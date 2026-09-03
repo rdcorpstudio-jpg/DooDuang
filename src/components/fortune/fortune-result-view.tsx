@@ -6,6 +6,7 @@ import { ArrowUp, Check, Lock, Moon, Sparkles, Sun } from "lucide-react";
 import { SacredButton } from "@/components/ui/sacred-button";
 import { SacredCorners, SacredDivider, SacredMark } from "@/components/ui/sacred-mark";
 import { FORTUNE_UNLOCK_PRICE, APP_NAME, FORTUNE_DISCLAIMER } from "@/lib/site";
+import { SaveReadingForm } from "@/components/fortune/save-reading-form";
 import {
   getUnlockStorageKey,
   type ExtendedFortuneResult,
@@ -21,7 +22,8 @@ interface FortuneResultViewProps {
   profile: FortuneProfile;
   readingOption: ReadingOption;
   type: string;
-  onRetry: () => void;
+  shareToken?: string | null;
+  onRetry?: () => void;
 }
 
 const PAYWALL_BULLETS: Record<string, [string, string, string]> = {
@@ -261,6 +263,7 @@ export function FortuneResultView({
   profile,
   readingOption,
   type,
+  shareToken,
   onRetry,
 }: FortuneResultViewProps) {
   const [unlocked, setUnlocked] = useState(false);
@@ -317,13 +320,16 @@ export function FortuneResultView({
       )}
 
       <footer className="mt-8 space-y-4 text-center">
-        <button
-          type="button"
-          onClick={onRetry}
-          className="text-xs text-purple-400/45 transition-colors hover:text-purple-200/70"
-        >
-          ดูดวงใหม่
-        </button>
+        <SaveReadingForm token={shareToken ?? null} />
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="text-xs text-purple-400/45 transition-colors hover:text-purple-200/70"
+          >
+            ดูดวงใหม่
+          </button>
+        )}
         <div className="flex items-center justify-center gap-3 text-[11px]">
           <Link href="/reading" className="text-purple-400/40 hover:text-purple-200/65">
             เลือกการ์ดอื่น

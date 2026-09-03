@@ -7,6 +7,8 @@ import { FortuneLoading } from "@/components/fortune/fortune-loading";
 import { FortuneResultView } from "@/components/fortune/fortune-result-view";
 import { READING_OPTIONS } from "@/lib/fortune/zodiac";
 import type { ExtendedFortuneResult } from "@/lib/fortune/extended";
+
+type FortuneApiResult = ExtendedFortuneResult & { shareToken?: string | null };
 import { ArrowLeft, Moon } from "lucide-react";
 import { SacredButton } from "@/components/ui/sacred-button";
 import {
@@ -82,7 +84,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
     birthDate: "",
     gender: "",
   });
-  const [result, setResult] = useState<ExtendedFortuneResult | null>(null);
+  const [result, setResult] = useState<FortuneApiResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -270,6 +272,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
             }}
             readingOption={readingOption}
             type={type}
+            shareToken={result.shareToken}
             onRetry={() => {
               setResult(null);
               setError(null);

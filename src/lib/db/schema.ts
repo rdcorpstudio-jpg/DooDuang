@@ -70,6 +70,8 @@ export const readings = pgTable("readings", {
   type: text("type").notNull(),
   input: text("input"),
   result: text("result").notNull(),
+  shareToken: text("share_token").unique(),
+  email: text("email"),
   isPaid: boolean("is_paid").default(false).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
