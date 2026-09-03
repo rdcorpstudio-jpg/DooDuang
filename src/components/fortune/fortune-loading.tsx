@@ -33,12 +33,13 @@ export function FortuneLoading({ nickname, categoryTitle }: FortuneLoadingProps)
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_45%,rgba(251,191,36,0.06),transparent_70%)]" />
       <div className="absolute inset-0 bg-brand-purple-deep/40 backdrop-blur-[2px]" />
 
-      <div className="relative z-10 w-full max-w-[280px] rounded-2xl sacred-surface sacred-card px-6 py-8 text-center backdrop-blur-sm">
+      <div className="reveal-scale is-visible relative z-10 w-full max-w-[280px] rounded-2xl sacred-surface sacred-card px-6 py-8 text-center backdrop-blur-sm">
         <SacredCorners className="text-amber-200/30" />
         <div className="pointer-events-none absolute inset-3 rounded-xl border border-brand-purple-light/14" />
 
-        <div className="mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full border border-brand-purple-light/30 bg-brand-purple-light/12 text-purple-100 shadow-[0_0_18px_rgba(168,85,247,0.2)]">
-          <Moon className="h-[18px] w-[18px] stroke-[1.5]" fill="currentColor" fillOpacity={0.15} />
+        <div className="relative mx-auto mb-5 flex h-11 w-11 items-center justify-center rounded-full border border-brand-purple-light/30 bg-brand-purple-light/12 text-purple-100 shadow-[0_0_18px_rgba(168,85,247,0.2)]">
+          <div className="intro-icon-ring absolute inset-[-4px] rounded-full border border-dashed border-amber-200/20" />
+          <Moon className="h-[18px] w-[18px] animate-float stroke-[1.5]" fill="currentColor" fillOpacity={0.15} />
         </div>
 
         <p className="mb-6 text-[10px] uppercase tracking-[0.42em] text-amber-200/45">

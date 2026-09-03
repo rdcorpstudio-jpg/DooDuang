@@ -8,10 +8,10 @@ export async function Header() {
   const session = await auth();
 
   return (
-    <header className="shrink-0 z-50 border-b sacred-chrome">
+    <header className="z-50 shrink-0 border-b sacred-chrome">
       <div className="flex items-center justify-between px-4 py-3">
-        <Link href="/" className="flex items-center gap-1.5 group">
-          <Sparkles className="h-4 w-4 text-brand-purple-light" />
+        <Link href="/" className="group flex items-center gap-1.5">
+          <Sparkles className="h-4 w-4 animate-float text-brand-purple-light" />
           <span className="font-sacred text-base text-purple-200">{APP_NAME}</span>
         </Link>
 
@@ -19,7 +19,9 @@ export async function Header() {
           {session?.user ? (
             <>
               <Link href="/dashboard">
-                <Button variant="ghost" size="sm">แดชบอร์ด</Button>
+                <Button variant="ghost" size="sm">
+                  แดชบอร์ด
+                </Button>
               </Link>
               <form
                 action={async () => {

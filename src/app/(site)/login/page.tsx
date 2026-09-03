@@ -1,6 +1,7 @@
 import { signIn } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { AnimatedPage } from "@/components/ui/reveal";
 import { sacredInputClassName } from "@/components/ui/sacred-form";
 import { Sparkles, Mail } from "lucide-react";
 
@@ -12,16 +13,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { callbackUrl } = await searchParams;
 
   return (
-    <div className="px-4 py-16">
-      <div className="mx-auto max-w-md">
-        <div className="text-center mb-8">
-          <Sparkles className="h-8 w-8 text-purple-400 mx-auto mb-3" />
-          <h1 className="text-2xl font-bold text-white mb-1">
-            เข้าสู่<span className="text-gradient">ระบบ</span>
-          </h1>
-          <p className="text-purple-300/50 text-sm">เพื่อเปิดไพ่พิเศษ</p>
-        </div>
+    <AnimatedPage className="px-4 py-16">
+      <div className="mx-auto max-w-md text-center">
+        <Sparkles className="mx-auto mb-3 h-8 w-8 animate-float text-purple-400" />
+        <h1 className="mb-1 text-2xl font-bold text-white">
+          เข้าสู่<span className="text-gradient">ระบบ</span>
+        </h1>
+        <p className="text-sm text-purple-300/50">เพื่อเปิดไพ่พิเศษ</p>
+      </div>
 
+      <div className="mx-auto mt-8 max-w-md">
         <Card>
           <form
             action={async (formData) => {
@@ -35,7 +36,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             className="space-y-4"
           >
             <div>
-              <label htmlFor="email" className="block text-xs text-purple-300/70 mb-1.5">
+              <label htmlFor="email" className="mb-1.5 block text-xs text-purple-300/70">
                 อีเมล
               </label>
               <input
@@ -58,7 +59,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               <div className="w-full border-t border-brand-purple-dark/30" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-brand-purple-dark/40 text-brand-purple-light/60 text-xs">หรือ</span>
+              <span className="bg-brand-purple-dark/40 px-4 text-xs text-brand-purple-light/60">หรือ</span>
             </div>
           </div>
 
@@ -92,6 +93,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </form>
         </Card>
       </div>
-    </div>
+    </AnimatedPage>
   );
 }

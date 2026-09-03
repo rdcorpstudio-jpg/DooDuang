@@ -21,15 +21,16 @@ export function MysticBackground({ className, intensity = "normal" }: MysticBack
   return (
     <div className={cn("absolute inset-0 overflow-hidden pointer-events-none", className)} aria-hidden>
       <div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(168,85,247,0.22),transparent_62%)]"
-        style={{ opacity: glow + 0.1 }}
+        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_12%,rgba(240,215,140,0.12),transparent_55%)]"
+        style={{ opacity: glow + 0.15 }}
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_85%,rgba(192,132,252,0.08),transparent_42%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(168,85,247,0.12),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_88%,rgba(201,162,39,0.08),transparent_42%)]" />
 
       {STARS.map((star) => (
         <span
           key={star.id}
-          className="absolute rounded-full bg-purple-300/60 animate-twinkle"
+          className="absolute rounded-full bg-amber-100/70 animate-twinkle"
           style={
             {
               top: `${star.top}%`,
@@ -43,7 +44,7 @@ export function MysticBackground({ className, intensity = "normal" }: MysticBack
         />
       ))}
 
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-48 h-48 bg-brand-purple/25 rounded-full blur-3xl animate-float" />
+      <div className="absolute top-[18%] left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-[#F0D78C]/10 blur-3xl animate-float" />
     </div>
   );
 }
