@@ -10,9 +10,15 @@ export function Footer() {
           <Sparkles className="h-3.5 w-3.5 text-brand-purple-light" />
           <span className="text-xs font-medium text-purple-300/60">{APP_NAME}</span>
         </div>
-        <div className="flex gap-4 text-xs text-purple-400/50">
+        <div className="flex gap-3 text-xs text-purple-400/50">
           <Link href="/#fortune" className="transition-colors hover:text-purple-300">
             ไพ่
+          </Link>
+          <Link href="/privacy" className="transition-colors hover:text-purple-300">
+            ความเป็นส่วนตัว
+          </Link>
+          <Link href="/terms" className="transition-colors hover:text-purple-300">
+            ข้อกำหนด
           </Link>
         </div>
       </div>

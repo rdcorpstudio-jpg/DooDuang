@@ -17,6 +17,8 @@ import {
 import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils";
 
+type FortuneApiResult = ExtendedFortuneResult & { shareToken?: string | null };
+
 interface ReadingFormProps {
   type: string;
 }
@@ -42,7 +44,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
     birthDate: "",
     gender: "",
   });
-  const [result, setResult] = useState<ExtendedFortuneResult | null>(null);
+  const [result, setResult] = useState<FortuneApiResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -265,6 +267,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
               }}
               readingOption={readingOption}
               type={type}
+              shareToken={result.shareToken}
               onRetry={() => {
                 setResult(null);
                 setError(null);

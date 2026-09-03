@@ -35,8 +35,8 @@ export async function Header() {
               </form>
             </>
           ) : (
-            <Link href="/login">
-              <Button size="sm">เข้าสู่ระบบ</Button>
+            <Link href="/reading">
+              <Button size="sm">ดูดวง</Button>
             </Link>
           )}
         </div>

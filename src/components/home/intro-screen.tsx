@@ -3,9 +3,16 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, Sparkles } from "lucide-react";
 import { useSacredBurst } from "@/components/ui/sacred-burst";
+import { SacredCtaLink } from "@/components/ui/sacred-cta-link";
 import { SacredMark } from "@/components/ui/sacred-mark";
-import { APP_NAME_ACCENT, APP_NAME_PRIMARY, APP_TAGLINE } from "@/lib/site";
+import {
+  APP_NAME_ACCENT,
+  APP_NAME_PRIMARY,
+  APP_PURPOSE,
+  APP_TAGLINE,
+} from "@/lib/site";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface IntroScreenProps {
   onScrollDown: () => void;
@@ -79,19 +86,34 @@ export function IntroScreen({ onScrollDown, scrollProgress = 0 }: IntroScreenPro
         </Reveal>
 
         <Reveal visible={mounted} delay={300} variant="glow">
-          <h1 className="intro-title-glow font-sacred mb-7 leading-none">
+          <h1 className="intro-title-glow font-sacred mb-5 leading-none">
             <span className="text-[2.85rem] text-white sm:text-[3.1rem]">{APP_NAME_PRIMARY}</span>
             <span className="intro-title-accent text-[2.85rem] sm:text-[3.1rem]">{APP_NAME_ACCENT}</span>
           </h1>
         </Reveal>
 
-        <Reveal visible={mounted} delay={480}>
-          <div className="mb-5 flex items-center justify-center gap-3">
+        <Reveal visible={mounted} delay={450}>
+          <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-px w-14 bg-gradient-to-r from-transparent via-[#d4a090]/50 to-transparent" />
             <SacredMark size="xs" className="text-[#e8c4b0]/70" />
             <span className="h-px w-14 bg-gradient-to-l from-transparent via-[#d4a090]/50 to-transparent" />
           </div>
-          <p className="text-[16px] font-normal leading-[1.9] text-white/70">{APP_TAGLINE}</p>
+          <p className="mb-3 text-[16px] font-normal leading-[1.9] text-white/70">{APP_TAGLINE}</p>
+          <p className="mx-auto mb-5 max-w-[280px] text-[13px] font-light leading-relaxed text-white/55">
+            {APP_PURPOSE}
+          </p>
+          <div className="mx-auto mb-4 max-w-[240px]">
+            <SacredCtaLink href="/reading">เริ่มดูดวง ไม่ต้องล็อกอิน</SacredCtaLink>
+          </div>
+          <p className="text-[11px] text-white/40">
+            <Link href="/privacy" className="underline-offset-2 hover:text-white/70 hover:underline">
+              นโยบายความเป็นส่วนตัว
+            </Link>
+            <span className="mx-2">·</span>
+            <Link href="/terms" className="underline-offset-2 hover:text-white/70 hover:underline">
+              ข้อกำหนด
+            </Link>
+          </p>
         </Reveal>
       </div>
 

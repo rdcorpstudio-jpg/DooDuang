@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { requireDb } from "@/lib/db";
 import { readings } from "@/lib/db/schema";
 import { generateExtendedFortune } from "@/lib/fortune/extended";
 import { READING_OPTIONS, type ReadingType } from "@/lib/fortune/zodiac";
+import { createShareToken } from "@/lib/site";
 
 export async function POST(request: Request) {
   try {
@@ -45,21 +45,27 @@ export async function POST(request: Request) {
     };
 
     const fortune = generateExtendedFortune(type, profile);
-    const session = await auth();
+    const shareToken = createShareToken();
 
-    if (session?.user) {
-      try {
-        const db = requireDb();
-        await db.insert(readings).values({
-          userId: session.user.id,
-          type,
-          input: JSON.stringify(profile),
-          result: fortune.preview,
-          isPaid: false,
-        });
-      } catch {
-        // Allow reading without DB in dev
-      }
+    try {
+      const db = requireDb();
+      await db.insert(readings).values({
+        type,
+        input: JSON.stringify(profile),
+        result: JSON.stringify(fortune),
+        shareToken,
+        isPaid: false,
+      });
+    } catch (err) {
+      console.error("Failed to save reading:", err);
+      return NextResponse.json({
+        title: fortune.title,
+        preview: fortune.preview,
+        tabs: fortune.tabs,
+        highlights: fortune.highlights,
+        premium: fortune.premium,
+        shareToken: null,
+      });
     }
 
     return NextResponse.json({
@@ -68,6 +74,7 @@ export async function POST(request: Request) {
       tabs: fortune.tabs,
       highlights: fortune.highlights,
       premium: fortune.premium,
+      shareToken,
     });
   } catch {
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });

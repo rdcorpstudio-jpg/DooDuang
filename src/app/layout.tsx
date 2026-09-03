@@ -19,8 +19,11 @@ const srisakdi = Srisakdi({
 export const metadata: Metadata = {
   title: `${APP_NAME} — ดูดวงออนไลน์ ไพ่ทาโรต์ ดวงความรัก`,
   description:
-    "ดูดวงออนไลน์ด้วยไพ่ทาโรต์ ดวงความรัก การงาน การเงิน สุขภาพ",
+    "DooDuang เป็นเว็บดูดวงออนไลน์ เปิดไพ่ทาโรต์ ดวงความรัก การงาน การเงิน และสุขภาพได้ทันทีโดยไม่ต้องเข้าสู่ระบบ กรอกอีเมลเพื่อรับลิงก์ดูผลซ้ำ",
   keywords: ["ดูดวง", "ไพ่ทาโรต์", "ดวงความรัก", "ดวงการงาน", "ทำนาย"],
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default function RootLayout({
