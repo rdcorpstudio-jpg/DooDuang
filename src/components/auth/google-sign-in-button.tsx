@@ -29,7 +29,13 @@ export function GoogleSignInButton({ callbackUrl = "/dashboard" }: { callbackUrl
         body: JSON.stringify({ idToken }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data: { error?: string } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error("เซิร์ฟเวอร์ล็อกอินตอบกลับผิดพลาด กรุณาลองใหม่");
+      }
       if (!res.ok) {
         throw new Error(data.error || "เข้าสู่ระบบไม่สำเร็จ");
       }

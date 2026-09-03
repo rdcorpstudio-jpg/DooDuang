@@ -1,9 +1,22 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { getFirebaseAdminAuth, isFirebaseAdminConfigured } from "@/lib/firebase/admin";
+import {
+  getFirebaseAdminAuth,
+  isFirebaseAdminConfigured,
+} from "@/lib/firebase/admin";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/auth";
 import { requireDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    adminConfigured: isFirebaseAdminConfigured(),
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -20,7 +33,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "ไม่พบ token" }, { status: 400 });
     }
 
-    const decoded = await getFirebaseAdminAuth().verifyIdToken(idToken);
+    const adminAuth = await getFirebaseAdminAuth();
+    const decoded = await adminAuth.verifyIdToken(idToken);
     const db = requireDb();
 
     const profile = {
@@ -64,6 +78,17 @@ export async function POST(request: Request) {
     return response;
   } catch (err) {
     console.error("Firebase login failed:", err);
+    const message = err instanceof Error ? err.message : "";
+    if (
+      message.includes("not configured") ||
+      message.includes("AUTH_SECRET") ||
+      message.includes("DATABASE_URL")
+    ) {
+      return NextResponse.json(
+        { error: "เซิร์ฟเวอร์ยังตั้งค่าไม่ครบ" },
+        { status: 500 }
+      );
+    }
     return NextResponse.json({ error: "เข้าสู่ระบบไม่สำเร็จ" }, { status: 401 });
   }
 }
