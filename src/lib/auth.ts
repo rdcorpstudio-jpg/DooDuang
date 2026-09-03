@@ -1,30 +1,76 @@
-import NextAuth from "next-auth";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { cookies } from "next/headers";
+import { jwtVerify, SignJWT } from "jose";
+import { eq } from "drizzle-orm";
 import { db } from "./db";
-import * as schema from "./db/schema";
+import { users } from "./db/schema";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: db
-    ? DrizzleAdapter(db, {
-        usersTable: schema.users,
-        accountsTable: schema.accounts,
-        sessionsTable: schema.sessions,
-        verificationTokensTable: schema.verificationTokens,
+export const SESSION_COOKIE = "dd_session";
+const SESSION_DAYS = 30;
+
+export type SessionUser = {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  credits: number;
+};
+
+export type Session = {
+  user: SessionUser;
+};
+
+function secretKey() {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    throw new Error("AUTH_SECRET is not configured");
+  }
+  return new TextEncoder().encode(secret);
+}
+
+export async function createSessionToken(uid: string) {
+  return new SignJWT({ uid })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(`${SESSION_DAYS}d`)
+    .sign(secretKey());
+}
+
+export async function signOut() {
+  const store = await cookies();
+  store.delete(SESSION_COOKIE);
+}
+
+export async function auth(): Promise<Session | null> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+
+  try {
+    const { payload } = await jwtVerify(token, secretKey());
+    const uid = typeof payload.uid === "string" ? payload.uid : null;
+    if (!uid) return null;
+
+    if (!db) {
+      return {
+        user: { id: uid, credits: 0 },
+      };
+    }
+
+    const [user] = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+        credits: users.credits,
       })
-    : undefined,
-  providers: [],
-  trustHost: true,
-  pages: {
-    signIn: "/login",
-    verifyRequest: "/login/verify",
-  },
-  callbacks: {
-    session({ session, user }) {
-      if (session.user && user) {
-        session.user.id = user.id;
-        session.user.credits = user.credits;
-      }
-      return session;
-    },
-  },
-});
+      .from(users)
+      .where(eq(users.id, uid))
+      .limit(1);
+
+    if (!user) return null;
+
+    return { user };
+  } catch {
+    return null;
+  }
+}

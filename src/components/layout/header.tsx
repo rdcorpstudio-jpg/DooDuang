@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
@@ -6,6 +7,12 @@ import { APP_NAME } from "@/lib/site";
 
 export async function Header() {
   const session = await auth();
+
+  async function handleSignOut() {
+    "use server";
+    await signOut();
+    redirect("/");
+  }
 
   return (
     <header className="shrink-0 z-50 border-b sacred-chrome">
@@ -21,20 +28,15 @@ export async function Header() {
               <Link href="/dashboard">
                 <Button variant="ghost" size="sm">แดชบอร์ด</Button>
               </Link>
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({ redirectTo: "/" });
-                }}
-              >
+              <form action={handleSignOut}>
                 <Button variant="ghost" size="sm" type="submit">
                   ออก
                 </Button>
               </form>
             </>
           ) : (
-            <Link href="/reading">
-              <Button size="sm">ดูดวง</Button>
+            <Link href="/login">
+              <Button size="sm">เข้าสู่ระบบ</Button>
             </Link>
           )}
         </div>

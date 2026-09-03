@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { requireDb } from "@/lib/db";
 import { readings } from "@/lib/db/schema";
 import { generateExtendedFortune } from "@/lib/fortune/extended";
@@ -46,10 +47,12 @@ export async function POST(request: Request) {
 
     const fortune = generateExtendedFortune(type, profile);
     const shareToken = createShareToken();
+    const session = await auth().catch(() => null);
 
     try {
       const db = requireDb();
       await db.insert(readings).values({
+        userId: session?.user.id,
         type,
         input: JSON.stringify(profile),
         result: JSON.stringify(fortune),

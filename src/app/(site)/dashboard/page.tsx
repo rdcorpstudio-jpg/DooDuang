@@ -80,7 +80,16 @@ export default async function DashboardPage() {
                     {item.createdAt.toLocaleDateString("th-TH")}
                   </span>
                 </div>
-                <p className="text-purple-300/60 text-xs line-clamp-2">{item.result}</p>
+                <p className="text-purple-300/60 text-xs line-clamp-2">
+                  {(() => {
+                    try {
+                      const parsed = JSON.parse(item.result) as { preview?: string };
+                      return parsed.preview || item.result;
+                    } catch {
+                      return item.result;
+                    }
+                  })()}
+                </p>
               </div>
             ))}
           </div>

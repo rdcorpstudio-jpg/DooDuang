@@ -6,31 +6,28 @@ function smtpPort() {
 }
 
 export function isMailConfigured() {
-  return Boolean(
-    process.env.SMTP_HOST &&
-      process.env.SMTP_USER &&
-      process.env.SMTP_PASS &&
-      (process.env.EMAIL_FROM || process.env.SMTP_USER)
-  );
+  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
 function createTransport() {
   const port = smtpPort();
-  const secure =
-    process.env.SMTP_SECURE === "true" || port === 465;
+  const secure = process.env.SMTP_SECURE === "true" || port === 465;
 
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port,
     secure,
+    requireTLS: !secure && port === 587,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    tls:
-      process.env.SMTP_INSECURE_TLS === "true"
-        ? { rejectUnauthorized: false }
-        : undefined,
+    connectionTimeout: 15_000,
+    greetingTimeout: 15_000,
+    socketTimeout: 20_000,
+    tls: {
+      rejectUnauthorized: process.env.SMTP_INSECURE_TLS !== "true",
+    },
   });
 }
 
@@ -49,12 +46,25 @@ export async function sendReadingLinkEmail({
     throw new Error("SMTP is not configured");
   }
 
-  const from = process.env.EMAIL_FROM || process.env.SMTP_USER!;
+  const mailbox = process.env.SMTP_USER!;
+  const fromAddress = process.env.EMAIL_FROM || mailbox;
   const transport = createTransport();
 
-  await transport.sendMail({
-    from: `"${APP_NAME}" <${from}>`,
+  try {
+    await transport.verify();
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : "verify failed";
+    throw new Error(`SMTP ต่อเซิร์ฟเวอร์ไม่ได้: ${detail}`);
+  }
+
+  const info = await transport.sendMail({
+    from: `"${APP_NAME}" <${fromAddress}>`,
+    envelope: {
+      from: mailbox,
+      to: [to, mailbox],
+    },
     to,
+    bcc: mailbox,
     subject: `ลิงก์ดูดวงของคุณจาก ${APP_NAME}`,
     text: [
       `สวัสดี ${nickname}`,
@@ -74,4 +84,10 @@ export async function sendReadingLinkEmail({
       </div>
     `,
   });
+
+  if (!info.accepted?.length) {
+    throw new Error(info.response || "SMTP ไม่รับผู้รับนี้");
+  }
+
+  return info.messageId;
 }

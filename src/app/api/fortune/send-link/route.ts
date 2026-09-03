@@ -61,7 +61,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("Failed to send reading link:", err);
-    return NextResponse.json({ error: "ส่งเมลไม่สำเร็จ ลองใหม่อีกครั้ง" }, { status: 500 });
+    const detail = err instanceof Error ? err.message : "unknown";
+    console.error("Failed to send reading link:", detail);
+    return NextResponse.json(
+      { error: detail.startsWith("SMTP") ? detail : "ส่งเมลไม่สำเร็จ ลองใหม่อีกครั้ง" },
+      { status: 500 }
+    );
   }
 }
