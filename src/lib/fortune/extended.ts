@@ -44,8 +44,8 @@ function pick<T>(arr: T[], seed: string, salt = ""): T {
   return arr[hashString(seed + salt) % arr.length];
 }
 
-const MAX_SECTION_CHARS = 95;
-const MAX_SUMMARY_CHARS = 80;
+const MAX_SECTION_CHARS = 280;
+const MAX_SUMMARY_CHARS = 160;
 
 function trimText(text: string, max: number): string {
   const t = text.trim();

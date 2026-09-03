@@ -1,34 +1,34 @@
 "use client";
 
-const STAR_DUST = Array.from({ length: 90 }, (_, i) => ({
+import { ZodiacWheelBg } from "@/components/layout/zodiac-wheel-bg";
+
+/** Deep space + large rose-gold natal chart */
+const STAR_DUST = Array.from({ length: 160 }, (_, i) => ({
   id: i,
-  top: (i * 11.3) % 98,
-  left: (i * 17.1 + 3) % 98,
-  size: i % 7 === 0 ? 2 : i % 11 === 0 ? 1.5 : 1,
-  opacity: 0.18 + (i % 5) * 0.1,
+  top: (i * 7.1 + 2.3) % 100,
+  left: (i * 13.7 + 5.1) % 100,
+  size: i % 11 === 0 ? 2.2 : i % 5 === 0 ? 1.5 : 1,
+  opacity: 0.25 + (i % 7) * 0.08,
 }));
 
 const BRIGHT_STARS = Array.from({ length: 36 }, (_, i) => ({
   id: i,
-  top: (i * 19 + 7) % 92,
-  left: (i * 27 + 11) % 92,
-  duration: 2.2 + (i % 4) * 0.65,
-  delay: (i * 0.33) % 4,
-  gold: i % 3 === 0,
-  size: i % 5 === 0 ? 2.5 : 2,
+  top: (i * 17.3 + 6) % 96,
+  left: (i * 23.9 + 8) % 96,
+  duration: 2.1 + (i % 5) * 0.5,
+  delay: (i * 0.31) % 4,
+  size: i % 4 === 0 ? 2.6 : 1.7,
 }));
 
 export function StarfieldBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden" aria-hidden>
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-purple-deep via-[#2a0648] to-[#14032a]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_15%,rgba(168,85,247,0.35),transparent_62%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_85%_75%,rgba(88,28,135,0.28),transparent_55%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_45%_35%_at_12%_55%,rgba(192,132,252,0.15),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[#060212]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0e061c] via-[#160a28] to-[#1f0a30]" />
 
       {STAR_DUST.map((s) => (
         <span
-          key={s.id}
+          key={`d-${s.id}`}
           className="absolute rounded-full bg-white"
           style={{
             top: `${s.top}%`,
@@ -42,20 +42,33 @@ export function StarfieldBackground() {
 
       {BRIGHT_STARS.map((star) => (
         <span
-          key={star.id}
-          className={`absolute rounded-full animate-twinkle ${star.gold ? "bg-amber-200/70" : "bg-purple-100/60"}`}
+          key={`b-${star.id}`}
+          className="absolute rounded-full bg-white animate-twinkle"
           style={
             {
               top: `${star.top}%`,
               left: `${star.left}%`,
               width: star.size,
               height: star.size,
+              boxShadow: "0 0 6px rgba(255,255,255,0.65)",
               "--twinkle-duration": `${star.duration}s`,
               "--twinkle-delay": `${star.delay}s`,
             } as React.CSSProperties
           }
         />
       ))}
+
+      {/* Soft rose glow */}
+      <div className="absolute left-1/2 top-[44%] h-[55%] w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(212,160,144,0.16)_0%,transparent_65%)]" />
+
+      {/* Zodiac — centered, inset from corners so the full ring reads clearly */}
+      <div className="absolute left-1/2 top-[44%] z-[1] w-[118%] -translate-x-1/2 -translate-y-1/2 opacity-95">
+        <div className="astro-zodiac-wheel origin-center drop-shadow-[0_0_32px_rgba(212,160,144,0.3)]">
+          <ZodiacWheelBg className="h-auto w-full" />
+        </div>
+      </div>
+
+      <div className="absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_center,transparent_52%,rgba(6,2,18,0.5)_100%)]" />
     </div>
   );
 }

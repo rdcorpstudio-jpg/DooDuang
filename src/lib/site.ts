@@ -1,6 +1,6 @@
-export const APP_NAME = "DooDuang";
-export const APP_NAME_PRIMARY = "Doo";
-export const APP_NAME_ACCENT = "Duang";
+export const APP_NAME = "ดูดวงชะตา";
+export const APP_NAME_PRIMARY = "ดูดวง";
+export const APP_NAME_ACCENT = "ชะตา";
 export const APP_TAGLINE = "เปิดประตูสู่โลกแห่งการทำนาย";
 export const APP_PURPOSE =
   "DooDuang เป็นเว็บดูดวงออนไลน์ เปิดไพ่ทาโรต์ ดูดวงความรัก การงาน การเงิน และสุขภาพได้ทันที โดยไม่ต้องเข้าสู่ระบบ กรอกอีเมลหลังดูดวงเพื่อรับลิงก์ดูผลซ้ำ";
