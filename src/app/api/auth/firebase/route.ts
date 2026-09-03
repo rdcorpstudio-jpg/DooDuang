@@ -2,19 +2,105 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import {
   getFirebaseAdminAuth,
+  getFirebaseAdminProjectId,
   isFirebaseAdminConfigured,
 } from "@/lib/firebase/admin";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/auth";
-import { requireDb } from "@/lib/db";
+import { db, requireDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function loginErrorResponse(err: unknown) {
+  const message = err instanceof Error ? err.message : String(err);
+  const lower = message.toLowerCase();
+  const code =
+    err && typeof err === "object" && "code" in err
+      ? String((err as { code?: string }).code)
+      : "";
+
+  if (
+    lower.includes("private key") ||
+    lower.includes("pem") ||
+    lower.includes("failed to parse") ||
+    lower.includes("invalid jwt signature") ||
+    lower.includes("credential")
+  ) {
+    return NextResponse.json(
+      { error: "กุญแจ Firebase Admin ไม่ถูกต้อง" },
+      { status: 500 }
+    );
+  }
+
+  if (
+    lower.includes("audience") ||
+    lower.includes('"aud"') ||
+    lower.includes("incorrect") ||
+    code.includes("id-token-revoked")
+  ) {
+    return NextResponse.json(
+      { error: "โปรเจกต์ Firebase ไม่ตรงกัน" },
+      { status: 401 }
+    );
+  }
+
+  if (
+    lower.includes("not configured") ||
+    lower.includes("auth_secret") ||
+    lower.includes("database_url")
+  ) {
+    return NextResponse.json(
+      { error: "เซิร์ฟเวอร์ยังตั้งค่าไม่ครบ" },
+      { status: 500 }
+    );
+  }
+
+  if (
+    lower.includes("connect") ||
+    lower.includes("enotfound") ||
+    lower.includes("timeout") ||
+    lower.includes("econn") ||
+    lower.includes("postgres")
+  ) {
+    return NextResponse.json(
+      { error: "ต่อฐานข้อมูลไม่ได้" },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ error: "เข้าสู่ระบบไม่สำเร็จ" }, { status: 401 });
+}
+
 export async function GET() {
+  let adminReady = false;
+  let dbReady = false;
+
+  if (isFirebaseAdminConfigured()) {
+    try {
+      await getFirebaseAdminAuth();
+      adminReady = true;
+    } catch {
+      adminReady = false;
+    }
+  }
+
+  if (db) {
+    try {
+      await db.select({ id: users.id }).from(users).limit(1);
+      dbReady = true;
+    } catch {
+      dbReady = false;
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     adminConfigured: isFirebaseAdminConfigured(),
+    adminProjectId: getFirebaseAdminProjectId(),
+    adminReady,
+    dbReady,
+    authSecret: Boolean(process.env.AUTH_SECRET),
   });
 }
 
@@ -35,7 +121,7 @@ export async function POST(request: Request) {
 
     const adminAuth = await getFirebaseAdminAuth();
     const decoded = await adminAuth.verifyIdToken(idToken);
-    const db = requireDb();
+    const database = requireDb();
 
     const profile = {
       id: decoded.uid,
@@ -44,14 +130,16 @@ export async function POST(request: Request) {
       image: decoded.picture ?? null,
     };
 
-    const [existing] = await db
+    const [byId] = await database
       .select({ id: users.id })
       .from(users)
       .where(eq(users.id, profile.id))
       .limit(1);
 
-    if (existing) {
-      await db
+    let userId = profile.id;
+
+    if (byId) {
+      await database
         .update(users)
         .set({
           email: profile.email,
@@ -59,14 +147,36 @@ export async function POST(request: Request) {
           image: profile.image,
         })
         .where(eq(users.id, profile.id));
+    } else if (profile.email) {
+      const [byEmail] = await database
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, profile.email))
+        .limit(1);
+
+      if (byEmail) {
+        userId = byEmail.id;
+        await database
+          .update(users)
+          .set({
+            name: profile.name,
+            image: profile.image,
+          })
+          .where(eq(users.id, byEmail.id));
+      } else {
+        await database.insert(users).values({
+          ...profile,
+          credits: 0,
+        });
+      }
     } else {
-      await db.insert(users).values({
+      await database.insert(users).values({
         ...profile,
         credits: 0,
       });
     }
 
-    const token = await createSessionToken(profile.id);
+    const token = await createSessionToken(userId);
     const response = NextResponse.json({ ok: true });
     response.cookies.set(SESSION_COOKIE, token, {
       httpOnly: true,
@@ -78,17 +188,6 @@ export async function POST(request: Request) {
     return response;
   } catch (err) {
     console.error("Firebase login failed:", err);
-    const message = err instanceof Error ? err.message : "";
-    if (
-      message.includes("not configured") ||
-      message.includes("AUTH_SECRET") ||
-      message.includes("DATABASE_URL")
-    ) {
-      return NextResponse.json(
-        { error: "เซิร์ฟเวอร์ยังตั้งค่าไม่ครบ" },
-        { status: 500 }
-      );
-    }
-    return NextResponse.json({ error: "เข้าสู่ระบบไม่สำเร็จ" }, { status: 401 });
+    return loginErrorResponse(err);
   }
 }
