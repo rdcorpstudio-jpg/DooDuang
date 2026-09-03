@@ -16,16 +16,25 @@ export function getFirebaseAdminProjectId() {
 }
 
 function normalizePrivateKey(value: string) {
-  let key = value.trim();
+  let key = value.trim().replace(/^\uFEFF/, "");
   if (key.startsWith("{")) {
     try {
       const parsed = JSON.parse(key) as { private_key?: string };
       if (parsed.private_key) key = parsed.private_key;
     } catch {
-      // keep original string
+      const extracted = key.match(
+        /-----BEGIN PRIVATE KEY-----[\s\S]+?-----END PRIVATE KEY-----/
+      );
+      if (extracted) key = extracted[0];
     }
   }
-  return key.replace(/\\n/g, "\n").replace(/^["']|["']$/g, "").trim();
+  key = key.replace(/^["']|["']$/g, "").replace(/\\n/g, "\n").replace(/\r/g, "").trim();
+  if (key.includes("BEGIN PRIVATE KEY") && !key.includes("\n")) {
+    key = key
+      .replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n")
+      .replace("-----END PRIVATE KEY-----", "\n-----END PRIVATE KEY-----\n");
+  }
+  return key;
 }
 
 export async function getFirebaseAdminAuth() {
