@@ -1,6 +1,6 @@
-export const APP_NAME = "ลัคนาทิพย์";
-export const APP_NAME_PRIMARY = "ลัคนา";
-export const APP_NAME_ACCENT = "ทิพย์";
+export const APP_NAME = "DooDuang";
+export const APP_NAME_PRIMARY = "Doo";
+export const APP_NAME_ACCENT = "Duang";
 export const APP_TAGLINE = "เปิดประตูสู่โลกแห่งการทำนาย";
 export const FORTUNE_UNLOCK_PRICE = 69;
 export const FORTUNE_DISCLAIMER = "จักรวาลชี้ทาง — คุณเลือกก้าวต่อ";

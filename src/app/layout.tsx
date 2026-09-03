@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   description:
     "ดูดวงออนไลน์ด้วยไพ่ทาโรต์ ดวงความรัก การงาน การเงิน สุขภาพ",
   keywords: ["ดูดวง", "ไพ่ทาโรต์", "ดวงความรัก", "ดวงการงาน", "ทำนาย"],
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default function RootLayout({
