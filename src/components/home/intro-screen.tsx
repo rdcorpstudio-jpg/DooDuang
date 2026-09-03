@@ -4,9 +4,15 @@ import { useEffect, useState } from "react";
 import { ChevronDown, Sparkles } from "lucide-react";
 import { AstroBackground } from "@/components/home/astro-background";
 import { useSacredBurst } from "@/components/ui/sacred-burst";
-import { SacredMark } from "@/components/ui/sacred-mark";
-import { APP_NAME_ACCENT, APP_NAME_PRIMARY, APP_TAGLINE } from "@/lib/site";
+import { SacredCtaLink } from "@/components/ui/sacred-cta-link";
+import {
+  APP_NAME_ACCENT,
+  APP_NAME_PRIMARY,
+  APP_PURPOSE,
+  APP_TAGLINE,
+} from "@/lib/site";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface IntroScreenProps {
   onScrollDown: () => void;
@@ -129,23 +135,29 @@ export function IntroScreen({ onScrollDown, scrollProgress = 0 }: IntroScreenPro
           </p>
         </Reveal>
 
-        <Reveal visible={mounted} delay={300} variant="glow">
-          <h1 className="intro-title-glow font-sacred mb-7 leading-none">
-            <span className="block text-[3.1rem] text-white/95">{APP_NAME_PRIMARY}</span>
-            <span className="intro-title-accent mt-1 block text-[3.4rem]">{APP_NAME_ACCENT}</span>
-          </h1>
-        </Reveal>
+        <h1 className="intro-title-glow font-sacred mb-5 leading-none">
+          <span className="block text-[3.1rem] text-white/95">{APP_NAME_PRIMARY}</span>
+          <span className="intro-title-accent mt-1 block text-[3.4rem]">{APP_NAME_ACCENT}</span>
+        </h1>
 
-        <Reveal visible={mounted} delay={480}>
-          <div className="mb-5 flex items-center justify-center gap-3">
-            <span className="h-px w-14 bg-gradient-to-r from-transparent via-amber-300/40 to-transparent intro-line-grow" />
-            <SacredMark size="xs" className="text-amber-200/60 animate-twinkle" style={{ "--twinkle-duration": "2s" } as React.CSSProperties} />
-            <span className="h-px w-14 bg-gradient-to-l from-transparent via-amber-300/40 to-transparent intro-line-grow" />
-          </div>
-          <p className="text-[15px] font-normal leading-[1.9] text-purple-100/70">
-            {APP_TAGLINE}
-          </p>
-        </Reveal>
+        <p className="mb-4 text-[15px] font-normal leading-[1.9] text-purple-100/70">
+          {APP_TAGLINE}
+        </p>
+        <p className="mx-auto mb-6 max-w-[280px] text-[13px] font-light leading-relaxed text-purple-200/65">
+          {APP_PURPOSE}
+        </p>
+        <div className="mx-auto mb-4 max-w-[240px]">
+          <SacredCtaLink href="/reading">เริ่มดูดวง ไม่ต้องล็อกอิน</SacredCtaLink>
+        </div>
+        <p className="text-[11px] text-purple-400/55">
+          <Link href="/privacy" className="underline-offset-2 hover:text-purple-200 hover:underline">
+            นโยบายความเป็นส่วนตัว
+          </Link>
+          <span className="mx-2">·</span>
+          <Link href="/terms" className="underline-offset-2 hover:text-purple-200 hover:underline">
+            ข้อกำหนด
+          </Link>
+        </p>
       </div>
 
       <Reveal visible={mounted} delay={650} className="absolute bottom-12 left-1/2 z-10 -translate-x-1/2">

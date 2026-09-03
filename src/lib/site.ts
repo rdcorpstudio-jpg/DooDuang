@@ -2,6 +2,8 @@ export const APP_NAME = "DooDuang";
 export const APP_NAME_PRIMARY = "Doo";
 export const APP_NAME_ACCENT = "Duang";
 export const APP_TAGLINE = "เปิดประตูสู่โลกแห่งการทำนาย";
+export const APP_PURPOSE =
+  "DooDuang เป็นเว็บดูดวงออนไลน์ เปิดไพ่ทาโรต์ ดูดวงความรัก การงาน การเงิน และสุขภาพได้ทันที โดยไม่ต้องเข้าสู่ระบบ เข้าสู่ระบบด้วย Google เฉพาะเมื่อต้องการบันทึกประวัติหรือซื้อเครดิต";
 export const FORTUNE_UNLOCK_PRICE = 69;
 export const FORTUNE_DISCLAIMER = "จักรวาลชี้ทาง — คุณเลือกก้าวต่อ";
 export const SITE_URL = "https://dooduang-bay.vercel.app";
