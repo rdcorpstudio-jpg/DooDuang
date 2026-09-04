@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { requireDb } from "@/lib/db";
 import { readings } from "@/lib/db/schema";
-import { generateExtendedFortune } from "@/lib/fortune/extended";
+import { generateReading } from "@/lib/fortune/generate";
 import { READING_OPTIONS, type ReadingType } from "@/lib/fortune/zodiac";
 import { createShareToken } from "@/lib/site";
+
+export const runtime = "nodejs";
+export const maxDuration = 15;
 
 export async function POST(request: Request) {
   try {
@@ -45,7 +48,7 @@ export async function POST(request: Request) {
       gender,
     };
 
-    const fortune = generateExtendedFortune(type, profile);
+    const fortune = await generateReading(type, profile);
     const shareToken = createShareToken();
     const session = await auth().catch(() => null);
 
