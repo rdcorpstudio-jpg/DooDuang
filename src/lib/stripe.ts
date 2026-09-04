@@ -36,3 +36,28 @@ export const CREDIT_PACKAGES = [
 ] as const;
 
 export type CreditPackageId = (typeof CREDIT_PACKAGES)[number]["id"];
+
+export async function resolveStripePriceId(priceOrProductId: string) {
+  if (!stripe) {
+    throw new Error("Stripe ยังไม่ได้ตั้งค่า");
+  }
+
+  if (priceOrProductId.startsWith("price_")) {
+    return priceOrProductId;
+  }
+
+  if (priceOrProductId.startsWith("prod_")) {
+    const product = await stripe.products.retrieve(priceOrProductId, {
+      expand: ["default_price"],
+    });
+    const defaultPrice = product.default_price;
+    const priceId =
+      typeof defaultPrice === "string" ? defaultPrice : defaultPrice?.id;
+    if (!priceId) {
+      throw new Error("สินค้านี้ยังไม่มีราคา default ใน Stripe");
+    }
+    return priceId;
+  }
+
+  throw new Error("ต้องใช้ Price ID ที่ขึ้นต้นด้วย price_");
+}
