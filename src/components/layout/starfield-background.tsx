@@ -17,23 +17,23 @@ export function StarfieldBackground() {
           backgroundSize: "cover",
           backgroundPosition: "center top",
           backgroundRepeat: "no-repeat",
-          filter: "blur(5px) saturate(1.08)",
-          transform: "scale(1.03)",
+          filter: "blur(2px) saturate(1.1)",
+          transform: "scale(1.02)",
         }}
       />
-      {/* Soft center wash so cards/text stay readable */}
+      {/* Light wash — keep art visible, text readable */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 85% 70% at 50% 42%, rgba(8,10,24,0.28) 0%, rgba(8,10,24,0.12) 45%, rgba(8,10,24,0.42) 100%)",
+            "radial-gradient(ellipse 85% 70% at 50% 42%, rgba(8,10,24,0.16) 0%, rgba(8,10,24,0.06) 48%, rgba(8,10,24,0.32) 100%)",
         }}
       />
       <div
-        className="absolute inset-x-0 bottom-0 h-40"
+        className="absolute inset-x-0 bottom-0 h-36"
         style={{
           background:
-            "linear-gradient(180deg, transparent, rgba(8,10,22,0.55))",
+            "linear-gradient(180deg, transparent, rgba(8,10,22,0.4))",
         }}
       />
     </div>
