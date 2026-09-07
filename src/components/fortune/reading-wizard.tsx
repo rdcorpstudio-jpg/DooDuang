@@ -19,6 +19,11 @@ import {
 } from "@/components/ui/sacred-form";
 import { READING_OPTIONS } from "@/lib/fortune/zodiac";
 import type { ExtendedFortuneResult } from "@/lib/fortune/extended";
+import {
+  WIZARD_CACHE_KEY,
+  writeFortuneProfile,
+  readFortuneProfile,
+} from "@/lib/fortune/profile-storage";
 import { cn } from "@/lib/utils";
 
 type FortuneApiResult = ExtendedFortuneResult & { shareToken?: string | null };
@@ -36,6 +41,57 @@ const readingOption = READING_OPTIONS.find((o) => o.id === READING_TYPE)!;
 
 const MIN_LOADING_MS = 4800;
 const FETCH_TIMEOUT_MS = 6000;
+
+type WizardCache = {
+  step: "result";
+  profile: ProfileForm;
+  result: FortuneApiResult;
+};
+
+function readWizardCache(): WizardCache | null {
+  try {
+    const raw = sessionStorage.getItem(WIZARD_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as WizardCache;
+    if (
+      parsed?.step === "result" &&
+      parsed.result &&
+      parsed.profile?.nickname &&
+      parsed.profile?.birthDate &&
+      parsed.profile?.gender
+    ) {
+      return parsed;
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function writeWizardCache(profile: ProfileForm, result: FortuneApiResult) {
+  try {
+    const payload: WizardCache = { step: "result", profile, result };
+    sessionStorage.setItem(WIZARD_CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    /* ignore */
+  }
+  if (profile.nickname.trim() && profile.birthDate) {
+    writeFortuneProfile({
+      realName: profile.realName,
+      nickname: profile.nickname,
+      birthDate: profile.birthDate,
+      gender: profile.gender,
+    });
+  }
+}
+
+function clearWizardCache() {
+  try {
+    sessionStorage.removeItem(WIZARD_CACHE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 function buildLocalFallback(nickname: string): FortuneApiResult {
   return {
@@ -112,7 +168,7 @@ function buildLocalFallback(nickname: string): FortuneApiResult {
 
 const GENDER_META: Record<
   Gender,
-  { icon: React.ReactNode; tone: "rose" | "sky" | "gold" }
+  { icon: React.ReactNode; tone: "rose" | "sky" | "violet" | "gold" }
 > = {
   female: {
     icon: <GenderMoonIcon />,
@@ -120,7 +176,7 @@ const GENDER_META: Record<
   },
   male: {
     icon: <GenderSunIcon />,
-    tone: "gold",
+    tone: "violet",
   },
   other: {
     icon: <GenderStarIcon />,
@@ -276,6 +332,38 @@ export function ReadingWizard() {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const cached = readWizardCache();
+    if (cached) {
+      setProfile(cached.profile);
+      setResult(cached.result);
+      setStep("result");
+    } else {
+      try {
+        const saved = readFortuneProfile();
+        if (saved) {
+          setProfile({
+            realName: saved.realName,
+            nickname: saved.nickname,
+            birthDate: saved.birthDate,
+            gender: saved.gender,
+          });
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    if (step === "result" && result) {
+      writeWizardCache(profile, result);
+    }
+  }, [ready, step, result, profile]);
 
   useEffect(() => {
     if (step !== "loading") return;
@@ -355,6 +443,10 @@ export function ReadingWizard() {
   const stepNumber = step === "gender" ? 1 : step === "birth" ? 2 : 3;
   const backHref = step === "gender" ? "/" : undefined;
 
+  if (!ready) {
+    return <div className="relative h-full" aria-hidden />;
+  }
+
   if (step === "result" && result) {
     return (
       <div className="relative h-full overflow-y-auto">
@@ -371,6 +463,7 @@ export function ReadingWizard() {
             type={READING_TYPE}
             shareToken={result.shareToken}
             onRetry={() => {
+              clearWizardCache();
               setResult(null);
               setError(null);
               setStep("gender");

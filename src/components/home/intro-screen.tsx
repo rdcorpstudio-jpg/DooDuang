@@ -100,6 +100,19 @@ export function IntroScreen() {
             <Lock className="h-3 w-3 text-[#e8c547]/75" strokeWidth={1.8} />
             ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
           </p>
+          <p className="mt-3 flex items-center justify-center gap-3 text-[11px] text-white/30">
+            <Link href="/privacy" className="hover:text-[#F4BC52]/80">
+              ความเป็นส่วนตัว
+            </Link>
+            <span aria-hidden>·</span>
+            <Link href="/terms" className="hover:text-[#F4BC52]/80">
+              ข้อกำหนด
+            </Link>
+            <span aria-hidden>·</span>
+            <Link href="/premium" className="hover:text-[#F4BC52]/80">
+              พรีเมียม
+            </Link>
+          </p>
         </Reveal>
       </div>
     </section>

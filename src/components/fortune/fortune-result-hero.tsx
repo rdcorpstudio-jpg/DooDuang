@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,7 +14,7 @@ function formatPredictionDate(date = new Date()) {
   }).format(date);
 }
 
-/** Daily greeting hero with mascot — free overview */
+/** Daily greeting hero — free overview */
 export function FortuneResultHero({
   realName,
   nickname,
@@ -44,7 +43,7 @@ export function FortuneResultHero({
           <ChevronLeft className="h-5 w-5" strokeWidth={2} />
           กลับ
         </Link>
-        <p className="text-center text-[11px] font-medium tracking-[0.42em] text-[#F4BC52]/90">
+        <p className="text-center font-sacred text-[13px] font-normal tracking-[0.28em] text-[#F4BC52]/95">
           DOODUANG
         </p>
         <span className="justify-self-end" aria-hidden />
@@ -52,51 +51,34 @@ export function FortuneResultHero({
 
       <div className="relative px-0.5 pb-2 pt-1">
         <section
-          className="relative overflow-visible rounded-[18px] px-4 py-4"
+          className="relative overflow-hidden rounded-[20px] border border-white/10 px-4 py-4 shadow-[0_12px_32px_rgba(0,0,0,0.4)]"
           style={{
-            border: "1px solid rgba(154,184,220,0.18)",
-            backgroundImage: [
-              "linear-gradient(105deg, rgba(12,20,39,0.92) 0%, rgba(12,20,39,0.55) 42%, transparent 68%)",
-              "radial-gradient(ellipse at 88% 30%, rgba(241,109,181,0.28), transparent 52%)",
-              "linear-gradient(110deg, #0C1427 0%, #152044 42%, #3A2158 72%, #5A2A58 100%)",
-            ].join(", "),
-            boxShadow: "0 8px 22px rgba(3, 8, 24, 0.28)",
+            backgroundImage: "url(/images/mascot/hero-deities.jpg)",
+            backgroundSize: "cover",
+            backgroundPosition: "72% center",
           }}
         >
-          <div className="relative z-[1] grid grid-cols-[1.35fr_0.75fr] items-center gap-1">
-            <div className="min-w-0 pr-1">
-              <p className="text-[13px] leading-snug text-[#F7F8FF]/90">
-                สวัสดี คุณ{displayName}
-              </p>
-              <p className="mt-1 flex items-center gap-1.5 text-[12px] text-[#9AB8DC]">
-                <CalendarDays className="h-3.5 w-3.5 shrink-0 text-[#46DDED]" strokeWidth={1.9} />
-                <span>คำทำนายสำหรับ {dateLabel}</span>
-              </p>
-              <h2 className="mt-2.5 text-[20px] font-bold leading-[1.35] tracking-tight text-[#F7F8FF]">
-                {headline}
-              </h2>
-              <p className="mt-2 text-[14px] leading-[1.7] text-[#9AB8DC]">
-                {subline}
-              </p>
-            </div>
-            <div className="min-h-[7.5rem]" aria-hidden />
-          </div>
-
           <div
-            className="fortune-mascot-float pointer-events-none absolute -bottom-2 -right-1 z-[2] h-[9.5rem] w-[9.5rem] sm:h-[10.5rem] sm:w-[10.5rem]"
-            data-slot="daily-hero-illustration"
-          >
-            <Image
-              src="/images/mascot/daily-hero.png"
-              alt=""
-              width={512}
-              height={512}
-              priority
-              quality={100}
-              unoptimized
-              className="h-full w-full object-contain object-bottom"
-              style={{ filter: "drop-shadow(0 8px 14px rgba(0,0,0,0.35))" }}
-            />
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0A1020]/75 via-[#0A1020]/35 to-transparent"
+          />
+          <div className="relative z-[1] min-w-0 max-w-[22rem]">
+            <p className="text-[13px] leading-snug text-[#F7F8FF] drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)]">
+              สวัสดี คุณ{displayName}
+            </p>
+            <p className="mt-1 flex items-center gap-1.5 text-[12px] text-[#E8EEF8] drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)]">
+              <CalendarDays
+                className="h-3.5 w-3.5 shrink-0 text-[#7EE9F5]"
+                strokeWidth={1.9}
+              />
+              <span>คำทำนายสำหรับ {dateLabel}</span>
+            </p>
+            <h2 className="font-sacred mt-2.5 text-[1.55rem] font-normal leading-[1.35] tracking-wide text-[#F7F8FF] drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
+              {headline}
+            </h2>
+            <p className="mt-2 text-[14px] leading-[1.7] text-[#F0F4FC] drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)]">
+              {subline}
+            </p>
           </div>
         </section>
       </div>

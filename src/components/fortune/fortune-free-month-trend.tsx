@@ -1,15 +1,17 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
 import {
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
   ChartNoAxesColumn,
   ChevronRight,
-  Lightbulb,
+  ChevronDown,
   Lock,
-  Sparkles,
-  Wrench,
+  Minus,
 } from "lucide-react";
-import { MONTH_NAMES_TH } from "@/components/fortune/life-cycle-graph";
+import { MONTH_LABELS_TH, MONTH_NAMES_TH } from "@/components/fortune/life-cycle-graph";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -20,9 +22,33 @@ export type FreeMonthPoint = {
   score: number;
 };
 
+type ChartPoint = FreeMonthPoint & {
+  kind: "past" | "future";
+};
+
 function monthLabel(monthIndex: number, yearCe: number) {
   const be = yearCe + 543;
   return `${MONTH_NAMES_TH[monthIndex]} ${be}`;
+}
+
+function monthShort(monthIndex: number, yearCe: number) {
+  return `${MONTH_LABELS_TH[monthIndex]} ${(yearCe + 543).toString().slice(-2)}`;
+}
+
+function LockMark({ x, y }: { x: number; y: number }) {
+  return (
+    <g transform={`translate(${x - 5.5}, ${y - 20})`} className="pointer-events-none">
+      <circle cx={5.5} cy={7} r={8} fill="rgba(12,20,39,0.82)" stroke="rgba(244,188,82,0.55)" strokeWidth={1} />
+      <path
+        d="M3.2 7.2V5.1a2.3 2.3 0 0 1 4.6 0v2.1"
+        fill="none"
+        stroke="#F4BC52"
+        strokeWidth={1.35}
+        strokeLinecap="round"
+      />
+      <rect x={2.4} y={7} width={6.2} height={4.6} rx={1.1} fill="#F4BC52" />
+    </g>
+  );
 }
 
 function scoreColor(score: number) {
@@ -37,15 +63,18 @@ function scoreBand(score: number) {
   if (score >= 10) {
     return {
       label: "พลังสูง",
-      meaning: "จังหวะเปิด เหมาะผลักงานสำคัญและเก็บผล",
+      meaning:
+        "จังหวะเปิดกว้าง — เหมาะผลักงานสำคัญ ปิดดีล หรือเริ่มเรื่องที่ค้างมานาน",
       strength: "โฟกัสคม · ตัดสินใจไว · โอกาสเข้าหาง่าย",
+      use: "ใช้พลังไปกับเป้าหมายหลัก 1–2 เรื่อง อย่ากระจายจนหมดแรง",
     };
   }
   if (score >= 8) {
     return {
       label: "กำลังดี",
-      meaning: "เดินต่อได้ดี ถ้าโฟกัสไม่กระจายเกิน",
+      meaning: "เดินต่อได้ลื่น ถ้าโฟกัสไม่แตกเกินไป",
       strength: "นิ่งพอจะวางแผน · มีแรงส่งต่อเนื่อง",
+      use: "เก็บงานที่ใกล้จบให้เสร็จก่อนเปิดงานใหม่",
     };
   }
   if (score >= 6) {
@@ -53,43 +82,58 @@ function scoreBand(score: number) {
       label: "ปานกลาง",
       meaning: "คุมจังหวะได้ แต่ควรลดเรื่องที่ไม่จำเป็น",
       strength: "บาลานซ์ได้ดี · ปรับตัวตามสถานการณ์",
+      use: "ตัดงานที่ไม่เร่งด่วนออก แล้วโฟกัสสิ่งที่กระทบผลจริง",
     };
   }
   if (score >= 4) {
     return {
       label: "ชะลอ",
-      meaning: "พลังไม่เต็ม เหมาะจัดระบบและพักให้พอ",
-      strength: "เหมาะทบทวน · ตัดสิ่งที่ไม่จำเป็นได้ชัด",
+      meaning: "พลังไม่เต็ม — เหมาะจัดระบบ พักให้พอ และทบทวนแผน",
+      strength: "เห็นจุดอ่อนชัด · ตัดสิ่งที่ไม่จำเป็นได้ง่าย",
+      use: "อย่ารีบขยายงานใหญ่ ใช้ช่วงนี้จัดบ้าน/ระบบก่อน",
     };
   }
   return {
     label: "ระวัง",
-    meaning: "ช่วงหนัก อย่ารีบตัดสินใจใหญ่",
+    meaning: "ช่วงหนัก — อย่ารีบตัดสินใจใหญ่โดยไม่มีข้อมูลพอ",
     strength: "ได้เรียนรู้ขอบเขตตัวเอง · รู้ว่าอะไรสำคัญจริง",
+    use: "พักให้พอ คุยกับคนที่ไว้ใจ และเลื่อนเรื่องใหญ่ถ้าทำได้",
   };
+}
+
+function monthDescribe(point: FreeMonthPoint, kind: "past" | "future") {
+  if (kind === "future") {
+    return `ภาพรวมจังหวะ${MONTH_NAMES_TH[point.monthIndex]} — ปลดล็อกเพื่อดูคะแนนและคำแนะนำล่วงหน้า`;
+  }
+  const band = scoreBand(point.score);
+  return `${MONTH_NAMES_TH[point.monthIndex]} ${point.yearCe + 543} · ${band.label} — ${band.meaning}`;
 }
 
 function basicFix(prev: number, cur: number) {
   const diff = cur - prev;
   if (diff >= 2) {
     return {
-      highlight: "จังหวะดีขึ้นชัด — เหมาะเก็บผลงานและโชว์ความสามารถ",
-      issue: "โอกาสมาเร็ว อาจรับเกินจนสะสมงาน",
+      highlight:
+        "จังหวะดีขึ้นชัด — เหมาะเก็บผลงาน โชว์ความสามารถ และปิดเรื่องค้าง",
+      issue: "โอกาสมาเร็ว อาจรับเกินจนสะสมงานและเครียดทีหลัง",
       tip: "เลือกเป้าหมายหลัก 1 เรื่อง แล้วปิดงานค้างก่อนเปิดแนวใหม่",
+      why: "คะแนนขยับขึ้นแรง แปลว่าพลังพร้อม แต่ยังต้องคุมขอบเขต",
     };
   }
   if (diff <= -2) {
     return {
       highlight: "ช่วงชะลอช่วยให้เห็นสิ่งที่ต้องพักและจัดใหม่",
       issue: "จังหวะชะลอ อาจกดดันตัวเองให้ทำเท่าเดือนก่อน",
-      tip: "ลดภาระ 20% สัปดาห์นี้ และนอนให้ครบกว่าปกติเล็กน้อย",
+      tip: "ลดภาระประมาณ 20% สัปดาห์นี้ และนอนให้ครบกว่าปกติเล็กน้อย",
+      why: "คะแนนลดลงแรง ไม่ใช่ล้มเหลว — เป็นสัญญาณให้รีเซ็ตจังหวะ",
     };
   }
   if (cur >= 10) {
     return {
       highlight: "พลังสูงต่อเนื่อง — จุดแข็งคือความมุ่งมั่นและการลงมือ",
-      issue: "พลังสูงต่อเนื่อง เสี่ยงแบกทุกอย่างคนเดียว",
+      issue: "พลังสูงต่อเนื่อง เสี่ยงแบกทุกอย่างคนเดียวจนหมดไฟ",
       tip: "บอกขอบเขตก่อนรับปาก และแบ่งงานที่คนอื่นช่วยได้",
+      why: "เดือนต่อเดือนยังสูง เหมาะเร่งผล แต่ต้องกันไม่ให้เผาตัวเอง",
     };
   }
   if (cur <= 5) {
@@ -97,87 +141,890 @@ function basicFix(prev: number, cur: number) {
       highlight: "ช่วงนี้เหมาะจัดลำดับชีวิตใหม่ให้เบาและชัดขึ้น",
       issue: "พลังต่ำ ทำหลายอย่างพร้อมกันแล้วเหนื่อยง่าย",
       tip: "เหลืองานสำคัญวันละ 1–2 เรื่อง และพักสั้น ๆ ระหว่างวัน",
+      why: "คะแนนต่ำไม่ใช่จุดจบ — เป็นจังหวะพักเพื่อกลับมาแรงกว่า",
     };
   }
   return {
-    highlight: "จังหวะคงที่ — จุดเด่นคือความสม่ำเสมอที่สะสมได้",
+    highlight: "จังหวะคงที่ — จุดเด่นคือความสม่ำเสมอที่สะสมผลได้",
     issue: "จังหวะค่อนข้างคงที่ อาจเฉื่อยหรือไม่เห็นความคืบหน้า",
     tip: "ตั้งเช็คพอยต์สัปดาห์ละครั้ง 15 นาที เพื่อปรับแผนเล็ก ๆ",
+    why: "คะแนนใกล้เคียงเดือนก่อน แปลว่าสถานะนิ่ง — ต้องตั้งเป้าเอง",
   };
 }
 
-/** Free trend: graph + per-point meaning + basic fix + unlock CTA */
+function hashSeed(input: string) {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h) >>> 0;
+}
+
+const YEAR_DETAILS = [
+  {
+    overview: "ปีแห่งการตั้งต้นและจัดระบบชีวิตใหม่",
+    turning: "เลือกทิศทางหลักให้ชัดก่อนขยายงาน",
+    reason: "จังหวะนี้เหมาะกับการวางรากฐานมากกว่าเร่งผลลัพธ์",
+    guidance: "โฟกัสเป้าหมายหลักหนึ่งเรื่อง และตัดสิ่งที่ไม่จำเป็น",
+  },
+  {
+    overview: "ปีแห่งการสร้างวินัยและความสม่ำเสมอ",
+    turning: "นิสัยเล็ก ๆ ที่ทำซ้ำจะเริ่มเห็นผล",
+    reason: "พลังงานสนับสนุนงานที่ต้องใช้ความอดทน",
+    guidance: "ตั้งเกณฑ์วัดผลรายเดือนแบบเรียบง่าย",
+  },
+  {
+    overview: "ปีแห่งการเปิดโอกาสและการทดลอง",
+    turning: "โอกาสใหม่เข้ามาเมื่อคุณพร้อมรับผิดชอบ",
+    reason: "ช่วงขยายเครือข่ายและการเรียนรู้",
+    guidance: "ลองแนวทางใหม่ได้ แต่เก็บข้อมูลผลลัพธ์ไว้",
+  },
+  {
+    overview: "ปีแห่งการทดสอบความอดทน",
+    turning: "แรงกดดันช่วยให้เห็นสิ่งที่สำคัญจริง",
+    reason: "จังหวะเหมาะกับการคัดกรองมากกว่าขยาย",
+    guidance: "อย่าตัดสินใจใหญ่ตอนอารมณ์ต่ำ",
+  },
+  {
+    overview: "ปีแห่งการเก็บเกี่ยวผลงาน",
+    turning: "ผลจากความพยายามก่อนหน้าเริ่มชัด",
+    reason: "เหมาะกับการปิดงานสำคัญและสร้างชื่อเสียง",
+    guidance: "ปิดงานค้างก่อนเปิดแนวรบใหม่",
+  },
+  {
+    overview: "ปีแห่งการปรับสมดุลชีวิต",
+    turning: "หันมาดูแลร่างกายและความสัมพันธ์ควบคู่เป้าหมาย",
+    reason: "พลังงานชวนลดความเร่งและเพิ่มคุณภาพชีวิต",
+    guidance: "จัดเวลาพักให้เป็นส่วนหนึ่งของแผนงาน",
+  },
+  {
+    overview: "ปีแห่งการก้าวกระโดด",
+    turning: "โอกาสสำคัญอาจต้องการการตัดสินใจที่กล้า",
+    reason: "จังหวะเหมาะกับการรับผิดชอบที่ใหญ่ขึ้น",
+    guidance: "ตัดสินใจด้วยข้อมูล และอย่ารอความพร้อมสมบูรณ์",
+  },
+  {
+    overview: "ปีแห่งการเชื่อมโยงผู้คน",
+    turning: "ความร่วมมือดีจะพาคุณไปได้ไกลกว่าทำคนเดียว",
+    reason: "พลังด้านคนรอบตัวเด่นขึ้น",
+    guidance: "สื่อสารความต้องการให้ชัดและฟังอีกฝ่าย",
+  },
+  {
+    overview: "ปีแห่งการเข้าใจตัวตนลึกขึ้น",
+    turning: "ปล่อยสิ่งเก่าที่ไม่ได้เป็นคุณอีกต่อไป",
+    reason: "เหมาะกับการทบทวนนิยามความสำเร็จ",
+    guidance: "ลดบทบาทที่ไม่ใช่ และเลือกสิ่งที่สอดคล้องใจ",
+  },
+  {
+    overview: "ปีแห่งการสร้างมรดกและส่งต่อ",
+    turning: "สิ่งที่คุณสร้างเริ่มมีผลต่อคนอื่น",
+    reason: "จังหวะของการสอน แบ่งปัน และวางระบบระยะยาว",
+    guidance: "บันทึกองค์ความรู้และส่งต่อให้ทีม/คนใกล้ตัว",
+  },
+  {
+    overview: "ปีแห่งการปิดวงจรและเริ่มรอบใหม่",
+    turning: "จบเรื่องค้างเพื่อเปิดพื้นที่ให้บทถัดไป",
+    reason: "พลังงานสนับสนุนการเคลียร์และรีเซ็ต",
+    guidance: "ทำบัญชีชีวิต: อะไรเก็บ อะไรปล่อย อะไรเริ่มใหม่",
+  },
+  {
+    overview: "ปีแห่งการยืนหยัดบนรากฐานที่แข็ง",
+    turning: "ความมั่นคงมาจากการเลือกที่ชัดซ้ำ ๆ",
+    reason: "เหมาะกับการขยายจากของที่มีอยู่แล้ว",
+    guidance: "อย่าไล่ทุกโอกาส — ขยายเฉพาะสิ่งที่สอดคล้องแกนชีวิต",
+  },
+] as const;
+
+type YearPoint = {
+  i: number;
+  ce: number;
+  be: number;
+  score: number;
+  overview: string;
+  turning: string;
+  reason: string;
+  guidance: string;
+};
+
+function YearRhythmChart({
+  years,
+  selectedIndex,
+  onSelect,
+}: {
+  years: YearPoint[];
+  selectedIndex: number;
+  onSelect: (index: number) => void;
+}) {
+  const gid = useId().replace(/:/g, "");
+  const W = 360;
+  const H = 200;
+  const padL = 26;
+  const padR = 12;
+  const padT = 24;
+  const padB = 36;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+  const scores = years.map((y) => y.score);
+  const { yMin, yMax } = yDomain(scores);
+  const ticks = tickValues(yMin, yMax);
+  const n = years.length;
+  const xAt = (i: number) =>
+    padL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+  const yAt = (score: number) =>
+    padT + ((yMax - score) / (yMax - yMin || 1)) * plotH;
+
+  const lineD = years
+    .map((y, i) => `${i === 0 ? "M" : "L"} ${xAt(i).toFixed(1)} ${yAt(y.score).toFixed(1)}`)
+    .join(" ");
+  const areaD = `${lineD} L ${xAt(n - 1).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(0).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`;
+  const nowCe = new Date().getFullYear();
+
+  return (
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="mt-1 w-full"
+      role="img"
+      aria-label="กราฟจังหวะชีวิต 12 ปี กดจุดเพื่อวิเคราะห์รายปี"
+    >
+      <defs>
+        <linearGradient id={`yr-fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(244,188,82,0.32)" />
+          <stop offset="55%" stopColor="rgba(70,221,237,0.1)" />
+          <stop offset="100%" stopColor="rgba(70,221,237,0)" />
+        </linearGradient>
+        <linearGradient id={`yr-stroke-${gid}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#F4BC52" />
+          <stop offset="45%" stopColor="#BB6CF0" />
+          <stop offset="100%" stopColor="#46DDED" />
+        </linearGradient>
+      </defs>
+
+      {ticks.map((t) => {
+        const y = yAt(t);
+        return (
+          <g key={t}>
+            <line
+              x1={padL}
+              y1={y}
+              x2={W - padR}
+              y2={y}
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth={1}
+            />
+            <text
+              x={padL - 5}
+              y={y + 3}
+              textAnchor="end"
+              fill="rgba(247,248,255,0.4)"
+              fontSize={9}
+            >
+              {t}
+            </text>
+          </g>
+        );
+      })}
+
+      <path d={areaD} fill={`url(#yr-fill-${gid})`} />
+      <path
+        d={lineD}
+        fill="none"
+        stroke={`url(#yr-stroke-${gid})`}
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {years.map((y, i) => {
+        const x = xAt(i);
+        const yy = yAt(y.score);
+        const isSelected = i === selectedIndex;
+        const isNow = y.ce === nowCe;
+        const color = scoreColor(y.score);
+        return (
+          <g key={y.ce}>
+            {isSelected ? (
+              <text
+                x={x}
+                y={yy - 11}
+                textAnchor="middle"
+                fill="#F4BC52"
+                fontSize={11}
+                fontWeight={700}
+              >
+                {y.score}
+              </text>
+            ) : null}
+            <circle
+              cx={x}
+              cy={yy}
+              r={isSelected ? 7 : 4}
+              fill={isSelected ? color : "rgba(255,255,255,0.55)"}
+              stroke={isSelected ? "#fff" : "rgba(255,255,255,0.35)"}
+              strokeWidth={isSelected ? 2 : 1}
+              className="pointer-events-none"
+            />
+            <text
+              x={x}
+              y={H - 18}
+              textAnchor="middle"
+              fill={
+                isSelected
+                  ? "rgba(247,248,255,0.95)"
+                  : "rgba(247,248,255,0.45)"
+              }
+              fontSize={isSelected ? 9 : 8}
+              fontWeight={isSelected || isNow ? 600 : 400}
+              className="pointer-events-none"
+            >
+              {String(y.be).slice(-2)}
+            </text>
+            <text
+              x={x}
+              y={H - 7}
+              textAnchor="middle"
+              fill={isNow ? "rgba(244,188,82,0.8)" : "rgba(247,248,255,0.28)"}
+              fontSize={7}
+              className="pointer-events-none"
+            >
+              {isNow ? "ปีนี้" : ""}
+            </text>
+            <circle
+              cx={x}
+              cy={yy}
+              r={14}
+              fill="transparent"
+              className="cursor-pointer"
+              role="button"
+              tabIndex={0}
+              aria-label={`วิเคราะห์ปี ${y.be} คะแนน ${y.score}`}
+              aria-pressed={isSelected}
+              onClick={() => onSelect(i)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelect(i);
+                }
+              }}
+            />
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function UnlockedTwelveYearTrend({
+  seed,
+  className,
+}: {
+  seed: string;
+  className?: string;
+}) {
+  const nowCe = new Date().getFullYear();
+  const years = useMemo((): YearPoint[] => {
+    return Array.from({ length: 12 }, (_, i) => {
+      const ce = nowCe - 2 + i;
+      const detail = YEAR_DETAILS[i]!;
+      const score = 3 + (hashSeed(`${seed}-year-${ce}`) % 10);
+      return {
+        i,
+        ce,
+        be: ce + 543,
+        score,
+        ...detail,
+      };
+    });
+  }, [seed, nowCe]);
+
+  const currentIdx = years.findIndex((y) => y.ce === nowCe);
+  const [index, setIndex] = useState(currentIdx >= 0 ? currentIdx : 2);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const widthRef = useRef(320);
+  const startXRef = useRef(0);
+  const lastXRef = useRef(0);
+  const activeRef = useRef(false);
+
+  useEffect(() => {
+    const measure = () => {
+      widthRef.current = viewportRef.current?.clientWidth || 320;
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  function goTo(next: number) {
+    setIndex(Math.max(0, Math.min(years.length - 1, next)));
+    setDragX(0);
+    setDragging(false);
+  }
+
+  function onPointerDown(e: PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    activeRef.current = true;
+    startXRef.current = e.clientX;
+    lastXRef.current = e.clientX;
+    widthRef.current = viewportRef.current?.clientWidth || 320;
+    setDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e: PointerEvent<HTMLDivElement>) {
+    if (!activeRef.current) return;
+    lastXRef.current = e.clientX;
+    const dx = e.clientX - startXRef.current;
+    const w = widthRef.current;
+    let next = dx;
+    if ((index === 0 && dx > 0) || (index === years.length - 1 && dx < 0)) {
+      next = dx * 0.35;
+    }
+    setDragX(Math.max(-w * 1.05, Math.min(w * 1.05, next)));
+  }
+
+  function onPointerUp(e: PointerEvent<HTMLDivElement>) {
+    if (!activeRef.current) return;
+    activeRef.current = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+    const dx = lastXRef.current - startXRef.current;
+    const threshold = Math.min(72, widthRef.current * 0.18);
+    setDragging(false);
+    if (dx < -threshold) goTo(index + 1);
+    else if (dx > threshold) goTo(index - 1);
+    else setDragX(0);
+  }
+
+  const dragPct =
+    widthRef.current > 0 ? (dragX / widthRef.current) * 100 : 0;
+
+  return (
+    <section className={cn("space-y-2.5", className)}>
+      <div className="flex items-center gap-2 px-0.5">
+        <ChartNoAxesColumn
+          className="h-4 w-4 shrink-0 text-[#F4BC52]"
+          strokeWidth={1.7}
+        />
+        <h2 className="text-[15px] font-semibold tracking-wide text-white">
+          จังหวะชีวิต
+          <span className="text-[#e8c547]/90"> 12 ปี</span>
+        </h2>
+      </div>
+
+      <YearRhythmChart
+        years={years}
+        selectedIndex={index}
+        onSelect={goTo}
+      />
+
+      <div
+        ref={viewportRef}
+        className="relative touch-pan-y overflow-hidden select-none"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        <div
+          className="flex will-change-transform"
+          style={{
+            transform: `translate3d(calc(${-index * 100}% + ${dragPct}%), 0, 0)`,
+            transition: dragging
+              ? "none"
+              : "transform 420ms cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
+          {years.map((year, i) => {
+            const band = scoreBand(year.score);
+            const color = scoreColor(year.score);
+            const when =
+              year.ce === nowCe
+                ? "ปีนี้"
+                : year.ce < nowCe
+                  ? "ปีที่ผ่านมา"
+                  : "ปีข้างหน้า";
+            const active = i === index;
+            return (
+              <article
+                key={year.ce}
+                className="w-full min-w-full shrink-0 basis-full px-0.5"
+                aria-hidden={!active}
+              >
+                <div
+                  className={cn(
+                    "relative space-y-2.5 rounded-[18px] fortune-surface px-3.5 py-3.5 transition-opacity duration-300",
+                    active ? "opacity-100" : "opacity-70"
+                  )}
+                >
+                  <p className="absolute right-3.5 top-3.5 text-[12px] font-semibold tabular-nums text-[#F4BC52]">
+                    {i + 1}/{years.length}
+                  </p>
+
+                  <div className="pr-10">
+                    <p className="text-[11px] text-white/45">{when}</p>
+                    <p className="mt-1 text-[15px] font-semibold text-white">
+                      พ.ศ. {year.be} · {band.label}
+                    </p>
+                  </div>
+
+                  <p className="text-[13px] font-medium leading-snug text-[#F7F8FF]">
+                    {year.overview}
+                  </p>
+                  <p className="text-[12px] leading-[1.65] text-white/60">
+                    {band.meaning}
+                  </p>
+                  <div className="rounded-[12px] bg-[#F4BC52]/08 px-2.5 py-2 ring-1 ring-[#F4BC52]/2">
+                    <p className="text-[11px] font-semibold text-[#F4BC52]">
+                      จุดเปลี่ยนปีนี้
+                    </p>
+                    <p className="mt-1 text-[12px] leading-snug text-white/80">
+                      {year.turning}
+                    </p>
+                  </div>
+                  <div className="rounded-[12px] bg-[#46DDED]/08 px-2.5 py-2 ring-1 ring-[#46DDED]/2">
+                    <p className="text-[11px] font-semibold text-[#46DDED]">
+                      ทำไมถึงเป็นแบบนี้
+                    </p>
+                    <p className="mt-1 text-[12px] leading-snug text-white/80">
+                      {year.reason}
+                    </p>
+                  </div>
+                  <div className="rounded-[12px] bg-white/[0.04] px-2.5 py-2 ring-1 ring-white/10">
+                    <p className="text-[11px] font-semibold text-white/70">
+                      แนวทางแก้ไข
+                    </p>
+                    <p className="mt-1 text-[12px] leading-snug text-white/80">
+                      {year.guidance}
+                    </p>
+                  </div>
+                  <p className="text-[11px] leading-snug text-white/40">
+                    จุดเด่น: {band.strength} · ใช้ยังไง: {band.use}
+                  </p>
+                  <p
+                    className="pt-0.5 text-right text-[13px] font-bold tabular-nums"
+                    style={{ color }}
+                  >
+                    {year.score}/12
+                  </p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Smart Y domain — zoom into the data so high scores aren't stuck at the ceiling */
+function yDomain(scores: number[]) {
+  const lo = Math.min(...scores);
+  const hi = Math.max(...scores);
+  let yMin = Math.max(1, lo - 1);
+  let yMax = Math.min(12, hi + 1);
+  if (yMax - yMin < 5) {
+    const mid = (lo + hi) / 2;
+    yMin = Math.max(1, Math.floor(mid - 2.5));
+    yMax = Math.min(12, Math.ceil(mid + 2.5));
+    if (yMax - yMin < 5) {
+      if (yMin === 1) yMax = Math.min(12, yMin + 5);
+      else yMin = Math.max(1, yMax - 5);
+    }
+  }
+  return { yMin, yMax };
+}
+
+function tickValues(yMin: number, yMax: number) {
+  const span = yMax - yMin;
+  const step = span <= 5 ? 1 : span <= 8 ? 2 : 3;
+  const ticks: number[] = [];
+  for (let v = yMin; v <= yMax; v += step) ticks.push(v);
+  if (ticks[ticks.length - 1] !== yMax) ticks.push(yMax);
+  return ticks;
+}
+
+function RhythmChart({
+  points,
+  selectedIndex,
+  onSelect,
+  isLocked,
+}: {
+  points: ChartPoint[];
+  selectedIndex: number;
+  onSelect: (index: number) => void;
+  isLocked: (index: number) => boolean;
+}) {
+  const gid = useId().replace(/:/g, "");
+  const W = 340;
+  const H = 212;
+  const padL = 28;
+  const padR = 14;
+  const padT = 26;
+  const padB = 44;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const visibleScores = points.map((p, i) =>
+    isLocked(i) && p.kind === "future" ? points[Math.max(0, i - 1)]!.score : p.score
+  );
+  const { yMin, yMax } = yDomain(visibleScores);
+  const ticks = tickValues(yMin, yMax);
+  const n = points.length;
+  const xAt = (i: number) =>
+    padL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+  const yAt = (score: number) =>
+    padT + ((yMax - score) / (yMax - yMin || 1)) * plotH;
+
+  const lineD = points
+    .map((p, i) => {
+      const score =
+        isLocked(i) && p.kind === "future"
+          ? points[Math.max(0, i - 1)]!.score
+          : p.score;
+      return `${i === 0 ? "M" : "L"} ${xAt(i).toFixed(1)} ${yAt(score).toFixed(1)}`;
+    })
+    .join(" ");
+
+  const areaD = `${lineD} L ${xAt(n - 1).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(0).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`;
+
+  return (
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="mt-1 w-full"
+      role="img"
+      aria-label="กราฟจังหวะชีวิตรายเดือน กดจุดเพื่อดูรายละเอียด"
+    >
+      <defs>
+        <linearGradient id={`rm-fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(187,108,240,0.38)" />
+          <stop offset="55%" stopColor="rgba(70,221,237,0.12)" />
+          <stop offset="100%" stopColor="rgba(70,221,237,0)" />
+        </linearGradient>
+        <linearGradient id={`rm-stroke-${gid}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#F16DB5" />
+          <stop offset="50%" stopColor="#BB6CF0" />
+          <stop offset="100%" stopColor="#46DDED" />
+        </linearGradient>
+        <filter id={`rm-glow-${gid}`} x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="1.6" result="b" />
+          <feMerge>
+            <feMergeNode in="b" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      {yMin <= 6 && yMax >= 4 ? (
+        <rect
+          x={padL}
+          y={yAt(Math.min(yMax, 6))}
+          width={plotW}
+          height={Math.max(0, yAt(Math.max(yMin, 4)) - yAt(Math.min(yMax, 6)))}
+          fill="rgba(250,204,21,0.05)"
+        />
+      ) : null}
+      {yMax >= 10 ? (
+        <rect
+          x={padL}
+          y={yAt(Math.min(yMax, 12))}
+          width={plotW}
+          height={Math.max(0, yAt(Math.max(yMin, 10)) - yAt(Math.min(yMax, 12)))}
+          fill="rgba(74,222,128,0.06)"
+        />
+      ) : null}
+
+      {ticks.map((t) => {
+        const y = yAt(t);
+        return (
+          <g key={t}>
+            <line
+              x1={padL}
+              y1={y}
+              x2={W - padR}
+              y2={y}
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth={1}
+            />
+            <text
+              x={padL - 6}
+              y={y + 3}
+              textAnchor="end"
+              fill="rgba(247,248,255,0.4)"
+              fontSize={9}
+            >
+              {t}
+            </text>
+          </g>
+        );
+      })}
+
+      <path d={areaD} fill={`url(#rm-fill-${gid})`} />
+      <path
+        d={lineD}
+        fill="none"
+        stroke={`url(#rm-stroke-${gid})`}
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        filter={`url(#rm-glow-${gid})`}
+      />
+
+      {points.map((p, i) => {
+        const locked = isLocked(i);
+        const plotScore =
+          locked && p.kind === "future"
+            ? points[Math.max(0, i - 1)]!.score
+            : p.score;
+        const x = xAt(i);
+        const y = yAt(plotScore);
+        const isSelected = i === selectedIndex && !locked;
+        const color = scoreColor(p.score);
+        const hitR = 16;
+        return (
+          <g key={`${p.kind}-${p.yearCe}-${p.monthIndex}`} opacity={locked ? 0.9 : 1}>
+            {isSelected ? (
+              <text
+                x={x}
+                y={y - 12}
+                textAnchor="middle"
+                fill="#46DDED"
+                fontSize={12}
+                fontWeight={700}
+              >
+                {p.score}
+              </text>
+            ) : null}
+            {locked ? <LockMark x={x} y={y} /> : null}
+            <circle
+              cx={x}
+              cy={y}
+              r={isSelected ? 7 : locked ? 5 : 4}
+              fill={
+                locked
+                  ? "rgba(244,188,82,0.35)"
+                  : isSelected
+                    ? color
+                    : "rgba(255,255,255,0.55)"
+              }
+              stroke={
+                locked
+                  ? "rgba(244,188,82,0.7)"
+                  : isSelected
+                    ? "#fff"
+                    : "rgba(255,255,255,0.35)"
+              }
+              strokeWidth={isSelected || locked ? 2 : 1}
+              strokeDasharray={locked && p.kind === "future" ? "2 2" : undefined}
+              className="pointer-events-none"
+            />
+            <text
+              x={x}
+              y={H - 22}
+              textAnchor="middle"
+              fill={
+                isSelected
+                  ? "rgba(247,248,255,0.95)"
+                  : locked
+                    ? "rgba(244,188,82,0.75)"
+                    : "rgba(247,248,255,0.5)"
+              }
+              fontSize={isSelected ? 10 : 9}
+              fontWeight={isSelected || locked ? 600 : 400}
+              className="pointer-events-none"
+            >
+              {monthShort(p.monthIndex, p.yearCe)}
+            </text>
+            <text
+              x={x}
+              y={H - 9}
+              textAnchor="middle"
+              fill={
+                locked ? "rgba(244,188,82,0.55)" : "rgba(247,248,255,0.32)"
+              }
+              fontSize={8}
+              className="pointer-events-none"
+            >
+              {p.kind === "future" ? "เดือนหน้า" : locked ? "ล็อก" : ""}
+            </text>
+            <circle
+              cx={x}
+              cy={y}
+              r={hitR}
+              fill="transparent"
+              className="cursor-pointer"
+              role="button"
+              tabIndex={0}
+              aria-label={
+                locked
+                  ? `ปลดล็อก${MONTH_NAMES_TH[p.monthIndex]}`
+                  : `ดู${MONTH_NAMES_TH[p.monthIndex]} คะแนน ${p.score}`
+              }
+              aria-pressed={isSelected}
+              onClick={() => onSelect(i)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelect(i);
+                }
+              }}
+            />
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/** Free: month teaser. Unlocked: full 12-year analysis per year */
 export function FortuneFreeMonthTrend({
   points,
   unlocked = false,
   onUnlock,
+  seed = "dooduang",
   className,
 }: {
   points?: FreeMonthPoint[] | null;
   unlocked?: boolean;
   onUnlock?: () => void;
+  seed?: string;
   className?: string;
 }) {
-  const gid = useId().replace(/:/g, "");
+  if (unlocked) {
+    return <UnlockedTwelveYearTrend seed={seed} className={className} />;
+  }
+
   const now = new Date();
   const curIdx = now.getMonth();
   const curYear = now.getFullYear();
   const prevDate = new Date(curYear, curIdx - 1, 1);
 
-  const hasData =
-    Array.isArray(points) &&
-    points.length >= 2 &&
-    points.every(
-      (p) =>
-        typeof p.score === "number" &&
-        Number.isFinite(p.score) &&
-        p.score >= 1 &&
-        p.score <= 12
+  const series = useMemo(() => {
+    if (
+      Array.isArray(points) &&
+      points.length >= 2 &&
+      points.every(
+        (p) =>
+          typeof p.score === "number" &&
+          Number.isFinite(p.score) &&
+          p.score >= 1 &&
+          p.score <= 12
+      )
+    ) {
+      return points;
+    }
+    return null;
+  }, [points]);
+
+  const hasData = !!series;
+  const pastCount = hasData ? series!.length : 0;
+
+  const chartPoints = useMemo((): ChartPoint[] | null => {
+    if (!series) return null;
+    const nextDate = new Date(curYear, curIdx + 1, 1);
+    const last = series[series.length - 1]!;
+    const forecast = Math.min(
+      12,
+      Math.max(1, last.score + ((last.score % 3) - 1))
     );
+    return [
+      ...series.map((p) => ({ ...p, kind: "past" as const })),
+      {
+        monthIndex: nextDate.getMonth(),
+        yearCe: nextDate.getFullYear(),
+        score: forecast,
+        kind: "future" as const,
+      },
+    ];
+  }, [series, curYear, curIdx]);
+
+  /** Free: current month + 1 month back only; future always locked until unlock */
+  const freeMinIndex = unlocked || !hasData ? 0 : Math.max(0, pastCount - 2);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
+  function pointLocked(index: number) {
+    if (unlocked || !chartPoints) return false;
+    const p = chartPoints[index];
+    if (!p) return true;
+    if (p.kind === "future") return true;
+    return index < freeMinIndex;
+  }
+
+  const lastFreeIndex = Math.max(0, pastCount - 1);
+  const safeSelected = hasData
+    ? Math.min(
+        Math.max(selectedIndex ?? lastFreeIndex, freeMinIndex),
+        unlocked ? (chartPoints?.length ?? 1) - 1 : lastFreeIndex
+      )
+    : 0;
+
+  function selectPoint(index: number) {
+    if (pointLocked(index)) {
+      onUnlock?.();
+      return;
+    }
+    setSelectedIndex(index);
+    setDetailOpen(false);
+  }
 
   const prev = hasData
-    ? points![0]!
+    ? series![series!.length - 2]!
     : {
         monthIndex: prevDate.getMonth(),
         yearCe: prevDate.getFullYear(),
         score: 0,
       };
   const cur = hasData
-    ? points![1]!
+    ? series![series!.length - 1]!
     : { monthIndex: curIdx, yearCe: curYear, score: 0 };
+
+  const selected = hasData ? chartPoints![safeSelected]! : { ...cur, kind: "past" as const };
+  const selectedBand = hasData && !pointLocked(safeSelected) ? scoreBand(selected.score) : null;
+  const selectedColor = hasData ? scoreColor(selected.score) : "#46DDED";
+  const selectedWhen =
+    selected.kind === "future"
+      ? "เดือนหน้า"
+      : safeSelected === lastFreeIndex
+        ? "เดือนนี้"
+        : safeSelected === lastFreeIndex - 1
+          ? "เดือนก่อน"
+          : "เดือนที่เลือก";
+  const selectedDescribe = hasData
+    ? monthDescribe(selected, selected.kind)
+    : "";
 
   const prevLabel = monthLabel(prev.monthIndex, prev.yearCe);
   const curLabel = monthLabel(cur.monthIndex, cur.yearCe);
-  const prevBand = hasData ? scoreBand(prev.score) : null;
-  const curBand = hasData ? scoreBand(cur.score) : null;
+  const nextLabel = monthLabel(
+    new Date(curYear, curIdx + 1, 1).getMonth(),
+    new Date(curYear, curIdx + 1, 1).getFullYear()
+  );
   const fix = hasData ? basicFix(prev.score, cur.score) : null;
 
-  let changeNote =
-    "เมื่อมีข้อมูลจังหวะรายเดือน จะสรุปให้ว่าอะไรเปลี่ยนจากเดือนก่อนถึงเดือนนี้";
+  const diff = hasData ? cur.score - prev.score : 0;
+  let deltaLabel = "คงที่";
+  let DeltaIcon = Minus;
+  let deltaColor = "#9AB8DC";
   if (hasData) {
-    const diff = cur.score - prev.score;
     if (diff > 0) {
-      changeNote = `จาก${MONTH_NAMES_TH[prev.monthIndex]}ถึง${MONTH_NAMES_TH[cur.monthIndex]} คะแนนขยับจาก ${prev.score}/12 เป็น ${cur.score}/12 — สูงขึ้น ${diff} ระดับ`;
+      deltaLabel = `สูงขึ้น ${diff}`;
+      DeltaIcon = ArrowUpRight;
+      deltaColor = "#4ade80";
     } else if (diff < 0) {
-      changeNote = `จาก${MONTH_NAMES_TH[prev.monthIndex]}ถึง${MONTH_NAMES_TH[cur.monthIndex]} คะแนนขยับจาก ${prev.score}/12 เป็น ${cur.score}/12 — ต่ำลง ${Math.abs(diff)} ระดับ`;
+      deltaLabel = `ต่ำลง ${Math.abs(diff)}`;
+      DeltaIcon = ArrowDownRight;
+      deltaColor = "#fb923c";
     } else {
-      changeNote = `${MONTH_NAMES_TH[prev.monthIndex]}และ${MONTH_NAMES_TH[cur.monthIndex]} อยู่ที่ ${prev.score}/12 เท่ากัน — จังหวะยังไม่เปลี่ยนจากเดือนก่อน`;
+      deltaLabel = "เท่าเดิม";
+      DeltaIcon = ArrowRight;
+      deltaColor = "#9AB8DC";
     }
   }
-
-  const W = 340;
-  const H = 168;
-  const padX = 44;
-  const padTop = 28;
-  const padBottom = 40;
-  const plotH = H - padTop - padBottom;
-  const yFor = (score: number) => padTop + ((12 - score) / 11) * plotH;
-  const x0 = padX;
-  const x1 = W - padX;
-  const y0 = hasData ? yFor(prev.score) : H / 2;
-  const y1 = hasData ? yFor(cur.score) : H / 2;
-  const c0 = hasData ? scoreColor(prev.score) : "#9AB8DC";
-  const c1 = hasData ? scoreColor(cur.score) : "#46DDED";
 
   return (
     <section className={cn("space-y-2", className)}>
@@ -192,154 +1039,44 @@ export function FortuneFreeMonthTrend({
             <span className="text-[#e8c547]/90">ช่วงนี้</span>
           </h2>
         </div>
-        <p className="max-w-[9.5rem] pt-0.5 text-right text-[10.5px] leading-snug text-white/38">
-          เดือนก่อน → เดือนนี้
+        <p className="max-w-[10rem] pt-0.5 text-right text-[10.5px] leading-snug text-white/38">
+          ฟรีดูเดือนนี้กับเดือนก่อน
         </p>
       </div>
 
-      <div
-        className="overflow-hidden rounded-[22px] px-3.5 pb-3.5 pt-3.5"
-        style={{
-          border: "1px solid transparent",
-          backgroundImage: [
-            "linear-gradient(165deg, rgba(28,36,78,0.55) 0%, rgba(42,28,72,0.42) 48%, rgba(18,24,52,0.58) 100%)",
-            "linear-gradient(135deg, rgba(241,109,181,0.55), rgba(187,108,240,0.5) 42%, rgba(70,221,237,0.55))",
-          ].join(", "),
-          backgroundOrigin: "border-box",
-          backgroundClip: "padding-box, border-box",
-          backdropFilter: "blur(18px) saturate(1.2)",
-          WebkitBackdropFilter: "blur(18px) saturate(1.2)",
-          boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.14), 0 10px 28px rgba(8,4,24,0.22)",
-        }}
-      >
-        <p className="px-0.5 text-[12px] text-white/50">
-          {prevLabel} → {curLabel}
-        </p>
-
-        {hasData ? (
-          <svg
-            viewBox={`0 0 ${W} ${H}`}
-            className="mt-1 w-full"
-            role="img"
-            aria-label={`กราฟจังหวะ ${prevLabel} ถึง ${curLabel}`}
-          >
-            <defs>
-              <linearGradient id={`fm-stroke-${gid}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#F16DB5" />
-                <stop offset="48%" stopColor="#BB6CF0" />
-                <stop offset="100%" stopColor="#46DDED" />
-              </linearGradient>
-              <linearGradient id={`fm-fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(241,109,181,0.28)" />
-                <stop offset="45%" stopColor="rgba(187,108,240,0.16)" />
-                <stop offset="100%" stopColor="rgba(70,221,237,0)" />
-              </linearGradient>
-              <filter id={`fm-glow-${gid}`} x="-40%" y="-40%" width="180%" height="180%">
-                <feGaussianBlur stdDeviation="2.4" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-
-            {[3, 6, 9, 12].map((s) => {
-              const y = yFor(s);
-              return (
-                <g key={s}>
-                  <line
-                    x1={padX - 10}
-                    y1={y}
-                    x2={W - padX + 10}
-                    y2={y}
-                    stroke="rgba(255,255,255,0.07)"
-                    strokeWidth={1}
-                  />
-                  <text x={14} y={y + 3} fill="rgba(247,248,255,0.38)" fontSize={9}>
-                    {s}
-                  </text>
-                </g>
-              );
-            })}
-
-            <path
-              d={`M ${x0} ${y0} L ${x1} ${y1} L ${x1} ${H - padBottom + 10} L ${x0} ${H - padBottom + 10} Z`}
-              fill={`url(#fm-fill-${gid})`}
-            />
-            <line
-              x1={x0}
-              y1={y0}
-              x2={x1}
-              y2={y1}
-              stroke={`url(#fm-stroke-${gid})`}
-              strokeWidth={9}
-              strokeLinecap="round"
-              opacity={0.3}
-            />
-            <line
-              x1={x0}
-              y1={y0}
-              x2={x1}
-              y2={y1}
-              stroke={`url(#fm-stroke-${gid})`}
-              strokeWidth={3.4}
-              strokeLinecap="round"
-              filter={`url(#fm-glow-${gid})`}
-            />
-
-            <circle cx={x0} cy={y0} r={8} fill="#F16DB5" opacity={0.28} />
-            <circle
-              cx={x0}
-              cy={y0}
-              r={4.8}
-              fill={c0}
-              stroke="rgba(255,255,255,0.85)"
-              strokeWidth={1.3}
-            />
-            <circle cx={x1} cy={y1} r={10} fill="#46DDED" opacity={0.3} />
-            <circle cx={x1} cy={y1} r={5.8} fill={c1} stroke="#fff" strokeWidth={2} />
-
-            <text
-              x={x0}
-              y={y0 - 12}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.88)"
-              fontSize={12}
-              fontWeight={600}
+      <div className="overflow-hidden rounded-[22px] px-1 pb-1 pt-1">
+        <div className="flex items-start justify-between gap-2 px-0.5">
+          <div className="min-w-0">
+            <p className="text-[12px] text-white/50">
+              {prevLabel} → {curLabel}
+              <span className="text-[#F4BC52]/75"> · {nextLabel} ล็อก</span>
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed text-white/40">
+              ฟรีดูเดือนนี้กับเดือนก่อน · ปลดล็อกเพื่อดูจังหวะ 12 ปีและวิเคราะห์รายปี
+            </p>
+          </div>
+          {hasData ? (
+            <span
+              className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+              style={{
+                color: deltaColor,
+                background: `${deltaColor}18`,
+                boxShadow: `inset 0 0 0 1px ${deltaColor}55`,
+              }}
             >
-              {prev.score}
-            </text>
-            <text
-              x={x1}
-              y={y1 - 12}
-              textAnchor="middle"
-              fill="#46DDED"
-              fontSize={13}
-              fontWeight={700}
-            >
-              {cur.score}
-            </text>
-            <text
-              x={x0}
-              y={H - 12}
-              textAnchor="middle"
-              fill="rgba(247,248,255,0.5)"
-              fontSize={11}
-            >
-              {MONTH_NAMES_TH[prev.monthIndex]}
-            </text>
-            <text
-              x={x1}
-              y={H - 12}
-              textAnchor="middle"
-              fill="rgba(247,248,255,0.9)"
-              fontSize={11}
-              fontWeight={600}
-            >
-              {MONTH_NAMES_TH[cur.monthIndex]}
-            </text>
-          </svg>
+              <DeltaIcon className="h-3.5 w-3.5" strokeWidth={2.2} />
+              {deltaLabel}
+            </span>
+          ) : null}
+        </div>
+
+        {hasData && chartPoints ? (
+          <RhythmChart
+            points={chartPoints}
+            selectedIndex={safeSelected}
+            onSelect={selectPoint}
+            isLocked={pointLocked}
+          />
         ) : (
           <div className="mt-3 rounded-[14px] border border-dashed border-white/15 bg-white/[0.04] px-3 py-5 text-center">
             <p className="text-[14px] font-medium text-white">
@@ -351,124 +1088,90 @@ export function FortuneFreeMonthTrend({
           </div>
         )}
 
-        <div
-          className="mt-2.5 flex items-start gap-2.5 rounded-[14px] px-3 py-2.5"
-          style={{
-            border: "1px solid rgba(255,255,255,0.1)",
-            background:
-              "linear-gradient(120deg, rgba(241,109,181,0.12), rgba(187,108,240,0.1) 50%, rgba(70,221,237,0.12))",
-          }}
-        >
-          <Lightbulb
-            className="mt-0.5 h-4 w-4 shrink-0 text-[#F4BC52]"
-            strokeWidth={1.8}
-          />
-          <p className="text-[12px] leading-snug text-white/60">{changeNote}</p>
-        </div>
-
-        {hasData && prevBand && curBand && fix ? (
+        {hasData && selectedBand && fix ? (
           <>
-            {/* Per-point explain */}
-            <div className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
-              {(
-                [
-                  {
-                    when: "เดือนก่อน",
-                    name: MONTH_NAMES_TH[prev.monthIndex],
-                    score: prev.score,
-                    band: prevBand,
-                    color: c0,
-                  },
-                  {
-                    when: "เดือนนี้",
-                    name: MONTH_NAMES_TH[cur.monthIndex],
-                    score: cur.score,
-                    band: curBand,
-                    color: c1,
-                  },
-                ] as const
-              ).map((p) => (
-                <div
-                  key={p.when}
-                  className="rounded-[14px] border border-white/10 bg-[#0C1427]/45 px-3 py-2.5"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] text-white/45">{p.when}</p>
-                    <p
-                      className="text-[13px] font-bold tabular-nums"
-                      style={{ color: p.color }}
-                    >
-                      {p.score}/12
-                    </p>
-                  </div>
-                  <p className="mt-1 text-[13px] font-semibold text-white">
-                    {p.name} · {p.band.label}
-                  </p>
-                  <p className="mt-1 text-[12px] leading-[1.6] text-white/55">
-                    {p.band.meaning}
-                  </p>
-                  <p className="mt-2 text-[11px] font-medium text-[#46DDED]/90">
-                    จุดเด่น: {p.band.strength}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Highlights */}
-            <div className="mt-2.5 rounded-[14px] border border-[#46DDED]/25 bg-[#46DDED]/08 px-3 py-3">
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-[#46DDED]" strokeWidth={1.8} />
-                <p className="text-[12px] font-semibold text-[#46DDED]">
-                  จุดดีในช่วงนี้
-                </p>
-              </div>
-              <p className="mt-1.5 text-[13px] leading-[1.65] text-white/85">
-                {fix.highlight}
-              </p>
-            </div>
-
-            {/* Basic fix — free */}
-            <div className="mt-2.5 rounded-[14px] border border-[#F4BC52]/25 bg-[#F4BC52]/08 px-3 py-3">
-              <div className="flex items-center gap-1.5">
-                <Wrench className="h-3.5 w-3.5 text-[#F4BC52]" strokeWidth={1.8} />
-                <p className="text-[12px] font-semibold text-[#F4BC52]">
-                  วิธีแก้เบื้องต้น
-                </p>
-              </div>
-              <p className="mt-1.5 text-[12px] leading-[1.6] text-white/50">
-                เรื่องที่ควรระวัง: {fix.issue}
-              </p>
-              <p className="mt-1 text-[13px] leading-[1.65] text-white/85">
-                {fix.tip}
-              </p>
-            </div>
-
-            {/* Unlock deeper — paid */}
-            {!unlocked ? (
+            <div className="mt-3 overflow-hidden rounded-[14px] bg-white/[0.04] ring-1 ring-white/[0.08]">
               <button
                 type="button"
-                onClick={onUnlock}
-                disabled={!onUnlock}
-                className="mt-2.5 flex w-full items-center gap-3 rounded-[14px] border border-[#BB6CF0]/35 bg-gradient-to-r from-[#BB6CF0]/15 to-[#F16DB5]/12 px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#BB6CF0]/45 disabled:opacity-60"
+                aria-expanded={detailOpen}
+                onClick={() => setDetailOpen((v) => !v)}
+                className="flex w-full items-start justify-between gap-2 px-3 py-2.5 text-left outline-none transition hover:bg-white/[0.03] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/25"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#F4BC52]/45">
-                  <Lock className="h-4 w-4 text-[#F4BC52]" strokeWidth={1.9} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-semibold text-white">
-                    ปลดล็อกแก้ปัญหาเชิงลึก
-                  </span>
-                  <span className="mt-0.5 block text-[11.5px] leading-snug text-white/50">
-                    ดูสาเหตุรายปี แผนรับมือ และคำแนะนำเฉพาะคุณ ·{" "}
-                    {FORTUNE_UNLOCK_PRICE} บาท
-                  </span>
-                </span>
-                <ChevronRight
-                  className="h-4 w-4 shrink-0 text-[#F16DB5]"
-                  strokeWidth={2.2}
-                />
+                <div className="min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] text-white/45">{selectedWhen}</p>
+                  </div>
+                  <p className="mt-1 text-[13px] font-semibold text-white">
+                    {MONTH_NAMES_TH[selected.monthIndex]} · {selectedBand.label}
+                  </p>
+                  {!detailOpen ? (
+                    <p className="mt-1 text-[11px] text-white/40">
+                      กดดูรายละเอียดเดือนนี้
+                    </p>
+                  ) : null}
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <p
+                    className="text-[13px] font-bold tabular-nums"
+                    style={{ color: selectedColor }}
+                  >
+                    {selected.score}/12
+                  </p>
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 text-white/40 transition-transform duration-300",
+                      detailOpen && "rotate-180 text-white/70"
+                    )}
+                    strokeWidth={2}
+                  />
+                </div>
               </button>
-            ) : null}
+
+              <div
+                className={cn(
+                  "grid transition-[grid-template-rows] duration-300 ease-out",
+                  detailOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="border-t border-white/[0.06] px-3 pb-2.5 pt-2">
+                    <p className="text-[12px] leading-[1.65] text-white/60">
+                      {selectedDescribe}
+                    </p>
+                    <p className="mt-2 text-[11px] font-medium text-[#46DDED]/90">
+                      จุดเด่น: {selectedBand.strength}
+                    </p>
+                    <p className="mt-1.5 text-[11px] leading-snug text-white/40">
+                      ใช้ยังไง: {selectedBand.use}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onUnlock}
+              disabled={!onUnlock}
+              className="mt-2.5 flex w-full items-center gap-3 rounded-[14px] border border-[#BB6CF0]/35 bg-gradient-to-r from-[#BB6CF0]/15 to-[#F16DB5]/12 px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#BB6CF0]/45 disabled:opacity-60"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#F4BC52]/45">
+                <Lock className="h-4 w-4 text-[#F4BC52]" strokeWidth={1.9} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[13px] font-semibold text-white">
+                  ปลดล็อกจังหวะชีวิต 12 ปี
+                </span>
+                <span className="mt-0.5 block text-[11.5px] leading-snug text-white/50">
+                  ดูกราฟครบและวิเคราะห์แต่ละปี · {FORTUNE_UNLOCK_PRICE} บาท
+                </span>
+              </span>
+              <ChevronRight
+                className="h-4 w-4 shrink-0 text-[#F16DB5]"
+                strokeWidth={2.2}
+              />
+            </button>
+
           </>
         ) : null}
       </div>

@@ -40,7 +40,7 @@ export function FortuneLifeTrendCompare({
           </h2>
         </div>
         <p className="max-w-[9.5rem] pt-0.5 text-right text-[10.5px] leading-snug text-white/38">
-          เดือนที่แล้ว → เดือนนี้
+          เดือนนี้ + เดือนก่อน (ฟรี)
         </p>
       </div>
 
@@ -56,7 +56,7 @@ export function FortuneLifeTrendCompare({
         uid={uid}
         blurFuture={!unlocked}
         onUnlock={onUnlock}
-        rangeNote="ดูย้อนหลัง 3 เดือน"
+        rangeNote="ฟรีดูย้อนหลัง 1 เดือน"
         className="!rounded-[22px] fortune-frame-cyan fortune-frame-breathe"
       />
 

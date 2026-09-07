@@ -8,7 +8,6 @@ import {
   Loader2,
   Lock,
   QrCode,
-  Sparkles,
   X,
 } from "lucide-react";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
@@ -162,13 +161,21 @@ export function FortunePaymentSheet({
             <span className="h-9 w-9" />
           )}
           <div className="text-center">
-            <p
-              id={titleId}
-              className="flex items-center justify-center gap-1.5 text-[13px] font-semibold tracking-[0.14em] text-[#F4BC52]"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              ชำระเงิน
-            </p>
+              <p
+                id={titleId}
+                className="flex items-center justify-center gap-1.5 text-[13px] font-semibold tracking-[0.14em] text-[#F4BC52]"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/icons/star-gold.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 object-contain"
+                  style={{ mixBlendMode: "screen" }}
+                />
+                ชำระเงิน
+              </p>
             <p className="mt-0.5 text-[12px] text-[#9AB8DC]">ดวงพรีเมียม</p>
           </div>
           <button

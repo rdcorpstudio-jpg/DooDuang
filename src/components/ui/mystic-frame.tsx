@@ -20,7 +20,7 @@ export function MysticFrame({
   return (
     <div
         className={cn(
-          "relative overflow-hidden border border-[#c4a8ff]/28 bg-[rgba(36,24,72,0.4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_12px_32px_rgba(8,4,24,0.25)] backdrop-blur-[18px]",
+          "fortune-glass relative overflow-hidden",
           dimmed && "opacity-50",
           className
         )}

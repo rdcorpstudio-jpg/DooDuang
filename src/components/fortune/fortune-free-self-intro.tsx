@@ -31,14 +31,16 @@ const PROFILES = [
   },
 ] as const;
 
-/** Free self snapshot — short only */
+/** Self snapshot — short on free; deeper label on premium */
 export function FortuneFreeSelfIntro({
   seed = "dooduang",
   nickname,
+  premium = false,
   className,
 }: {
   seed?: string;
   nickname: string;
+  premium?: boolean;
   className?: string;
 }) {
   const profile = useMemo(
@@ -49,17 +51,19 @@ export function FortuneFreeSelfIntro({
   return (
     <section
       className={cn(
-        "rounded-[18px] border border-[#9AB8DC]/16 bg-[#121D36] px-3.5 py-3.5",
+        "fortune-glass rounded-[18px] px-3.5 py-3.5",
         className
       )}
     >
       <div className="flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-[#BB6CF0]" strokeWidth={1.8} />
+        <span className="fortune-spark flex h-8 w-8 items-center justify-center rounded-full bg-[#BB6CF0]/15 ring-1 ring-[#BB6CF0]/35">
+          <Sparkles className="h-4 w-4 text-[#BB6CF0]" strokeWidth={1.8} />
+        </span>
         <h2 className="text-[17px] font-semibold text-[#F7F8FF]">
-          รู้จักตัวเองเบื้องต้น
+          {premium ? "เข้าใจตัวเองเชิงลึก" : "รู้จักตัวเองเบื้องต้น"}
         </h2>
       </div>
-      <p className="mt-2.5 text-[15px] leading-[1.7] text-[#9AB8DC]">
+      <p className="mt-2.5 text-[15px] leading-[1.75] text-[#D5E4F7]">
         {nickname ? `${nickname} — ` : null}
         {profile.habit}
       </p>
@@ -67,7 +71,7 @@ export function FortuneFreeSelfIntro({
         {profile.strengths.map((s) => (
           <span
             key={s}
-            className="rounded-full border border-[#F4BC52]/30 bg-[#F4BC52]/10 px-2.5 py-1 text-[13px] font-medium text-[#F4BC52]"
+            className="rounded-full border border-[#F4BC52]/35 bg-[#F4BC52]/14 px-2.5 py-1 text-[13px] font-medium text-[#FFE7A8]"
           >
             {s}
           </span>

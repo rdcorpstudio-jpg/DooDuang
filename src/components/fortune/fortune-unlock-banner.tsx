@@ -147,9 +147,14 @@ export function FortuneUnlockBanner({
             <div className="flex items-center justify-center gap-3">
               <span className="h-px w-9 bg-gradient-to-r from-transparent via-[#F4BC52]/70 to-[#F4BC52]/90" />
               <div className="flex items-center gap-1.5">
-                <Sparkles
-                  className="h-3.5 w-3.5 text-[#F4BC52]"
-                  strokeWidth={2}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/icons/star-gold.png"
+                  alt=""
+                  width={14}
+                  height={14}
+                  className="h-3.5 w-3.5 object-contain"
+                  style={{ mixBlendMode: "screen" }}
                 />
                 <p
                   className="text-[13px] font-semibold tracking-[0.2em]"
@@ -163,9 +168,14 @@ export function FortuneUnlockBanner({
                 >
                   ดวงพรีเมียม
                 </p>
-                <Sparkles
-                  className="h-3.5 w-3.5 text-[#F4BC52]"
-                  strokeWidth={2}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/icons/star-gold.png"
+                  alt=""
+                  width={14}
+                  height={14}
+                  className="h-3.5 w-3.5 object-contain"
+                  style={{ mixBlendMode: "screen" }}
                 />
               </div>
               <span className="h-px w-9 bg-gradient-to-l from-transparent via-[#F4BC52]/70 to-[#F4BC52]/90" />
@@ -259,6 +269,12 @@ export function FortuneUnlockBanner({
                 <ChevronRight className="h-4 w-4" strokeWidth={2.2} />
               ) : null}
             </button>
+            <a
+              href="/premium"
+              className="mt-2.5 block text-center text-[12px] text-[#F4BC52]/85 underline-offset-2 hover:underline"
+            >
+              ดูรายละเอียดพรีเมียม
+            </a>
           </div>
         </div>
       </div>

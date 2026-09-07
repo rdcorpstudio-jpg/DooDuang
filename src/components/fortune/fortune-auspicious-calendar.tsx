@@ -159,30 +159,19 @@ function DayDetailCards({
   const hasChaos = profile.markers.includes("chaos");
 
   return (
-    <div className="space-y-2.5">
-      <p className="text-[13px] font-semibold tracking-wide text-[#F4BC52]">
+    <div className="space-y-1.5">
+      <p className="text-[12px] font-semibold tracking-wide text-[#F4BC52]">
         ฤกษ์มงคล · {titleDate}
       </p>
 
-      <div
-        className="rounded-[16px] px-3.5 py-3"
-        style={{
-          border: "1px solid transparent",
-          backgroundImage: [
-            "linear-gradient(160deg, rgba(18,29,54,0.95), rgba(28,24,18,0.92))",
-            "linear-gradient(135deg, rgba(244,188,82,0.45), rgba(201,146,46,0.25))",
-          ].join(", "),
-          backgroundOrigin: "border-box",
-          backgroundClip: "padding-box, border-box",
-        }}
-      >
+      <div className="fortune-glass-inset rounded-[14px] px-3 py-2">
         <div className="flex items-center gap-2">
-          <EnergyDot energy={profile.energy} size={16} />
-          <p className="text-[15px] font-semibold text-[#F7F8FF]">
+          <EnergyDot energy={profile.energy} size={14} />
+          <p className="text-[14px] font-semibold text-[#F7F8FF]">
             {ENERGY_META[profile.energy].label}
           </p>
         </div>
-        <p className="mt-2 text-[14px] leading-[1.7] text-[#9AB8DC]">
+        <p className="mt-1 text-[13px] leading-[1.45] text-[#9AB8DC]">
           {adviceForDay({ ...profile, markers: [] })}
         </p>
       </div>
@@ -190,26 +179,26 @@ function DayDetailCards({
       {primaryMarkers.map((m) => (
         <div
           key={m}
-          className="rounded-[16px] border border-[#F4BC52]/25 bg-[#F4BC52]/08 px-3.5 py-3"
+          className="fortune-glass-inset rounded-[14px] px-3 py-2"
         >
           <div className="flex items-center gap-2">
-            <MarkerIcon marker={m} size={16} />
-            <p className="text-[15px] font-semibold text-[#F4BC52]">
+            <MarkerIcon marker={m} size={14} />
+            <p className="text-[14px] font-semibold text-[#F4BC52]">
               {MARKER_META[m].label}
             </p>
           </div>
-          <p className="mt-2 text-[14px] leading-[1.7] text-[#F7F8FF]/88">
+          <p className="mt-1 text-[13px] leading-[1.45] text-[#F7F8FF]/88">
             {MARKER_META[m].hint}
           </p>
         </div>
       ))}
 
       {hasChaos ? (
-        <div className="rounded-[16px] border border-[#F16DB5]/35 bg-[#F16DB5]/08 px-3.5 py-3">
-          <p className="text-[15px] font-semibold text-[#F16DB5]">
+        <div className="rounded-[14px] border border-[#F16DB5]/35 bg-[#F16DB5]/08 px-3 py-2">
+          <p className="text-[14px] font-semibold text-[#F16DB5]">
             {MARKER_META.chaos.label}
           </p>
-          <p className="mt-2 text-[14px] leading-[1.7] text-[#F7F8FF]/88">
+          <p className="mt-1 text-[13px] leading-[1.45] text-[#F7F8FF]/88">
             {MARKER_META.chaos.hint}
           </p>
         </div>
@@ -217,9 +206,9 @@ function DayDetailCards({
 
       {(hasChaos && primaryMarkers.includes("victory")) ||
       profile.markers.length > 1 ? (
-        <div className="rounded-[16px] border border-white/10 bg-white/[0.04] px-3.5 py-3">
-          <p className="text-[13px] font-semibold text-[#9AB8DC]">หมายเหตุ</p>
-          <p className="mt-1.5 text-[14px] leading-[1.7] text-[#F7F8FF]/85">
+        <div className="rounded-[14px] border border-white/10 bg-white/[0.04] px-3 py-2">
+          <p className="text-[12px] font-semibold text-[#9AB8DC]">หมายเหตุ</p>
+          <p className="mt-1 text-[13px] leading-[1.45] text-[#F7F8FF]/85">
             {adviceForDay(profile)}
           </p>
         </div>
@@ -228,7 +217,7 @@ function DayDetailCards({
   );
 }
 
-/** Free: today only. Premium: browse 12 years of auspicious days. */
+/** Free: look back 1 month → today. Premium: browse 12 years. */
 export function FortuneAuspiciousCalendar({
   seed,
   unlocked = false,
@@ -247,38 +236,58 @@ export function FortuneAuspiciousCalendar({
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }, []);
   const todayIso = toIsoDate(today);
+  const freeStart = useMemo(() => {
+    const d = new Date(today);
+    d.setMonth(d.getMonth() - 1);
+    return d;
+  }, [today]);
+  const freeStartIso = toIsoDate(freeStart);
   const yearRange = useMemo(() => getCalendarYearRange(today.getFullYear()), [today]);
 
   const canBrowse = unlocked || variant === "full";
-  // full variant is only mounted when premium unlocked; teaser respects unlocked
 
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedIso, setSelectedIso] = useState(todayIso);
   const [legendOpen, setLegendOpen] = useState(variant === "full");
 
+  const isFreeDay = (iso: string) => iso >= freeStartIso && iso <= todayIso;
+
+  const isFreeMonth = (year: number, month: number) => {
+    const monthStart = new Date(year, month, 1);
+    const monthEnd = new Date(year, month + 1, 0);
+    return monthEnd >= freeStart && monthStart <= today;
+  };
+
   const grid = useMemo(
     () => getMonthGrid(seed, viewYear, viewMonth),
     [seed, viewYear, viewMonth]
   );
 
-  const selectedProfile = useMemo(() => {
-    const allowedIso = canBrowse ? selectedIso : todayIso;
-    return getDayProfile(seed, parseIsoDate(allowedIso));
-  }, [canBrowse, selectedIso, todayIso, seed]);
+  const activeIso =
+    canBrowse || isFreeDay(selectedIso) ? selectedIso : todayIso;
+
+  const selectedProfile = useMemo(
+    () => getDayProfile(seed, parseIsoDate(activeIso)),
+    [activeIso, seed]
+  );
 
   const selectedLabel = formatThaiDayShort(parseIsoDate(selectedProfile.iso));
 
   function shiftMonth(delta: number) {
-    if (!canBrowse) {
-      onUnlock?.();
-      return;
-    }
     const d = new Date(viewYear, viewMonth + delta, 1);
     const y = d.getFullYear();
-    if (y < yearRange.start || y > yearRange.end) return;
+    const m = d.getMonth();
+    if (!canBrowse) {
+      if (!isFreeMonth(y, m)) {
+        onUnlock?.();
+        return;
+      }
+    } else if (y < yearRange.start || y > yearRange.end) {
+      return;
+    }
     setViewYear(y);
-    setViewMonth(d.getMonth());
+    setViewMonth(m);
   }
 
   function shiftYear(delta: number) {
@@ -292,7 +301,7 @@ export function FortuneAuspiciousCalendar({
   }
 
   function selectDay(profile: DayProfile) {
-    if (!canBrowse && profile.iso !== todayIso) {
+    if (!canBrowse && !isFreeDay(profile.iso)) {
       onUnlock?.();
       return;
     }
@@ -307,26 +316,18 @@ export function FortuneAuspiciousCalendar({
 
   return (
     <section
-      className={cn("overflow-hidden rounded-[22px]", className)}
-      style={{
-        border: "1px solid transparent",
-        backgroundImage: [
-          "linear-gradient(165deg, rgba(14,20,40,0.96), rgba(28,24,16,0.94) 55%, rgba(14,20,40,0.98))",
-          "linear-gradient(145deg, rgba(255,230,170,0.75), rgba(244,188,82,0.55) 40%, rgba(184,120,40,0.45) 75%, rgba(244,188,82,0.65))",
-        ].join(", "),
-        backgroundOrigin: "border-box",
-        backgroundClip: "padding-box, border-box",
-        boxShadow:
-          "inset 0 1px 0 rgba(255,236,190,0.22), 0 14px 36px rgba(8,4,16,0.35)",
-      }}
+      className={cn(
+        "fortune-glass overflow-hidden rounded-[22px]",
+        className
+      )}
     >
-      <div className="relative px-3.5 pb-4 pt-4">
+      <div className="relative px-3.5 pb-3.5 pt-3.5">
         <div
-          className="pointer-events-none absolute inset-0 opacity-50"
+          className="pointer-events-none absolute inset-0 opacity-40"
           aria-hidden
           style={{
             background:
-              "radial-gradient(ellipse 80% 50% at 50% -5%, rgba(244,188,82,0.18), transparent 55%)",
+              "radial-gradient(ellipse 80% 50% at 50% -5%, rgba(244,188,82,0.16), transparent 55%)",
           }}
         />
 
@@ -338,17 +339,13 @@ export function FortuneAuspiciousCalendar({
                 ปฏิทินฤกษ์ 12 ปี
               </p>
               <h2 className="mt-1 text-[18px] font-semibold text-[#F7F8FF]">
-                {canBrowse ? "ดูฤกษ์มงคลรายวัน" : "ฤกษ์วันนี้"}
+                {canBrowse ? "ดูฤกษ์มงคลรายวัน" : "ฤกษ์ย้อนหลัง 1 เดือน"}
               </h2>
-              {!canBrowse ? (
-                <p className="mt-0.5 text-[12px] text-[#9AB8DC]">
-                  เวอร์ชันฟรีดูรายละเอียดได้เฉพาะวันนี้
-                </p>
-              ) : (
+              {canBrowse ? (
                 <p className="mt-0.5 text-[12px] text-[#9AB8DC]">
                   พ.ศ. {yearRange.start + 543}–{yearRange.end + 543}
                 </p>
-              )}
+              ) : null}
             </div>
             <button
               type="button"
@@ -426,9 +423,8 @@ export function FortuneAuspiciousCalendar({
             {grid.map((cell, i) => {
               if (!cell) return <div key={`e-${i}`} />;
               const dayNum = parseIsoDate(cell.iso).getDate();
-              const locked = !canBrowse && cell.iso !== todayIso;
-              const selected =
-                (canBrowse ? selectedIso : todayIso) === cell.iso;
+              const locked = !canBrowse && !isFreeDay(cell.iso);
+              const selected = activeIso === cell.iso;
               return (
                 <DayCell
                   key={cell.iso}
@@ -444,7 +440,7 @@ export function FortuneAuspiciousCalendar({
           </div>
 
           {/* Legend */}
-          <div className="mt-4">
+          <div className="mt-3">
             <button
               type="button"
               onClick={() => setLegendOpen((v) => !v)}
@@ -458,7 +454,7 @@ export function FortuneAuspiciousCalendar({
               </span>
             </button>
             {legendOpen ? (
-              <div className="mt-2.5 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+              <div className="mt-2 grid grid-cols-1 gap-1.5 min-[380px]:grid-cols-2">
                 {(Object.keys(ENERGY_META) as DayEnergy[]).map((e) => (
                   <div key={e} className="flex items-center gap-2">
                     <EnergyDot energy={e} />
@@ -480,7 +476,7 @@ export function FortuneAuspiciousCalendar({
           </div>
 
           <div
-            className="my-4 h-px w-full"
+            className="my-3 h-px w-full"
             style={{
               background:
                 "linear-gradient(90deg, transparent, rgba(244,188,82,0.45), transparent)",
@@ -494,7 +490,7 @@ export function FortuneAuspiciousCalendar({
               type="button"
               onClick={onUnlock}
               disabled={!onUnlock}
-              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-3 text-[14px] font-semibold text-[#1A1208] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/5 disabled:opacity-60"
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-semibold text-[#1A1208] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/5 disabled:opacity-60"
               style={{
                 background:
                   "linear-gradient(135deg, #FFF0C4 0%, #F4BC52 40%, #C9922E 100%)",

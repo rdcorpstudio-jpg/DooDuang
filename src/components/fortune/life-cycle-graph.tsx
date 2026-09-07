@@ -405,7 +405,8 @@ export function LifeCycleGraph({
 
   function selectMonth(index: number) {
     if (index < 0 || index >= pts.length) return;
-    if (blurFuture && index !== presentIndex) {
+    const freeMin = Math.max(0, presentIndex - 1);
+    if (blurFuture && (index < freeMin || index > presentIndex)) {
       onUnlock?.();
       return;
     }
@@ -846,6 +847,7 @@ export function LifeCycleGraph({
         <MonthNotesPanel
           notes={monthNotes}
           selectedIndex={selectedIndex}
+          presentIndex={presentIndex}
           onSelect={selectMonth}
           listRef={listScrollRef}
           locked={blurFuture}
@@ -913,6 +915,7 @@ export function LifeCycleGraph({
 function MonthNotesPanel({
   notes,
   selectedIndex,
+  presentIndex,
   onSelect,
   listRef,
   locked = false,
@@ -921,6 +924,7 @@ function MonthNotesPanel({
 }: {
   notes: MonthNote[];
   selectedIndex: number;
+  presentIndex: number;
   onSelect: (index: number) => void;
   listRef: RefObject<HTMLDivElement | null>;
   locked?: boolean;
@@ -929,13 +933,14 @@ function MonthNotesPanel({
 }) {
   const [open, setOpen] = useState(true);
   const present = notes.find((n) => n.isPresent);
+  const freeMin = Math.max(0, presentIndex - 1);
   const selected =
-    (locked ? present : notes.find((n) => n.index === selectedIndex)) ?? present;
+    notes.find((n) => n.index === selectedIndex) ?? present;
 
   const visibleNotes = locked
     ? [
-        ...notes.filter((n) => n.isPresent),
-        ...notes.filter((n) => !n.isPresent),
+        ...notes.filter((n) => n.index >= freeMin && n.index <= presentIndex),
+        ...notes.filter((n) => n.index < freeMin || n.index > presentIndex),
       ]
     : notes;
 
@@ -949,7 +954,7 @@ function MonthNotesPanel({
       >
         <p className="text-[11px] tracking-wide text-white/42">
           {locked
-            ? "รายการ · เลื่อนดูได้ · อ่านฟรีเฉพาะปัจจุบัน"
+            ? "รายการ · ฟรีดูย้อนหลัง 1 เดือน · นอกนั้นล็อก"
             : notes.length >= 10
               ? "รายปี · กดแถวเพื่อโฟกัสบนกราฟ"
               : "รายเดือน · กดแถวเพื่อโฟกัสบนกราฟ"}
@@ -971,7 +976,8 @@ function MonthNotesPanel({
           {visibleNotes.map((m) => {
             const isCurrent = m.isPresent;
             const active = m.index === selectedIndex;
-            const rowLocked = locked && !isCurrent;
+            const rowLocked =
+              locked && (m.index < freeMin || m.index > presentIndex);
 
             return (
               <div

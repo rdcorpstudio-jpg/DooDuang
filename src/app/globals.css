@@ -59,44 +59,117 @@
   }
 
   .sacred-surface {
-    border: 1px solid rgba(196, 168, 255, 0.24);
-    background: rgba(36, 24, 72, 0.4);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(28, 24, 64, 0.34);
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
   }
 
   /* Mystic glass — translucent (legacy alias kept in sync with soft glass) */
   .glass-frame {
-    border: 1px solid rgba(196, 168, 255, 0.28);
-    background: rgba(36, 24, 72, 0.42);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(244, 188, 82, 0.26);
+    background: rgba(22, 18, 42, 0.42);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 12px 32px rgba(8, 4, 24, 0.25);
+      inset 0 1px 0 rgba(255, 236, 190, 0.12),
+      0 0 22px rgba(212, 175, 55, 0.06),
+      0 10px 28px rgba(4, 8, 16, 0.2);
   }
 
   .glass-frame-soft {
-    border: 1px solid rgba(196, 168, 255, 0.2);
-    background: rgba(36, 24, 72, 0.32);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(28, 24, 64, 0.26);
+    backdrop-filter: blur(14px) saturate(1.15);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Liquid glass panels — clearer lift off starfield */
+  .fortune-glass {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.12) 0%,
+      rgba(22, 34, 64, 0.58) 45%,
+      rgba(12, 20, 39, 0.72) 100%
+    );
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 -1px 0 rgba(244, 188, 82, 0.04),
+      0 10px 28px rgba(0, 0, 0, 0.38),
+      0 24px 56px rgba(0, 0, 0, 0.32);
+    transition:
+      border-color 220ms ease,
+      box-shadow 220ms ease,
+      transform 220ms ease;
+  }
+
+  .fortune-glass-inset {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(10, 16, 34, 0.55);
+    backdrop-filter: blur(12px) saturate(1.3);
+    -webkit-backdrop-filter: blur(12px) saturate(1.3);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 8px 22px rgba(0, 0, 0, 0.28);
+  }
+
+  .fortune-surface {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: linear-gradient(
+      180deg,
+      rgba(18, 29, 54, 0.92) 0%,
+      rgba(10, 16, 32, 0.94) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 12px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .fortune-free-page {
+    --dd-text: #f7f8ff;
+    --dd-muted: #c8d8ef;
+    --dd-gold: #f4bc52;
+    --dd-cyan: #46dded;
+    color: var(--dd-text);
+  }
+
+  .fortune-free-page .text-white\/40 {
+    color: rgba(200, 216, 239, 0.72) !important;
+  }
+
+  .fortune-free-page .text-white\/45 {
+    color: rgba(200, 216, 239, 0.78) !important;
+  }
+
+  .fortune-free-page .text-white\/50 {
+    color: rgba(213, 226, 245, 0.82) !important;
+  }
+
+  .fortune-free-page .text-white\/60 {
+    color: rgba(230, 238, 252, 0.88) !important;
   }
 
   .fortune-dash-card {
-    border: 1px solid rgba(210, 190, 255, 0.34);
-    background: rgba(58, 44, 110, 0.48);
-    backdrop-filter: blur(18px) saturate(1.18);
-    -webkit-backdrop-filter: blur(18px) saturate(1.18);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(
+      165deg,
+      rgba(48, 40, 96, 0.4) 0%,
+      rgba(22, 26, 58, 0.3) 100%
+    );
+    backdrop-filter: blur(20px) saturate(1.22);
+    -webkit-backdrop-filter: blur(20px) saturate(1.22);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      0 12px 32px rgba(8, 4, 24, 0.16);
+      0 12px 32px rgba(8, 4, 24, 0.14);
   }
 
   .fortune-dash-inset {
-    border: 1px solid rgba(210, 190, 255, 0.22);
-    background: rgba(42, 32, 88, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(12, 16, 40, 0.3);
   }
 
   /* Premium neon frames — richer card borders */
@@ -186,8 +259,18 @@
 
   /* Result page — smooth motion */
   .fortune-reveal {
-    animation: fortune-reveal-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fortune-reveal-up 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--fortune-delay, 0ms);
+  }
+
+  .fortune-tap {
+    transition:
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 180ms ease;
+  }
+
+  .fortune-tap:active {
+    transform: scale(0.98);
   }
 
   .fortune-mascot-float {
@@ -472,15 +555,15 @@
     @apply text-[12px] text-white/40 transition-colors duration-200 hover:text-[#d4b8ff];
   }
 
-  /* Soft glass frames — translucent, thin lilac rim */
+  /* Soft glass frames — sacred gold rim */
   .soft-select-card {
-    border: 1px solid rgba(210, 190, 255, 0.32);
-    background: rgba(42, 30, 82, 0.34);
+    border: 1px solid rgba(244, 188, 82, 0.24);
+    background: rgba(24, 18, 48, 0.38);
     backdrop-filter: blur(22px) saturate(1.15);
     -webkit-backdrop-filter: blur(22px) saturate(1.15);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 8px 24px rgba(8, 4, 24, 0.18);
+      inset 0 1px 0 rgba(255, 236, 190, 0.1),
+      0 8px 24px rgba(4, 8, 16, 0.18);
     transition:
       transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
       box-shadow 0.28s ease,
@@ -490,11 +573,12 @@
 
   .soft-select-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(220, 200, 255, 0.48);
-    background: rgba(56, 40, 104, 0.42);
+    border-color: rgba(244, 188, 82, 0.42);
+    background: rgba(36, 26, 64, 0.48);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.14),
-      0 12px 30px rgba(88, 48, 160, 0.2);
+      inset 0 1px 0 rgba(255, 236, 190, 0.14),
+      0 0 20px rgba(212, 175, 55, 0.1),
+      0 12px 30px rgba(8, 4, 24, 0.22);
   }
 
   .soft-select-card:active {
@@ -502,12 +586,12 @@
   }
 
   .soft-select-card.is-selected {
-    border-color: rgba(224, 200, 255, 0.62);
-    background: rgba(72, 48, 128, 0.46);
+    border-color: rgba(244, 188, 82, 0.55);
+    background: rgba(40, 30, 64, 0.52);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.16),
-      0 0 0 1px rgba(180, 150, 255, 0.16),
-      0 12px 32px rgba(120, 70, 200, 0.26);
+      inset 0 1px 0 rgba(255, 236, 190, 0.16),
+      0 0 22px rgba(212, 175, 55, 0.14),
+      0 10px 28px rgba(8, 4, 24, 0.22);
   }
 
   .soft-select-orb {
@@ -1401,12 +1485,44 @@
 @keyframes fortune-reveal-up {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(22px) scale(0.985);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    filter: blur(0);
   }
+}
+
+@keyframes daily-card-slide-next {
+  from {
+    opacity: 0.35;
+    transform: translate3d(28px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes daily-card-slide-prev {
+  from {
+    opacity: 0.35;
+    transform: translate3d(-28px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.daily-card-slide-next {
+  animation: daily-card-slide-next 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.daily-card-slide-prev {
+  animation: daily-card-slide-prev 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes fortune-mascot-float {
@@ -1890,19 +2006,23 @@
 }
 
 .stagger-in.is-visible > * {
-  animation: reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: reveal-up 0.88s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.stagger-in.is-visible > *:nth-child(1) { animation-delay: 40ms; }
-.stagger-in.is-visible > *:nth-child(2) { animation-delay: 110ms; }
-.stagger-in.is-visible > *:nth-child(3) { animation-delay: 180ms; }
-.stagger-in.is-visible > *:nth-child(4) { animation-delay: 250ms; }
-.stagger-in.is-visible > *:nth-child(5) { animation-delay: 320ms; }
-.stagger-in.is-visible > *:nth-child(6) { animation-delay: 390ms; }
-.stagger-in.is-visible > *:nth-child(7) { animation-delay: 460ms; }
-.stagger-in.is-visible > *:nth-child(8) { animation-delay: 530ms; }
-.stagger-in.is-visible > *:nth-child(9) { animation-delay: 600ms; }
-.stagger-in.is-visible > *:nth-child(10) { animation-delay: 670ms; }
+.stagger-in.is-visible > *:nth-child(1) { animation-delay: 30ms; }
+.stagger-in.is-visible > *:nth-child(2) { animation-delay: 90ms; }
+.stagger-in.is-visible > *:nth-child(3) { animation-delay: 150ms; }
+.stagger-in.is-visible > *:nth-child(4) { animation-delay: 210ms; }
+.stagger-in.is-visible > *:nth-child(5) { animation-delay: 270ms; }
+.stagger-in.is-visible > *:nth-child(6) { animation-delay: 330ms; }
+.stagger-in.is-visible > *:nth-child(7) { animation-delay: 390ms; }
+.stagger-in.is-visible > *:nth-child(8) { animation-delay: 450ms; }
+.stagger-in.is-visible > *:nth-child(9) { animation-delay: 510ms; }
+.stagger-in.is-visible > *:nth-child(10) { animation-delay: 570ms; }
+.stagger-in.is-visible > *:nth-child(11) { animation-delay: 630ms; }
+.stagger-in.is-visible > *:nth-child(12) { animation-delay: 690ms; }
+.stagger-in.is-visible > *:nth-child(13) { animation-delay: 750ms; }
+.stagger-in.is-visible > *:nth-child(14) { animation-delay: 810ms; }
 
 .intro-aurora {
   background: radial-gradient(circle, rgba(168, 85, 247, 0.55) 0%, rgba(88, 28, 135, 0.25) 40%, transparent 70%);

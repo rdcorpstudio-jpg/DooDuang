@@ -1,270 +1,299 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronRight, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-function hashSeed(input: string) {
-  let h = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h) >>> 0;
-}
+type DomainTone = {
+  soft: string;
+  accent: string;
+  ctaFrom: string;
+  ctaTo: string;
+};
 
-const DOMAINS = [
+const DOMAIN_TONES: DomainTone[] = [
   {
-    id: "work",
-    name: "การงาน",
-    tip: "จัดลำดับ",
-    image: "/images/daily/work.png",
-    glow: "rgba(70,221,237,0.55)",
-    ring: "rgba(70,221,237,0.75)",
-    ctaFrom: "#5EEAD4",
-    ctaTo: "#38BDF8",
-    titles: [
-      "จัดลำดับให้ชัด งานจะไหลง่ายขึ้น",
-      "โฟกัสทีละเรื่อง แล้วค่อยขยับต่อ",
-      "ปิดงานค้างก่อนเปิดแนวใหม่",
-    ],
-    bodies: [
-      "วันนี้เหมาะกับการเลือกงานสำคัญก่อน แล้วเคลียร์ทีละเรื่อง จะรู้สึกควบคุมสถานการณ์ได้ดีขึ้น",
-      "หลายอย่างอาจเข้ามาพร้อมกัน ลองจัดลำดับก่อนเริ่ม แล้วโฟกัสวันละหนึ่งเรื่อง",
-      "จังหวะเหมาะกับการปิดงานค้าง อย่าเปิดแนวรบใหม่จนกว่าของเดิมจะนิ่ง",
-    ],
-    actions: [
-      "ลองทำวันนี้: เลือกงานหลัก 1 เรื่อง",
-      "ลองทำวันนี้: เขียนลำดับงานสั้น ๆ",
-      "ลองทำวันนี้: ปิดงานค้างอย่างน้อย 1 รายการ",
-    ],
+    soft: "rgba(255, 184, 77, 0.22)",
+    accent: "#FFB84D",
+    ctaFrom: "#FFC857",
+    ctaTo: "#F5A623",
   },
   {
-    id: "money",
-    name: "การเงิน",
-    tip: "รู้รายจ่าย",
-    image: "/images/daily/money.png",
-    glow: "rgba(244,188,82,0.5)",
-    ring: "rgba(244,188,82,0.75)",
-    ctaFrom: "#FDE68A",
-    ctaTo: "#F4BC52",
-    titles: [
-      "รู้รายจ่ายชัด แล้วเงินจะนิ่งขึ้น",
-      "เช็กตัวเลขก่อนตัดสินใจใหญ่",
-      "เก็บก่อน ใช้ทีหลังอย่างมีแผน",
-    ],
-    bodies: [
-      "ใส่ใจรายจ่ายเล็ก ๆ ที่เกิดซ้ำ และเผื่อเงินสำหรับสิ่งจำเป็นไว้ก่อน",
-      "โอกาสเรื่องเงินมี แต่ควรเช็กตัวเลขให้ชัดก่อนตัดสินใจใหญ่",
-      "เหมาะกับการเก็บและจัดระเบียบบัญชี มากกว่าการลงทุนเสี่ยง",
-    ],
-    actions: [
-      "ลองทำวันนี้: จดรายจ่ายเล็ก ๆ 1 รอบ",
-      "ลองทำวันนี้: ตั้งงบสั้น ๆ สำหรับสิ่งจำเป็น",
-      "ลองทำวันนี้: ตรวจยอดก่อนจ่ายใหญ่",
-    ],
+    soft: "rgba(255, 107, 157, 0.2)",
+    accent: "#FF6B9D",
+    ctaFrom: "#FF8FB3",
+    ctaTo: "#E85A8A",
+  },
+  {
+    soft: "rgba(110, 168, 255, 0.2)",
+    accent: "#6EA8FF",
+    ctaFrom: "#8BBCFF",
+    ctaTo: "#4F8FE8",
+  },
+  {
+    soft: "rgba(122, 230, 176, 0.2)",
+    accent: "#7AE6B0",
+    ctaFrom: "#8FF0C0",
+    ctaTo: "#4FCB93",
+  },
+];
+
+const DOMAIN_META = [
+  {
+    id: "career",
+    name: "การงาน",
+    title: "โฟกัสงานที่สร้างผลจริง",
+    body: "วันนี้เหมาะกับงานที่วัดผลได้ชัด ตัดงานฟุ้งออกก่อน แล้วลงมือกับชิ้นที่ขยับตัวเลขหรือความคืบหน้าได้ในวันเดียว",
+    action: "ลองทำวันนี้: ปิดงานค้าง 1 ชิ้นให้จบ",
+    image: "/images/daily/work.png",
   },
   {
     id: "love",
     name: "ความรัก",
-    tip: "คุยให้ชัด",
+    title: "พูดสั้น ๆ แต่จริงใจ",
+    body: "ความสัมพันธ์ดีขึ้นเมื่อสื่อสารตรงจุด ไม่ต้องยาว แค่บอกความรู้สึกหรือความต้องการอย่างนุ่มนวลก็พอ",
+    action: "ลองทำวันนี้: ส่งข้อความดี ๆ 1 ข้อความ",
     image: "/images/daily/love.png",
-    glow: "rgba(241,109,181,0.5)",
-    ring: "rgba(241,109,181,0.75)",
-    ctaFrom: "#F9A8D4",
-    ctaTo: "#F16DB5",
-    titles: [
-      "คุยให้ชัด ความเข้าใจจะตามมา",
-      "เปิดใจฟังก่อนสรุป",
-      "ใช้เวลาร่วมกันแบบเรียบง่ายก็พอ",
-    ],
-    bodies: [
-      "การบอกความต้องการอย่างตรงไปตรงมา ช่วยให้เข้าใจกันมากขึ้น",
-      "บรรยากาศอบอุ่นถ้าเปิดใจฟังก่อนตัดสิน อย่ารีบสรุปจากความรู้สึกชั่วขณะ",
-      "เหมาะกับการใช้เวลาร่วมกันแบบเรียบง่าย มากกว่าการคาดหวังใหญ่",
-    ],
-    actions: [
-      "ลองทำวันนี้: บอกความต้องการ 1 ประโยค",
-      "ลองทำวันนี้: ฟังอีกฝ่ายให้จบก่อนตอบ",
-      "ลองทำวันนี้: นัดเวลาสั้น ๆ ที่อยู่ด้วยกัน",
-    ],
+  },
+  {
+    id: "money",
+    name: "การเงิน",
+    title: "คุมรายจ่ายก่อนขยายแผน",
+    body: "จังหวะเงินวันนี้ดีกับการจัดระเบียบ ไม่ใช่การเสี่ยงใหญ่ ดูรายจ่ายซ้ำซ้อนก่อน แล้วค่อยวางแผนรอบถัดไป",
+    action: "ลองทำวันนี้: เช็ครายจ่ายที่ไม่จำเป็น 1 รายการ",
+    image: "/images/daily/money.png",
   },
   {
     id: "health",
     name: "สุขภาพ",
-    tip: "พักให้พอ",
+    title: "เว้นที่ว่าง ให้ร่างกายและใจได้พัก",
+    body: "โฟกัสการพักและจังหวะชีวิต อย่าเร่งทุกอย่างในวันเดียว เว้นช่องว่างให้ร่างกายฟื้นตัว",
+    action: "ลองทำวันนี้: จัดช่วงพักสั้น ๆ 1 รอบ",
     image: "/images/daily/health.png",
-    glow: "rgba(52,211,153,0.5)",
-    ring: "rgba(52,211,153,0.75)",
-    ctaFrom: "#6EE7B7",
-    ctaTo: "#34D399",
-    titles: [
-      "เว้นที่ว่าง ให้ร่างกายและใจได้พัก",
-      "พักให้พอ พลังจะกลับมาเอง",
-      "ลดหักโหม แล้วจังหวะชีวิตจะนิ่มขึ้น",
-    ],
-    bodies: [
-      "โฟกัสเรื่องการพัก จังหวะชีวิต และการดูแลตัวเองทั่วไป ไม่ใช่การวินิจฉัยโรคหรือทำนายการเจ็บป่วย",
-      "ร่างกายฟื้นตัวได้ดีถ้าพักให้พอ ลดงานดึก และเติมน้ำให้สม่ำเสมอ",
-      "เหมาะกับการเคลื่อนไหวเบา ๆ และนอนให้ครบ มากกว่าหักโหม",
-    ],
-    actions: [
-      "ลองทำวันนี้: จัดช่วงพักสั้น ๆ 1 รอบ",
-      "ลองทำวันนี้: นอนให้ครบกว่าปกติเล็กน้อย",
-      "ลองทำวันนี้: ยืดไหล่และคอระหว่างวัน",
-    ],
   },
 ] as const;
 
-/** Daily 4 domains — glass tabs + detail card (art swap via data-slot) */
-export function FortuneTopicGrid({
-  seed = "dooduang",
-  className,
-}: {
-  seed?: string;
-  className?: string;
-}) {
-  const domains = useMemo(
-    () =>
-      DOMAINS.map((d) => {
-        const i = hashSeed(`${seed}-daily-${d.id}`) % d.bodies.length;
-        return {
-          ...d,
-          title: d.titles[i] ?? d.titles[0],
-          body: d.bodies[i] ?? d.bodies[0],
-          action: d.actions[i] ?? d.actions[0],
-        };
-      }),
-    [seed]
+const SWIPE_THRESHOLD = 48;
+const AUTO_MS = 7000;
+
+export function FortuneTopicGrid({ className }: { className?: string }) {
+  const domains = DOMAIN_META.map((d, i) => ({ ...d, ...DOMAIN_TONES[i]! }));
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [slideDir, setSlideDir] = useState<"next" | "prev">("next");
+  const [autoPlay, setAutoPlay] = useState(true);
+  const pointerIdRef = useRef<number | null>(null);
+  const startXRef = useRef(0);
+  const movedRef = useRef(false);
+  const activeIndexRef = useRef(activeIndex);
+  activeIndexRef.current = activeIndex;
+
+  const stopAuto = useCallback(() => {
+    setAutoPlay(false);
+  }, []);
+
+  const goTo = useCallback(
+    (next: number, dir?: "next" | "prev", fromUser = false) => {
+      if (fromUser) stopAuto();
+      const clamped = Math.max(0, Math.min(domains.length - 1, next));
+      if (clamped === activeIndexRef.current) return;
+      setSlideDir(
+        dir ?? (clamped > activeIndexRef.current ? "next" : "prev")
+      );
+      setActiveIndex(clamped);
+      setDragX(0);
+      setIsDragging(false);
+    },
+    [domains.length, stopAuto]
   );
 
-  const [activeId, setActiveId] = useState(domains[0]?.id ?? "work");
-  const active = domains.find((d) => d.id === activeId) ?? domains[0];
+  useEffect(() => {
+    if (!autoPlay || isDragging) return;
+    const id = window.setInterval(() => {
+      const cur = activeIndexRef.current;
+      const next = (cur + 1) % domains.length;
+      setSlideDir("next");
+      setActiveIndex(next);
+      setDragX(0);
+    }, AUTO_MS);
+    return () => window.clearInterval(id);
+  }, [autoPlay, isDragging, domains.length]);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    stopAuto();
+    pointerIdRef.current = e.pointerId;
+    startXRef.current = e.clientX;
+    movedRef.current = false;
+    setIsDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (pointerIdRef.current !== e.pointerId) return;
+    const dx = e.clientX - startXRef.current;
+    if (Math.abs(dx) > 6) movedRef.current = true;
+    setDragX(dx);
+  };
+
+  const finishDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (pointerIdRef.current !== e.pointerId) return;
+    const dx = e.clientX - startXRef.current;
+    pointerIdRef.current = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* already released */
+    }
+    setIsDragging(false);
+    setDragX(0);
+
+    const cur = activeIndexRef.current;
+    if (!movedRef.current) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      if (x < rect.width * 0.35) goTo(cur - 1, "prev", true);
+      else if (x > rect.width * 0.65) goTo(cur + 1, "next", true);
+      return;
+    }
+
+    if (dx <= -SWIPE_THRESHOLD) goTo(cur + 1, "next", true);
+    else if (dx >= SWIPE_THRESHOLD) goTo(cur - 1, "prev", true);
+  };
+
+  const d = domains[activeIndex]!;
 
   return (
-    <section
-      className={cn("overflow-hidden rounded-[22px] px-3.5 py-3.5", className)}
-      style={{
-        border: "1px solid transparent",
-        backgroundImage: [
-          "linear-gradient(165deg, rgba(18,29,54,0.72) 0%, rgba(22,28,58,0.62) 100%)",
-          "linear-gradient(135deg, rgba(154,184,220,0.28), rgba(187,108,240,0.22))",
-        ].join(", "),
-        backgroundOrigin: "border-box",
-        backgroundClip: "padding-box, border-box",
-        backdropFilter: "blur(16px) saturate(1.15)",
-        WebkitBackdropFilter: "blur(16px) saturate(1.15)",
-        boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.1), 0 10px 28px rgba(8,4,24,0.22)",
-      }}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-[17px] font-semibold text-[#F7F8FF]">
-          ดวงรายวัน 4 ด้าน
-        </h2>
-        <span className="rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1 text-[11px] text-[#9AB8DC]">
-          สำหรับวันนี้
-        </span>
+    <section className={cn("space-y-3", className)}>
+      <div className="flex items-start justify-between gap-3 px-0.5">
+        <div className="min-w-0">
+          <h2 className="text-[17px] font-semibold tracking-wide text-[#F7F8FF]">
+            ดวงรายวัน 4 ด้าน
+          </h2>
+          <p className="mt-0.5 text-[12px] text-[#9AB8DC]">
+            ปัดหรือลากดูทีละด้าน · สำหรับวันนี้
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+          {domains.map((item, i) => {
+            const active = i === activeIndex;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                aria-label={item.name}
+                aria-current={active}
+                onClick={() => goTo(i, undefined, true)}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-full border outline-none transition active:scale-95",
+                  active
+                    ? "border-white/30 bg-white/[0.14]"
+                    : "border-white/10 bg-white/[0.05] opacity-55 hover:opacity-90"
+                )}
+                style={
+                  active
+                    ? {
+                        boxShadow: `0 0 0 1px ${item.accent}55, 0 4px 12px ${item.accent}33`,
+                        background: item.soft,
+                      }
+                    : undefined
+                }
+              >
+                <Image
+                  src={item.image}
+                  alt=""
+                  width={28}
+                  height={28}
+                  unoptimized
+                  className="pointer-events-none h-3.5 w-3.5 object-contain"
+                />
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div
-        className="mt-3 grid grid-cols-4 gap-2"
-        role="tablist"
+        className="cursor-grab touch-pan-y overflow-hidden rounded-[22px] active:cursor-grabbing"
+        style={{
+          border: `1px solid ${d.accent}66`,
+          background: `linear-gradient(165deg, ${d.soft} 0%, rgba(10,14,32,0.62) 45%, rgba(16,18,40,0.5) 100%)`,
+          boxShadow: `0 14px 34px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.1)`,
+          transform: `translate3d(${isDragging ? dragX * 0.4 : 0}px, 0, 0)`,
+          transition: isDragging
+            ? "none"
+            : "transform 420ms cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={finishDrag}
+        onPointerCancel={finishDrag}
+        role="region"
+        aria-roledescription="carousel"
         aria-label="ดวงรายวัน 4 ด้าน"
       >
-        {domains.map((d) => {
-          const selected = d.id === activeId;
-          return (
-            <button
-              key={d.id}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              onClick={() => setActiveId(d.id)}
-              className={cn(
-                "flex flex-col items-center rounded-[16px] px-1 py-2.5 text-center outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#46DDED]/45",
-                selected ? "bg-[#0C1427]/55" : "bg-white/[0.04]"
-              )}
-              style={
-                selected
-                  ? {
-                      border: `1px solid ${d.ring}`,
-                      boxShadow: `0 0 0 1px ${d.glow}, 0 0 18px ${d.glow}`,
-                    }
-                  : {
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }
-              }
-            >
-              <span
-                className="relative mb-1 block h-9 w-9"
-                data-slot={`daily-tab-icon-${d.id}`}
-              >
-                <Image
-                  src={d.image}
-                  alt=""
-                  width={72}
-                  height={72}
-                  unoptimized
-                  className="h-full w-full object-contain"
-                />
-              </span>
-              <p className="text-[11px] font-semibold text-[#F7F8FF]">{d.name}</p>
-            </button>
-          );
-        })}
-      </div>
-
-      {active ? (
-        <div
-          role="tabpanel"
-          className="mt-3 overflow-hidden rounded-[18px] px-3.5 py-3.5"
-          style={{
-            border: "1px solid rgba(255,255,255,0.1)",
-            background:
-              "linear-gradient(160deg, rgba(12,20,39,0.72), rgba(24,32,68,0.55))",
-          }}
+        <article
+          key={`${d.id}-${slideDir}-${activeIndex}`}
+          className={cn(
+            "px-4 py-4 will-change-transform",
+            slideDir === "next" ? "daily-card-slide-next" : "daily-card-slide-prev"
+          )}
         >
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-2.5">
             <span
-              className="relative flex h-[4.75rem] w-[4.75rem] shrink-0 items-center justify-center"
-              data-slot={`daily-hero-art-${active.id}`}
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+              style={{ background: d.soft }}
             >
-              {/* Swap later: /images/daily/{id}-hero.png */}
-              <span
-                className="pointer-events-none absolute inset-x-2 bottom-0 h-3 rounded-full blur-md"
-                style={{ background: active.glow }}
-                aria-hidden
-              />
               <Image
-                src={active.image}
+                src={d.image}
                 alt=""
-                width={120}
-                height={120}
+                width={56}
+                height={56}
                 unoptimized
-                className="relative h-[4.5rem] w-[4.5rem] object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.35)]"
+                className="pointer-events-none h-7 w-7 object-contain"
               />
             </span>
-
-            <span className="h-14 w-px shrink-0 bg-white/10" aria-hidden />
-
-            <div className="min-w-0 flex-1">
-              <h3 className="text-[16px] font-semibold leading-snug text-[#F7F8FF]">
-                {active.title}
-              </h3>
-              <p className="mt-1.5 text-[13px] leading-[1.65] text-[#9AB8DC]">
-                {active.body}
+            <div className="min-w-0">
+              <p
+                className="text-[12px] font-semibold tracking-wide"
+                style={{ color: d.accent }}
+              >
+                {d.name}
               </p>
+              <h3 className="mt-0.5 text-[16px] font-semibold leading-snug text-[#F7F8FF]">
+                {d.title}
+              </h3>
             </div>
           </div>
 
-          <button
-            type="button"
-            className="mt-3.5 flex w-full items-center gap-2 rounded-full px-3.5 py-2.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          <div className="mt-3.5 flex items-start gap-3.5">
+            <span className="relative flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center">
+              <span
+                className="pointer-events-none absolute inset-1 rounded-full opacity-70 blur-md"
+                style={{ background: d.soft }}
+                aria-hidden
+              />
+              <Image
+                src={d.image}
+                alt=""
+                width={112}
+                height={112}
+                unoptimized
+                className="pointer-events-none relative h-[4.25rem] w-[4.25rem] object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.35)]"
+              />
+            </span>
+            <p className="min-w-0 flex-1 pt-0.5 text-[13.5px] leading-[1.65] text-[#C8D6EC]/90">
+              {d.body}
+            </p>
+          </div>
+
+          <div
+            className="pointer-events-none mt-4 flex w-full items-center gap-2 rounded-full px-3.5 py-2.5"
             style={{
-              background: `linear-gradient(90deg, ${active.ctaFrom}, ${active.ctaTo})`,
-              boxShadow: `0 6px 18px ${active.glow}`,
+              background: `linear-gradient(90deg, ${d.ctaFrom}, ${d.ctaTo})`,
+              boxShadow: `0 8px 20px ${d.accent}33`,
             }}
           >
             <Lightbulb
@@ -272,15 +301,15 @@ export function FortuneTopicGrid({
               strokeWidth={2}
             />
             <span className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-[#0C1427]">
-              {active.action}
+              {d.action}
             </span>
             <ChevronRight
               className="h-4 w-4 shrink-0 text-[#0C1427]/70"
               strokeWidth={2.2}
             />
-          </button>
-        </div>
-      ) : null}
+          </div>
+        </article>
+      </div>
     </section>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -91,77 +92,80 @@ export function SoftSelectCard({
   );
 }
 
-const iconBase =
-  "relative z-[1] h-[20px] w-[20px] text-[#e8c547] drop-shadow-[0_0_6px_rgba(232,197,71,0.35)]";
+function GenderAssetIcon({
+  src,
+  className,
+}: {
+  src: string;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "relative z-[1] block h-7 w-7 overflow-hidden",
+        className
+      )}
+    >
+      <Image
+        src={src}
+        alt=""
+        width={56}
+        height={56}
+        className="h-full w-full object-contain"
+        style={{ mixBlendMode: "screen" }}
+        unoptimized
+      />
+    </span>
+  );
+}
 
-/** Venus ♀ — female */
+/** Venus ♀ — female (user asset) */
 export function GenderMoonIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className={cn(iconBase, className)}
-    >
-      <circle
-        cx="12"
-        cy="9"
-        r="5"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      />
-      <path
-        d="M12 14v7M9 18.5h6"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-    </svg>
+    <GenderAssetIcon
+      src="/images/icons/female-gold.png"
+      className={className}
+    />
   );
 }
 
-/** Mars ♂ — male */
+/** Mars ♂ — male (user asset) */
 export function GenderSunIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className={cn(iconBase, className)}
-    >
-      <circle
-        cx="10.5"
-        cy="13.5"
-        r="5"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      />
-      <path
-        d="M14.2 9.8 20 4M20 4h-5.2M20 4v5.2"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <GenderAssetIcon
+      src="/images/icons/male-lavender.png"
+      className={className}
+    />
   );
 }
 
-/** Four-point star — other / อื่นๆ */
+/** Four-point star — other / อื่นๆ (user asset) */
 export function GenderStarIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className={cn(iconBase, "block", className)}
-    >
-      <path
-        d="M12 5.5c.4 3.25 2.65 5.5 5.9 5.9-3.25.4-5.5 2.65-5.9 5.9-.4-3.25-2.65-5.5-5.9-5.9 3.25-.4 5.5-2.65 5.9-5.9Z"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <GenderAssetIcon
+      src="/images/icons/star-gold.png"
+      className={className}
+    />
+  );
+}
+
+/** Brand sparkle / gold star */
+export function BrandStarIcon({
+  className,
+  size = 28,
+}: {
+  className?: string;
+  size?: number;
+}) {
+  return (
+    <Image
+      src="/images/icons/star-gold.png"
+      alt=""
+      width={size}
+      height={size}
+      className={cn("object-contain", className)}
+      style={{ mixBlendMode: "screen" }}
+      unoptimized
+    />
   );
 }

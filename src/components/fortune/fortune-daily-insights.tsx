@@ -49,17 +49,15 @@ export function FortuneDailyInsights({
       id: "highlight",
       title: "เรื่องเด่น",
       body: copy.highlight,
-      iconSrc: "/images/insights/star.png",
+      iconSrc: "/images/insights/highlight.png",
       titleClass: "text-[#F16DB5]",
-      border: "border-[#F16DB5]/35",
     },
     {
       id: "opportunity",
       title: "โอกาส",
       body: copy.opportunity,
-      iconSrc: "/images/insights/sprout.png",
+      iconSrc: "/images/insights/opportunity.png",
       titleClass: "text-[#46DDED]",
-      border: "border-[#46DDED]/35",
     },
     {
       id: "caution",
@@ -67,7 +65,6 @@ export function FortuneDailyInsights({
       body: copy.caution,
       iconSrc: "/images/insights/caution.png",
       titleClass: "text-[#F4BC52]",
-      border: "border-[#F4BC52]/35",
     },
   ] as const;
 
@@ -81,10 +78,7 @@ export function FortuneDailyInsights({
       {items.map((item) => (
         <div
           key={item.id}
-          className={cn(
-            "flex min-w-0 items-center gap-2.5 rounded-[16px] border bg-[#121D36] px-3 py-2.5",
-            item.border
-          )}
+          className="fortune-glass fortune-tap flex min-w-0 items-center gap-2.5 rounded-[16px] px-3 py-2.5"
         >
           <span
             className="relative block h-9 w-9 shrink-0"
