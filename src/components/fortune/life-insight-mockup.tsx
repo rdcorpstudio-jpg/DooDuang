@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Crown, Sparkles } from "lucide-react";
 import { FortuneResultHero } from "@/components/fortune/fortune-result-hero";
-import { FortuneDailyInsights } from "@/components/fortune/fortune-daily-insights";
 import { FortuneTopicGrid } from "@/components/fortune/fortune-topic-grid";
 import { FortuneFreeMonthTrend } from "@/components/fortune/fortune-free-month-trend";
 import { FortuneFreeSelfIntro } from "@/components/fortune/fortune-free-self-intro";
@@ -200,13 +199,6 @@ export function LifeInsightMockup({
       <div
         className="fortune-reveal"
         style={{ "--fortune-delay": "320ms" } as CSSProperties}
-      >
-        <FortuneDailyInsights seed={seed} />
-      </div>
-
-      <div
-        className="fortune-reveal"
-        style={{ "--fortune-delay": "360ms" } as CSSProperties}
       >
         <FortuneFreeMonthTrend
           seed={seed}

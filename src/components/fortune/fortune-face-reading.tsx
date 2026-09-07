@@ -95,20 +95,31 @@ export function FortuneFaceReading({
             <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.2} />
             กลับ
           </button>
-          <div className="fortune-glass mt-8 rounded-[22px] px-4 py-6 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#F4BC52]/45">
-              <Lock className="h-5 w-5 text-[#F4BC52]" strokeWidth={1.9} />
+          <div className="fortune-glass mt-8 rounded-[24px] px-5 py-7 text-center">
+            <span
+              className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px]"
+              style={{
+                color: "#E4C56A",
+                background:
+                  "linear-gradient(160deg, rgba(228,197,106,0.16), rgba(255,255,255,0.04))",
+                boxShadow: "inset 0 0 0 1px rgba(228,197,106,0.35)",
+              }}
+            >
+              <Lock className="h-5 w-5" strokeWidth={1.9} />
             </span>
-            <h1 className="mt-3 text-[20px] font-semibold text-white">
-              ดูหัวเฮ้ง · พรีเมียม
+            <p className="mt-4 text-[11px] font-semibold tracking-[0.18em] text-[#E4C56A]/90">
+              PREMIUM
+            </p>
+            <h1 className="font-sacred mt-1.5 text-[1.55rem] font-normal tracking-wide text-[#F5F2EA]">
+              ดูโหงวเฮ้ง
             </h1>
-            <p className="mt-2 text-[13px] leading-relaxed text-white/50">
+            <p className="mt-2 text-[13px] leading-relaxed text-[#C2C9DB]/90">
               ถ่ายหรืออัปโหลดรูปใบหน้า เพื่อวิเคราะห์โหงวเฮ้ง
             </p>
             <button
               type="button"
               onClick={() => setPayOpen(true)}
-              className="mt-5 w-full rounded-full bg-gradient-to-r from-[#F4BC52] to-[#E8A93A] py-3 text-[15px] font-semibold text-[#0C1427]"
+              className="mt-5 w-full rounded-full bg-[#E4C56A] py-3 text-[15px] font-semibold text-[#1A1408]"
             >
               ปลดล็อก · {FORTUNE_UNLOCK_PRICE} บาท
             </button>
