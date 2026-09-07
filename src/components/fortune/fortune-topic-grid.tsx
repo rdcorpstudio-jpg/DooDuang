@@ -189,14 +189,14 @@ export function FortuneTopicGrid({ className }: { className?: string }) {
                 className={cn(
                   "flex h-7 w-7 items-center justify-center rounded-full border outline-none transition active:scale-95",
                   active
-                    ? "border-white/30 bg-white/[0.14]"
-                    : "border-white/10 bg-white/[0.05] opacity-55 hover:opacity-90"
+                    ? "border-[#E4C56A]/55 bg-[#F4BC52]/16"
+                    : "border-[#E4C56A]/22 bg-white/[0.05] opacity-55 hover:opacity-90"
                 )}
                 style={
                   active
                     ? {
-                        boxShadow: `0 0 0 1px ${item.accent}55, 0 4px 12px ${item.accent}33`,
-                        background: item.soft,
+                        boxShadow:
+                          "0 0 0 1px rgba(228,197,106,0.35), 0 4px 12px rgba(212,175,85,0.18)",
                       }
                     : undefined
                 }
@@ -218,9 +218,10 @@ export function FortuneTopicGrid({ className }: { className?: string }) {
       <div
         className="cursor-grab touch-pan-y overflow-hidden rounded-[22px] active:cursor-grabbing"
         style={{
-          border: `1px solid ${d.accent}66`,
-          background: `linear-gradient(165deg, ${d.soft} 0%, rgba(10,14,32,0.62) 45%, rgba(16,18,40,0.5) 100%)`,
-          boxShadow: `0 14px 34px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.1)`,
+          border: "1px solid rgba(228, 197, 106, 0.42)",
+          background: `linear-gradient(165deg, rgba(90,60,160,0.38) 0%, rgba(10,14,32,0.72) 45%, rgba(24,18,48,0.66) 100%)`,
+          boxShadow:
+            "0 14px 34px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,236,190,0.1)",
           transform: `translate3d(${isDragging ? dragX * 0.4 : 0}px, 0, 0)`,
           transition: isDragging
             ? "none"

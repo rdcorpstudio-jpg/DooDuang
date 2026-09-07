@@ -38,12 +38,12 @@ export function FortuneResultHero({
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-0.5">
         <Link
           href="/reading"
-          className="inline-flex items-center gap-0.5 justify-self-start text-[14px] font-medium text-[#C9B27A] outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-[#D4AF55]/35 active:opacity-60"
+          className="inline-flex items-center gap-0.5 justify-self-start text-[14px] font-medium text-[#F4BC52] outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-[#F4BC52]/35 active:opacity-60"
         >
           <ChevronLeft className="h-5 w-5" strokeWidth={2} />
           กลับ
         </Link>
-        <p className="text-center font-sacred text-[12px] font-normal tracking-[0.32em] text-[#D4AF55]">
+        <p className="text-center font-sacred text-[12px] font-normal tracking-[0.32em] text-[#F4BC52]">
           DOODUANG
         </p>
         <span className="justify-self-end" aria-hidden />
@@ -51,12 +51,13 @@ export function FortuneResultHero({
 
       <div className="relative px-0.5 pb-1 pt-0.5">
         <section
-          className="relative min-h-[168px] overflow-hidden rounded-[22px] border border-white/[0.08]"
+          className="relative min-h-[168px] overflow-hidden rounded-[22px] border border-[#F4BC52]/35"
           style={{
             backgroundImage: "url(/images/mascot/hero-deities.jpg)",
             backgroundSize: "cover",
             backgroundPosition: "78% center",
-            boxShadow: "0 12px 28px rgba(0,0,0,0.28)",
+            boxShadow:
+              "0 12px 28px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(228,197,106,0.18)",
           }}
         >
           <div
@@ -68,7 +69,7 @@ export function FortuneResultHero({
             }}
           />
           <div className="relative z-[1] flex min-h-[168px] flex-col justify-end px-4 py-4">
-            <p className="text-[12px] font-medium tracking-wide text-[#D4AF55]/90">
+            <p className="text-[12px] font-medium tracking-wide text-[#F4BC52]/90">
               สวัสดี คุณ{displayName}
             </p>
             <p className="mt-1.5 flex items-center gap-1.5 text-[12px] text-[#B7C3D8]">

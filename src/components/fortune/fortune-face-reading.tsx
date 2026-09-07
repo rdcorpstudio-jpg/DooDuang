@@ -107,7 +107,7 @@ export function FortuneFaceReading({
             >
               <Lock className="h-5 w-5" strokeWidth={1.9} />
             </span>
-            <p className="mt-4 text-[11px] font-semibold tracking-[0.18em] text-[#E4C56A]/90">
+            <p className="mt-4 text-[11px] font-semibold tracking-[0.18em] text-[#F4BC52]/90">
               PREMIUM
             </p>
             <h1 className="font-sacred mt-1.5 text-[1.55rem] font-normal tracking-wide text-[#F5F2EA]">

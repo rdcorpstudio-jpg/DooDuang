@@ -56,7 +56,7 @@ export function FortuneFreeSelfIntro({
       )}
     >
       <div className="flex items-center gap-2">
-        <span className="fortune-spark flex h-8 w-8 items-center justify-center rounded-full bg-[#BB6CF0]/15 ring-1 ring-[#BB6CF0]/35">
+        <span className="fortune-spark flex h-8 w-8 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#BB6CF0]/35">
           <Sparkles className="h-4 w-4 text-[#BB6CF0]" strokeWidth={1.8} />
         </span>
         <h2 className="text-[17px] font-semibold text-[#F7F8FF]">

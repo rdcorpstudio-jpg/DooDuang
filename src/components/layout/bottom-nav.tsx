@@ -35,22 +35,25 @@ const TABS = [
   },
 ] as const;
 
-/** Quiet luxury tab bar */
+/** Gold-frame tab bar */
 export function BottomNav() {
   const pathname = usePathname() || "/";
 
   return (
     <nav
-      className="bottom-nav relative z-40 shrink-0 border-t border-white/[0.07]"
+      className="bottom-nav relative z-40 shrink-0"
       aria-label="เมนูหลัก"
       style={{
-        background: "rgba(12, 16, 32, 0.94)",
+        background:
+          "linear-gradient(180deg, rgba(22,16,48,0.9) 0%, rgba(12,10,28,0.96) 100%)",
+        borderTop: "1px solid rgba(228,197,106,0.28)",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
-        paddingBottom: "max(0.45rem, env(safe-area-inset-bottom))",
+        paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+        boxShadow: "inset 0 1px 0 rgba(255,236,190,0.08)",
       }}
     >
-      <div className="mx-auto grid max-w-[480px] grid-cols-4 gap-0.5 px-2 pt-1.5">
+      <div className="mx-auto grid max-w-[480px] grid-cols-4 gap-0.5 px-2.5 pt-2">
         {TABS.map(({ href, label, Icon, match }) => {
           const active = match(pathname);
 
@@ -59,15 +62,16 @@ export function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                "relative flex flex-col items-center gap-1 rounded-2xl px-1 py-2 outline-none transition-colors duration-150",
-                "active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#D4AF55]/35",
-                active ? "text-[#F3F5FA]" : "text-[#8A97AE]"
+                "relative flex flex-col items-center gap-1 rounded-2xl px-1 py-1.5 outline-none transition-all duration-200",
+                "active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#E4C56A]/4",
+                active ? "text-[#F5F2EA]" : "text-[#9AA3C0]"
               )}
             >
               <span
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150",
-                  active && "bg-[#D4AF55]/14"
+                  "flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-200",
+                  active &&
+                    "bg-[rgba(228,197,106,0.14)] ring-1 ring-[rgba(228,197,106,0.4)]"
                 )}
               >
                 <Icon
@@ -75,7 +79,7 @@ export function BottomNav() {
                     "h-[19px] w-[19px]",
                     active ? "text-[#E4C56A]" : "text-current"
                   )}
-                  strokeWidth={active ? 2.2 : 1.7}
+                  strokeWidth={active ? 2.25 : 1.7}
                 />
               </span>
               <span

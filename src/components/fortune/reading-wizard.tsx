@@ -249,7 +249,7 @@ function StepHeader({
     >
       <div className="wizard-step-pill mb-3.5 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5">
         <span className="wizard-step-pill-dot" />
-        <span className="text-[11px] font-medium tracking-[0.18em] text-[#f0d78c]/95">
+        <span className="text-[11px] font-medium tracking-[0.18em] text-[#F4BC52]/95">
           STEP {String(step).padStart(2, "0")}
         </span>
       </div>
@@ -320,7 +320,7 @@ function PrivacyNote({ delayMs = 520 }: { delayMs?: number }) {
       className="wizard-anim-item mt-5 flex items-center justify-center gap-1.5 text-[11px] tracking-wide text-white/35"
       style={{ "--wizard-delay": `${delayMs}ms` } as React.CSSProperties}
     >
-      <Lock className="h-3 w-3 text-[#e8c547]/70" strokeWidth={1.8} />
+      <Lock className="h-3 w-3 text-[#F4BC52]/70" strokeWidth={1.8} />
       ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
     </p>
   );
@@ -535,7 +535,7 @@ export function ReadingWizard() {
           {backHref ? (
             <Link
               href={backHref}
-              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#e8c547]/75 transition-opacity active:opacity-60"
+              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#F4BC52]/75 transition-opacity active:opacity-60"
             >
               <ChevronLeft className="h-5 w-5" strokeWidth={2} />
               กลับ
@@ -544,17 +544,17 @@ export function ReadingWizard() {
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#e8c547]/75 transition-opacity active:opacity-60"
+              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#F4BC52]/75 transition-opacity active:opacity-60"
             >
               <ChevronLeft className="h-5 w-5" strokeWidth={2} />
               กลับ
             </button>
           )}
-          <p className="text-center text-[11px] font-medium tracking-[0.42em] text-[#e8c547]/85">
+          <p className="text-center text-[11px] font-medium tracking-[0.42em] text-[#F4BC52]/85">
             DOODUANG
           </p>
           <p className="justify-self-end text-[13px] tabular-nums text-white/45">
-            <span key={stepNumber} className="wizard-step-num text-[#f0d78c]">
+            <span key={stepNumber} className="wizard-step-num text-[#F4BC52]">
               {stepNumber}
             </span>
             <span className="text-white/30"> / 3</span>

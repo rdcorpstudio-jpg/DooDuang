@@ -201,16 +201,16 @@ export function FortuneExtraReadings({
               }}
               className={cn(
                 "fortune-tap fortune-glass relative flex flex-col items-center gap-2.5 rounded-[20px] px-2 py-3.5 text-center outline-none transition",
-                "focus-visible:ring-2 focus-visible:ring-[#E4C56A]/35"
+                "focus-visible:ring-2 focus-visible:ring-[#F4BC52]/35"
               )}
               aria-label={
                 isLocked ? `${item.title} · ต้องเป็นพรีเมียม` : item.title
               }
             >
               {isLocked ? (
-                <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-black/35 ring-1 ring-[#E4C56A]/35">
+                <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-black/35 ring-1 ring-[#F4BC52]/35">
                   <Lock
-                    className="h-2.5 w-2.5 text-[#E4C56A]"
+                    className="h-2.5 w-2.5 text-[#F4BC52]"
                     strokeWidth={2.4}
                   />
                 </span>

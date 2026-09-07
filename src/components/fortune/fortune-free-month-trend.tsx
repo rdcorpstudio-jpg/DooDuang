@@ -1171,7 +1171,7 @@ function FreeMonthTrendTeaser({
               type="button"
               onClick={onUnlock}
               disabled={!onUnlock}
-              className="mt-2.5 flex w-full items-center gap-3 rounded-[14px] border border-[#BB6CF0]/35 bg-gradient-to-r from-[#BB6CF0]/15 to-[#F16DB5]/12 px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#BB6CF0]/45 disabled:opacity-60"
+              className="mt-2.5 flex w-full items-center gap-3 rounded-[14px] border border-[#BB6CF0]/35 bg-gradient-to-r from-[#F4BC52]/15 to-[#F16DB5]/12 px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#BB6CF0]/45 disabled:opacity-60"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#F4BC52]/45">
                 <Lock className="h-4 w-4 text-[#F4BC52]" strokeWidth={1.9} />

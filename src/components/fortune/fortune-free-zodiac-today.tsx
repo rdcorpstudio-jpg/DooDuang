@@ -271,7 +271,7 @@ export function FortuneFreeZodiacToday({
           type="button"
           onClick={onUnlock}
           disabled={!onUnlock}
-          className="mt-3 flex w-full items-center gap-2.5 rounded-[14px] border border-[#BB6CF0]/35 bg-[#BB6CF0]/12 px-3 py-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#BB6CF0]/45 disabled:opacity-60"
+          className="mt-3 flex w-full items-center gap-2.5 rounded-[14px] border border-[#BB6CF0]/35 bg-[#F4BC52]/12 px-3 py-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#BB6CF0]/45 disabled:opacity-60"
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#F4BC52]/4">
             <Lock className="h-3.5 w-3.5 text-[#F4BC52]" strokeWidth={1.9} />
