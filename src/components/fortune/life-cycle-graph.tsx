@@ -319,7 +319,7 @@ export function LifeCycleGraph({
   const dataMax = Math.max(...viewScores.map((s) => Math.max(0, Math.min(12, s))));
   const niceRange = Math.max(5, Math.ceil(dataMax) - Math.floor(dataMin) + 2);
   let yLo = Math.max(0, Math.floor(dataMin) - 1);
-  let yHi = Math.min(12, yLo + niceRange);
+  const yHi = Math.min(12, yLo + niceRange);
   if (yHi - yLo < niceRange) yLo = Math.max(0, yHi - niceRange);
   const ySpan = Math.max(1, yHi - yLo);
   const yOf = (score: number) => padT + plotH * (1 - (score - yLo) / ySpan);
