@@ -56,23 +56,24 @@ export function ZodiacPicker({ selected, onSelect }: ZodiacPickerProps) {
               type="button"
               onClick={() => onSelect(zodiac.id)}
               className={cn(
-                "relative w-full rounded-2xl border p-3 text-center transition-all duration-300",
-                "bg-brand-purple-deep/40 backdrop-blur-sm",
+                "glass-frame relative w-full overflow-hidden rounded-2xl p-3 text-center transition-all duration-300",
                 isSelected
-                  ? "border-brand-purple-light/70 bg-brand-purple-dark/50 scale-[1.03] shadow-[0_0_24px_rgba(168,85,247,0.4)]"
-                  : "border-brand-purple-dark/30 hover:border-brand-purple/50 hover:bg-brand-purple-dark/30 active:scale-[0.98]"
+                  ? "scale-[1.03] shadow-[0_0_24px_rgba(168,85,247,0.4)]"
+                  : "active:scale-[0.98]"
               )}
             >
-              {isSelected && (
-                <span className="absolute inset-0 rounded-2xl ring-1 ring-purple-400/40 animate-ring-pulse pointer-events-none" />
-              )}
+              {isSelected ? (
+                <span className="pointer-events-none absolute inset-0 bg-[#a967f5]/18" aria-hidden />
+              ) : null}
 
-              <div className="text-2xl leading-none mb-1.5">{zodiac.symbol}</div>
-              <div className="text-xs font-semibold text-white/90">{zodiac.thaiName}</div>
-              <div className="text-[9px] text-purple-300/50 mt-1 leading-tight">{zodiac.dateRange}</div>
+              <div className="relative z-[1] mb-1.5 text-2xl leading-none">{zodiac.symbol}</div>
+              <div className="relative z-[1] text-xs font-semibold text-white/90">{zodiac.thaiName}</div>
+              <div className="relative z-[1] mt-1 text-[9px] leading-tight text-purple-300/50">
+                {zodiac.dateRange}
+              </div>
               <span
                 className={cn(
-                  "inline-block mt-2 px-1.5 py-0.5 rounded-full text-[8px] border",
+                  "relative z-[1] mt-2 inline-block rounded-full border px-1.5 py-0.5 text-[8px]",
                   ELEMENT_STYLE[zodiac.element]
                 )}
               >

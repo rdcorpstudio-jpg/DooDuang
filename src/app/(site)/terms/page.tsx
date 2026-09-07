@@ -1,5 +1,7 @@
 import { APP_NAME, LEGAL_UPDATED_AT } from "@/lib/site";
 import { LegalSection } from "@/components/layout/legal-section";
+import { AnimatedPage } from "@/components/ui/reveal";
+import { PageHero } from "@/components/ui/page-hero";
 
 export const metadata = {
   title: `ข้อกำหนดการใช้งาน — ${APP_NAME}`,
@@ -8,15 +10,14 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="px-4 py-6 pb-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-1">
-          ข้อกำหนด<span className="text-gradient">การใช้งาน</span>
-        </h1>
-        <p className="text-purple-300/50 text-sm">อัปเดตล่าสุด {LEGAL_UPDATED_AT}</p>
-      </div>
+    <AnimatedPage className="px-4 py-6 pb-10">
+      <PageHero
+        title="ข้อกำหนด"
+        accent="การใช้งาน"
+        subtitle={`อัปเดตล่าสุด ${LEGAL_UPDATED_AT}`}
+      />
 
-      <div className="space-y-6">
+      <div className="space-y-3">
         <LegalSection title="1. การยอมรับข้อกำหนด">
           <p>
             เมื่อเข้าสู่ระบบหรือใช้บริการ {APP_NAME} ถือว่าคุณยอมรับข้อกำหนดนี้
@@ -77,6 +78,6 @@ export default function TermsPage() {
           </p>
         </LegalSection>
       </div>
-    </div>
+    </AnimatedPage>
   );
 }

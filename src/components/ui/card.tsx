@@ -11,8 +11,8 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-2xl p-5 sacred-surface sacred-card",
-          glow && "hover:border-brand-purple-light/35 transition-all",
+          "glass-frame ui-lift rounded-2xl p-5",
+          glow && "shadow-[0_0_28px_rgba(169,103,245,0.35)]",
           className
         )}
         {...props}

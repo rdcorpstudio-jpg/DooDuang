@@ -75,23 +75,16 @@ export function ZodiacWheelBg({ className }: { className?: string }) {
     >
       <defs>
         <linearGradient id="roseGold" x1="120" y1="80" x2="680" y2="720" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#f0d5c4" />
-          <stop offset="35%" stopColor="#d4a090" />
-          <stop offset="70%" stopColor="#b07868" />
-          <stop offset="100%" stopColor="#e8c4b0" />
+          <stop offset="0%" stopColor="#f5e6c8" />
+          <stop offset="35%" stopColor="#e8c47a" />
+          <stop offset="70%" stopColor="#c9a227" />
+          <stop offset="100%" stopColor="#f0d5a0" />
         </linearGradient>
         <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="35%" stopColor="#f0d5c4" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#d4a090" stopOpacity="0" />
+          <stop offset="0%" stopColor="#fff8e8" stopOpacity="0.95" />
+          <stop offset="35%" stopColor="#e8c47a" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#c9a227" stopOpacity="0" />
         </radialGradient>
-        <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="2" result="b" />
-          <feMerge>
-            <feMergeNode in="b" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
 
       {/* Rings */}
@@ -159,7 +152,6 @@ export function ZodiacWheelBg({ className }: { className?: string }) {
           <g
             key={`g-${name}`}
             transform={`translate(${p.x - 14}, ${p.y - 14}) scale(1.15)`}
-            filter="url(#softGlow)"
           >
             <path
               d={GLYPHS[name]}
@@ -210,7 +202,7 @@ export function ZodiacWheelBg({ className }: { className?: string }) {
           />
         );
       })}
-      <circle cx={cx} cy={cy} r="10" fill="#fff8f0" opacity="0.95" />
+      <circle cx={cx} cy={cy} r="10" fill="#fff8e8" opacity="0.95" />
       <circle cx={cx} cy={cy} r="16" stroke="url(#roseGold)" strokeWidth="1" opacity="0.7" />
     </svg>
   );

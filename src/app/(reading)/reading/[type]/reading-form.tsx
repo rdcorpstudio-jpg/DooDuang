@@ -30,7 +30,7 @@ interface ProfileForm {
   gender: Gender | "";
 }
 
-const MIN_LOADING_MS = 2400;
+const MIN_LOADING_MS = 4800;
 
 function wait(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -110,89 +110,63 @@ export function ReadingForm({ type }: ReadingFormProps) {
   return (
     <div className="relative h-full overflow-y-auto">
       <div className="relative min-h-full">
-        {/* Calm reading veil — dims star/zodiac noise under long text */}
-        {result && (
-          <div className="pointer-events-none absolute inset-0 min-h-full" aria-hidden>
-            <div className="absolute inset-0 bg-[#1a102c]/45 backdrop-blur-[6px]" />
-          </div>
-        )}
-
-        {!result && (
-          <div
-            className="pointer-events-none absolute inset-0 min-h-full"
-            aria-hidden
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-[#2a1548]/40 via-transparent to-[#1a0a2e]/50" />
-            <div className="absolute left-1/2 top-0 h-64 w-[80%] -translate-x-1/2 rounded-full bg-[#a855f7]/15 blur-3xl" />
-          </div>
-        )}
-
         {loading && !result && (
           <FortuneLoading nickname={profile.nickname} categoryTitle={readingOption.title} />
         )}
 
-        <div
-          className={cn(
-            "relative z-10 min-h-full pb-10 pt-4",
-            result ? "px-3" : "px-5"
-          )}
-        >
-          <Reveal visible={mounted} delay={0}>
-            <Link
-              href="/reading"
-              className="inline-flex items-center gap-0.5 text-[17px] font-medium text-[#c084fc] transition-opacity active:opacity-60"
-            >
-              <ChevronLeft className="h-6 w-6" strokeWidth={2} />
-              กลับ
-            </Link>
-          </Reveal>
+        <div className="relative z-10 min-h-full px-5 pb-10 pt-4">
+          {!result ? (
+            <Reveal visible={mounted} delay={0}>
+              <Link
+                href="/reading"
+                className="inline-flex items-center gap-0.5 text-[15px] font-medium text-[#c9a8ff] transition-opacity active:opacity-60"
+              >
+                <ChevronLeft className="h-5 w-5" strokeWidth={2} />
+                กลับ
+              </Link>
+            </Reveal>
+          ) : null}
 
           {!result ? (
-            <div className="mx-auto mt-4 max-w-[340px]">
-              <Reveal visible={mounted} delay={80} variant="glow" className="relative mb-6 overflow-hidden pt-2 text-center">
+            <div className="mx-auto mt-3 max-w-[340px]">
+              <Reveal
+                visible={mounted}
+                delay={80}
+                variant="glow"
+                className="relative mb-5 overflow-hidden pt-1 text-center"
+              >
                 <div
-                  className="pointer-events-none absolute left-1/2 top-[40%] h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(232,196,176,0.25)_0%,rgba(168,85,247,0.15)_45%,transparent_70%)] blur-2xl"
+                  className="pointer-events-none absolute left-1/2 top-[42%] h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(169,103,245,0.32)_0%,transparent_70%)] blur-2xl"
                   aria-hidden
                 />
 
                 <div className="relative z-[1]">
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#e8c4b0]/35 bg-[#e8c4b0]/10 px-4 py-1.5 shadow-[0_0_18px_rgba(232,196,176,0.12)]">
-                    <Sparkles className="h-3.5 w-3.5 text-[#e8c4b0]" strokeWidth={1.8} />
-                    <span className="text-[13px] font-semibold tracking-[0.14em] text-[#e8c4b0]">
+                  <div className="mb-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#a967f5]/12 px-3.5 py-1.5 ring-1 ring-[#c9a8ff]/25">
+                    <Sparkles className="h-3 w-3 text-[#c9a8ff]" strokeWidth={1.8} />
+                    <span className="text-[12px] font-medium tracking-[0.14em] text-[#c9a8ff]">
                       {readingOption.title}
                     </span>
                   </div>
 
-                  <div className="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center">
-                    <span className="absolute inset-[-6px] rounded-full border border-[#e8c4b0]/25" />
-                    <span className="absolute inset-[-12px] rounded-full border border-dashed border-white/15 intro-portal-spin-reverse" />
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#e8c4b0]/30 bg-black/20 shadow-[0_0_24px_rgba(232,196,176,0.25)] backdrop-blur-sm">
-                      <Sparkles
-                        className="h-6 w-6 animate-float text-[#e8c4b0] drop-shadow-[0_0_10px_rgba(232,196,176,0.8)]"
-                        strokeWidth={1.4}
-                      />
-                    </div>
-                  </div>
-
-                  <h1 className="font-sacred text-[1.85rem] leading-[1.3] tracking-wide text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] sm:text-[2rem]">
+                  <h1 className="font-sacred text-[1.7rem] leading-[1.3] tracking-wide text-white sm:text-[1.85rem]">
                     กรอกข้อมูลของคุณ
                   </h1>
 
-                  <div className="mx-auto mt-3 flex max-w-[12rem] items-center gap-3" aria-hidden>
-                    <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#e8c4b0]/50 to-transparent" />
-                    <span className="h-1.5 w-1.5 rotate-45 bg-[#e8c4b0] shadow-[0_0_8px_rgba(232,196,176,0.75)]" />
-                    <span className="h-px flex-1 bg-gradient-to-l from-transparent via-[#e8c4b0]/50 to-transparent" />
-                  </div>
+                  <div className="mx-auto mt-2.5 h-px w-16 bg-gradient-to-r from-transparent via-[#c9a8ff]/50 to-transparent" />
 
-                  <p className="mt-3 text-[15px] leading-relaxed text-white/55">
+                  <p className="mt-2.5 text-[13px] leading-relaxed text-white/50">
                     ใช้สำหรับคำนวณผลทำนายเท่านั้น
                   </p>
                 </div>
               </Reveal>
 
               <Reveal visible={mounted} delay={200} variant="scale">
-                <div className="rounded-[22px] border border-white/12 bg-black/20 p-5 backdrop-blur-md sm:p-6">
-                  <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="glass-frame relative overflow-hidden rounded-[22px] p-5 sm:p-6">
+                  <div
+                    className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(ellipse_at_top,rgba(169,103,245,0.18)_0%,transparent_70%)]"
+                    aria-hidden
+                  />
+                  <form onSubmit={handleSubmit} className="relative z-[1] space-y-4">
                     <SacredField label="ชื่อจริง" htmlFor="realName">
                       <input
                         id="realName"
@@ -236,12 +210,12 @@ export function ReadingForm({ type }: ReadingFormProps) {
                     </SacredField>
 
                     {error && (
-                      <div className="rounded-xl bg-rose-500/15 px-4 py-3.5 text-[15px] text-rose-200">
+                      <div className="rounded-xl border border-rose-400/25 bg-rose-500/12 px-4 py-3.5 text-[14px] text-rose-200">
                         {error}
                       </div>
                     )}
 
-                    <div className="pt-1">
+                    <div className="pt-2">
                       <SacredButton type="submit" disabled={!canSubmit || loading}>
                         เปิดดูดวง
                       </SacredButton>
@@ -251,7 +225,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
               </Reveal>
 
               <Reveal visible={mounted} delay={340}>
-                <p className="mt-5 text-center text-[14px] text-white/35">
+                <p className="mt-5 text-center text-[12px] tracking-wide text-white/30">
                   ข้อมูลของคุณใช้เพื่อคำทำนายเท่านั้น
                 </p>
               </Reveal>

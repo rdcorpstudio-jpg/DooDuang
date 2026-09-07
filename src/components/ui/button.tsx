@@ -12,19 +12,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+          "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-wide",
+          "transition-all duration-200 ease-out",
+          "disabled:cursor-not-allowed disabled:opacity-45",
+          "active:scale-[0.98]",
           {
-            "bg-brand-purple text-white hover:bg-brand-purple-light shadow-md shadow-brand-purple-dark/40":
+            "bg-gradient-to-r from-[#8b3fd9] via-[#a967f5] to-[#c9a8ff] text-white shadow-[0_8px_24px_rgba(139,92,246,0.35)] hover:shadow-[0_10px_28px_rgba(169,103,245,0.45)] hover:brightness-105":
               variant === "primary",
-            "bg-brand-purple-deep/60 text-purple-200 hover:bg-brand-purple-dark/60 border border-brand-purple-dark/50":
+            "border border-[#c9a8ff]/25 bg-white/[0.04] text-[#e9ddff] hover:bg-white/[0.08] hover:border-[#c9a8ff]/40":
               variant === "secondary",
-            "text-brand-purple-light hover:text-purple-200 hover:bg-brand-purple-dark/30":
+            "text-[#d4b8ff]/85 hover:bg-white/[0.06] hover:text-white":
               variant === "ghost",
-            "border border-brand-purple/50 text-purple-300 hover:bg-brand-purple-dark/30":
+            "border border-[#c9a8ff]/35 text-[#d4b8ff] hover:bg-[#a967f5]/12":
               variant === "outline",
-            "px-3 py-1.5 text-xs": size === "sm",
-            "px-5 py-2.5 text-sm": size === "md",
-            "px-6 py-3 text-base w-full": size === "lg",
+            "px-3 py-1.5 text-[12px]": size === "sm",
+            "px-5 py-2.5 text-[14px]": size === "md",
+            "w-full px-6 py-3.5 text-[15px]": size === "lg",
           },
           className
         )}

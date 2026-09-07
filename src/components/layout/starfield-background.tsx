@@ -1,30 +1,41 @@
 "use client";
 
-import { ZodiacWheelBg } from "@/components/layout/zodiac-wheel-bg";
+/**
+ * Shared app sky — same navy starfield + soft nebula as the home screen.
+ */
 
-/** Deep space + large rose-gold natal chart */
-const STAR_DUST = Array.from({ length: 160 }, (_, i) => ({
+const HOME_BG = [
+  "radial-gradient(ellipse 80% 58% at 90% 0%, rgba(180,95,200,0.48) 0%, transparent 54%)",
+  "radial-gradient(ellipse 55% 40% at 10% 18%, rgba(70,80,160,0.38) 0%, transparent 52%)",
+  "radial-gradient(ellipse 70% 48% at 50% 42%, rgba(70,55,140,0.28) 0%, transparent 62%)",
+  "radial-gradient(ellipse 95% 45% at 50% 100%, rgba(28,24,70,0.55) 0%, transparent 58%)",
+  "linear-gradient(180deg, #16143a 0%, #12102e 45%, #0e0c24 100%)",
+].join(", ");
+
+const STAR_DUST = Array.from({ length: 120 }, (_, i) => ({
   id: i,
   top: (i * 7.1 + 2.3) % 100,
   left: (i * 13.7 + 5.1) % 100,
   size: i % 11 === 0 ? 2.2 : i % 5 === 0 ? 1.5 : 1,
-  opacity: 0.25 + (i % 7) * 0.08,
+      opacity: 0.32 + (i % 7) * 0.1,
 }));
 
-const BRIGHT_STARS = Array.from({ length: 36 }, (_, i) => ({
+const BRIGHT_STARS = Array.from({ length: 20 }, (_, i) => ({
   id: i,
   top: (i * 17.3 + 6) % 96,
   left: (i * 23.9 + 8) % 96,
-  duration: 2.1 + (i % 5) * 0.5,
-  delay: (i * 0.31) % 4,
   size: i % 4 === 0 ? 2.6 : 1.7,
+  duration: 2.4 + (i % 5) * 0.55,
+  delay: (i * 0.37) % 4,
 }));
 
 export function StarfieldBackground() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden" aria-hidden>
-      <div className="absolute inset-0 bg-[#060212]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0e061c] via-[#160a28] to-[#1f0a30]" />
+    <div
+      className="pointer-events-none absolute inset-0 z-[1] overflow-hidden [&_*]:pointer-events-none"
+      aria-hidden
+    >
+      <div className="absolute inset-0" style={{ backgroundImage: HOME_BG }} />
 
       {STAR_DUST.map((s) => (
         <span
@@ -35,7 +46,8 @@ export function StarfieldBackground() {
             left: `${s.left}%`,
             width: s.size,
             height: s.size,
-            opacity: s.opacity,
+            opacity: s.opacity * 0.85,
+            backgroundColor: s.id % 5 === 0 ? "#c8d4ff" : undefined,
           }}
         />
       ))}
@@ -58,17 +70,21 @@ export function StarfieldBackground() {
         />
       ))}
 
-      {/* Soft rose glow */}
-      <div className="absolute left-1/2 top-[44%] h-[55%] w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(212,160,144,0.16)_0%,transparent_65%)]" />
-
-      {/* Zodiac — centered, inset from corners so the full ring reads clearly */}
-      <div className="absolute left-1/2 top-[44%] z-[1] w-[118%] -translate-x-1/2 -translate-y-1/2 opacity-95">
-        <div className="astro-zodiac-wheel origin-center drop-shadow-[0_0_32px_rgba(212,160,144,0.3)]">
-          <ZodiacWheelBg className="h-auto w-full" />
-        </div>
+      <div className="intro-mesh absolute inset-0">
+        <span className="intro-mesh-blob intro-mesh-blob-a" />
+        <span className="intro-mesh-blob intro-mesh-blob-b" />
+        <span className="intro-mesh-blob intro-mesh-blob-c" />
+        <span className="intro-mesh-blob intro-mesh-blob-d" />
+        <span className="intro-mesh-vignette" />
       </div>
 
-      <div className="absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_center,transparent_52%,rgba(6,2,18,0.5)_100%)]" />
+      <div
+        className="absolute inset-0 z-[2]"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 58%, rgba(10,10,28,0.28) 100%)",
+        }}
+      />
     </div>
   );
 }

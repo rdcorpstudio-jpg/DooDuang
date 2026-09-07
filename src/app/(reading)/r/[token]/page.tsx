@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import { requireDb } from "@/lib/db";
 import { readings } from "@/lib/db/schema";
 import { FortuneResultView } from "@/components/fortune/fortune-result-view";
-import { MysticBackground } from "@/components/fortune/mystic-background";
 import type { ExtendedFortuneResult } from "@/lib/fortune/extended";
 import { READING_OPTIONS } from "@/lib/fortune/zodiac";
 import type { FortuneProfile } from "@/lib/fortune/engine";
@@ -60,7 +59,6 @@ export default async function SavedReadingPage({ params }: SavedReadingPageProps
   if (!result || !profile || !readingOption) {
     return (
       <div className="relative flex h-full items-center justify-center px-6">
-        <MysticBackground />
         <div className="relative z-10 text-center">
           <p className="text-purple-200/70">เปิดผลดูดวงนี้ไม่ได้</p>
           <Link href="/reading" className="mt-4 inline-block text-sm text-purple-400">
@@ -74,7 +72,6 @@ export default async function SavedReadingPage({ params }: SavedReadingPageProps
   return (
     <div className="relative h-full overflow-y-auto">
       <div className="relative min-h-full px-5 py-6 pb-10">
-        <MysticBackground className="absolute inset-0 min-h-full" />
         <div className="relative z-10">
           <FortuneResultView
             result={result}

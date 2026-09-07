@@ -2,15 +2,23 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AnimatedPage } from "@/components/ui/reveal";
-import { Mail } from "lucide-react";
+import { PageHero } from "@/components/ui/page-hero";
+import { SacredDivider } from "@/components/ui/sacred-mark";
 
 export default function VerifyPage() {
   return (
-    <AnimatedPage className="px-4 py-12">
-      <Card className="text-center">
-        <Mail className="mx-auto mb-3 h-10 w-10 animate-float text-purple-400" />
-        <h1 className="mb-2 text-lg font-bold text-white">ตรวจสอบอีเมล</h1>
-        <p className="mb-5 text-sm text-purple-300/60">คลิกลิงก์ในอีเมลเพื่อเข้าสู่ระบบ</p>
+    <AnimatedPage className="px-4 py-12 pb-10">
+      <PageHero
+        align="center"
+        title="ตรวจสอบ"
+        accent="อีเมล"
+        subtitle="คลิกลิงก์ในอีเมลเพื่อเข้าสู่ระบบ"
+      />
+      <SacredDivider className="mx-auto mb-7" />
+      <Card className="ui-lift mx-auto max-w-md text-center">
+        <p className="mb-5 text-[13px] leading-relaxed text-white/50">
+          เปิดกล่องจดหมายแล้วกดลิงก์ยืนยันเพื่อเข้าใช้งานต่อ
+        </p>
         <Link href="/">
           <Button variant="secondary" size="sm">
             กลับหน้าแรก

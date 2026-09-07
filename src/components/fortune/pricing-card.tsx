@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface PricingCardProps {
   name: string;
@@ -21,19 +22,21 @@ export function PricingCard({
 }: PricingCardProps) {
   return (
     <Card
-      className={`relative flex flex-col ${popular ? "border-purple-500/50 ring-1 ring-purple-500/20" : ""}`}
+      className={cn("ui-lift relative flex flex-col", popular && "pt-5")}
       glow={popular}
     >
-      {popular && (
-        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 text-[10px] font-medium bg-brand-purple text-white rounded-full">
+      {popular ? (
+        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#b8860b] via-[#e8c547] to-[#c9a227] px-3 py-0.5 text-[10px] font-semibold text-[#1f1704]">
           ยอดนิยม
         </span>
-      )}
-      <h3 className="text-base font-semibold text-purple-100">{name}</h3>
-      <p className="text-purple-400/50 text-xs mt-0.5">{description}</p>
+      ) : null}
+      <h3 className="text-[15px] font-semibold text-white">{name}</h3>
+      <p className="mt-1 text-[12px] text-white/40">{description}</p>
       <div className="my-4">
-        <span className="text-2xl font-bold text-white">{formatPrice(price)}</span>
-        <span className="text-purple-400/60 text-sm ml-2">{credits} เครดิต</span>
+        <span className="text-[1.75rem] font-semibold tabular-nums text-white">
+          {formatPrice(price)}
+        </span>
+        <span className="ml-2 text-[13px] text-white/45">{credits} เครดิต</span>
       </div>
       <form action="/api/stripe/checkout" method="POST" className="mt-auto">
         <input type="hidden" name="packageId" value={packageId} />

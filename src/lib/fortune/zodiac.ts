@@ -26,7 +26,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "aries",
     name: "Aries",
     thaiName: "เมษ",
-    symbol: "I",
+    symbol: "♈",
     element: "ไฟ",
     dateRange: "21 มี.ค. – 19 เม.ย.",
   },
@@ -34,7 +34,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "taurus",
     name: "Taurus",
     thaiName: "พฤษภ",
-    symbol: "II",
+    symbol: "♉",
     element: "ดิน",
     dateRange: "20 เม.ย. – 20 พ.ค.",
   },
@@ -42,7 +42,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "gemini",
     name: "Gemini",
     thaiName: "เมถุน",
-    symbol: "III",
+    symbol: "♊",
     element: "ลม",
     dateRange: "21 พ.ค. – 20 มิ.ย.",
   },
@@ -50,7 +50,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "cancer",
     name: "Cancer",
     thaiName: "กรกฎ",
-    symbol: "IV",
+    symbol: "♋",
     element: "น้ำ",
     dateRange: "21 มิ.ย. – 22 ก.ค.",
   },
@@ -58,7 +58,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "leo",
     name: "Leo",
     thaiName: "สิงห์",
-    symbol: "V",
+    symbol: "♌",
     element: "ไฟ",
     dateRange: "23 ก.ค. – 22 ส.ค.",
   },
@@ -66,7 +66,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "virgo",
     name: "Virgo",
     thaiName: "กันย์",
-    symbol: "VI",
+    symbol: "♍",
     element: "ดิน",
     dateRange: "23 ส.ค. – 22 ก.ย.",
   },
@@ -74,7 +74,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "libra",
     name: "Libra",
     thaiName: "ตุลย์",
-    symbol: "VII",
+    symbol: "♎",
     element: "ลม",
     dateRange: "23 ก.ย. – 22 ต.ค.",
   },
@@ -82,7 +82,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "scorpio",
     name: "Scorpio",
     thaiName: "พิจิก",
-    symbol: "VIII",
+    symbol: "♏",
     element: "น้ำ",
     dateRange: "23 ต.ค. – 21 พ.ย.",
   },
@@ -90,7 +90,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "sagittarius",
     name: "Sagittarius",
     thaiName: "ธนู",
-    symbol: "IX",
+    symbol: "♐",
     element: "ไฟ",
     dateRange: "22 พ.ย. – 21 ธ.ค.",
   },
@@ -98,7 +98,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "capricorn",
     name: "Capricorn",
     thaiName: "มังกร",
-    symbol: "X",
+    symbol: "♑",
     element: "ดิน",
     dateRange: "22 ธ.ค. – 19 ม.ค.",
   },
@@ -106,7 +106,7 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "aquarius",
     name: "Aquarius",
     thaiName: "กุมภ์",
-    symbol: "XI",
+    symbol: "♒",
     element: "ลม",
     dateRange: "20 ม.ค. – 18 ก.พ.",
   },
@@ -114,11 +114,45 @@ export const ZODIAC_SIGNS: ZodiacInfo[] = [
     id: "pisces",
     name: "Pisces",
     thaiName: "มีน",
-    symbol: "XII",
+    symbol: "♓",
     element: "น้ำ",
     dateRange: "19 ก.พ. – 20 มี.ค.",
   },
 ];
+
+/** Sun sign from ISO birth date YYYY-MM-DD */
+export function getZodiacByBirthDate(birthDate: string): ZodiacInfo {
+  const parts = birthDate.split("-").map(Number);
+  const month = parts[1] ?? 1;
+  const day = parts[2] ?? 1;
+
+  const id: ZodiacSign =
+    (month === 3 && day >= 21) || (month === 4 && day <= 19)
+      ? "aries"
+      : (month === 4 && day >= 20) || (month === 5 && day <= 20)
+        ? "taurus"
+        : (month === 5 && day >= 21) || (month === 6 && day <= 20)
+          ? "gemini"
+          : (month === 6 && day >= 21) || (month === 7 && day <= 22)
+            ? "cancer"
+            : (month === 7 && day >= 23) || (month === 8 && day <= 22)
+              ? "leo"
+              : (month === 8 && day >= 23) || (month === 9 && day <= 22)
+                ? "virgo"
+                : (month === 9 && day >= 23) || (month === 10 && day <= 22)
+                  ? "libra"
+                  : (month === 10 && day >= 23) || (month === 11 && day <= 21)
+                    ? "scorpio"
+                    : (month === 11 && day >= 22) || (month === 12 && day <= 21)
+                      ? "sagittarius"
+                      : (month === 12 && day >= 22) || (month === 1 && day <= 19)
+                        ? "capricorn"
+                        : (month === 1 && day >= 20) || (month === 2 && day <= 18)
+                          ? "aquarius"
+                          : "pisces";
+
+  return ZODIAC_SIGNS.find((z) => z.id === id) ?? ZODIAC_SIGNS[0]!;
+}
 
 export type ReadingType =
   | "daily"
@@ -213,7 +247,7 @@ export const READING_OPTIONS: ReadingOption[] = [
   },
 ];
 
-export const HOME_CATEGORY_IDS = ["love", "career", "money", "overall"] as const;
+export const HOME_CATEGORY_IDS = ["love", "career", "money", "health"] as const;
 
 export type HomeCategoryId = (typeof HOME_CATEGORY_IDS)[number];
 

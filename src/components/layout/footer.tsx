@@ -1,23 +1,27 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
-import { APP_NAME } from "@/lib/site";
+import { APP_NAME_ACCENT, APP_NAME_PRIMARY } from "@/lib/site";
 
 export function Footer() {
   return (
-    <footer className="shrink-0 border-t sacred-chrome px-4 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="h-3.5 w-3.5 text-brand-purple-light" />
-          <span className="text-xs font-medium text-purple-300/60">{APP_NAME}</span>
+    <footer className="shrink-0 border-t sacred-chrome px-4 py-3.5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-baseline gap-0.5">
+          <span className="font-sacred text-[12px] text-white/55">{APP_NAME_PRIMARY}</span>
+          <span className="font-sacred intro-title-accent text-[12px] opacity-80">
+            {APP_NAME_ACCENT}
+          </span>
         </div>
-        <div className="flex gap-3 text-xs text-purple-400/50">
-          <Link href="/#fortune" className="transition-colors hover:text-purple-300">
-            ไพ่
+        <div className="flex gap-3.5">
+          <Link href="/reading" className="nav-link-mystic">
+            ดูดวง
           </Link>
-          <Link href="/privacy" className="transition-colors hover:text-purple-300">
+          <Link href="/pricing" className="nav-link-mystic">
+            เครดิต
+          </Link>
+          <Link href="/privacy" className="nav-link-mystic">
             ความเป็นส่วนตัว
           </Link>
-          <Link href="/terms" className="transition-colors hover:text-purple-300">
+          <Link href="/terms" className="nav-link-mystic">
             ข้อกำหนด
           </Link>
         </div>

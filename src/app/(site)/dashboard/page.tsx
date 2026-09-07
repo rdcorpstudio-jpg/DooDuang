@@ -5,9 +5,10 @@ import { requireDb } from "@/lib/db";
 import { readings } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { AnimatedPage } from "@/components/ui/reveal";
-import { History } from "lucide-react";
+import { PageHero } from "@/components/ui/page-hero";
+import { SacredButton } from "@/components/ui/sacred-button";
+import { SacredDivider } from "@/components/ui/sacred-mark";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -44,41 +45,41 @@ export default async function DashboardPage() {
 
   return (
     <AnimatedPage className="px-4 py-6 pb-10">
-      <div className="mb-6">
-        <h1 className="mb-1 text-2xl font-bold text-white">
-          แดช<span className="text-gradient">บอร์ด</span>
-        </h1>
-        <p className="text-sm text-purple-300/50">
-          {session.user.name ?? session.user.email}
-        </p>
-      </div>
+      <PageHero
+        title="แดช"
+        accent="บอร์ด"
+        subtitle={session.user.name ?? session.user.email ?? undefined}
+      />
 
-      <Link href="/#fortune" className="mb-6 block">
-        <Button className="w-full">เลือกไพ่</Button>
+      <Link href="/reading" className="mb-6 block">
+        <SacredButton type="button">เลือกไพ่ดูดวง</SacredButton>
       </Link>
 
       <Card>
         <div className="mb-4 flex items-center gap-2">
-          <History className="h-4 w-4 text-purple-400" />
-          <h2 className="text-sm font-semibold text-purple-100">ประวัติดูดวง</h2>
+          <h2 className="text-[14px] font-semibold text-white">ประวัติดูดวง</h2>
         </div>
+        <SacredDivider className="mb-4 opacity-60" />
         {history.length === 0 ? (
-          <p className="py-6 text-center text-xs text-purple-400/40">
-            ยังไม่มีประวัติ — ลองเปิดไพ่เลย!
+          <p className="py-8 text-center text-[13px] text-white/35">
+            ยังไม่มีประวัติ — ลองเปิดไพ่เลย
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {history.map((item) => (
-              <div key={item.id} className="rounded-xl p-3 sacred-surface">
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-xs font-medium text-purple-200">
+              <div
+                key={item.id}
+                className="rounded-xl bg-white/[0.03] px-3.5 py-3 ring-1 ring-white/[0.06] transition-colors hover:bg-white/[0.05]"
+              >
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="text-[13px] font-medium text-[#e9ddff]">
                     {typeLabels[item.type] ?? item.type}
                   </span>
-                  <span className="text-[10px] text-purple-400/50">
+                  <span className="text-[11px] text-white/35">
                     {item.createdAt.toLocaleDateString("th-TH")}
                   </span>
                 </div>
-                <p className="line-clamp-2 text-xs text-purple-300/60">
+                <p className="line-clamp-2 text-[12.5px] leading-relaxed text-white/45">
                   {(() => {
                     try {
                       const parsed = JSON.parse(item.result) as { preview?: string };

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Mail } from "lucide-react";
 import { SacredButton } from "@/components/ui/sacred-button";
 import { sacredInputClassName } from "@/components/ui/sacred-form";
+import { MysticFrame } from "@/components/ui/mystic-frame";
 
 export function SaveReadingForm({ token }: { token: string | null }) {
   const [email, setEmail] = useState("");
@@ -55,7 +56,7 @@ export function SaveReadingForm({ token }: { token: string | null }) {
   }
 
   return (
-    <div className="rounded-2xl border border-brand-purple-light/20 bg-brand-purple-dark/30 p-4 text-left">
+    <MysticFrame radius={16} contentClassName="p-4 text-left">
       <div className="mb-3 flex items-center gap-2 text-purple-100/85">
         <Mail className="h-4 w-4 text-amber-200/70" />
         <p className="text-[13px] font-medium">ส่งลิงก์ดูผลซ้ำเข้าเมล</p>
@@ -83,13 +84,15 @@ export function SaveReadingForm({ token }: { token: string | null }) {
           {message}
         </p>
       )}
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="mt-3 w-full text-center text-[11px] text-purple-300/55 transition-colors hover:text-purple-100/80"
-      >
-        {copied ? "คัดลอกลิงก์แล้ว" : "หรือคัดลอกลิงก์เก็บไว้เอง"}
-      </button>
-    </div>
+      {shareUrl ? (
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="mt-3 w-full text-center text-[11px] text-[#c9a8ff]/70 transition-opacity hover:opacity-80"
+        >
+          {copied ? "คัดลอกลิงก์แล้ว" : "หรือคัดลอกลิงก์"}
+        </button>
+      ) : null}
+    </MysticFrame>
   );
 }

@@ -1,5 +1,7 @@
 import { APP_NAME, LEGAL_UPDATED_AT } from "@/lib/site";
 import { LegalSection } from "@/components/layout/legal-section";
+import { AnimatedPage } from "@/components/ui/reveal";
+import { PageHero } from "@/components/ui/page-hero";
 
 export const metadata = {
   title: `นโยบายความเป็นส่วนตัว — ${APP_NAME}`,
@@ -8,15 +10,14 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="px-4 py-6 pb-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-1">
-          นโยบาย<span className="text-gradient">ความเป็นส่วนตัว</span>
-        </h1>
-        <p className="text-purple-300/50 text-sm">อัปเดตล่าสุด {LEGAL_UPDATED_AT}</p>
-      </div>
+    <AnimatedPage className="px-4 py-6 pb-10">
+      <PageHero
+        title="นโยบาย"
+        accent="ความเป็นส่วนตัว"
+        subtitle={`อัปเดตล่าสุด ${LEGAL_UPDATED_AT}`}
+      />
 
-      <div className="space-y-6">
+      <div className="space-y-3">
         <LegalSection title="1. ข้อมูลที่เราเก็บ">
           <p>
             เมื่อคุณใช้บริการ {APP_NAME} เราอาจเก็บข้อมูลดังต่อไปนี้
@@ -81,6 +82,6 @@ export default function PrivacyPage() {
           </p>
         </LegalSection>
       </div>
-    </div>
+    </AnimatedPage>
   );
 }

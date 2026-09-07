@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ComponentProps, useState } from "react";
+import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSacredBurst } from "@/components/ui/sacred-burst";
 
@@ -29,26 +30,21 @@ export function SacredCtaLink({
         onClick?.(e);
       }}
       className={cn(
-        "group relative inline-flex w-full items-center justify-center overflow-hidden rounded-full",
-        "bg-gradient-to-r from-[#9333ea] via-[#b57cff] to-[#9333ea] bg-[length:200%_100%]",
-        "px-7 py-[1.05rem]",
-        "text-[14px] font-semibold tracking-[0.06em] text-white",
-        "shadow-[0_8px_32px_rgba(147,51,234,0.42),inset_0_1px_0_rgba(255,255,255,0.28)]",
-        "transition-all duration-300 ease-out",
-        "hover:scale-[1.02] hover:bg-[position:100%_0] hover:shadow-[0_10px_40px_rgba(168,85,247,0.52)]",
-        "active:scale-[0.98]",
+        "sacred-pill-cta group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full",
+        "px-8 py-[1.1rem]",
+        "text-[16px] font-semibold tracking-[0.04em] text-white",
+        "transition-transform duration-300 ease-out",
+        "hover:scale-[1.025] active:scale-[0.98]",
         pressing && "sacred-burst-press",
         className
       )}
     >
       <BurstLayer size="lg" />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/10"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -left-full top-0 h-full w-1/2 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 group-hover:left-full group-hover:opacity-100"
+      <span className="sacred-pill-cta-shine" aria-hidden />
+      <span className="sacred-pill-cta-sheen" aria-hidden />
+      <Sparkles
+        className="relative z-[1] h-4 w-4 text-white/90 drop-shadow-[0_0_8px_rgba(255,255,255,0.45)]"
+        strokeWidth={2}
       />
       <span className="relative z-[1]">{children}</span>
     </Link>

@@ -25,7 +25,7 @@ export function SacredField({
     <div className={className}>
       <label
         htmlFor={htmlFor}
-        className="mb-2 block text-[16px] font-medium text-white/75"
+        className="mb-2 block text-[14px] font-medium tracking-wide text-white/70"
       >
         {label}
       </label>
@@ -35,7 +35,7 @@ export function SacredField({
 }
 
 export const sacredInputClassName =
-  "w-full rounded-xl border-0 bg-black/25 px-4 py-4 text-[18px] text-white placeholder:text-white/35 outline-none transition-all duration-200 ring-1 ring-inset ring-white/12 focus:bg-black/35 focus:ring-2 focus:ring-[#a855f7]/70";
+  "w-full rounded-xl border-0 bg-[#0f0a24]/55 px-4 py-3.5 text-[16px] text-white placeholder:text-white/32 outline-none transition-all duration-200 ring-1 ring-inset ring-[#c9a8ff]/18 focus:bg-[#0f0a24]/75 focus:ring-2 focus:ring-[#a967f5]/55 focus:shadow-[0_0_16px_rgba(169,103,245,0.18)]";
 
 interface SacredGenderPickerProps {
   value: Gender | "";
@@ -45,7 +45,7 @@ interface SacredGenderPickerProps {
 export function SacredGenderPicker({ value, onChange }: SacredGenderPickerProps) {
   return (
     <div
-      className="grid grid-cols-3 gap-1.5 rounded-xl bg-black/20 p-1.5 ring-1 ring-inset ring-white/12"
+      className="grid grid-cols-3 gap-1.5 rounded-xl bg-[#0f0a24]/45 p-1.5 ring-1 ring-inset ring-[#c9a8ff]/18"
       role="group"
       aria-label="เพศ"
     >
@@ -58,10 +58,10 @@ export function SacredGenderPicker({ value, onChange }: SacredGenderPickerProps)
             aria-pressed={selected}
             onClick={() => onChange(option.id)}
             className={cn(
-              "rounded-lg py-3.5 text-[16px] font-medium transition-all duration-150 active:scale-[0.98]",
+              "rounded-lg py-3 text-[15px] font-medium transition-all duration-200 active:scale-[0.98]",
               selected
-                ? "bg-white text-[#2e1065] shadow-sm"
-                : "text-white/55 hover:text-white/85"
+                ? "bg-gradient-to-b from-[#b66bff] to-[#8b3fd9] text-white shadow-[0_4px_14px_rgba(169,103,245,0.4)]"
+                : "text-white/50 hover:bg-white/[0.04] hover:text-white/80"
             )}
           >
             {option.label}

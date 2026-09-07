@@ -14,17 +14,19 @@ export const SacredButton = forwardRef<HTMLButtonElement, SacredButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex w-full items-center justify-center rounded-xl",
-          "bg-[#a855f7] px-6 py-4 text-[18px] font-semibold text-white",
-          "shadow-[0_8px_24px_rgba(168,85,247,0.35)]",
-          "transition-all duration-150",
-          "hover:bg-[#b66bff] active:scale-[0.98]",
-          "disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:active:scale-100",
+          "sacred-pill-cta relative inline-flex w-full items-center justify-center overflow-hidden rounded-full",
+          "px-7 py-[1.05rem] text-[16px] font-semibold tracking-[0.03em] text-white",
+          "transition-transform duration-200",
+          "hover:scale-[1.02] active:scale-[0.98]",
+          "disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100 disabled:active:scale-100",
+          "disabled:[animation:none]",
           className
         )}
         {...props}
       >
-        {children}
+        <span className="sacred-pill-cta-shine" aria-hidden />
+        <span className="sacred-pill-cta-sheen" aria-hidden />
+        <span className="relative z-[1]">{children}</span>
       </button>
     );
   }
