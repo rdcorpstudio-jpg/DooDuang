@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FocusEvent } from "react";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -26,6 +26,12 @@ import {
 } from "@/lib/fortune/profile-storage";
 import { cn } from "@/lib/utils";
 
+function scrollFieldIntoView(event: FocusEvent<HTMLInputElement>) {
+  const el = event.currentTarget;
+  window.setTimeout(() => {
+    el.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+  }, 120);
+}
 type FortuneApiResult = ExtendedFortuneResult & { shareToken?: string | null };
 type Step = "gender" | "birth" | "name" | "loading" | "result";
 
@@ -261,7 +267,7 @@ function WizardShell({ children, className }: { children: React.ReactNode; class
   return (
     <div
       className={cn(
-        "wizard-form-card wizard-anim-item relative overflow-hidden rounded-[24px] p-5 sm:p-6",
+        "wizard-form-card wizard-anim-item relative rounded-[24px] p-5 sm:p-6",
         className,
       )}
       style={{ "--wizard-delay": "140ms" } as React.CSSProperties}
@@ -364,6 +370,28 @@ export function ReadingWizard() {
       writeWizardCache(profile, result);
     }
   }, [ready, step, result, profile]);
+
+  // Keep form above the iOS/Android keyboard inside the fixed phone frame.
+  useEffect(() => {
+    if (step === "loading" || step === "result") return;
+    const root = document.documentElement;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const update = () => {
+      const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      root.style.setProperty("--wizard-keyboard-inset", `${inset}px`);
+    };
+
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+      root.style.removeProperty("--wizard-keyboard-inset");
+    };
+  }, [step]);
 
   useEffect(() => {
     if (step !== "loading") return;
@@ -487,7 +515,7 @@ export function ReadingWizard() {
   }
 
   return (
-    <div className="relative h-full overflow-y-auto">
+    <div className="relative h-full overflow-y-auto overscroll-contain">
       <div className="wizard-form-aura pointer-events-none absolute inset-0" aria-hidden>
         <div className="wizard-form-sky" />
         <div className="wizard-form-wheel">
@@ -496,7 +524,13 @@ export function ReadingWizard() {
         <div key={`bloom-${step}`} className="wizard-form-bloom wizard-bloom-pulse" />
       </div>
 
-      <div className="relative z-10 flex min-h-full flex-col px-5 pb-8 pt-4">
+      <div
+        className="relative z-10 flex min-h-full flex-col px-5 pt-4"
+        style={{
+          paddingBottom:
+            "max(2rem, calc(1.25rem + var(--wizard-keyboard-inset, 0px)))",
+        }}
+      >
         <div className="relative z-20 mb-2 grid grid-cols-[minmax(4.5rem,1fr)_auto_minmax(4.5rem,1fr)] items-center gap-2">
           {backHref ? (
             <Link
@@ -527,7 +561,12 @@ export function ReadingWizard() {
           </p>
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-[340px] flex-1 flex-col justify-center overflow-hidden py-4">
+        <div
+          className={cn(
+            "relative mx-auto flex w-full max-w-[340px] flex-1 flex-col py-4",
+            step === "name" ? "justify-start" : "justify-center",
+          )}
+        >
           <div className="wizard-step-stage">
             <div
               key={`${step}-${direction}`}
@@ -610,9 +649,11 @@ export function ReadingWizard() {
                         onChange={(e) =>
                           setProfile((p) => ({ ...p, realName: e.target.value }))
                         }
+                        onFocus={scrollFieldIntoView}
                         placeholder="ชื่อจริงของคุณ"
                         className="name-step-input"
                         autoComplete="name"
+                        enterKeyHint="next"
                       />
                     </label>
 
@@ -626,9 +667,11 @@ export function ReadingWizard() {
                         onChange={(e) =>
                           setProfile((p) => ({ ...p, nickname: e.target.value }))
                         }
+                        onFocus={scrollFieldIntoView}
                         placeholder="ชื่อที่อยากให้เรียก"
                         className="name-step-input"
                         autoComplete="nickname"
+                        enterKeyHint="done"
                       />
                     </label>
 

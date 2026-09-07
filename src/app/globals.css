@@ -760,7 +760,13 @@
   }
 
   .name-step-input {
-    @apply w-full rounded-xl border-0 px-4 py-3.5 text-[16px] text-white outline-none;
+    @apply w-full rounded-xl border-0 px-4 text-[16px] text-white outline-none;
+    min-height: 3.15rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+    line-height: 1.35;
+    -webkit-appearance: none;
+    appearance: none;
     background: rgba(255, 255, 255, 0.05);
     box-shadow: inset 0 0 0 1px rgba(210, 190, 255, 0.22);
     transition:
@@ -770,6 +776,7 @@
 
   .name-step-input::placeholder {
     color: rgba(255, 255, 255, 0.32);
+    line-height: 1.35;
   }
 
   .name-step-input:focus {
@@ -1896,7 +1903,8 @@
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    /* none — avoid leaving a transform layer that breaks iOS input/keyboard scroll */
+    transform: none;
   }
 }
 
@@ -1907,7 +1915,7 @@
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: none;
   }
 }
 
@@ -1918,7 +1926,7 @@
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: none;
   }
 }
 
@@ -1929,7 +1937,7 @@
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: none;
   }
 }
 

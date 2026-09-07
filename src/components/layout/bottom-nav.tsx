@@ -34,6 +34,17 @@ const TABS = [
 export function BottomNav() {
   const pathname = usePathname() || "/";
 
+  // Hide during reading wizard / immersive reading flows so the keyboard
+  // does not crush the form against the tab bar.
+  if (
+    pathname === "/reading" ||
+    pathname.startsWith("/reading/") ||
+    pathname.startsWith("/r/") ||
+    pathname.startsWith("/preview/")
+  ) {
+    return null;
+  }
+
   return (
     <nav
       className="bottom-nav relative z-40 shrink-0 border-t border-[#F4BC52]/22"
