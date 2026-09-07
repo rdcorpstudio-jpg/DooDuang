@@ -26,13 +26,11 @@ interface FortuneResultViewProps {
 }
 
 export function FortuneResultView({
-  result: _result,
   profile,
   readingOption,
   type,
   shareToken,
   onRetry,
-  showBackLink: _showBackLink = true,
 }: FortuneResultViewProps) {
   const router = useRouter();
   const storageKey = getUnlockStorageKey(type, profile);

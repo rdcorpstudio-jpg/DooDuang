@@ -898,6 +898,24 @@ export function FortuneFreeMonthTrend({
     return <UnlockedTwelveYearTrend seed={seed} className={className} />;
   }
 
+  return (
+    <FreeMonthTrendTeaser
+      points={points}
+      onUnlock={onUnlock}
+      className={className}
+    />
+  );
+}
+
+function FreeMonthTrendTeaser({
+  points,
+  onUnlock,
+  className,
+}: {
+  points?: FreeMonthPoint[] | null;
+  onUnlock?: () => void;
+  className?: string;
+}) {
   const now = new Date();
   const curIdx = now.getMonth();
   const curYear = now.getFullYear();
@@ -943,12 +961,12 @@ export function FortuneFreeMonthTrend({
   }, [series, curYear, curIdx]);
 
   /** Free: current month + 1 month back only; future always locked until unlock */
-  const freeMinIndex = unlocked || !hasData ? 0 : Math.max(0, pastCount - 2);
+  const freeMinIndex = !hasData ? 0 : Math.max(0, pastCount - 2);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
   function pointLocked(index: number) {
-    if (unlocked || !chartPoints) return false;
+    if (!chartPoints) return false;
     const p = chartPoints[index];
     if (!p) return true;
     if (p.kind === "future") return true;
@@ -959,7 +977,7 @@ export function FortuneFreeMonthTrend({
   const safeSelected = hasData
     ? Math.min(
         Math.max(selectedIndex ?? lastFreeIndex, freeMinIndex),
-        unlocked ? (chartPoints?.length ?? 1) - 1 : lastFreeIndex
+        lastFreeIndex
       )
     : 0;
 

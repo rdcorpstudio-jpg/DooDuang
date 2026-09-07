@@ -126,15 +126,17 @@ export function FortuneExtraReadings({
                   return;
                 }
                 if (item.id === "face" || item.id === "palm") {
-                  if (unlocked) {
-                    try {
-                      sessionStorage.setItem(
-                        "dooduang-premium-unlocked",
-                        "1"
-                      );
-                    } catch {
-                      /* ignore */
-                    }
+                  if (isLocked) {
+                    onUnlock?.();
+                    return;
+                  }
+                  try {
+                    sessionStorage.setItem(
+                      "dooduang-premium-unlocked",
+                      "1"
+                    );
+                  } catch {
+                    /* ignore */
                   }
                   router.push(
                     `/reading/${item.id}?seed=${encodeURIComponent(seed)}`
