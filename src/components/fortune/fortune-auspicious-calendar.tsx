@@ -366,22 +366,22 @@ export function FortuneAuspiciousCalendar({
                 type="button"
                 onClick={() => shiftYear(-1)}
                 disabled={viewYear <= yearRange.start}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-[#F4BC52] disabled:opacity-30"
+                className="flex h-8 w-8 items-center justify-center text-[#A07E1A] outline-none transition active:opacity-60 disabled:opacity-30"
                 aria-label="ปีก่อน"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
               </button>
-              <p className="text-[14px] font-semibold text-[#F7F8FF]">
+              <p className="text-[14px] font-semibold text-[#241C4F]">
                 พ.ศ. {viewYear + 543}
               </p>
               <button
                 type="button"
                 onClick={() => shiftYear(1)}
                 disabled={viewYear >= yearRange.end}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-[#F4BC52] disabled:opacity-30"
+                className="flex h-8 w-8 items-center justify-center text-[#A07E1A] outline-none transition active:opacity-60 disabled:opacity-30"
                 aria-label="ปีถัดไป"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-5 w-5" strokeWidth={2.2} />
               </button>
             </div>
           ) : null}
@@ -391,21 +391,21 @@ export function FortuneAuspiciousCalendar({
             <button
               type="button"
               onClick={() => shiftMonth(-1)}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-[#F4BC52]/25 text-[#F4BC52]"
+              className="flex h-8 w-8 items-center justify-center text-[#A07E1A] outline-none transition active:opacity-60"
               aria-label="เดือนก่อน"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
             </button>
-            <p className="text-[15px] font-semibold text-[#F7F8FF]">
+            <p className="text-[15px] font-semibold text-[#241C4F]">
               {formatThaiMonthYear(viewYear, viewMonth)}
             </p>
             <button
               type="button"
               onClick={() => shiftMonth(1)}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-[#F4BC52]/25 text-[#F4BC52]"
+              className="flex h-8 w-8 items-center justify-center text-[#A07E1A] outline-none transition active:opacity-60"
               aria-label="เดือนถัดไป"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" strokeWidth={2.2} />
             </button>
           </div>
 

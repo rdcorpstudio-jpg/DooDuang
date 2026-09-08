@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Lock, Pencil } from "lucide-react";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import {
@@ -88,41 +89,42 @@ export function FortuneFaceReading({
 
   if (!unlocked) {
     return (
-      <div className={cn("relative h-full overflow-y-auto", className)}>
+      <div className={cn("sky-copy relative h-full overflow-y-auto", className)}>
         <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="inline-flex w-fit items-center gap-1 rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-[12px] text-white/75"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.2} />
-            กลับ
-          </button>
-          <div className="fortune-glass mt-8 rounded-[24px] px-5 py-7 text-center">
-            <span
-              className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px]"
-              style={{
-                color: "#E4C56A",
-                background:
-                  "linear-gradient(160deg, rgba(228,197,106,0.16), rgba(255,255,255,0.04))",
-                boxShadow: "inset 0 0 0 1px rgba(228,197,106,0.35)",
-              }}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
             >
-              <Lock className="h-5 w-5" strokeWidth={1.9} />
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+              กลับ
+            </button>
+            <div className="flex flex-col items-center justify-self-center">
+              <FortuneIcon name="moon" size={16} className="-mb-0.5" />
+              <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
+                DOODUANG
+              </p>
+            </div>
+            <span aria-hidden className="justify-self-end" />
+          </div>
+          <div className="fortune-glass mt-8 rounded-[24px] px-5 py-7 text-center">
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#9B7FE8]/12 ring-1 ring-[#9B7FE8]/30">
+              <Lock className="h-5 w-5 text-[#7B5FD4]" strokeWidth={1.9} />
             </span>
-            <p className="mt-4 text-[11px] font-semibold tracking-[0.18em] text-[#F4BC52]/90">
+            <p className="mt-4 text-[11px] font-semibold tracking-[0.18em] text-[#7B5FD4]">
               PREMIUM
             </p>
-            <h1 className="font-sacred mt-1.5 text-[1.55rem] font-normal tracking-wide text-[#F5F2EA]">
+            <h1 className="mt-1.5 text-[1.55rem] font-bold tracking-tight text-[#241C4F]">
               ดูโหงวเฮ้ง
             </h1>
-            <p className="mt-2 text-[13px] leading-relaxed text-[#C2C9DB]/90">
+            <p className="mt-2 text-[13px] leading-relaxed text-[#5E5688]">
               ถ่ายหรืออัปโหลดรูปใบหน้า เพื่อวิเคราะห์โหงวเฮ้ง
             </p>
             <button
               type="button"
               onClick={() => setPayOpen(true)}
-              className="mt-5 w-full rounded-full bg-[#E4C56A] py-3 text-[15px] font-semibold text-[#1A1408]"
+              className="no-sky-lift mt-5 w-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8] py-3 text-[15px] font-semibold text-white outline-none transition active:scale-[0.99]"
             >
               ปลดล็อก · {FORTUNE_UNLOCK_PRICE} บาท
             </button>
@@ -139,36 +141,54 @@ export function FortuneFaceReading({
   }
 
   return (
-    <div className={cn("relative h-full overflow-y-auto", className)}>
+    <div className={cn("sky-copy relative h-full overflow-y-auto", className)}>
       <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
-        <button
-          type="button"
-          onClick={() => {
-            if (step === "result") setStep("upload");
-            else router.back();
-          }}
-          className="inline-flex w-fit items-center gap-1 rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-[12px] text-white/75"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.2} />
-          กลับ
-        </button>
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (step === "result") setStep("upload");
+              else router.back();
+            }}
+            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+          >
+            <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+            กลับ
+          </button>
+          <div className="flex flex-col items-center justify-self-center">
+            <FortuneIcon name="moon" size={16} className="-mb-0.5" />
+            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
+              DOODUANG
+            </p>
+          </div>
+          <span aria-hidden className="justify-self-end" />
+        </div>
 
         {step === "upload" ? (
           <>
-            <header className="mt-4">
-              <h1 className="text-[22px] font-semibold text-white">
+            <header className="mt-5">
+              <h1 className="text-[1.55rem] font-bold tracking-tight text-[#241C4F]">
                 โหงวเฮ้ง
               </h1>
-              <p className="mt-1 text-[14px] font-medium text-[#F16DB5]">
+              <p className="mt-1 text-[14px] font-medium text-[#7B5FD4]">
                 อัปโหลดรูปใบหน้า
               </p>
-              <p className="mt-1 text-[12px] text-white/45">
+              <p className="mt-1 text-[12px] leading-relaxed text-[#6B6490]">
                 ใช้รูปหน้าชัดเจน — กดช่องแล้วเลือกถ่ายด้วยกล้องหรืออัปโหลดจากคลังรูป
               </p>
             </header>
 
-            <div className="mt-4 flex items-center justify-between gap-2 rounded-[14px] border border-[#F16DB5]/25 bg-[#F16DB5]/1 px-3 py-2.5">
-              <p className="text-[13px] text-white/85">ข้อมูลของคุณ : {profile}</p>
+            <div
+              className="mt-4 flex items-center justify-between gap-2 rounded-[14px] px-3 py-2.5"
+              style={{
+                background: "rgba(255,255,255,0.82)",
+                border: "1px solid rgba(155,127,232,0.28)",
+                boxShadow: "0 6px 18px rgba(80,55,150,0.1)",
+              }}
+            >
+              <p className="text-[13px] font-medium text-[#241C4F]">
+                ข้อมูลของคุณ : {profile}
+              </p>
               <button
                 type="button"
                 aria-label="แก้ไขข้อมูล"
@@ -176,7 +196,7 @@ export function FortuneFaceReading({
                   const next = window.prompt("ข้อมูลของคุณ", profile);
                   if (next != null && next.trim()) setProfile(next.trim());
                 }}
-                className="text-[#F16DB5]"
+                className="text-[#7B5FD4] outline-none transition active:opacity-60"
               >
                 <Pencil className="h-4 w-4" strokeWidth={1.8} />
               </button>
@@ -203,7 +223,7 @@ export function FortuneFaceReading({
               />
             </div>
 
-            <p className="mt-5 text-center text-[11px] leading-relaxed text-white/35">
+            <p className="mt-5 text-center text-[11px] leading-relaxed text-[#8A82B0]">
               รูปของคุณประมวลผลบนเครื่องเท่านั้น และไม่ถูกอัปโหลด
             </p>
 
@@ -211,7 +231,7 @@ export function FortuneFaceReading({
               type="button"
               disabled={!front}
               onClick={() => setStep("result")}
-              className="mt-3 w-full rounded-full bg-gradient-to-r from-[#F16DB5] to-[#BB6CF0] py-3.5 text-[15px] font-semibold text-white outline-none transition enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-35"
+              className="no-sky-lift mt-3 w-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8] py-3.5 text-[15px] font-semibold text-white outline-none transition enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-35"
             >
               ถัดไป
             </button>
@@ -284,32 +304,28 @@ function FaceResult({
   ];
 
   return (
-    <div className="mt-4 space-y-3 pb-4">
-      <h1 className="text-[20px] font-semibold text-white">โหงวเฮ้ง</h1>
+    <div className="mt-5 space-y-3 pb-4">
+      <h1 className="text-[1.4rem] font-bold tracking-tight text-[#241C4F]">
+        โหงวเฮ้ง
+      </h1>
 
-      <div
-        className="overflow-hidden rounded-[20px] p-3.5"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(120,60,50,0.9), rgba(60,30,40,0.85))",
-        }}
-      >
+      <div className="fortune-glass overflow-hidden rounded-[20px] p-3.5">
         <div className="flex gap-3">
-          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-black/20">
+          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
             {photoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={photoUrl} alt="" className="h-full w-full object-cover" />
             ) : null}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold text-white">
+            <p className="text-[15px] font-semibold text-[#241C4F]">
               {element} · {faceType}
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {tags.map((t) => (
                 <span
                   key={t}
-                  className="rounded-full bg-white/15 px-2 py-0.5 text-[11px] text-white/85"
+                  className="rounded-full bg-[#9B7FE8]/12 px-2 py-0.5 text-[11px] text-[#5B45B8]"
                 >
                   {t}
                 </span>
@@ -318,19 +334,19 @@ function FaceResult({
           </div>
         </div>
         <div className="mt-3 flex items-center justify-between gap-3">
-          <p className="text-[12px] text-white/70">{element}</p>
-          <p className="text-[12px] text-white/70">ความชัดเจน {clarity}%</p>
+          <p className="text-[12px] text-[#5E5688]">{element}</p>
+          <p className="text-[12px] text-[#5E5688]">ความชัดเจน {clarity}%</p>
         </div>
-        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/15">
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#9B7FE8]/15">
           <div
-            className="h-full rounded-full bg-[#F4BC52]"
+            className="h-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8]"
             style={{ width: `${clarity}%` }}
           />
         </div>
       </div>
 
       <div className="fortune-glass rounded-[20px] px-4 py-4">
-        <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/90">
+        <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[#7B5FD4]">
           สามวังหลัก
         </h2>
         <div className="mt-3.5 space-y-3.5">
@@ -338,11 +354,11 @@ function FaceResult({
             <div
               key={p.title}
               className={cn(
-                i > 0 && "border-t border-white/[0.08] pt-3.5"
+                i > 0 && "border-t border-[#7B6BB0]/12 pt-3.5"
               )}
             >
-              <p className="text-[13px] font-semibold text-[#F7F8FF]">{p.title}</p>
-              <p className="mt-1 text-[12px] leading-[1.7] text-[#B7C3D8]">
+              <p className="text-[13px] font-semibold text-[#2C2458]">{p.title}</p>
+              <p className="mt-1 text-[12px] leading-[1.7] text-[#5E5688]">
                 {p.body}
               </p>
             </div>

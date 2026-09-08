@@ -2,52 +2,49 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Lock } from "lucide-react";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { cn } from "@/lib/utils";
 
 type ReadingItem = {
-  id: "tarot" | "face" | "palm";
+  id: "tarot" | "face" | "palm" | "wallpaper";
   title: string;
-  sub: string;
+  badge: string;
   locked: boolean;
-  tone: "violet" | "gold" | "cyan";
   icon: string;
 };
 
 const READINGS: ReadingItem[] = [
   {
     id: "tarot",
-    title: "ดูไพ่รายวัน",
-    sub: "เปิดฟรี",
+    title: "ไพ่รายวัน",
+    badge: "ดูฟรี",
     locked: false,
-    tone: "violet",
     icon: "/images/extra/tarot.png",
   },
   {
     id: "face",
     title: "ดูโหงวเฮ้ง",
-    sub: "พรีเมียม",
+    badge: "พรีเมียม",
     locked: true,
-    tone: "gold",
     icon: "/images/extra/face.png",
   },
   {
     id: "palm",
     title: "ดูลายมือ",
-    sub: "พรีเมียม",
+    badge: "พรีเมียม",
     locked: true,
-    tone: "cyan",
     icon: "/images/extra/palm.png",
+  },
+  {
+    id: "wallpaper",
+    title: "วอลเปเปอร์มงคล",
+    badge: "พรีเมียม",
+    locked: true,
+    icon: "/images/extra/wallpaper.jpg",
   },
 ];
 
-const TONE = {
-  violet: { text: "#D2A8F5" },
-  gold: { text: "#E4C56A" },
-  cyan: { text: "#7EDFEA" },
-} as const;
-
-/** Extra reading entry points — tarot free; face & palm premium-locked */
+/** Popular features — glass cards with large 3D icons */
 export function FortuneExtraReadings({
   seed,
   unlocked = false,
@@ -62,25 +59,30 @@ export function FortuneExtraReadings({
   const router = useRouter();
 
   return (
-    <section className={cn("space-y-3", className)}>
+    <section className={cn("space-y-3.5", className)}>
       <div className="px-0.5">
-        <p className="fortune-section-kicker">Explore</p>
-        <h2 className="fortune-section-title mt-1">ฟีเจอร์ยอดนิยม</h2>
-        <p className="mt-1 text-[12px] leading-relaxed text-[#C2C9DB]/88">
-          เลือกวิธีดู · บางอันปลดล็อกด้วยพรีเมียม
+        <div className="mb-2.5 flex items-center gap-2">
+          <FortuneIcon name="moon" size={28} />
+          <p className="font-sacred text-[13px] tracking-[0.22em] text-[#C9A227]">
+            DOODUANG
+          </p>
+        </div>
+        <h2 className="text-[1.5rem] font-bold tracking-tight text-[#2C2458]">
+          ฟีเจอร์ยอดนิยม
+        </h2>
+        <p className="mt-1.5 text-[14px] leading-relaxed text-[#5E5688]">
+          เลือกวิธีดูดวงที่เหมาะกับคุณ
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-4 gap-1.5">
         {READINGS.map((item) => {
           const isLocked = item.locked && !unlocked;
-          const tone = TONE[item.tone];
 
           return (
             <button
               key={item.id}
               type="button"
-              data-slot={`reading-card-${item.id}`}
               onClick={() => {
                 if (item.id === "tarot") {
                   router.push(
@@ -88,18 +90,14 @@ export function FortuneExtraReadings({
                   );
                   return;
                 }
+                if (item.id === "wallpaper") {
+                  router.push("/reading/wallpaper");
+                  return;
+                }
                 if (item.id === "face" || item.id === "palm") {
                   if (isLocked) {
                     onUnlock?.();
                     return;
-                  }
-                  try {
-                    sessionStorage.setItem(
-                      "dooduang-premium-unlocked",
-                      "1"
-                    );
-                  } catch {
-                    /* ignore */
                   }
                   router.push(
                     `/reading/${item.id}?seed=${encodeURIComponent(seed)}`
@@ -107,44 +105,47 @@ export function FortuneExtraReadings({
                 }
               }}
               className={cn(
-                "fortune-tap fortune-glass relative flex flex-col items-center gap-2 rounded-[20px] px-2 py-3 text-center outline-none transition",
-                "focus-visible:ring-2 focus-visible:ring-white/25"
+                "fortune-glass relative flex flex-col items-center rounded-[18px] px-1 pb-2.5 pt-2.5 text-center outline-none transition",
+                "active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4"
               )}
               aria-label={
                 isLocked ? `${item.title} · ต้องเป็นพรีเมียม` : item.title
               }
             >
-              {isLocked ? (
-                <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-black/35">
-                  <Lock
-                    className="h-2.5 w-2.5 text-[#E4C56A]"
-                    strokeWidth={2.4}
-                  />
-                </span>
-              ) : null}
-
-              <span className="relative flex h-[4.1rem] w-[4.1rem] items-center justify-center">
+              <span className="relative flex h-[5.5rem] w-full items-center justify-center">
                 <Image
                   src={item.icon}
                   alt=""
-                  width={72}
-                  height={72}
+                  width={110}
+                  height={110}
                   unoptimized
-                  className="h-full w-full object-contain"
+                  className={cn(
+                    "object-contain",
+                    item.id === "wallpaper"
+                      ? "h-[5rem] w-[3.8rem] rounded-[10px] object-cover shadow-[0_6px_14px_rgba(80,60,140,0.16)]"
+                      : "h-[5.25rem] w-[5.25rem]"
+                  )}
                 />
+                {isLocked ? (
+                  <span className="absolute right-0 top-0 z-[1]">
+                    <FortuneIcon name="lock" size={24} />
+                  </span>
+                ) : null}
               </span>
 
-              <div className="min-w-0 px-0.5">
-                <p className="text-[12px] font-semibold leading-snug text-[#F5F2EA]">
-                  {item.title}
-                </p>
-                <p
-                  className="mt-0.5 text-[10px] font-medium"
-                  style={{ color: isLocked ? "#E4C56A" : tone.text }}
-                >
-                  {isLocked ? "ล็อก · พรีเมียม" : item.sub}
-                </p>
-              </div>
+              <p className="mt-0.5 px-0.5 text-[11px] font-semibold leading-snug text-[#2C2458]">
+                {item.title}
+              </p>
+              <span
+                className={cn(
+                  "mt-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold",
+                  isLocked
+                    ? "bg-[#F4BC52]/22 text-[#8A6A12]"
+                    : "bg-[#B9A4F0]/28 text-[#5B45B8]"
+                )}
+              >
+                {isLocked ? "พรีเมียม" : item.badge}
+              </span>
             </button>
           );
         })}

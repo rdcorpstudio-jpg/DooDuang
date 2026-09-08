@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { ChevronRight, Lock, Sparkles } from "lucide-react";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import {
   getZodiacByBirthDate,
   type ZodiacInfo,
@@ -162,42 +162,70 @@ export function FortuneFreeZodiacToday({
   return (
     <section
       className={cn(
-        "fortune-glass overflow-hidden rounded-[20px] px-4 py-4",
+        "fortune-glass relative overflow-hidden rounded-[20px] px-4 py-4",
         className
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold tracking-[0.16em] text-[#E4C56A]/90">
-            {deep ? "เจาะลึกราศี · พรีเมียม" : "ราศีของคุณ · วันนี้"}
-          </p>
-          <h2 className="font-sacred mt-1.5 text-[1.4rem] font-normal tracking-wide text-[#F7F8FF]">
-            ราศี{zodiac.thaiName}
-          </h2>
-          <p className="mt-0.5 text-[12px] text-[#B7C3D8]">
-            ธาตุ{zodiac.element} · {zodiac.dateRange}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-2 top-6 select-none text-[8rem] leading-none text-[#7B6BB0]/[0.08]"
+      >
+        {zodiac.symbol}
+      </span>
+
+      <div className="relative z-[1] flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <FortuneIcon name="sparkle" size={24} />
+          <p className="text-[15px] font-semibold text-[#2C2458]">
+            {deep ? "เจาะลึกราศี · พรีเมียม" : "ดวงของคุณวันนี้"}
           </p>
         </div>
-        <div className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] text-[#C8D8EF]">
+        <div className="shrink-0 rounded-full bg-white/55 px-3 py-1.5 text-[12px] text-[#5E5688] ring-1 ring-[#7B6BB0]/15">
           {dateLabel}
         </div>
       </div>
 
-      <p className="mt-3.5 text-[15px] leading-[1.75] text-[#F7F8FF]">
+      <div className="relative z-[1] mt-4 flex items-center gap-3.5">
+        <span className="relative flex h-14 w-14 shrink-0 items-center justify-center">
+          {zodiac.id === "virgo" ? (
+            <FortuneIcon name="virgo" size={56} />
+          ) : (
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#B9A4F0]/35 text-[1.7rem] text-[#3A2F6B] ring-1 ring-[#B9A4F0]/45">
+              {zodiac.symbol}
+            </span>
+          )}
+        </span>
+        <div className="min-w-0">
+          <h2 className="text-[1.35rem] font-semibold tracking-wide text-[#2C2458]">
+            ราศี{zodiac.thaiName}
+          </h2>
+          <p className="mt-1 text-[13px] text-[#5E5688]">
+            ธาตุ{zodiac.element} · {zodiac.dateRange}
+          </p>
+        </div>
+      </div>
+
+      <p className="relative z-[1] mt-4 text-[16px] font-medium leading-[1.7] text-[#2C2458]">
         {nickname
           ? `คุณ${nickname.replace(/^คุณ\s*/, "").trim()} — `
           : "คุณ — "}
         {today.vibe}
       </p>
 
-      <div className="mt-3 space-y-1.5 text-[13px] leading-[1.65] text-[#D5E0F0]">
-        <p>
-          <span className="font-semibold text-[#E8EEF8]">ทำ · </span>
-          {today.doToday}
+      <div className="relative z-[1] mt-3.5 space-y-2.5 border-t border-[#7B6BB0]/15 pt-3.5 text-[15px] leading-[1.65] text-[#4A4278]">
+        <p className="flex items-start gap-2.5">
+          <FortuneIcon name="check" size={28} className="mt-0.5 shrink-0" />
+          <span>
+            <span className="font-semibold text-[#2C2458]">ทำ · </span>
+            {today.doToday}
+          </span>
         </p>
-        <p>
-          <span className="font-semibold text-[#E8EEF8]">ระวัง · </span>
-          {today.watch}
+        <p className="flex items-start gap-2.5">
+          <FortuneIcon name="warning" size={28} className="mt-0.5 shrink-0" />
+          <span>
+            <span className="font-semibold text-[#2C2458]">ระวัง · </span>
+            {today.watch}
+          </span>
         </p>
       </div>
 
@@ -242,47 +270,41 @@ export function FortuneFreeZodiacToday({
       ) : unlocked ? (
         <Link
           href="/premium"
-          className="mt-3.5 flex w-full items-center gap-2.5 rounded-[14px] border border-white/10 bg-white/[0.05] px-3 py-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/25"
+          className="mt-4 flex w-full items-center gap-3 rounded-[16px] border border-[#7B6BB0]/15 bg-white/45 px-3.5 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35"
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06]">
-            <Sparkles className="h-3.5 w-3.5 text-[#E4C56A]" strokeWidth={1.9} />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+            <FortuneIcon name="sparkle" size={36} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[13px] font-semibold text-[#F7F8FF]">
+            <span className="block text-[15px] font-semibold text-[#2C2458]">
               เปิดเจาะลึกดวงราศี{zodiac.thaiName}
             </span>
-            <span className="mt-0.5 block text-[11px] text-[#B7C3D8]">
+            <span className="mt-0.5 block text-[12px] text-[#5E5688]">
               ปลดล็อกแล้ว · อ่านบุคลิก จุดเปลี่ยน และคำแนะนำที่แท็บพรีเมียม
             </span>
           </span>
-          <ChevronRight
-            className="h-4 w-4 shrink-0 text-[#E4C56A]"
-            strokeWidth={2.2}
-          />
+          <FortuneIcon name="arrow-right" size={22} className="shrink-0" />
         </Link>
       ) : (
         <button
           type="button"
           onClick={onUnlock}
           disabled={!onUnlock}
-          className="mt-3.5 flex w-full items-center gap-2.5 rounded-[14px] border border-white/10 bg-white/[0.05] px-3 py-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/25 disabled:opacity-60"
+          className="mt-4 flex w-full items-center gap-3 rounded-[16px] border border-[#7B6BB0]/15 bg-white/45 px-3.5 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35 disabled:opacity-60"
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06]">
-            <Lock className="h-3.5 w-3.5 text-[#E4C56A]" strokeWidth={1.9} />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+            <FortuneIcon name="lock" size={36} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="flex items-center gap-1 text-[13px] font-semibold text-[#F7F8FF]">
-              <Sparkles className="h-3.5 w-3.5 text-[#E4C56A]" />
+            <span className="flex items-center gap-1.5 text-[15px] font-semibold text-[#2C2458]">
+              <FortuneIcon name="sparkle" size={16} />
               ปลดล็อกเจาะลึกดวงราศี{zodiac.thaiName}
             </span>
-            <span className="mt-0.5 block text-[11px] text-[#B7C3D8]">
+            <span className="mt-0.5 block text-[12px] text-[#5E5688]">
               บุคลิก · จุดเปลี่ยน · คำแนะนำเฉพาะราศี · {FORTUNE_UNLOCK_PRICE} บาท
             </span>
           </span>
-          <ChevronRight
-            className="h-4 w-4 shrink-0 text-[#E4C56A]"
-            strokeWidth={2.2}
-          />
+          <FortuneIcon name="arrow-right" size={22} className="shrink-0" />
         </button>
       )}
     </section>

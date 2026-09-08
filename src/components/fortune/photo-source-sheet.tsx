@@ -306,8 +306,14 @@ export function PhotoSlot({
       <button
         type="button"
         onClick={onPick}
-        className="relative block w-full overflow-hidden rounded-[16px] border border-white/12 bg-white/[0.04] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/30"
-        style={{ aspectRatio: "1 / 1" }}
+        className="relative block w-full overflow-hidden rounded-[16px] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45"
+        style={{
+          aspectRatio: "1 / 1",
+          border: "1.5px dashed rgba(123,95,212,0.45)",
+          background: "rgba(255,255,255,0.78)",
+          boxShadow:
+            "0 8px 22px rgba(80,55,150,0.12), inset 0 1px 0 rgba(255,255,255,0.95)",
+        }}
       >
         {previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -317,11 +323,17 @@ export function PhotoSlot({
             className="h-full w-full object-cover"
           />
         ) : (
-          <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/40">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-white/25 bg-white/[0.04] text-[22px] font-light text-white/55">
+          <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-[#5B45B8]">
+            <span
+              className="flex h-12 w-12 items-center justify-center rounded-full text-[24px] font-light text-[#7B5FD4]"
+              style={{
+                border: "1.5px dashed rgba(123,95,212,0.4)",
+                background: "rgba(155,127,232,0.12)",
+              }}
+            >
               +
             </span>
-            <span className="px-2 text-center text-[11px] leading-snug">
+            <span className="px-2 text-center text-[12px] font-medium leading-snug text-[#3A3270]">
               ถ่ายหรืออัปโหลด
             </span>
           </span>
@@ -330,24 +342,24 @@ export function PhotoSlot({
           className={cn(
             "absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold",
             badgeTone === "required"
-              ? "bg-[#F43F5E]/9 text-white"
-              : "bg-white/80 text-[#0C1427]"
+              ? "bg-[#E11D48] text-white"
+              : "bg-white text-[#5E5688] ring-1 ring-[#7B6BB0]/25"
           )}
         >
           {badge}
         </span>
       </button>
-      <p className="mt-1.5 text-[13px] font-medium text-white">{label}</p>
+      <p className="mt-1.5 text-[13px] font-semibold text-[#241C4F]">{label}</p>
       {error ? (
-        <p className="mt-0.5 text-[11px] leading-snug text-[#FB7185]">{error}</p>
+        <p className="mt-0.5 text-[11px] leading-snug text-[#E11D48]">{error}</p>
       ) : hint ? (
-        <p className="mt-0.5 text-[11px] leading-snug text-white/40">{hint}</p>
+        <p className="mt-0.5 text-[11px] leading-snug text-[#6B6490]">{hint}</p>
       ) : null}
       {previewUrl && onClear ? (
         <button
           type="button"
           onClick={onClear}
-          className="mt-1 text-[11px] text-white/40 underline-offset-2 hover:text-white/70 hover:underline"
+          className="mt-1 text-[11px] text-[#7B5FD4] underline-offset-2 hover:underline"
         >
           ลบรูป
         </button>

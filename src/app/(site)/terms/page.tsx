@@ -1,4 +1,4 @@
-import { APP_NAME, LEGAL_UPDATED_AT } from "@/lib/site";
+import { APP_NAME, FORTUNE_PACKAGE_MONTHS, LEGAL_UPDATED_AT } from "@/lib/site";
 import { LegalSection } from "@/components/layout/legal-section";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { PageHero } from "@/components/ui/page-hero";
@@ -28,7 +28,7 @@ export default function TermsPage() {
         <LegalSection title="2. บริการที่ให้">
           <p>
             {APP_NAME} เป็นเว็บดูดวงออนไลน์ ให้บริการคำทำนายและไพ่ทาโรต์เพื่อความบันเทิง
-            บางส่วนใช้ได้ฟรี และบางส่วนใช้เครดิตที่ซื้อผ่านระบบชำระเงิน
+            บางส่วนใช้ได้ฟรี และบางส่วนเป็นเนื้อหาพรีเมียมที่ปลดล็อกผ่านแพ็กเกจชำระเงิน
           </p>
         </LegalSection>
 
@@ -39,13 +39,13 @@ export default function TermsPage() {
           </p>
         </LegalSection>
 
-        <LegalSection title="4. เครดิตและการชำระเงิน">
+        <LegalSection title="4. แพ็กเกจพรีเมียมและการชำระเงิน">
           <p>
-            เครดิตใช้สำหรับเปิดการ์ดดูดวงพิเศษตามแพ็กเกจที่แสดงในหน้าซื้อเครดิต
-            การชำระเงินดำเนินการผ่าน Stripe
+            แพ็กเกจพรีเมียมให้สิทธิ์เข้าถึงเนื้อหาพิเศษตามระยะเวลาที่ระบุในหน้าชำระเงิน
+            (ปัจจุบัน {FORTUNE_PACKAGE_MONTHS} เดือน) การชำระเงินดำเนินการผ่าน Stripe
           </p>
           <p>
-            เครดิตเป็นสินทรัพย์ดิจิทัลสำหรับใช้ในบริการนี้เท่านั้น ไม่สามารถแลกเป็นเงินสด
+            แพ็กเกจเป็นสิทธิ์ใช้งานดิจิทัลในบริการนี้เท่านั้น ไม่สามารถแลกเป็นเงินสด
             และโดยทั่วไปไม่สามารถขอคืนเงินได้ เว้นแต่กฎหมายที่ใช้บังคับกำหนดไว้เป็นอย่างอื่น
           </p>
         </LegalSection>

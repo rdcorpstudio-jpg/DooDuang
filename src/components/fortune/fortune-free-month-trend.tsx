@@ -6,12 +6,10 @@ import {
   ArrowRight,
   ArrowUpRight,
   ChartNoAxesColumn,
-  ChevronRight,
-  ChevronDown,
-  Lock,
   Minus,
 } from "lucide-react";
 import { MONTH_LABELS_TH, MONTH_NAMES_TH } from "@/components/fortune/life-cycle-graph";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -26,27 +24,40 @@ type ChartPoint = FreeMonthPoint & {
   kind: "past" | "future";
 };
 
-function monthLabel(monthIndex: number, yearCe: number) {
-  const be = yearCe + 543;
-  return `${MONTH_NAMES_TH[monthIndex]} ${be}`;
-}
-
-function monthShort(monthIndex: number, yearCe: number) {
-  return `${MONTH_LABELS_TH[monthIndex]} ${(yearCe + 543).toString().slice(-2)}`;
-}
-
 function LockMark({ x, y }: { x: number; y: number }) {
   return (
-    <g transform={`translate(${x - 5.5}, ${y - 20})`} className="pointer-events-none">
-      <circle cx={5.5} cy={7} r={8} fill="rgba(12,20,39,0.82)" stroke="rgba(244,188,82,0.55)" strokeWidth={1} />
-      <path
-        d="M3.2 7.2V5.1a2.3 2.3 0 0 1 4.6 0v2.1"
+    <g transform={`translate(${x}, ${y})`} className="pointer-events-none">
+      <circle
+        cx={0}
+        cy={0}
+        r={13}
+        fill="#1A1630"
+        stroke="#E4C56A"
+        strokeWidth={1.6}
+      />
+      <circle
+        cx={0}
+        cy={0}
+        r={15.5}
         fill="none"
-        stroke="#F4BC52"
-        strokeWidth={1.35}
+        stroke="rgba(228,197,106,0.32)"
+        strokeWidth={2.2}
+      />
+      <path
+        d="M-3.8 -0.4V-3a3.8 3.8 0 0 1 7.6 0V-0.4"
+        fill="none"
+        stroke="#E4C56A"
+        strokeWidth={1.7}
         strokeLinecap="round"
       />
-      <rect x={2.4} y={7} width={6.2} height={4.6} rx={1.1} fill="#F4BC52" />
+      <rect
+        x={-5}
+        y={-0.6}
+        width={10}
+        height={6.6}
+        rx={1.6}
+        fill="#E4C56A"
+      />
     </g>
   );
 }
@@ -309,14 +320,14 @@ function YearRhythmChart({
               y1={y}
               x2={W - padR}
               y2={y}
-              stroke="rgba(255,255,255,0.08)"
+              stroke="rgba(90,70,150,0.14)"
               strokeWidth={1}
             />
             <text
               x={padL - 5}
               y={y + 3}
               textAnchor="end"
-              fill="rgba(247,248,255,0.4)"
+              fill="rgba(58,50,112,0.55)"
               fontSize={9}
             >
               {t}
@@ -348,7 +359,7 @@ function YearRhythmChart({
                 x={x}
                 y={yy - 11}
                 textAnchor="middle"
-                fill="#F4BC52"
+                fill="#A07E1A"
                 fontSize={11}
                 fontWeight={700}
               >
@@ -359,9 +370,9 @@ function YearRhythmChart({
               cx={x}
               cy={yy}
               r={isSelected ? 7 : 4}
-              fill={isSelected ? color : "rgba(255,255,255,0.55)"}
-              stroke={isSelected ? "#fff" : "rgba(255,255,255,0.35)"}
-              strokeWidth={isSelected ? 2 : 1}
+              fill={isSelected ? color : "rgba(255,255,255,0.92)"}
+              stroke={isSelected ? "#fff" : "rgba(90,70,150,0.35)"}
+              strokeWidth={isSelected ? 2 : 1.5}
               className="pointer-events-none"
             />
             <text
@@ -370,8 +381,8 @@ function YearRhythmChart({
               textAnchor="middle"
               fill={
                 isSelected
-                  ? "rgba(247,248,255,0.95)"
-                  : "rgba(247,248,255,0.45)"
+                  ? "rgba(36,28,79,0.95)"
+                  : "rgba(58,50,112,0.62)"
               }
               fontSize={isSelected ? 9 : 8}
               fontWeight={isSelected || isNow ? 600 : 400}
@@ -383,7 +394,7 @@ function YearRhythmChart({
               x={x}
               y={H - 7}
               textAnchor="middle"
-              fill={isNow ? "rgba(244,188,82,0.8)" : "rgba(247,248,255,0.28)"}
+              fill={isNow ? "rgba(160,126,26,0.95)" : "rgba(58,50,112,0.35)"}
               fontSize={7}
               className="pointer-events-none"
             >
@@ -394,12 +405,17 @@ function YearRhythmChart({
               cy={yy}
               r={14}
               fill="transparent"
-              className="cursor-pointer"
+              className="cursor-pointer outline-none focus:outline-none"
+              style={{ outline: "none" }}
               role="button"
               tabIndex={0}
               aria-label={`วิเคราะห์ปี ${y.be} คะแนน ${y.score}`}
               aria-pressed={isSelected}
               onClick={() => onSelect(i)}
+              onPointerDown={(e) => {
+                // avoid native square focus ring after click
+                e.currentTarget.blur();
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -441,33 +457,45 @@ function UnlockedTwelveYearTrend({
   const [index, setIndex] = useState(currentIdx >= 0 ? currentIdx : 2);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [width, setWidth] = useState(320);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const widthRef = useRef(320);
   const startXRef = useRef(0);
   const lastXRef = useRef(0);
   const activeRef = useRef(false);
+  const animLockRef = useRef(false);
 
   useEffect(() => {
-    const measure = () => {
-      widthRef.current = viewportRef.current?.clientWidth || 320;
-    };
+    const el = viewportRef.current;
+    if (!el) return;
+    const measure = () => setWidth(el.clientWidth || 320);
     measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
   function goTo(next: number) {
-    setIndex(Math.max(0, Math.min(years.length - 1, next)));
+    const clamped = Math.max(0, Math.min(years.length - 1, next));
+    setIndex(clamped);
     setDragX(0);
     setDragging(false);
+    animLockRef.current = true;
+    window.setTimeout(() => {
+      animLockRef.current = false;
+    }, 420);
   }
 
   function onPointerDown(e: PointerEvent<HTMLDivElement>) {
     if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (animLockRef.current) return;
     activeRef.current = true;
     startXRef.current = e.clientX;
     lastXRef.current = e.clientX;
-    widthRef.current = viewportRef.current?.clientWidth || 320;
+    setWidth(viewportRef.current?.clientWidth || width);
     setDragging(true);
     e.currentTarget.setPointerCapture(e.pointerId);
   }
@@ -476,12 +504,11 @@ function UnlockedTwelveYearTrend({
     if (!activeRef.current) return;
     lastXRef.current = e.clientX;
     const dx = e.clientX - startXRef.current;
-    const w = widthRef.current;
     let next = dx;
     if ((index === 0 && dx > 0) || (index === years.length - 1 && dx < 0)) {
-      next = dx * 0.35;
+      next = dx * 0.28;
     }
-    setDragX(Math.max(-w * 1.05, Math.min(w * 1.05, next)));
+    setDragX(Math.max(-width * 1.05, Math.min(width * 1.05, next)));
   }
 
   function onPointerUp(e: PointerEvent<HTMLDivElement>) {
@@ -493,26 +520,24 @@ function UnlockedTwelveYearTrend({
       /* ignore */
     }
     const dx = lastXRef.current - startXRef.current;
-    const threshold = Math.min(72, widthRef.current * 0.18);
+    const threshold = Math.min(56, width * 0.18);
     setDragging(false);
     if (dx < -threshold) goTo(index + 1);
     else if (dx > threshold) goTo(index - 1);
-    else setDragX(0);
+    else {
+      setDragX(0);
+    }
   }
 
-  const dragPct =
-    widthRef.current > 0 ? (dragX / widthRef.current) * 100 : 0;
+  const trackX = -index * width + dragX;
 
   return (
     <section className={cn("space-y-2.5", className)}>
       <div className="flex items-center gap-2 px-0.5">
-        <ChartNoAxesColumn
-          className="h-4 w-4 shrink-0 text-[#F4BC52]"
-          strokeWidth={1.7}
-        />
-        <h2 className="text-[15px] font-semibold tracking-wide text-white">
+        <FortuneIcon name="compass" size={18} className="shrink-0" />
+        <h2 className="text-[15px] font-semibold tracking-wide text-[#241C4F]">
           จังหวะชีวิต
-          <span className="text-[#e8c547]/90"> 12 ปี</span>
+          <span className="text-[#A07E1A]"> 12 ปี</span>
         </h2>
       </div>
 
@@ -524,19 +549,21 @@ function UnlockedTwelveYearTrend({
 
       <div
         ref={viewportRef}
-        className="relative touch-pan-y overflow-hidden select-none"
+        className="relative overflow-hidden touch-pan-y select-none"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
         <div
-          className="flex will-change-transform"
+          className="flex"
           style={{
-            transform: `translate3d(calc(${-index * 100}% + ${dragPct}%), 0, 0)`,
+            width: width * years.length,
+            transform: `translate3d(${trackX}px, 0, 0)`,
             transition: dragging
               ? "none"
               : "transform 420ms cubic-bezier(0.22, 1, 0.36, 1)",
+            willChange: "transform",
           }}
         >
           {years.map((year, i) => {
@@ -548,65 +575,62 @@ function UnlockedTwelveYearTrend({
                 : year.ce < nowCe
                   ? "ปีที่ผ่านมา"
                   : "ปีข้างหน้า";
-            const active = i === index;
             return (
               <article
                 key={year.ce}
-                className="w-full min-w-full shrink-0 basis-full px-0.5"
-                aria-hidden={!active}
+                className="shrink-0"
+                style={{ width }}
+                aria-hidden={i !== index}
               >
-                <div
-                  className={cn(
-                    "relative space-y-2.5 rounded-[18px] fortune-surface px-3.5 py-3.5 transition-opacity duration-300",
-                    active ? "opacity-100" : "opacity-70"
-                  )}
-                >
-                  <p className="absolute right-3.5 top-3.5 text-[12px] font-semibold tabular-nums text-[#F4BC52]">
+                <div className="fortune-glass relative mx-0.5 space-y-2.5 rounded-[18px] px-3.5 py-3.5">
+                  <p className="absolute right-3.5 top-3.5 text-[12px] font-semibold tabular-nums text-[#A07E1A]">
                     {i + 1}/{years.length}
                   </p>
 
                   <div className="pr-10">
-                    <p className="text-[11px] text-white/45">{when}</p>
-                    <p className="mt-1 text-[15px] font-semibold text-white">
+                    <p className="text-[11px] font-medium text-[#6B6490]">
+                      {when}
+                    </p>
+                    <p className="mt-1 text-[15px] font-semibold text-[#241C4F]">
                       พ.ศ. {year.be} · {band.label}
                     </p>
                   </div>
 
-                  <p className="text-[13px] font-medium leading-snug text-[#F7F8FF]">
+                  <p className="text-[13px] font-medium leading-snug text-[#3A3270]">
                     {year.overview}
                   </p>
-                  <p className="text-[12px] leading-[1.65] text-white/60">
+                  <p className="text-[12px] leading-[1.65] text-[#5E5688]">
                     {band.meaning}
                   </p>
 
-                  <div className="mt-1 space-y-3 border-t border-white/[0.08] pt-3">
+                  <div className="mt-1 space-y-3 border-t border-[#7B6BB0]/14 pt-3">
                     <div>
-                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
                         จุดเปลี่ยน
                       </p>
-                      <p className="mt-1 text-[12px] leading-[1.65] text-[#E8EEF8]">
+                      <p className="mt-1 text-[12px] leading-[1.65] text-[#3A3270]">
                         {year.turning}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
                         ทำไมถึงเป็นแบบนี้
                       </p>
-                      <p className="mt-1 text-[12px] leading-[1.65] text-[#E8EEF8]">
+                      <p className="mt-1 text-[12px] leading-[1.65] text-[#3A3270]">
                         {year.reason}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
                         แนวทาง
                       </p>
-                      <p className="mt-1 text-[12px] leading-[1.65] text-[#E8EEF8]">
+                      <p className="mt-1 text-[12px] leading-[1.65] text-[#3A3270]">
                         {year.guidance}
                       </p>
                     </div>
                   </div>
 
-                  <p className="text-[11px] leading-snug text-white/40">
+                  <p className="text-[11px] leading-snug text-[#6B6490]">
                     จุดเด่น: {band.strength} · ใช้ยังไง: {band.use}
                   </p>
                   <p
@@ -621,6 +645,10 @@ function UnlockedTwelveYearTrend({
           })}
         </div>
       </div>
+
+      <p className="text-center text-[11px] text-[#8A82B0]">
+        ปัดซ้าย–ขวา หรือกดจุดบนกราฟเพื่อเปลี่ยนปี
+      </p>
     </section>
   );
 }
@@ -665,32 +693,44 @@ function RhythmChart({
 }) {
   const gid = useId().replace(/:/g, "");
   const W = 340;
-  const H = 212;
-  const padL = 28;
-  const padR = 14;
-  const padT = 26;
-  const padB = 44;
+  const H = 200;
+  const padL = 30;
+  const padR = 12;
+  const padT = 16;
+  const padB = 32;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
-  const visibleScores = points.map((p, i) =>
-    isLocked(i) && p.kind === "future" ? points[Math.max(0, i - 1)]!.score : p.score
-  );
-  const { yMin, yMax } = yDomain(visibleScores);
-  const ticks = tickValues(yMin, yMax);
+  /** Fixed readable scale like the mockup */
+  const yMin = 0;
+  const yMax = 15;
+  const ticks = [0, 5, 10, 15];
+
   const n = points.length;
   const xAt = (i: number) =>
     padL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
   const yAt = (score: number) =>
-    padT + ((yMax - score) / (yMax - yMin || 1)) * plotH;
+    padT + ((yMax - score) / (yMax - yMin)) * plotH;
+
+  const lastFreeIndex = (() => {
+    for (let i = n - 1; i >= 0; i--) {
+      if (!isLocked(i) && points[i]!.kind === "past") return i;
+    }
+    return selectedIndex;
+  })();
+
+  const plotScore = (i: number) => {
+    const p = points[i]!;
+    if (isLocked(i) && p.kind === "future") {
+      return points[Math.max(0, i - 1)]!.score;
+    }
+    return p.score;
+  };
 
   const lineD = points
-    .map((p, i) => {
-      const score =
-        isLocked(i) && p.kind === "future"
-          ? points[Math.max(0, i - 1)]!.score
-          : p.score;
-      return `${i === 0 ? "M" : "L"} ${xAt(i).toFixed(1)} ${yAt(score).toFixed(1)}`;
+    .map((_, i) => {
+      const cmd = i === 0 ? "M" : "L";
+      return `${cmd} ${xAt(i).toFixed(1)} ${yAt(plotScore(i)).toFixed(1)}`;
     })
     .join(" ");
 
@@ -705,43 +745,13 @@ function RhythmChart({
     >
       <defs>
         <linearGradient id={`rm-fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(187,108,240,0.38)" />
-          <stop offset="55%" stopColor="rgba(70,221,237,0.12)" />
-          <stop offset="100%" stopColor="rgba(70,221,237,0)" />
+          <stop offset="0%" stopColor="rgba(155,127,232,0.42)" />
+          <stop offset="70%" stopColor="rgba(155,127,232,0.12)" />
+          <stop offset="100%" stopColor="rgba(155,127,232,0)" />
         </linearGradient>
-        <linearGradient id={`rm-stroke-${gid}`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#F16DB5" />
-          <stop offset="50%" stopColor="#BB6CF0" />
-          <stop offset="100%" stopColor="#46DDED" />
-        </linearGradient>
-        <filter id={`rm-glow-${gid}`} x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="1.6" result="b" />
-          <feMerge>
-            <feMergeNode in="b" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
 
-      {yMin <= 6 && yMax >= 4 ? (
-        <rect
-          x={padL}
-          y={yAt(Math.min(yMax, 6))}
-          width={plotW}
-          height={Math.max(0, yAt(Math.max(yMin, 4)) - yAt(Math.min(yMax, 6)))}
-          fill="rgba(250,204,21,0.05)"
-        />
-      ) : null}
-      {yMax >= 10 ? (
-        <rect
-          x={padL}
-          y={yAt(Math.min(yMax, 12))}
-          width={plotW}
-          height={Math.max(0, yAt(Math.max(yMin, 10)) - yAt(Math.min(yMax, 12)))}
-          fill="rgba(74,222,128,0.06)"
-        />
-      ) : null}
-
+      {/* Horizontal dotted grid */}
       {ticks.map((t) => {
         const y = yAt(t);
         return (
@@ -751,15 +761,17 @@ function RhythmChart({
               y1={y}
               x2={W - padR}
               y2={y}
-              stroke="rgba(255,255,255,0.08)"
+              stroke="rgba(120,110,160,0.28)"
               strokeWidth={1}
+              strokeDasharray="3 4"
             />
             <text
-              x={padL - 6}
-              y={y + 3}
+              x={padL - 8}
+              y={y + 3.5}
               textAnchor="end"
-              fill="rgba(247,248,255,0.4)"
-              fontSize={9}
+              fill="#9A90C0"
+              fontSize={10}
+              fontWeight={500}
             >
               {t}
             </text>
@@ -767,100 +779,95 @@ function RhythmChart({
         );
       })}
 
+      {/* Vertical month guides */}
+      {points.map((_, i) => (
+        <line
+          key={`v-${i}`}
+          x1={xAt(i)}
+          y1={padT}
+          x2={xAt(i)}
+          y2={padT + plotH}
+          stroke="rgba(120,110,160,0.12)"
+          strokeWidth={1}
+          strokeDasharray="2 4"
+        />
+      ))}
+
       <path d={areaD} fill={`url(#rm-fill-${gid})`} />
       <path
         d={lineD}
         fill="none"
-        stroke={`url(#rm-stroke-${gid})`}
-        strokeWidth={3}
+        stroke="#8B6FE0"
+        strokeWidth={2.75}
         strokeLinecap="round"
         strokeLinejoin="round"
-        filter={`url(#rm-glow-${gid})`}
       />
 
       {points.map((p, i) => {
         const locked = isLocked(i);
-        const plotScore =
-          locked && p.kind === "future"
-            ? points[Math.max(0, i - 1)]!.score
-            : p.score;
         const x = xAt(i);
-        const y = yAt(plotScore);
-        const isSelected = i === selectedIndex && !locked;
-        const color = scoreColor(p.score);
-        const hitR = 16;
+        const y = yAt(plotScore(i));
+        const isTip = i === lastFreeIndex;
+        const isOpen = !locked && !isTip;
+
         return (
-          <g key={`${p.kind}-${p.yearCe}-${p.monthIndex}`} opacity={locked ? 0.9 : 1}>
-            {isSelected ? (
-              <text
-                x={x}
-                y={y - 12}
-                textAnchor="middle"
-                fill="#46DDED"
-                fontSize={12}
-                fontWeight={700}
-              >
-                {p.score}
-              </text>
-            ) : null}
-            {locked ? <LockMark x={x} y={y} /> : null}
+          <g key={`${p.kind}-${p.yearCe}-${p.monthIndex}`}>
+            {locked ? (
+              <LockMark x={x} y={y} />
+            ) : isTip ? (
+              <>
+                {/* Current-month focus frame */}
+                <rect
+                  x={x - 14}
+                  y={y - 14}
+                  width={28}
+                  height={28}
+                  rx={4}
+                  fill="none"
+                  stroke="#2C2458"
+                  strokeWidth={1.6}
+                  opacity={0.85}
+                />
+                <circle cx={x} cy={y} r={10} fill="rgba(74,222,128,0.28)" />
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={7}
+                  fill="#3DCF7A"
+                  stroke="#FFFFFF"
+                  strokeWidth={2.5}
+                />
+              </>
+            ) : (
+              <circle
+                cx={x}
+                cy={y}
+                r={6}
+                fill="#FFFFFF"
+                stroke="#8B6FE0"
+                strokeWidth={2.4}
+              />
+            )}
+
+            <text
+              x={x}
+              y={H - 10}
+              textAnchor="middle"
+              fill={isTip ? "#2C2458" : locked ? "#9A90C0" : "#6B6490"}
+              fontSize={11}
+              fontWeight={isTip ? 700 : isOpen ? 600 : 500}
+              className="pointer-events-none"
+            >
+              {MONTH_LABELS_TH[p.monthIndex]}
+            </text>
+
             <circle
               cx={x}
               cy={y}
-              r={isSelected ? 7 : locked ? 5 : 4}
-              fill={
-                locked
-                  ? "rgba(244,188,82,0.35)"
-                  : isSelected
-                    ? color
-                    : "rgba(255,255,255,0.55)"
-              }
-              stroke={
-                locked
-                  ? "rgba(244,188,82,0.7)"
-                  : isSelected
-                    ? "#fff"
-                    : "rgba(255,255,255,0.35)"
-              }
-              strokeWidth={isSelected || locked ? 2 : 1}
-              strokeDasharray={locked && p.kind === "future" ? "2 2" : undefined}
-              className="pointer-events-none"
-            />
-            <text
-              x={x}
-              y={H - 22}
-              textAnchor="middle"
-              fill={
-                isSelected
-                  ? "rgba(247,248,255,0.95)"
-                  : locked
-                    ? "rgba(244,188,82,0.75)"
-                    : "rgba(247,248,255,0.5)"
-              }
-              fontSize={isSelected ? 10 : 9}
-              fontWeight={isSelected || locked ? 600 : 400}
-              className="pointer-events-none"
-            >
-              {monthShort(p.monthIndex, p.yearCe)}
-            </text>
-            <text
-              x={x}
-              y={H - 9}
-              textAnchor="middle"
-              fill={
-                locked ? "rgba(244,188,82,0.55)" : "rgba(247,248,255,0.32)"
-              }
-              fontSize={8}
-              className="pointer-events-none"
-            >
-              {p.kind === "future" ? "เดือนหน้า" : locked ? "ล็อก" : ""}
-            </text>
-            <circle
-              cx={x}
-              cy={y}
-              r={hitR}
+              r={16}
               fill="transparent"
-              className="cursor-pointer"
+              className="cursor-pointer outline-none focus:outline-none"
+              style={{ outline: "none" }}
               role="button"
               tabIndex={0}
               aria-label={
@@ -868,8 +875,11 @@ function RhythmChart({
                   ? `ปลดล็อก${MONTH_NAMES_TH[p.monthIndex]}`
                   : `ดู${MONTH_NAMES_TH[p.monthIndex]} คะแนน ${p.score}`
               }
-              aria-pressed={isSelected}
+              aria-pressed={i === selectedIndex && !locked}
               onClick={() => onSelect(i)}
+              onPointerDown={(e) => {
+                e.currentTarget.blur();
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -947,27 +957,12 @@ function FreeMonthTrendTeaser({
 
   const chartPoints = useMemo((): ChartPoint[] | null => {
     if (!series) return null;
-    const nextDate = new Date(curYear, curIdx + 1, 1);
-    const last = series[series.length - 1]!;
-    const forecast = Math.min(
-      12,
-      Math.max(1, last.score + ((last.score % 3) - 1))
-    );
-    return [
-      ...series.map((p) => ({ ...p, kind: "past" as const })),
-      {
-        monthIndex: nextDate.getMonth(),
-        yearCe: nextDate.getFullYear(),
-        score: forecast,
-        kind: "future" as const,
-      },
-    ];
-  }, [series, curYear, curIdx]);
+    return series.map((p) => ({ ...p, kind: "past" as const }));
+  }, [series]);
 
-  /** Free: current month + 1 month back only; future always locked until unlock */
-  const freeMinIndex = !hasData ? 0 : Math.max(0, pastCount - 2);
+  /** Free: current month only — history locked until premium */
+  const freeMinIndex = !hasData ? 0 : Math.max(0, pastCount - 1);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
 
   function pointLocked(index: number) {
     if (!chartPoints) return false;
@@ -991,7 +986,6 @@ function FreeMonthTrendTeaser({
       return;
     }
     setSelectedIndex(index);
-    setDetailOpen(false);
   }
 
   const prev = hasData
@@ -1004,29 +998,6 @@ function FreeMonthTrendTeaser({
   const cur = hasData
     ? series![series!.length - 1]!
     : { monthIndex: curIdx, yearCe: curYear, score: 0 };
-
-  const selected = hasData ? chartPoints![safeSelected]! : { ...cur, kind: "past" as const };
-  const selectedBand = hasData && !pointLocked(safeSelected) ? scoreBand(selected.score) : null;
-  const selectedColor = hasData ? scoreColor(selected.score) : "#46DDED";
-  const selectedWhen =
-    selected.kind === "future"
-      ? "เดือนหน้า"
-      : safeSelected === lastFreeIndex
-        ? "เดือนนี้"
-        : safeSelected === lastFreeIndex - 1
-          ? "เดือนก่อน"
-          : "เดือนที่เลือก";
-  const selectedDescribe = hasData
-    ? monthDescribe(selected, selected.kind)
-    : "";
-
-  const prevLabel = monthLabel(prev.monthIndex, prev.yearCe);
-  const curLabel = monthLabel(cur.monthIndex, cur.yearCe);
-  const nextLabel = monthLabel(
-    new Date(curYear, curIdx + 1, 1).getMonth(),
-    new Date(curYear, curIdx + 1, 1).getFullYear()
-  );
-  const fix = hasData ? basicFix(prev.score, cur.score) : null;
 
   const diff = hasData ? cur.score - prev.score : 0;
   let deltaLabel = "คงที่";
@@ -1048,153 +1019,123 @@ function FreeMonthTrendTeaser({
     }
   }
 
+  const trendUp = hasData && diff > 0;
+  const curBand = hasData ? scoreBand(cur.score) : null;
+
   return (
-    <section className={cn("space-y-2", className)}>
-      <div className="flex items-start justify-between gap-3 px-0.5">
-        <div className="flex min-w-0 items-center gap-2">
-          <ChartNoAxesColumn
-            className="h-4 w-4 shrink-0 text-[#67e8f9]"
-            strokeWidth={1.7}
-          />
-          <h2 className="text-[15px] font-semibold tracking-wide text-white">
-            จังหวะชีวิต
-            <span className="text-[#e8c547]/90">ช่วงนี้</span>
-          </h2>
+    <section className={cn("fortune-glass space-y-3 rounded-[18px] px-3.5 py-4", className)}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <ChartNoAxesColumn
+              className="h-5 w-5 shrink-0 text-[#7B5FD4]"
+              strokeWidth={2}
+            />
+            <h2 className="text-[17px] font-semibold tracking-wide text-[#2C2458]">
+              จังหวะชีวิตช่วงนี้
+            </h2>
+          </div>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-[#5E5688]">
+            ดูแนวโน้มและวางแผนล่วงหน้า
+          </p>
         </div>
-        <p className="max-w-[10rem] pt-0.5 text-right text-[10.5px] leading-snug text-white/38">
-          ฟรีดูเดือนนี้กับเดือนก่อน
-        </p>
+        {hasData ? (
+          <span
+            className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-semibold"
+            style={{
+              color: trendUp ? "#2F9E5F" : deltaColor,
+              background: trendUp ? "rgba(74,222,128,0.16)" : `${deltaColor}18`,
+              boxShadow: `inset 0 0 0 1px ${trendUp ? "rgba(74,222,128,0.45)" : `${deltaColor}55`}`,
+            }}
+          >
+            <DeltaIcon className="h-3.5 w-3.5" strokeWidth={2.2} />
+            {trendUp ? "แนวโน้มดีขึ้น" : deltaLabel}
+          </span>
+        ) : null}
       </div>
 
-      <div className="overflow-hidden rounded-[22px] px-1 pb-1 pt-1">
-        <div className="flex items-start justify-between gap-2 px-0.5">
-          <div className="min-w-0">
-            <p className="text-[12px] text-white/50">
-              {prevLabel} → {curLabel}
-              <span className="text-[#F4BC52]/75"> · {nextLabel} ล็อก</span>
-            </p>
-            <p className="mt-1 text-[12px] leading-relaxed text-white/40">
-              ฟรีดูเดือนนี้กับเดือนก่อน · ปลดล็อกเพื่อดูจังหวะ 12 ปีและวิเคราะห์รายปี
-            </p>
-          </div>
-          {hasData ? (
-            <span
-              className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-              style={{
-                color: deltaColor,
-                background: `${deltaColor}18`,
-                boxShadow: `inset 0 0 0 1px ${deltaColor}55`,
-              }}
-            >
-              <DeltaIcon className="h-3.5 w-3.5" strokeWidth={2.2} />
-              {deltaLabel}
-            </span>
-          ) : null}
+      {hasData && chartPoints ? (
+        <RhythmChart
+          points={chartPoints}
+          selectedIndex={safeSelected}
+          onSelect={selectPoint}
+          isLocked={pointLocked}
+        />
+      ) : (
+        <div className="rounded-[14px] border border-dashed border-[#7B6BB0]/25 bg-white/40 px-3 py-5 text-center">
+          <p className="text-[14px] font-medium text-[#2C2458]">
+            ยังไม่มีข้อมูลจังหวะรายเดือน
+          </p>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-[#5E5688]">
+            ส่วนนี้รอคะแนนรายเดือนจากระบบคำนวณ
+          </p>
         </div>
+      )}
 
-        {hasData && chartPoints ? (
-          <RhythmChart
-            points={chartPoints}
-            selectedIndex={safeSelected}
-            onSelect={selectPoint}
-            isLocked={pointLocked}
-          />
-        ) : (
-          <div className="mt-3 rounded-[14px] border border-dashed border-white/15 bg-white/[0.04] px-3 py-5 text-center">
-            <p className="text-[14px] font-medium text-white">
-              ยังไม่มีข้อมูลจังหวะรายเดือน
-            </p>
-            <p className="mt-1.5 text-[12px] leading-relaxed text-white/45">
-              ส่วนนี้รอคะแนนรายเดือนจากระบบคำนวณ
+      {hasData && curBand ? (
+        <div className="rounded-[16px] border border-[#3DCF7A]/35 bg-[#3DCF7A]/10 px-3.5 py-3.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[12px] font-semibold tracking-wide text-[#2F9E5F]">
+                เดือนปัจจุบัน · {MONTH_NAMES_TH[cur.monthIndex]}{" "}
+                {cur.yearCe + 543}
+              </p>
+              <p className="mt-1 text-[15px] font-semibold text-[#2C2458]">
+                {curBand.label}
+              </p>
+            </div>
+            <p
+              className="shrink-0 text-[1.35rem] font-bold tabular-nums"
+              style={{ color: scoreColor(cur.score) }}
+            >
+              {cur.score}
+              <span className="text-[13px] font-semibold text-[#6B6490]">
+                /12
+              </span>
             </p>
           </div>
-        )}
+          <p className="mt-2.5 text-[13px] leading-[1.65] text-[#3A3270]">
+            {curBand.meaning}
+          </p>
+          <p className="mt-2 text-[13px] leading-[1.65] text-[#4A4278]">
+            <span className="font-semibold text-[#2C2458]">ใช้ยังไง · </span>
+            {curBand.use}
+          </p>
+        </div>
+      ) : null}
 
-        {hasData && selectedBand && fix ? (
-          <>
-            <div className="mt-3.5 border-t border-white/[0.08] pt-3">
-              <button
-                type="button"
-                aria-expanded={detailOpen}
-                onClick={() => setDetailOpen((v) => !v)}
-                className="flex w-full items-start justify-between gap-2 text-left outline-none transition active:opacity-80 focus-visible:ring-2 focus-visible:ring-white/25"
-              >
-                <div className="min-w-0">
-                  <p className="text-[11px] text-white/45">{selectedWhen}</p>
-                  <p className="mt-1 text-[13px] font-semibold text-white">
-                    {MONTH_NAMES_TH[selected.monthIndex]} · {selectedBand.label}
-                  </p>
-                  {!detailOpen ? (
-                    <p className="mt-1 text-[11px] text-white/40">
-                      กดดูรายละเอียดเดือนนี้
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-2">
-                  <p
-                    className="text-[13px] font-bold tabular-nums"
-                    style={{ color: selectedColor }}
-                  >
-                    {selected.score}/12
-                  </p>
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 text-white/40 transition-transform duration-300",
-                      detailOpen && "rotate-180 text-white/70"
-                    )}
-                    strokeWidth={2}
-                  />
-                </div>
-              </button>
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[12px] text-[#6B6490]">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#3DCF7A]" />
+          เดือนปัจจุบัน · ดูได้ฟรี
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <FortuneIcon name="lock" size={22} />
+          ปลดล็อกเพื่อดูย้อนหลัง
+        </span>
+      </div>
 
-              <div
-                className={cn(
-                  "grid transition-[grid-template-rows] duration-300 ease-out",
-                  detailOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                )}
-              >
-                <div className="overflow-hidden">
-                  <div className="pt-2.5">
-                    <p className="text-[12px] leading-[1.65] text-white/60">
-                      {selectedDescribe}
-                    </p>
-                    <p className="mt-2 text-[12px] leading-[1.65] text-[#D5E0F0]">
-                      <span className="font-semibold text-[#E8EEF8]">จุดเด่น · </span>
-                      {selectedBand.strength}
-                    </p>
-                    <p className="mt-1 text-[12px] leading-[1.65] text-[#D5E0F0]">
-                      <span className="font-semibold text-[#E8EEF8]">ใช้ยังไง · </span>
-                      {selectedBand.use}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={onUnlock}
-              disabled={!onUnlock}
-              className="mt-3 flex w-full items-center gap-3 rounded-[14px] border border-white/10 bg-white/[0.05] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/25 disabled:opacity-60"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.06]">
-                <Lock className="h-4 w-4 text-[#E4C56A]" strokeWidth={1.9} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[13px] font-semibold text-white">
-                  ปลดล็อกจังหวะชีวิต 12 ปี
-                </span>
-                <span className="mt-0.5 block text-[11.5px] leading-snug text-white/50">
-                  ดูกราฟครบและวิเคราะห์แต่ละปี · {FORTUNE_UNLOCK_PRICE} บาท
-                </span>
-              </span>
-              <ChevronRight
-                className="h-4 w-4 shrink-0 text-[#E4C56A]"
-                strokeWidth={2.2}
-              />
-            </button>
-          </>
-        ) : null}
+      <div className="flex items-center gap-2.5 rounded-[14px] bg-[#4A2B6A] px-3 py-2.5">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+          <FortuneIcon name="finance" size={40} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-semibold leading-snug text-white">
+            เห็นจังหวะชีวิตได้ไกลกว่าเดิม
+          </p>
+          <p className="mt-0.5 text-[11px] leading-snug text-white/65">
+            เจาะลึกเส้นทางชีวิต 12 ปี พร้อมคำแนะนำเฉพาะคุณ
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onUnlock}
+          disabled={!onUnlock}
+          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#7B5FD4] px-3 py-2 text-[11px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-60"
+        >
+          ปลดล็อกพรีเมียม · {FORTUNE_UNLOCK_PRICE} บาท
+          <FortuneIcon name="arrow-right" size={20} />
+        </button>
       </div>
     </section>
   );

@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
   CalendarRange,
-  ChartNoAxesColumnIncreasing,
+  ChartNoAxesColumn,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Compass,
-  Crown,
-  Sparkles,
+  Heart,
 } from "lucide-react";
 import { AnimatedPage } from "@/components/ui/reveal";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
@@ -22,32 +23,34 @@ import {
 } from "@/lib/fortune/profile-storage";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 
+const LIST_PRICE = 699;
+
 const FEATURES = [
   {
     title: "ปฏิทินฤกษ์ 12 ปี",
-    sub: "เลือกวันมงคล พลังงาน และจุดที่ควรระวัง",
+    detail: "เลือกวันมงคล พลังงาน และช่วงที่ควรระวัง",
     Icon: CalendarRange,
   },
   {
-    title: "เจาะลึกราศีของคุณ",
-    sub: "บุคลิก จุดแข็ง จุดเปลี่ยน และคำแนะนำเฉพาะราศี",
+    title: "เจาะลึกดวงราศีของคุณ",
+    detail: "บุคลิก จุดแข็ง จุดเปลี่ยน และคำแนะนำเฉพาะคุณ",
     Icon: Compass,
   },
   {
     title: "เส้นทางชีวิต 12 ปี",
-    sub: "จุดเปลี่ยนรายปีพร้อมแนวทางพิจารณา",
-    Icon: ChartNoAxesColumnIncreasing,
+    detail: "จุดเปลี่ยนรายปี พร้อมแนวทางรับมือ",
+    Icon: ChartNoAxesColumn,
   },
   {
     title: "งาน · เงิน · ความรัก",
-    sub: "อ่านเชิงลึกในเรื่องที่กระทบชีวิตจริง",
-    Icon: Sparkles,
+    detail: "อ่านเชิงลึกในเรื่องที่กระทบชีวิตจริง",
+    Icon: Heart,
   },
 ] as const;
 
-const RITES = [
+const BEFORE_READ = [
   "ตั้งจิตให้สงบก่อนอ่าน",
-  "ใช้เป็นแสงนำทาง ไม่ใช่คำตัดสิน",
+  "ใช้เป็นแนวทาง ไม่ใช่คำตัดสิน",
   "เลือกวันมงคลก่อนเริ่มเรื่องสำคัญ",
 ] as const;
 
@@ -65,7 +68,7 @@ function hasWizardReading() {
   }
 }
 
-/** Sales / unlock only — unlocked content lives on PremiumHomePage */
+/** Premium sales — open Guanyin hero + glass cards + clear buy CTA */
 export function PremiumSalesPage({
   onUnlocked,
 }: {
@@ -95,89 +98,83 @@ export function PremiumSalesPage({
     onUnlocked?.();
   }
 
+  function openPay() {
+    if (hasReading) setPayOpen(true);
+  }
+
+  const ctaClass =
+    "no-sky-lift flex w-full items-center justify-between rounded-full px-5 py-3.5 outline-none transition active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45";
+  const ctaStyle = {
+    background: "linear-gradient(90deg, #6A48C8 0%, #8B6AD8 52%, #B29AEF 100%)",
+  } as const;
+
   return (
-    <AnimatedPage className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-4 pb-6 pt-5">
-      <section className="fortune-glass relative overflow-hidden rounded-[22px] px-4 pb-5 pt-6 text-center">
+    <AnimatedPage className="sky-copy mx-auto flex w-full max-w-[480px] flex-col px-3 pb-4 pt-2">
+      {/* Header */}
+      <div className="relative z-10 grid grid-cols-[1fr_auto_1fr] items-center px-0.5">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+        >
+          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+          กลับ
+        </Link>
+        <span className="justify-self-center" aria-hidden />
+        <span className="justify-self-end" aria-hidden />
+      </div>
+
+      {/* Compact Guanyin breathe — keep face visible, less empty scroll */}
+      <div className="relative h-[72px] shrink-0" aria-hidden />
+
+      {/* Title + price — padding so white text-shadow isn't clipped */}
+      <div className="relative z-10 -mt-1 overflow-visible px-1 py-3 text-center">
         <div
-          className="pointer-events-none absolute inset-0 opacity-60"
-          aria-hidden
+          className="pointer-events-none absolute inset-x-[-8%] -top-2 -bottom-2 -z-10 rounded-[36px]"
           style={{
-            background: [
-              "radial-gradient(ellipse 80% 55% at 50% -10%, rgba(244,188,82,0.22), transparent 55%)",
-              "radial-gradient(circle at 12% 88%, rgba(187,108,240,0.12), transparent 40%)",
-            ].join(", "),
+            background:
+              "radial-gradient(ellipse 75% 70% at 50% 45%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.35) 55%, transparent 78%)",
           }}
+          aria-hidden
         />
-        <div className="relative z-[1]">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center">
-            <Image
-              src="/images/icons/star-gold.png"
-              alt=""
-              width={56}
-              height={56}
-              className="object-contain"
-              style={{ mixBlendMode: "screen" }}
-              unoptimized
-            />
-          </div>
-          <p className="mt-2 text-[11px] font-semibold tracking-[0.28em] text-[#F4BC52]/90">
-            DOODUANG · SACRED READING
-          </p>
-          <h1 className="font-sacred mt-2 text-[2rem] leading-tight tracking-wide text-[#F7F8FF] drop-shadow-[0_0_24px_rgba(244,188,82,0.28)]">
-            ดวง<span className="intro-title-accent">พรีเมียม</span>
-          </h1>
-          <p className="mx-auto mt-2 max-w-[20rem] text-[14px] leading-relaxed text-[#9AB8DC]">
-            ปลดล็อกแล้วจะเปิดหน้าดวงเต็มบนแท็บนี้ — ปฏิทินครบ จังหวะเดือน
-            และเนื้อหาเชิงลึก
-          </p>
 
-          <div className="mt-4 flex items-end justify-center gap-2">
-            <span className="pb-1 text-[14px] text-[#9AB8DC]/55 line-through">
-              699
-            </span>
-            <span
-              className="text-[40px] font-bold leading-none tracking-tight"
-              style={{
-                background:
-                  "linear-gradient(180deg, #FFF8E4 8%, #F4BC52 48%, #C9922E 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              {FORTUNE_UNLOCK_PRICE}.-
-            </span>
-            <span className="pb-1.5 text-[13px] text-[#9AB8DC]">บาท</span>
-          </div>
+        <h1 className="text-[1.85rem] font-bold leading-tight tracking-tight text-[#241C4F]">
+          ดวงพรีเมียม
+        </h1>
+        <p className="mx-auto mt-1.5 max-w-[19rem] text-[12.5px] leading-snug text-[#4A4278]">
+          เปิดคำทำนายฉบับเต็ม จังหวะชีวิตและคำแนะนำเฉพาะคุณ
+        </p>
+
+        <div className="mt-2.5 flex items-center justify-center gap-2">
+          <span className="text-[14px] text-[#9A90C0] line-through">
+            {LIST_PRICE} บาท
+          </span>
+          <span className="text-[1.65rem] font-bold tabular-nums leading-tight text-[#241C4F]">
+            {FORTUNE_UNLOCK_PRICE}
+            <span className="ml-1 text-[1rem] font-semibold">บาท</span>
+          </span>
         </div>
-      </section>
+      </div>
 
-      <section className="fortune-glass rounded-[20px] px-3.5 py-4">
-        <div className="mb-3 flex items-center gap-2">
-          <Crown className="h-4 w-4 text-[#F4BC52]" strokeWidth={1.9} />
-          <h2 className="font-sacred text-[1.25rem] text-[#F7F8FF]">
+      {/* Benefits — tighter */}
+      <section className="fortune-glass relative z-10 mt-3 rounded-[18px] px-3.5 py-3">
+        <div className="mb-2 flex items-center gap-1.5">
+          <FortuneIcon name="sparkle" size={15} />
+          <h2 className="text-[14px] font-semibold text-[#241C4F]">
             สิ่งที่คุณจะได้รับ
           </h2>
         </div>
-        <ul className="space-y-3">
-          {FEATURES.map(({ title, sub, Icon }) => (
-            <li key={title} className="flex items-start gap-3">
-              <span
-                className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-                style={{
-                  background:
-                    "linear-gradient(160deg, rgba(244,188,82,0.22), rgba(244,188,82,0.06))",
-                  boxShadow: "inset 0 0 0 1px rgba(244,188,82,0.4)",
-                }}
-              >
-                <Icon className="h-4 w-4 text-[#F4BC52]" strokeWidth={1.8} />
+        <ul className="space-y-2">
+          {FEATURES.map(({ title, detail, Icon }) => (
+            <li key={title} className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E8DFFC] ring-1 ring-[#9B7FE8]/28">
+                <Icon className="h-4 w-4 text-[#5B45B8]" strokeWidth={2} />
               </span>
-              <div className="min-w-0 pt-0.5">
-                <p className="text-[15px] font-semibold text-[#F7F8FF]">
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold leading-snug text-[#241C4F]">
                   {title}
                 </p>
-                <p className="mt-0.5 text-[13px] leading-snug text-[#9AB8DC]">
-                  {sub}
+                <p className="mt-0.5 text-[11px] leading-snug text-[#5E5688]">
+                  {detail}
                 </p>
               </div>
             </li>
@@ -185,16 +182,21 @@ export function PremiumSalesPage({
         </ul>
       </section>
 
-      <section className="fortune-glass rounded-[20px] px-3.5 py-4">
-        <h2 className="font-sacred text-[1.2rem] text-[#F7F8FF]">ก่อนเปิดอ่าน</h2>
-        <ul className="mt-3 space-y-2.5">
-          {RITES.map((line) => (
-            <li key={line} className="flex items-start gap-2.5">
-              <Check
-                className="mt-0.5 h-4 w-4 shrink-0 text-[#F4BC52]"
-                strokeWidth={2.2}
-              />
-              <span className="text-[14px] leading-relaxed text-[#9AB8DC]">
+      {/* Before read — compact one block */}
+      <section className="fortune-glass relative z-10 mt-2 rounded-[18px] px-3.5 py-2.5">
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <FortuneIcon name="sparkle" size={15} />
+          <h2 className="text-[14px] font-semibold text-[#241C4F]">
+            ก่อนเปิดอ่าน
+          </h2>
+        </div>
+        <ul className="space-y-1.5">
+          {BEFORE_READ.map((line) => (
+            <li key={line} className="flex items-center gap-2">
+              <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[#F6E2A6]">
+                <Check className="h-2.5 w-2.5 text-[#A07E1A]" strokeWidth={2.8} />
+              </span>
+              <span className="text-[12px] leading-snug text-[#3A3270]">
                 {line}
               </span>
             </li>
@@ -202,46 +204,36 @@ export function PremiumSalesPage({
         </ul>
       </section>
 
-      <div className="space-y-2.5">
+      {/* Buy CTA */}
+      <div className="relative z-10 mt-3 space-y-2">
         {hasReading ? (
           <button
             type="button"
-            onClick={() => setPayOpen(true)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[15px] font-semibold text-[#1A1208] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/55"
-            style={{
-              background:
-                "linear-gradient(135deg, #FFF0C4 0%, #F4BC52 40%, #C9922E 100%)",
-              boxShadow:
-                "0 12px 32px rgba(244,188,82,0.38), inset 0 1px 0 rgba(255,255,255,0.45)",
-            }}
+            onClick={openPay}
+            className={ctaClass}
+            style={ctaStyle}
           >
-            <Sparkles className="h-4 w-4" strokeWidth={2} />
-            ปลดล็อกหน้าพรีเมียม
+            <span className="inline-flex min-w-0 items-center gap-2 text-[15px] font-bold text-white">
+              <FortuneIcon name="sparkle" size={18} />
+              <span className="truncate">
+                ปลดล็อกดวงพรีเมียม · {FORTUNE_UNLOCK_PRICE} บาท
+              </span>
+            </span>
+            <ChevronRight className="h-5 w-5 shrink-0 text-white" strokeWidth={2.4} />
           </button>
         ) : (
-          <Link
-            href="/reading"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[15px] font-semibold text-[#1A1208] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/55"
-            style={{
-              background:
-                "linear-gradient(135deg, #FFF0C4 0%, #F4BC52 40%, #C9922E 100%)",
-              boxShadow:
-                "0 12px 32px rgba(244,188,82,0.38), inset 0 1px 0 rgba(255,255,255,0.45)",
-            }}
-          >
-            <Sparkles className="h-4 w-4" strokeWidth={2} />
-            เริ่มดูดวงแล้วปลดล็อกพรีเมียม
+          <Link href="/reading" className={ctaClass} style={ctaStyle}>
+            <span className="inline-flex min-w-0 items-center gap-2 text-[15px] font-bold text-white">
+              <FortuneIcon name="sparkle" size={18} />
+              <span className="truncate">เริ่มดูดวงแล้วปลดล็อกพรีเมียม</span>
+            </span>
+            <ChevronRight className="h-5 w-5 shrink-0 text-white" strokeWidth={2.4} />
           </Link>
         )}
-        <p className="text-center text-[12px] leading-relaxed text-[#9AB8DC]/75">
-          หลังชำระเงิน แท็บพรีเมียมจะกลายเป็นหน้าดวงแบบปลดล็อกเต็ม
+        <p className="flex items-center justify-center gap-1.5 text-[11px] text-[#6B6490]">
+          <FortuneIcon name="lock" size={14} />
+          ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
         </p>
-        <Link
-          href="/login"
-          className="block text-center text-[13px] text-[#F4BC52]/85 underline-offset-2 hover:underline"
-        >
-          จัดการบัญชี / เข้าสู่ระบบ
-        </Link>
       </div>
 
       <FortunePaymentSheet

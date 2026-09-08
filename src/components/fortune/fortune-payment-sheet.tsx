@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useId, useState } from "react";
-import { Loader2, Lock, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Check, Loader2, Lock, X } from "lucide-react";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
-import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
 
 type Step = "ready" | "redirecting";
@@ -14,7 +16,17 @@ type SessionUser = {
   email?: string | null;
 };
 
-/** Stripe Checkout for 399 premium unlock — requires Google login first */
+const PERKS = [
+  `ใช้งานเต็ม ${FORTUNE_PACKAGE_MONTHS} เดือน`,
+  "ปฏิทินฤกษ์ · ราศีเชิงลึก · เส้นทาง 12 ปี",
+  "แผนที่ตัวตน · งานเงินรัก · โหงวเฮ้งและลายมือ",
+] as const;
+
+/** Stripe Checkout modal — light lilac glass (mockup) */
+const IS_LOCAL_DEV =
+  process.env.NODE_ENV === "development" ||
+  process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
+
 export function FortunePaymentSheet({
   open,
   onClose,
@@ -27,6 +39,7 @@ export function FortunePaymentSheet({
   returnPath?: string;
 }) {
   const titleId = useId();
+  const [host, setHost] = useState<HTMLElement | null>(null);
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [step, setStep] = useState<Step>("ready");
@@ -61,12 +74,26 @@ export function FortunePaymentSheet({
 
   useEffect(() => {
     if (!open) return;
+    setHost(document.querySelector(".phone-frame") as HTMLElement | null);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && step !== "redirecting") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose, step]);
 
   async function startCheckout() {
     setError(null);
@@ -104,123 +131,209 @@ export function FortunePaymentSheet({
     }
   }
 
-  if (!open) return null;
+  if (!open || !host) return null;
 
-  return (
+  const monthly = Math.round(FORTUNE_UNLOCK_PRICE / FORTUNE_PACKAGE_MONTHS);
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center"
+      className="no-sky-lift absolute inset-0 z-[80] flex items-center justify-center px-3.5"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
     >
       <button
         type="button"
-        className="absolute inset-0 bg-[#050810]/72 backdrop-blur-[6px]"
+        className="absolute inset-0 bg-[#3A2F6B]/28 backdrop-blur-[6px]"
         aria-label="ปิด"
         onClick={step === "redirecting" ? undefined : onClose}
       />
 
       <div
-        className="relative z-[1] w-full max-w-[420px] overflow-hidden rounded-t-[28px] sm:rounded-[28px]"
+        className="relative z-[1] w-full max-w-[360px] overflow-hidden rounded-[28px]"
         style={{
-          border: "1px solid rgba(255,255,255,0.12)",
           background:
-            "linear-gradient(165deg, rgba(14,16,34,0.98), rgba(18,16,28,0.99))",
-          boxShadow: "0 -8px 40px rgba(0,0,0,0.45)",
+            "linear-gradient(165deg, rgba(255,255,255,0.92) 0%, rgba(248,244,255,0.9) 45%, rgba(242,236,255,0.88) 100%)",
+          border: "1px solid rgba(255,255,255,0.95)",
+          boxShadow: [
+            "0 24px 60px rgba(80,55,150,0.22)",
+            "0 0 0 1px rgba(155,127,232,0.18)",
+            "inset 0 1px 0 rgba(255,255,255,0.95)",
+          ].join(", "),
+          backdropFilter: "blur(22px) saturate(1.2)",
+          WebkitBackdropFilter: "blur(22px) saturate(1.2)",
         }}
       >
-        <div className="flex items-center justify-between px-4 pb-2 pt-4">
-          <span className="h-9 w-9" />
-          <div className="text-center">
-            <p
-              id={titleId}
-              className="text-[13px] font-semibold tracking-[0.14em] text-[#E4C56A]"
-            >
-              ชำระเงิน
-            </p>
-            <p className="mt-0.5 text-[12px] text-[#9AB8DC]">ดวงพรีเมียม</p>
+        {/* Soft cloud wash */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden
+          style={{
+            background: [
+              "radial-gradient(ellipse 90% 55% at 50% -5%, rgba(255,255,255,0.95), transparent 60%)",
+              "radial-gradient(circle at 85% 12%, rgba(196,176,245,0.28), transparent 42%)",
+              "radial-gradient(circle at 15% 88%, rgba(244,188,82,0.1), transparent 40%)",
+            ].join(", "),
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={step === "redirecting"}
+          className="absolute right-3 top-3 z-[2] flex h-8 w-8 items-center justify-center rounded-full text-[#7A72A0] outline-none transition hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4 disabled:opacity-40"
+          aria-label="ปิด"
+        >
+          <X className="h-4 w-4" strokeWidth={2} />
+        </button>
+
+        <div className="relative z-[1] px-5 pb-5 pt-7 text-center">
+          <div className="relative mx-auto flex h-14 w-14 items-center justify-center">
+            <span
+              className="pointer-events-none absolute inset-[-6px] rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(244,188,82,0.28) 0%, transparent 68%)",
+              }}
+              aria-hidden
+            />
+            <FortuneIcon name="sparkle" size={48} />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={step === "redirecting"}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-[#9AB8DC] outline-none focus-visible:ring-2 focus-visible:ring-white/25 disabled:opacity-40"
-            aria-label="ปิด"
+
+          <p className="mt-3 font-sacred text-[11px] tracking-[0.2em] text-[#C9A227]">
+            DOODUANG · PREMIUM
+          </p>
+          <h2
+            id={titleId}
+            className="mt-2 text-[1.55rem] font-bold leading-tight tracking-tight text-[#241C4F]"
           >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+            ปลดล็อกดวงพรีเมียม
+          </h2>
+          <p className="mx-auto mt-1.5 max-w-[17rem] text-[13px] leading-snug text-[#5E5688]">
+            แพ็ก {PREMIUM_UNLOCK.months} เดือน · เปิดเนื้อหาเต็มแบบพรีเมียม
+          </p>
 
-        <div className="relative z-[1] space-y-4 px-4 pb-6 pt-2">
-          <div className="rounded-[18px] border border-white/10 bg-white/[0.04] px-4 py-4 text-center">
-            <p className="text-[12px] text-[#9AB8DC]">ราคาปลดล็อก</p>
-            <p className="mt-1 font-sacred text-[2rem] text-[#F7F8FF]">
-              {FORTUNE_UNLOCK_PRICE}
-              <span className="ml-1 text-[1rem] text-[#E4C56A]">บาท</span>
-            </p>
-            <p className="mt-2 text-[12px] leading-relaxed text-[#B7C3D8]">
-              ชำระผ่าน Stripe · ปลอดภัย
-            </p>
+          <p className="mt-4 text-[2.35rem] font-bold leading-none tabular-nums tracking-tight text-[#241C4F]">
+            {FORTUNE_UNLOCK_PRICE}{" "}
+            <span className="text-[1.15rem] font-semibold">บาท</span>
+          </p>
+          <p className="mt-1.5 text-[12px] text-[#7A72A0]">
+            เฉลี่ย {monthly} บาท/เดือน · ชำระผ่าน Stripe
+          </p>
+
+          <div
+            className="mx-auto mt-4 max-w-[19rem] border-y border-[#7B6BB0]/14 py-3.5"
+          >
+            <ul className="space-y-2.5 text-left">
+              {PERKS.map((line) => (
+                <li key={line} className="flex items-start gap-2.5">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#F6E2A6] ring-1 ring-[#E0B84A]/4">
+                    <Check
+                      className="h-3 w-3 text-[#8F6F14]"
+                      strokeWidth={2.6}
+                    />
+                  </span>
+                  <span className="text-[13px] leading-snug text-[#3A3270]">
+                    {line}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {loadingSession ? (
-            <div className="flex items-center justify-center gap-2 py-6 text-[13px] text-[#9AB8DC]">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              กำลังตรวจสอบสถานะเข้าสู่ระบบ…
-            </div>
-          ) : !user ? (
-            <div className="space-y-3">
-              <div className="flex items-start gap-2 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-3">
-                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-[#E4C56A]" />
-                <p className="text-[13px] leading-relaxed text-[#D5E0F0]">
-                  ก่อนชำระเงินทุกครั้ง ต้องเข้าสู่ระบบด้วย Google ก่อน
+          <div className="mt-4">
+            {IS_LOCAL_DEV ? (
+              <div className="mb-3 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => onPaid()}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[15px] font-bold text-white outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #6A48C8 0%, #8B6AD8 52%, #B29AEF 100%)",
+                    boxShadow:
+                      "0 12px 28px rgba(106,72,200,0.36), inset 0 1px 0 rgba(255,255,255,0.35)",
+                  }}
+                >
+                  จำลองชำระสำเร็จ · ดูพรีเมียม
+                </button>
+                <p className="text-[11px] text-[#9B7FE8]">
+                  โหมด local — ข้าม Google / Stripe
                 </p>
               </div>
-              <GoogleSignInButton
-                label="ล็อกอินด้วย Google เพื่อชำระเงิน"
-                onSuccess={async () => {
-                  await refreshSession();
-                }}
-              />
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <p className="text-center text-[12px] text-[#9AB8DC]">
-                เข้าสู่ระบบแล้ว
-                {user.email ? ` · ${user.email}` : ""}
-              </p>
-              <button
-                type="button"
-                onClick={() => void startCheckout()}
-                disabled={step === "redirecting"}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[15px] font-semibold text-[#1A1208] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#E4C56A]/5 disabled:opacity-60"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #FFF0C4 0%, #F4BC52 40%, #C9922E 100%)",
-                }}
-              >
-                {step === "redirecting" ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    กำลังไปหน้า Stripe…
-                  </>
-                ) : (
-                  <>ชำระ {FORTUNE_UNLOCK_PRICE} บาทด้วย Stripe</>
-                )}
-              </button>
-            </div>
-          )}
+            ) : null}
 
-          {error ? (
-            <p className="text-center text-[12px] text-rose-300/90">{error}</p>
-          ) : null}
+            {loadingSession ? (
+              <div className="flex items-center justify-center gap-2 py-3 text-[13px] text-[#6B6490]">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                กำลังตรวจสอบสถานะเข้าสู่ระบบ…
+              </div>
+            ) : !user ? (
+              <div className="space-y-3">
+                <p className="text-[12px] leading-relaxed text-[#5E5688]">
+                  เข้าสู่ระบบด้วย Google ก่อนชำระ
+                  <br />
+                  เพื่อยืนยันสิทธิ์พรีเมียมของคุณ
+                </p>
+                <GoogleSignInButton
+                  label="เข้าสู่ระบบด้วย Google"
+                  className="space-y-2"
+                  variant="outline"
+                  coloredIcon
+                  buttonClassName="h-12 rounded-full border-[#C8B8F0]/55 bg-white text-[15px] font-semibold text-[#241C4F] shadow-[0_8px_22px_rgba(110,79,201,0.14)] hover:bg-[#FBF8FF] hover:border-[#9B7FE8]/45 hover:text-[#241C4F]"
+                  onSuccess={async () => {
+                    await refreshSession();
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-[12px] text-[#5E5688]">
+                  พร้อมชำระ
+                  {user.email ? (
+                    <>
+                      {" "}
+                      · <span className="font-medium text-[#3A3270]">{user.email}</span>
+                    </>
+                  ) : null}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void startCheckout()}
+                  disabled={step === "redirecting"}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[15px] font-bold text-white outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45 disabled:opacity-60"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #6A48C8 0%, #8B6AD8 52%, #B29AEF 100%)",
+                    boxShadow:
+                      "0 12px 28px rgba(106,72,200,0.36), inset 0 1px 0 rgba(255,255,255,0.35)",
+                  }}
+                >
+                  {step === "redirecting" ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      กำลังไปหน้า Stripe…
+                    </>
+                  ) : (
+                    <>ชำระ {FORTUNE_UNLOCK_PRICE} บาทด้วย Stripe</>
+                  )}
+                </button>
+              </div>
+            )}
 
-          <p className="text-center text-[11px] leading-relaxed text-white/35">
-            หลังชำระสำเร็จ ระบบจะปลดล็อกพรีเมียมให้อัตโนมัติ
-          </p>
+            {error ? (
+              <p className="mt-3 text-[12px] text-rose-500">{error}</p>
+            ) : null}
+
+            <p className="mt-3.5 flex items-center justify-center gap-1.5 text-[11px] leading-snug text-[#7A72A0]">
+              <Lock className="h-3 w-3 shrink-0" strokeWidth={2.2} />
+              หลังชำระสำเร็จ ระบบจะปลดล็อกพรีเมียมให้อัตโนมัติ
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </div>,
+    host
   );
 }
 

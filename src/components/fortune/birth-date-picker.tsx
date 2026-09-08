@@ -108,8 +108,8 @@ function WheelColumn({
             className={cn(
               "flex w-full shrink-0 items-center justify-center text-[17px]",
               item.value === value
-                ? "font-bold text-white"
-                : "font-medium text-white/45"
+                ? "font-bold text-[#241C4F]"
+                : "font-medium text-[#6B6490]/70"
             )}
             style={{ height: ITEM_H, scrollSnapAlign: "center" }}
             onClick={() => onChange(item.value)}
@@ -173,13 +173,13 @@ export function BirthDatePicker({
 
   return (
     <div className={cn("relative", className)}>
-      <div className="mb-2.5 grid grid-cols-3 text-center text-[11px] font-medium tracking-[0.12em] text-white/70">
+      <div className="mb-2.5 grid grid-cols-3 text-center text-[11px] font-semibold tracking-[0.12em] text-[#6B6490]">
         <span>วัน</span>
         <span>เดือน</span>
         <span>ปี พ.ศ.</span>
       </div>
-      <div className="relative flex overflow-hidden rounded-[18px] bg-white/[0.03] ring-1 ring-inset ring-white/[0.12]">
-        <div className="pointer-events-none absolute inset-x-2.5 top-1/2 z-[1] h-10 -translate-y-1/2 rounded-xl border border-white/40 bg-white/[0.06]" />
+      <div className="relative flex overflow-hidden rounded-[18px] bg-white/45 ring-1 ring-inset ring-[#7B6BB0]/18">
+        <div className="pointer-events-none absolute inset-x-2.5 top-1/2 z-[1] h-10 -translate-y-1/2 rounded-xl border border-[#9B7FE8]/35 bg-[#EDE6FF]/55" />
         <WheelColumn
           ariaLabel="วัน"
           items={days}

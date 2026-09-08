@@ -139,7 +139,7 @@ export function PremiumHomePage({
   const realName = profile?.realName ?? nickname;
 
   return (
-    <AnimatedPage className="mx-auto w-full max-w-[480px] px-4 pb-10 pt-4">
+    <AnimatedPage className="mx-auto w-full max-w-[480px] px-1.5 pb-10 pt-3">
       <LifeInsightMockup
         seed={seed}
         birthDate={birthDate}

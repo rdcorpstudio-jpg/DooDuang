@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import {
   CalendarDays,
   ChevronRight,
-  Coins,
   Crown,
   Hand,
   LogOut,
@@ -34,6 +33,7 @@ import {
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
 import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export type AccountHistoryItem = {
@@ -193,7 +193,7 @@ export function AccountDashboard({
   }
 
   return (
-    <AnimatedPage className="mx-auto w-full max-w-[480px] space-y-3.5 px-4 pb-10 pt-5">
+    <AnimatedPage className="sky-copy mx-auto w-full max-w-[480px] space-y-3.5 px-4 pb-10 pt-5">
       {/* Header / identity */}
       <section className="fortune-glass relative overflow-hidden rounded-[22px] px-4 pb-5 pt-5">
         <div
@@ -239,11 +239,14 @@ export function AccountDashboard({
         <div className="relative z-[1] mt-4 grid grid-cols-2 gap-2">
           <div className="fortune-glass-inset rounded-[14px] px-3 py-2.5">
             <p className="flex items-center gap-1.5 text-[11px] text-[#9AB8DC]">
-              <Coins className="h-3.5 w-3.5 text-[#F4BC52]" strokeWidth={1.9} />
-              เครดิต
+              <Sparkles className="h-3.5 w-3.5 text-[#F4BC52]" strokeWidth={1.9} />
+              แพ็กเกจ
             </p>
-            <p className="mt-1 text-[22px] font-semibold tabular-nums text-[#F7F8FF]">
-              {user.credits}
+            <p className="mt-1 text-[15px] font-semibold text-[#F7F8FF]">
+              {FORTUNE_PACKAGE_MONTHS} เดือน
+            </p>
+            <p className="mt-0.5 text-[11px] text-[#9AB8DC]">
+              {FORTUNE_UNLOCK_PRICE} บาท
             </p>
           </div>
           <Link
@@ -252,10 +255,10 @@ export function AccountDashboard({
           >
             <p className="flex items-center gap-1.5 text-[11px] text-[#9AB8DC]">
               <Crown className="h-3.5 w-3.5 text-[#F4BC52]" strokeWidth={1.9} />
-              พรีเมียม
+              สถานะ
             </p>
             <p className="mt-1 text-[15px] font-semibold text-[#F7F8FF]">
-              {premium ? "ปลดล็อกแล้ว" : "ยังไม่ปลดล็อก"}
+              {premium ? "ใช้งานอยู่" : "ยังไม่ปลดล็อก"}
             </p>
           </Link>
         </div>
@@ -463,19 +466,21 @@ export function AccountDashboard({
           <ChevronRight className="h-4 w-4 text-[#46DDED]" strokeWidth={2.2} />
         </Link>
         <Link
-          href="/pricing"
+          href="/premium"
           className="fortune-glass flex items-center gap-3 rounded-[16px] px-3.5 py-3 outline-none transition active:scale-[0.99]"
           style={{ boxShadow: "inset 0 0 0 1px rgba(244,188,82,0.28)" }}
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#F4BC52]/4">
-            <Coins className="h-4 w-4 text-[#F4BC52]" strokeWidth={1.8} />
+            <Crown className="h-4 w-4 text-[#F4BC52]" strokeWidth={1.8} />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-[14px] font-semibold text-[#F7F8FF]">
-              เติมเครดิต
+              แพ็กเกจ {FORTUNE_PACKAGE_MONTHS} เดือน
             </span>
             <span className="text-[11px] text-[#9AB8DC]">
-              เหลือ {user.credits} เครดิต
+              {premium
+                ? "พรีเมียมใช้งานอยู่"
+                : `ปลดล็อก ${FORTUNE_UNLOCK_PRICE} บาท`}
             </span>
           </span>
           <ChevronRight className="h-4 w-4 text-[#F4BC52]" strokeWidth={2.2} />

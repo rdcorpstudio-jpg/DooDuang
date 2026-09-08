@@ -2,10 +2,23 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock } from "lucide-react";
+import {
+  ArrowRight,
+  ChartNoAxesColumn,
+  Lightbulb,
+  Lock,
+  UserRound,
+} from "lucide-react";
 import { AstroHeroOrb } from "@/components/home/astro-hero-orb";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { APP_NAME_ACCENT, APP_NAME_PRIMARY } from "@/lib/site";
 import { cn } from "@/lib/utils";
+
+const FEATURES = [
+  { label: "ความเป็นตัวคุณ", Icon: UserRound },
+  { label: "จังหวะชีวิต", Icon: ChartNoAxesColumn },
+  { label: "คำแนะนำ", Icon: Lightbulb },
+] as const;
 
 function Reveal({
   visible,
@@ -21,7 +34,11 @@ function Reveal({
   variant?: "up" | "glow" | "scale";
 }) {
   const animClass =
-    variant === "glow" ? "reveal-glow" : variant === "scale" ? "reveal-scale" : "reveal-up";
+    variant === "glow"
+      ? "reveal-glow"
+      : variant === "scale"
+        ? "reveal-scale"
+        : "reveal-up";
 
   return (
     <div
@@ -33,18 +50,7 @@ function Reveal({
   );
 }
 
-function SacredOrnament() {
-  return (
-    <div className="intro-sacred-ornament mx-auto mt-4 flex items-center justify-center gap-1.5" aria-hidden>
-      <span className="intro-sacred-line intro-sacred-line-lg" />
-      <span className="intro-sacred-diamond intro-sacred-diamond-sm" />
-      <span className="intro-sacred-diamond" />
-      <span className="intro-sacred-diamond intro-sacred-diamond-sm" />
-      <span className="intro-sacred-line intro-sacred-line-lg" />
-    </div>
-  );
-}
-
+/** Home landing — lilac Guanyin mockup */
 export function IntroScreen() {
   const [mounted, setMounted] = useState(false);
 
@@ -54,65 +60,98 @@ export function IntroScreen() {
   }, []);
 
   return (
-    <section className="intro-sacred relative flex h-full min-h-full flex-col overflow-hidden px-5">
-      <div className="absolute inset-x-5 top-5 z-20">
-        <Reveal visible={mounted} delay={0}>
-          <p className="text-[11px] font-medium tracking-[0.42em] text-[#e8c547]/80">
+    <section className="sky-copy relative flex h-full min-h-full flex-col overflow-hidden px-5 pb-3 pt-4">
+      <Reveal visible={mounted} delay={0} className="relative z-20 shrink-0">
+        <div className="flex flex-col items-center">
+          <FortuneIcon name="sparkle" size={18} className="mb-0.5" />
+          <p className="font-sacred text-[13px] tracking-[0.28em] text-[#C9A227]">
             DOODUANG
           </p>
-        </Reveal>
-      </div>
+        </div>
+      </Reveal>
 
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center py-10">
-        <Reveal visible={mounted} delay={40} variant="scale" className="w-full">
-          <div className="intro-orb-halo mx-auto">
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center py-2">
+        <Reveal
+          visible={mounted}
+          delay={40}
+          variant="scale"
+          className="w-full"
+        >
+          <div className="intro-orb-halo mx-auto w-full max-w-[280px] sm:max-w-[300px]">
             <AstroHeroOrb />
           </div>
         </Reveal>
 
-        <Reveal visible={mounted} delay={130} variant="glow" className="mt-2 w-full max-w-[310px] text-center">
-          <h1 className="font-sacred text-[2.25rem] leading-[1.12] tracking-wide drop-shadow-[0_0_28px_rgba(232,197,71,0.35)] sm:text-[2.45rem]">
-            <span className="intro-title-primary">{APP_NAME_PRIMARY}</span>
-            <span className="intro-title-accent">{APP_NAME_ACCENT}</span>
+        <Reveal
+          visible={mounted}
+          delay={120}
+          variant="glow"
+          className="-mt-1 w-full max-w-[320px] text-center"
+        >
+          <h1 className="font-sacred text-[2.15rem] font-bold leading-[1.15] tracking-wide text-[#2C2458] sm:text-[2.35rem]">
+            <span>{APP_NAME_PRIMARY}</span>
+            <span className="text-[#5B45B8]">{APP_NAME_ACCENT}</span>
           </h1>
-          <p className="mt-3 text-[13px] font-light leading-relaxed tracking-wide text-white/60">
+          <p className="mt-2.5 text-[14px] font-medium leading-snug text-[#3A3270]">
             อ่านจังหวะชีวิตในแบบของคุณ
           </p>
-          <SacredOrnament />
+          <p className="mt-1.5 text-[13px] leading-snug text-[#6B6490]">
+            ค้นพบแนวทางเรื่องงาน เงิน และความรัก
+          </p>
         </Reveal>
 
-        <Reveal visible={mounted} delay={280} variant="up" className="mt-7 w-full max-w-[310px]">
-          <Link href="/reading" className="intro-cta group relative block w-full">
-            <span className="intro-cta-glow" aria-hidden />
-            <span className="intro-cta-surface">
-              <span className="intro-cta-shine" aria-hidden />
-              <span className="intro-cta-label relative z-[1]">เริ่มดูดวง</span>
-              <ArrowRight
-                className="relative z-[1] h-[17px] w-[17px] text-[#1a1440] transition-transform duration-200 group-hover:translate-x-0.5"
-                strokeWidth={2.3}
-              />
+        <Reveal
+          visible={mounted}
+          delay={240}
+          className="mt-5 w-full max-w-[320px]"
+        >
+          <Link
+            href="/reading"
+            className="group relative flex w-full items-center justify-between overflow-hidden rounded-full px-6 py-3.5 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45"
+            style={{
+              background:
+                "linear-gradient(90deg, #7B5FD4 0%, #9B7FE8 48%, #C4B0F5 100%)",
+              boxShadow: "0 10px 28px rgba(123,95,212,0.32)",
+            }}
+          >
+            <span className="text-[16px] font-bold tracking-wide text-white">
+              เริ่มดูดวง
             </span>
+            <ArrowRight
+              className="h-[18px] w-[18px] text-white transition-transform duration-200 group-hover:translate-x-0.5"
+              strokeWidth={2.4}
+            />
           </Link>
-        </Reveal>
 
-        <Reveal visible={mounted} delay={380} className="mt-5 w-full max-w-[310px]">
-          <p className="flex items-center justify-center gap-1.5 text-[11px] tracking-wide text-white/35">
-            <Lock className="h-3 w-3 text-[#e8c547]/75" strokeWidth={1.8} />
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[#6B6490]">
+            <FortuneIcon name="lock" size={16} />
             ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
           </p>
-          <p className="mt-3 flex items-center justify-center gap-3 text-[11px] text-white/30">
-            <Link href="/privacy" className="hover:text-[#F4BC52]/80">
-              ความเป็นส่วนตัว
-            </Link>
-            <span aria-hidden>·</span>
-            <Link href="/terms" className="hover:text-[#F4BC52]/80">
-              ข้อกำหนด
-            </Link>
-            <span aria-hidden>·</span>
-            <Link href="/premium" className="hover:text-[#F4BC52]/80">
-              พรีเมียม
-            </Link>
-          </p>
+        </Reveal>
+
+        <Reveal
+          visible={mounted}
+          delay={340}
+          className="mt-6 w-full max-w-[340px]"
+        >
+          <div className="grid grid-cols-3 items-start">
+            {FEATURES.map(({ label, Icon }, i) => (
+              <div
+                key={label}
+                className={cn(
+                  "flex flex-col items-center gap-2 px-1 text-center",
+                  i > 0 && "border-l border-[#7B6BB0]/22"
+                )}
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#B9A4F0]/28 ring-1 ring-[#9B7FE8]/25">
+                  <Icon className="h-5 w-5 text-[#5B45B8]" strokeWidth={1.9} />
+                </span>
+                <p className="text-[12px] font-medium leading-snug text-[#3A3270]">
+                  {label}
+                </p>
+              </div>
+            ))}
+          </div>
         </Reveal>
       </div>
     </section>

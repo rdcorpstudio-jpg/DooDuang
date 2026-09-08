@@ -3,17 +3,19 @@
 import type { CSSProperties } from "react";
 import { useMemo } from "react";
 import Link from "next/link";
-import { Crown, Sparkles } from "lucide-react";
+import { Crown } from "lucide-react";
 import { FortuneResultHero } from "@/components/fortune/fortune-result-hero";
 import { FortuneTopicGrid } from "@/components/fortune/fortune-topic-grid";
+import { FortuneLuckyStrip } from "@/components/fortune/fortune-lucky-strip";
 import { FortuneFreeMonthTrend } from "@/components/fortune/fortune-free-month-trend";
 import { FortuneFreeSelfIntro } from "@/components/fortune/fortune-free-self-intro";
 import { FortuneFreeZodiacToday } from "@/components/fortune/fortune-free-zodiac-today";
 import { FortuneCalendarShirtPreview } from "@/components/fortune/fortune-calendar-shirt-preview";
 import { FortuneExtraReadings } from "@/components/fortune/fortune-extra-readings";
-import { FortuneUnlockBanner } from "@/components/fortune/fortune-unlock-banner";
 import { FortunePremiumSelfDeep } from "@/components/fortune/fortune-premium-self-deep";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { REFERENCE_YEAR_SCORES } from "@/components/fortune/life-cycle-graph";
+import { generateFortune } from "@/lib/fortune/engine";
 import { cn } from "@/lib/utils";
 
 function hashSeed(input: string) {
@@ -28,17 +30,21 @@ function hashSeed(input: string) {
 const HERO_SETS = [
   {
     headline: "ค่อย ๆ ตั้งหลัก แล้วไปต่อ",
-    subline: "วันนี้เริ่มจากเรื่องสำคัญทีละอย่าง จะเดินได้นิ่งขึ้น",
+    quote: "ทุกวันคือโอกาสที่ดีขึ้น",
   },
   {
     headline: "โฟกัสสิ่งที่สำคัญจริง ๆ",
-    subline: "ลดสิ่งรบกวน แล้วลงมือกับเรื่องหลักให้จบหนึ่งอย่าง",
+    quote: "ทุกวันคือโอกาสที่ดีขึ้น",
   },
   {
     headline: "จังหวะดีเมื่อไม่เร่งเกินตัว",
-    subline: "วันนี้เหมาะกับการจัดลำดับและพักให้พอระหว่างทาง",
+    quote: "ทุกวันคือโอกาสที่ดีขึ้น",
   },
 ] as const;
+
+function dailyBodyFromEngine(content: string) {
+  return content.replace(/^คุณ[^—–-]+[—–-]\s*/, "").trim();
+}
 
 interface LifeInsightMockupProps {
   seed: string;
@@ -46,16 +52,14 @@ interface LifeInsightMockupProps {
   nickname: string;
   realName?: string;
   readingTitle?: string;
-  /** Has paid entitlement (free page shows CTA to /premium) */
   unlocked?: boolean;
   onUnlock?: () => void;
   unlocking?: boolean;
-  /** free = teasers only; premium = full unlocked dashboard on /premium tab */
   variant?: "free" | "premium";
   className?: string;
 }
 
-/** Daily dashboard — free teasers, or full premium on the premium tab */
+/** Daily dashboard — mockup stack: hero → zodiac → 4 aspects → lucky → unlock */
 export function LifeInsightMockup({
   seed,
   birthDate,
@@ -70,6 +74,17 @@ export function LifeInsightMockup({
   const isPremiumPage = variant === "premium";
   const contentUnlocked = isPremiumPage;
   const hero = HERO_SETS[hashSeed(`${seed}-hero`) % HERO_SETS.length]!;
+  const displayName = realName ?? nickname;
+
+  const dailyDescription = useMemo(() => {
+    const reading = generateFortune("daily", {
+      realName: displayName || nickname || seed,
+      nickname: nickname || "คุณ",
+      birthDate: birthDate || "2000-01-01",
+      gender: "unspecified",
+    });
+    return dailyBodyFromEngine(reading.content);
+  }, [birthDate, displayName, nickname, seed]);
 
   const monthPoints = useMemo(() => {
     const now = new Date();
@@ -89,7 +104,7 @@ export function LifeInsightMockup({
   return (
     <div
       className={cn(
-        "fortune-free-page mx-auto w-full max-w-[480px] space-y-3.5",
+        "fortune-free-page mx-auto w-full max-w-[480px] space-y-2.5",
         className
       )}
     >
@@ -98,14 +113,15 @@ export function LifeInsightMockup({
         style={{ "--fortune-delay": "40ms" } as CSSProperties}
       >
         <FortuneResultHero
-          realName={realName ?? nickname}
+          realName={displayName}
           nickname={nickname}
           headline={hero.headline}
-          subline={hero.subline}
+          subline={dailyDescription}
+          quote={hero.quote}
         />
       </div>
 
-          {isPremiumPage ? (
+      {isPremiumPage ? (
         <div
           className="fortune-reveal"
           style={{ "--fortune-delay": "70ms" } as CSSProperties}
@@ -142,7 +158,7 @@ export function LifeInsightMockup({
             </span>
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-1.5 text-[14px] font-semibold text-[#F7F8FF]">
-                <Sparkles className="h-3.5 w-3.5 text-[#F4BC52]" />
+                <FortuneIcon name="sparkle" size={14} />
                 เปิดหน้าพรีเมียม
               </span>
               <span className="mt-0.5 block text-[12px] text-[#9AB8DC]">
@@ -169,14 +185,26 @@ export function LifeInsightMockup({
 
       <div
         className="fortune-reveal"
-        style={{ "--fortune-delay": "200ms" } as CSSProperties}
+        style={{ "--fortune-delay": "180ms" } as CSSProperties}
       >
-        <FortuneTopicGrid />
+        <FortuneTopicGrid
+          seed={seed}
+          nickname={nickname}
+          realName={realName ?? ""}
+          birthDate={birthDate}
+        />
       </div>
 
       <div
         className="fortune-reveal"
-        style={{ "--fortune-delay": "240ms" } as CSSProperties}
+        style={{ "--fortune-delay": "220ms" } as CSSProperties}
+      >
+        <FortuneLuckyStrip seed={seed} />
+      </div>
+
+      <div
+        className="fortune-reveal"
+        style={{ "--fortune-delay": "260ms" } as CSSProperties}
       >
         <FortuneExtraReadings
           seed={seed}
@@ -187,7 +215,7 @@ export function LifeInsightMockup({
 
       <div
         className="fortune-reveal"
-        style={{ "--fortune-delay": "280ms" } as CSSProperties}
+        style={{ "--fortune-delay": "300ms" } as CSSProperties}
       >
         <FortuneCalendarShirtPreview
           seed={seed}
@@ -198,7 +226,7 @@ export function LifeInsightMockup({
 
       <div
         className="fortune-reveal"
-        style={{ "--fortune-delay": "320ms" } as CSSProperties}
+        style={{ "--fortune-delay": "340ms" } as CSSProperties}
       >
         <FortuneFreeMonthTrend
           seed={seed}
@@ -210,7 +238,7 @@ export function LifeInsightMockup({
 
       <div
         className="fortune-reveal"
-        style={{ "--fortune-delay": "440ms" } as CSSProperties}
+        style={{ "--fortune-delay": "380ms" } as CSSProperties}
       >
         <FortuneFreeSelfIntro
           seed={seed}
@@ -225,19 +253,6 @@ export function LifeInsightMockup({
           style={{ "--fortune-delay": "500ms" } as CSSProperties}
         >
           <FortunePremiumSelfDeep seed={seed} nickname={nickname} />
-        </div>
-      ) : null}
-
-      {!isPremiumPage && !unlocked ? (
-        <div
-          className="fortune-reveal"
-          style={{ "--fortune-delay": "520ms" } as CSSProperties}
-        >
-          <FortuneUnlockBanner
-            unlocked={unlocked}
-            unlocking={unlocking}
-            onUnlock={onUnlock}
-          />
         </div>
       ) : null}
     </div>

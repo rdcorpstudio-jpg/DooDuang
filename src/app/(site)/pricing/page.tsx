@@ -3,10 +3,10 @@ import { AnimatedPage } from "@/components/ui/reveal";
 import { PageHero } from "@/components/ui/page-hero";
 import { SacredDivider } from "@/components/ui/sacred-mark";
 import { CREDIT_PACKAGES } from "@/lib/stripe-catalog";
-import { APP_NAME } from "@/lib/site";
+import { APP_NAME, FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 
 export const metadata = {
-  title: `ซื้อเครดิต — ${APP_NAME}`,
+  title: `แพ็กเกจพรีเมียม — ${APP_NAME}`,
 };
 
 export default function PricingPage() {
@@ -14,9 +14,9 @@ export default function PricingPage() {
     <AnimatedPage className="flex flex-col gap-3.5 px-4 py-6 pb-10">
       <PageHero
         align="center"
-        title="ซื้อ"
-        accent="เครดิต"
-        subtitle="1 เครดิต = เปิดไพ่ 1 ครั้ง"
+        title="แพ็กเกจ"
+        accent="พรีเมียม"
+        subtitle={`ใช้งานได้ ${FORTUNE_PACKAGE_MONTHS} เดือน · ${FORTUNE_UNLOCK_PRICE} บาท`}
       />
       <SacredDivider className="mx-auto mb-2 opacity-70" />
       {CREDIT_PACKAGES.map((pkg) => (
@@ -24,10 +24,10 @@ export default function PricingPage() {
           key={pkg.id}
           packageId={pkg.id}
           name={pkg.name}
-          credits={pkg.credits}
+          months={"months" in pkg ? pkg.months : FORTUNE_PACKAGE_MONTHS}
           price={pkg.price}
           description={pkg.description}
-          popular={"popular" in pkg && pkg.popular}
+          popular={"popular" in pkg && Boolean(pkg.popular)}
         />
       ))}
     </AnimatedPage>

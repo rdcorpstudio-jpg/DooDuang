@@ -12,11 +12,15 @@ export const stripe = process.env.STRIPE_SECRET_KEY
   : null;
 
 function priceIdForPackage(packageId: string) {
-  if (packageId === PREMIUM_UNLOCK.id || packageId === "starter") {
+  if (
+    packageId === PREMIUM_UNLOCK.id ||
+    packageId === "starter" ||
+    packageId === "popular" ||
+    packageId === "premium"
+  ) {
+    // All paid unlocks use the 3-month starter price for now.
     return process.env.STRIPE_PRICE_STARTER;
   }
-  if (packageId === "popular") return process.env.STRIPE_PRICE_POPULAR;
-  if (packageId === "premium") return process.env.STRIPE_PRICE_PREMIUM;
   return undefined;
 }
 
@@ -46,11 +50,17 @@ export async function resolveStripePriceId(priceOrProductId: string) {
 }
 
 export function resolveCheckoutPackage(packageId: string) {
-  if (packageId === PREMIUM_UNLOCK.id || packageId === "starter") {
+  if (
+    packageId === PREMIUM_UNLOCK.id ||
+    packageId === "starter" ||
+    packageId === "popular" ||
+    packageId === "premium"
+  ) {
     return {
       id: PREMIUM_UNLOCK.id,
       name: PREMIUM_UNLOCK.name,
       credits: 0,
+      months: PREMIUM_UNLOCK.months,
       price: PREMIUM_UNLOCK.price,
       priceId: priceIdForPackage(packageId),
       purpose: "premium-unlock" as const,
@@ -60,11 +70,12 @@ export function resolveCheckoutPackage(packageId: string) {
   const pkg = CREDIT_PACKAGES.find((p) => p.id === packageId);
   if (!pkg) return null;
   return {
-    id: pkg.id,
+    id: PREMIUM_UNLOCK.id,
     name: pkg.name,
-    credits: pkg.credits,
+    credits: 0,
+    months: PREMIUM_UNLOCK.months,
     price: pkg.price,
     priceId: priceIdForPackage(pkg.id),
-    purpose: "credits" as const,
+    purpose: "premium-unlock" as const,
   };
 }

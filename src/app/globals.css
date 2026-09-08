@@ -44,12 +44,18 @@
   background: #ffffff;
 }
 
+.phone-frame svg :focus,
+.phone-frame svg:focus,
+.phone-frame [role="button"]:focus {
+  outline: none !important;
+}
+
 .phone-frame {
   width: min(100vw, calc(100dvh * 9 / 16));
   height: 100dvh;
   overflow: hidden;
   position: relative;
-  background: #0a0c18;
+  background: #e9e2f8;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
@@ -67,6 +73,10 @@ html[data-keyboard-open="true"] .wizard-keyboard-hide {
 html[data-keyboard-open="true"] .wizard-keyboard-compact {
   padding-top: 0.5rem !important;
   padding-bottom: 0.75rem !important;
+}
+
+html[data-keyboard-open="true"] .wizard-keyboard-compact .wizard-name-stage {
+  padding-top: 0.35rem !important;
 }
 
 html[data-keyboard-open="true"] .wizard-keyboard-compact .wizard-step-header {
@@ -96,6 +106,67 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
     @apply bg-transparent;
   }
 
+  /*
+   * Soft white drop-shadow for dark text on Guanyin sky / video.
+   * Put `sky-copy` on page roots; also auto on free result + bottom nav.
+   */
+  .sky-copy h1,
+  .sky-copy h2,
+  .sky-copy h3,
+  .sky-copy h4,
+  .sky-copy p,
+  .sky-copy a,
+  .sky-copy label,
+  .sky-copy li,
+  .sky-copy span,
+  .sky-copy button,
+  .sky-copy small,
+  .fortune-free-page h1,
+  .fortune-free-page h2,
+  .fortune-free-page h3,
+  .fortune-free-page h4,
+  .fortune-free-page p,
+  .fortune-free-page a,
+  .fortune-free-page label,
+  .fortune-free-page li,
+  .fortune-free-page span,
+  .fortune-free-page button,
+  .fortune-free-page small,
+  .bottom-nav a,
+  .bottom-nav span {
+    text-shadow:
+      0 1px 0 #fff,
+      0 0 8px rgba(255, 255, 255, 1),
+      0 0 16px rgba(255, 255, 255, 0.95),
+      0 2px 10px rgba(255, 255, 255, 0.85);
+  }
+
+  .sky-copy .text-white,
+  .sky-copy .text-white *,
+  .sky-copy [class*="text-white"],
+  .sky-copy [class*="text-white"] *,
+  .fortune-free-page .text-white,
+  .fortune-free-page .text-white *,
+  .fortune-free-page [class*="text-white"],
+  .fortune-free-page [class*="text-white"] * {
+    text-shadow: none !important;
+  }
+
+  /* Solid sheets / modals — no white glow on already-white cards */
+  .no-sky-lift,
+  .no-sky-lift * {
+    text-shadow: none !important;
+  }
+
+  /* Result hero left copy — strong lift over busy sky */
+  .result-hero-copy {
+    text-shadow:
+      0 1px 0 #fff,
+      0 0 10px #fff,
+      0 0 20px rgba(255, 255, 255, 0.95),
+      0 3px 12px rgba(255, 255, 255, 0.9);
+  }
+
   .sacred-surface {
     border: 1px solid rgba(255, 255, 255, 0.12);
     background: rgba(16, 18, 36, 0.82);
@@ -121,63 +192,111 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   }
 
   .fortune-glass {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(14, 16, 34, 0.78);
-    backdrop-filter: blur(16px) saturate(1.08);
-    -webkit-backdrop-filter: blur(16px) saturate(1.08);
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.48);
+    backdrop-filter: blur(20px) saturate(1.15);
+    -webkit-backdrop-filter: blur(20px) saturate(1.15);
+    box-shadow:
+      0 10px 28px rgba(80, 60, 140, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65);
     transition:
       border-color 180ms ease,
       transform 180ms ease;
   }
 
   .fortune-glass-inset {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(10, 12, 28, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.36);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     box-shadow: none;
   }
 
   .fortune-surface {
-    border: 1px solid rgba(255, 255, 255, 0.11);
-    background: rgba(14, 16, 32, 0.84);
-    backdrop-filter: blur(14px) saturate(1.05);
-    -webkit-backdrop-filter: blur(14px) saturate(1.05);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.52);
+    backdrop-filter: blur(16px) saturate(1.1);
+    -webkit-backdrop-filter: blur(16px) saturate(1.1);
+    box-shadow: 0 8px 20px rgba(80, 60, 140, 0.08);
   }
 
   .fortune-free-page {
-    --dd-text: #f3f5fa;
-    --dd-muted: #b7c3d8;
-    --dd-gold: #e4c56a;
-    --dd-cyan: #6bb8c8;
-    --dd-frame: rgba(255, 255, 255, 0.1);
+    --dd-text: #2c2458;
+    --dd-muted: #5e5688;
+    --dd-gold: #c9a227;
+    --dd-cyan: #6b8fc8;
+    --dd-frame: rgba(255, 255, 255, 0.65);
+    --dd-gutter: 0.25rem;
     color: var(--dd-text);
+    /* page padding comes from parent (wizard / premium) — avoid double inset */
+    padding-inline: 0;
+  }
+
+  /* Remap old light-on-dark utilities inside lilac daily page */
+  .fortune-free-page .text-\[\#F7F8FF\],
+  .fortune-free-page .text-\[\#F5F7FC\],
+  .fortune-free-page .text-\[\#E8EEF8\],
+  .fortune-free-page .text-\[\#F3F5FA\] {
+    color: #2c2458 !important;
+  }
+
+  .fortune-free-page .text-\[\#D5E0F0\],
+  .fortune-free-page .text-\[\#C8D8EF\],
+  .fortune-free-page .text-\[\#C5D0E2\],
+  .fortune-free-page .text-\[\#B7C3D8\],
+  .fortune-free-page .text-\[\#9AB8DC\] {
+    color: #5e5688 !important;
+  }
+
+  .fortune-free-page .text-\[\#E4C56A\],
+  .fortune-free-page .text-\[\#F4BC52\] {
+    color: #b8921f !important;
+  }
+
+  .fortune-free-page .text-\[\#E4C56A\]\/85,
+  .fortune-free-page .text-\[\#E4C56A\]\/90,
+  .fortune-free-page .text-\[\#e8c547\]\/90 {
+    color: #a07e1a !important;
+  }
+
+  .fortune-free-page .text-\[\#F7F8FF\]\/90 {
+    color: #241c4f !important;
   }
 
   .fortune-free-page .text-white\/40 {
-    color: rgba(183, 195, 216, 0.78) !important;
+    color: rgba(94, 86, 136, 0.72) !important;
   }
 
   .fortune-free-page .text-white\/45 {
-    color: rgba(183, 195, 216, 0.84) !important;
+    color: rgba(94, 86, 136, 0.78) !important;
   }
 
   .fortune-free-page .text-white\/50 {
-    color: rgba(197, 208, 226, 0.9) !important;
+    color: rgba(74, 66, 120, 0.85) !important;
   }
 
   .fortune-free-page .text-white\/60 {
-    color: rgba(214, 222, 236, 0.94) !important;
+    color: rgba(44, 36, 88, 0.72) !important;
+  }
+
+  .fortune-free-page .border-white\/\[0\.08\],
+  .fortune-free-page .border-white\/10,
+  .fortune-free-page .border-white\/12 {
+    border-color: rgba(90, 70, 150, 0.12) !important;
+  }
+
+  .fortune-free-page .bg-white\/\[0\.05\],
+  .fortune-free-page .bg-white\/\[0\.06\],
+  .fortune-free-page .bg-white\/\[0\.08\] {
+    background-color: rgba(255, 255, 255, 0.45) !important;
   }
 
   .fortune-dash-card {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(14, 16, 34, 0.78);
-    backdrop-filter: blur(16px) saturate(1.08);
-    -webkit-backdrop-filter: blur(16px) saturate(1.08);
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(18px) saturate(1.12);
+    -webkit-backdrop-filter: blur(18px) saturate(1.12);
+    box-shadow: 0 10px 24px rgba(80, 60, 140, 0.1);
   }
 
   .fortune-dash-inset {
@@ -652,6 +771,16 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
       linear-gradient(180deg, rgba(6, 5, 22, 0.25) 0%, rgba(3, 3, 12, 0.55) 100%);
   }
 
+  .wizard-form-sky-light {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 252, 255, 0.18) 0%,
+        rgba(245, 240, 255, 0.08) 45%,
+        rgba(255, 255, 255, 0.22) 100%
+      );
+  }
+
   .wizard-form-wheel {
     position: absolute;
     left: 50%;
@@ -664,20 +793,28 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
     -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 74%);
   }
 
+  .wizard-form-wheel-light {
+    top: 38%;
+    opacity: 0.22;
+  }
+
   .astro-hero-watermark {
     animation: none !important;
   }
 
   .astro-hero-watermark .astro-hero-wheel {
     animation: mystic-orb-spin 96s linear infinite;
+    filter: none;
   }
 
   .astro-hero-watermark .astro-hero-planets {
     animation: mystic-orb-spin 64s linear infinite reverse;
+    filter: none;
   }
 
   .astro-hero-watermark .astro-hero-core {
     animation: intro-star-breathe 3.6s ease-in-out infinite;
+    filter: none;
   }
 
   .wizard-form-bloom {
@@ -717,28 +854,31 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   }
 
   .name-step-input {
-    @apply w-full rounded-xl border-0 px-4 text-[16px] text-white outline-none;
+    @apply w-full rounded-xl border-0 px-4 text-[16px] outline-none;
     min-height: 3.15rem;
     padding-top: 0.85rem;
     padding-bottom: 0.85rem;
     line-height: 1.35;
+    color: #2c2458;
     -webkit-appearance: none;
     appearance: none;
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: inset 0 0 0 1px rgba(210, 190, 255, 0.22);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow:
+      0 4px 14px rgba(90, 70, 150, 0.08),
+      inset 0 0 0 1px rgba(123, 107, 176, 0.28);
     transition:
       box-shadow 0.2s ease,
       background 0.2s ease;
   }
 
   .name-step-input::placeholder {
-    color: rgba(255, 255, 255, 0.32);
+    color: rgba(107, 100, 144, 0.65);
     line-height: 1.35;
   }
 
   .name-step-input:focus {
-    background: rgba(255, 255, 255, 0.07);
-    box-shadow: inset 0 0 0 1.5px rgba(228, 197, 106, 0.5);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: inset 0 0 0 1.5px rgba(155, 127, 232, 0.55);
   }
 
   .name-step-cta {
@@ -797,22 +937,24 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   .astro-hero-bloom-gold {
     background: radial-gradient(
       circle,
-      rgba(232, 197, 71, 0.38) 0%,
-      rgba(201, 162, 39, 0.12) 40%,
+      rgba(232, 197, 71, 0.22) 0%,
+      rgba(201, 162, 39, 0.08) 40%,
       transparent 68%
     );
     filter: blur(28px);
+    opacity: 0.7;
     animation: mystic-orb-pulse 4.2s ease-in-out infinite;
   }
 
   .astro-hero-bloom-violet {
     background: radial-gradient(
       circle,
-      rgba(167, 139, 250, 0.4) 0%,
-      rgba(109, 40, 217, 0.16) 48%,
+      rgba(167, 139, 250, 0.22) 0%,
+      rgba(109, 40, 217, 0.08) 48%,
       transparent 72%
     );
     filter: blur(22px);
+    opacity: 0.65;
     animation: mystic-orb-pulse 3.4s ease-in-out infinite reverse;
   }
 
@@ -950,19 +1092,32 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
 
   .astro-hero-wheel {
     animation: mystic-orb-spin 56s linear infinite;
+    filter:
+      drop-shadow(0 1px 0 rgba(255, 255, 255, 0.95))
+      drop-shadow(0 2px 4px rgba(255, 255, 255, 0.85))
+      drop-shadow(0 0 8px rgba(255, 255, 255, 0.65))
+      drop-shadow(0 2px 3px rgba(60, 40, 100, 0.12));
   }
 
   .astro-hero-planets {
     animation: mystic-orb-spin 36s linear infinite reverse;
+    filter:
+      drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9))
+      drop-shadow(0 0 6px rgba(255, 255, 255, 0.55));
   }
 
   .astro-hero-ray-lines {
     animation: mystic-orb-spin 100s linear infinite;
+    opacity: 0.45;
   }
 
   .astro-hero-core {
     transform-origin: 50% 50%;
     animation: intro-star-breathe 3.2s ease-in-out infinite;
+    filter:
+      drop-shadow(0 1px 0 #fff)
+      drop-shadow(0 0 6px rgba(255, 255, 255, 0.7))
+      drop-shadow(0 2px 4px rgba(60, 40, 100, 0.12));
   }
 
   .astro-hero-spark {
@@ -1381,6 +1536,15 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
     @apply bg-gradient-to-r from-brand-purple-light to-brand-purple bg-clip-text text-transparent;
   }
 
+  /* White glow lift — use on any copy that sinks into bright sky */
+  .text-lift {
+    text-shadow:
+      0 1px 0 #fff,
+      0 0 10px #fff,
+      0 0 18px rgba(255, 255, 255, 0.95),
+      0 3px 12px rgba(255, 255, 255, 0.85) !important;
+  }
+
   .font-sacred {
     font-family: var(--font-sacred);
   }
@@ -1416,6 +1580,75 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   }
 }
 
+@keyframes tarot-prayer-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes tarot-prayer-ring {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes tarot-prayer-spark {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes tarot-prayer-dot {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.tarot-prayer-breathe {
+  animation: tarot-prayer-breathe 3.6s ease-in-out infinite;
+}
+
+.tarot-prayer-ring {
+  border: 1px solid rgba(155, 127, 232, 0.42);
+  animation: tarot-prayer-ring 3.6s ease-in-out infinite;
+}
+
+.tarot-prayer-ring-delay {
+  animation-delay: 1.2s;
+  border-style: dashed;
+  border-color: rgba(201, 162, 39, 0.35);
+}
+
+.tarot-prayer-spark {
+  animation: tarot-prayer-spark 2.8s ease-in-out infinite;
+}
+
+.tarot-prayer-dot {
+  animation: tarot-prayer-dot 2.4s ease-in-out infinite;
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
@@ -1439,8 +1672,8 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   }
   to {
     opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
+    transform: none;
+    filter: none;
   }
 }
 
@@ -1452,8 +1685,8 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
+    transform: none;
+    filter: none;
   }
 }
 

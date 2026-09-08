@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Sparkles } from "lucide-react";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { cn } from "@/lib/utils";
 
 function hashSeed(input: string) {
@@ -56,14 +56,12 @@ export function FortuneFreeSelfIntro({
       )}
     >
       <div className="flex items-center gap-2">
-        <span className="fortune-spark flex h-8 w-8 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#BB6CF0]/35">
-          <Sparkles className="h-4 w-4 text-[#BB6CF0]" strokeWidth={1.8} />
-        </span>
-        <h2 className="text-[17px] font-semibold text-[#F7F8FF]">
+        <FortuneIcon name="sparkle" size={28} />
+        <h2 className="text-[17px] font-semibold text-[#2C2458]">
           {premium ? "เข้าใจตัวเองเชิงลึก" : "รู้จักตัวเองเบื้องต้น"}
         </h2>
       </div>
-      <p className="mt-2.5 text-[15px] leading-[1.75] text-[#D5E4F7]">
+      <p className="mt-2.5 text-[15px] leading-[1.75] text-[#4A4278]">
         {nickname
           ? `คุณ${nickname.replace(/^คุณ\s*/, "").trim()} — `
           : "คุณ — "}
@@ -73,7 +71,7 @@ export function FortuneFreeSelfIntro({
         {profile.strengths.map((s) => (
           <span
             key={s}
-            className="rounded-full border border-[#F4BC52]/35 bg-[#F4BC52]/14 px-2.5 py-1 text-[13px] font-medium text-[#FFE7A8]"
+            className="rounded-full border border-[#B9A4F0]/35 bg-[#B9A4F0]/18 px-2.5 py-1 text-[13px] font-medium text-[#5B45B8]"
           >
             {s}
           </span>

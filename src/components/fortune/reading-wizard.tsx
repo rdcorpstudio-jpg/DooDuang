@@ -3,16 +3,16 @@
 import { useEffect, useState, type FocusEvent } from "react";
 import Link from "next/link";
 import {
-  CalendarDays,
+  Check,
   ChevronLeft,
   ChevronRight,
-  Lock,
 } from "lucide-react";
+import Image from "next/image";
 import { BirthDatePicker } from "@/components/fortune/birth-date-picker";
 import { FortuneLoading } from "@/components/fortune/fortune-loading";
 import { FortuneResultView } from "@/components/fortune/fortune-result-view";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { AstroHeroOrb } from "@/components/home/astro-hero-orb";
-import { SoftSelectCard, GenderMoonIcon, GenderSunIcon, GenderStarIcon } from "@/components/ui/soft-select-card";
 import {
   GENDER_OPTIONS,
   type Gender,
@@ -189,20 +189,20 @@ function buildLocalFallback(nickname: string): FortuneApiResult {
   };
 }
 
-const GENDER_META: Record<
-  Gender,
-  { icon: React.ReactNode; tone: "rose" | "sky" | "violet" | "gold" }
-> = {
+const GENDER_ICONS: Record<Gender, { src: string; alt: string; tone: "rose" | "violet" | "gold" }> = {
   female: {
-    icon: <GenderMoonIcon />,
-    tone: "gold",
+    src: "/images/icons/gender-female.png",
+    alt: "หญิง",
+    tone: "rose",
   },
   male: {
-    icon: <GenderSunIcon />,
+    src: "/images/icons/gender-male.png",
+    alt: "ชาย",
     tone: "violet",
   },
   other: {
-    icon: <GenderStarIcon />,
+    src: "/images/icons/gender-other.png",
+    alt: "อื่นๆ",
     tone: "gold",
   },
 };
@@ -217,24 +217,60 @@ function GenderSelectList({
   return (
     <div className="space-y-2.5">
       {GENDER_OPTIONS.map((option, index) => {
-        const meta = GENDER_META[option.id];
+        const meta = GENDER_ICONS[option.id];
+        const selected = value === option.id;
         return (
-          <SoftSelectCard
+          <button
             key={option.id}
-            label="เพศ"
-            title={option.label}
-            iconNode={meta.icon}
-            orbTone={meta.tone}
-            selected={value === option.id}
+            type="button"
             onClick={() => onSelect(option.id)}
-            skipReveal
-            className="wizard-anim-item"
+            className={cn(
+              "wizard-anim-item fortune-glass flex w-full items-center gap-3.5 rounded-[18px] px-4 py-3.5 text-left outline-none transition",
+              "active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4",
+              selected && "ring-2 ring-[#9B7FE8]/55"
+            )}
             style={
               {
                 "--wizard-delay": `${140 + index * 85}ms`,
               } as React.CSSProperties
             }
-          />
+          >
+            <span
+              className={cn(
+                "relative flex h-12 w-12 shrink-0 items-center justify-center overflow-visible rounded-full",
+                meta.tone === "gold"
+                  ? "bg-[#F4BC52]/18 ring-1 ring-[#F4BC52]/35"
+                  : meta.tone === "rose"
+                    ? "bg-[#F2A8C8]/22 ring-1 ring-[#E89AB8]/35"
+                    : "bg-[#B9A4F0]/28 ring-1 ring-[#9B7FE8]/35"
+              )}
+            >
+              <Image
+                src={meta.src}
+                alt={meta.alt}
+                width={40}
+                height={40}
+                unoptimized
+                className="h-9 w-9 object-contain drop-shadow-[0_2px_8px_rgba(123,95,212,0.35)]"
+              />
+            </span>
+            <span className="min-w-0 flex-1 text-[16px] font-semibold text-[#2C2458]">
+              {option.label}
+            </span>
+            <span
+              className={cn(
+                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition",
+                selected
+                  ? "bg-[#7B5FD4] text-white"
+                  : "bg-white/70 ring-1 ring-[#7B6BB0]/25"
+              )}
+              aria-hidden
+            >
+              {selected ? (
+                <Check className="h-4 w-4" strokeWidth={2.6} />
+              ) : null}
+            </span>
+          </button>
         );
       })}
     </div>
@@ -261,19 +297,20 @@ function StepHeader({
 }) {
   return (
     <div
-      className="wizard-step-header wizard-anim-item relative mb-7 text-center"
+      className="wizard-step-header wizard-anim-item relative mb-5 text-center"
       style={{ "--wizard-delay": "40ms" } as React.CSSProperties}
     >
-      <div className="wizard-step-pill mb-3.5 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5">
-        <span className="wizard-step-pill-dot" />
-        <span className="text-[11px] font-medium tracking-[0.18em] text-[#F4BC52]/95">
-          STEP {String(step).padStart(2, "0")}
+      <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-[#B9A4F0]/28 px-3.5 py-1.5 ring-1 ring-[#9B7FE8]/3">
+        <FortuneIcon name="sparkle" size={12} />
+        <span className="text-[12px] font-semibold text-[#5B45B8]">
+          ขั้นตอนที่ {step}
         </span>
+        <FortuneIcon name="sparkle" size={12} />
       </div>
-      <h1 className="font-sacred text-[1.85rem] leading-tight tracking-wide text-white drop-shadow-[0_0_24px_rgba(232,197,71,0.22)]">
+      <h1 className="result-hero-copy text-[1.85rem] font-bold leading-tight tracking-tight text-[#2C2458]">
         {title}
       </h1>
-      <p className="wizard-keyboard-hide mt-2 text-[13px] font-light leading-relaxed tracking-wide text-white/50">
+      <p className="result-hero-copy wizard-keyboard-hide mt-2 text-[13px] leading-relaxed text-[#5E5688]">
         {subtitle}
       </p>
     </div>
@@ -284,7 +321,7 @@ function WizardShell({ children, className }: { children: React.ReactNode; class
   return (
     <div
       className={cn(
-        "wizard-form-card wizard-anim-item relative rounded-[24px] p-5 sm:p-6",
+        "wizard-anim-item fortune-glass relative rounded-[22px] p-5 sm:p-6",
         className,
       )}
       style={{ "--wizard-delay": "140ms" } as React.CSSProperties}
@@ -311,22 +348,27 @@ function FormContinueButton({
     <button
       type="button"
       className={cn(
-        "wizard-anim-item",
-        className ?? "name-step-cta group relative mt-6 block w-full",
+        "wizard-anim-item group relative mt-6 flex w-full items-center justify-between overflow-hidden rounded-full px-6 py-3.5 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45 disabled:opacity-45",
+        className,
       )}
-      style={{ "--wizard-delay": `${delayMs}ms` } as React.CSSProperties}
+      style={
+        {
+          "--wizard-delay": `${delayMs}ms`,
+          background:
+            "linear-gradient(90deg, #7B5FD4 0%, #9B7FE8 48%, #C4B0F5 100%)",
+          boxShadow: "0 10px 28px rgba(123,95,212,0.32)",
+        } as React.CSSProperties
+      }
       disabled={disabled}
       onClick={onClick}
     >
-      <span className="intro-cta-glow opacity-80" aria-hidden />
-      <span className="name-step-cta-surface">
-        <span className="intro-cta-shine" aria-hidden />
-        <span className="name-step-cta-label relative z-[1]">{label}</span>
-        <ChevronRight
-          className="relative z-[1] h-[17px] w-[17px] text-[#1a1440] transition-transform duration-200 group-hover:translate-x-0.5"
-          strokeWidth={2.4}
-        />
+      <span className="text-[16px] font-bold tracking-wide text-white">
+        {label}
       </span>
+      <ChevronRight
+        className="h-[18px] w-[18px] text-white transition-transform duration-200 group-hover:translate-x-0.5"
+        strokeWidth={2.4}
+      />
     </button>
   );
 }
@@ -334,10 +376,10 @@ function FormContinueButton({
 function PrivacyNote({ delayMs = 520 }: { delayMs?: number }) {
   return (
     <p
-      className="wizard-keyboard-hide wizard-anim-item mt-5 flex items-center justify-center gap-1.5 text-[11px] tracking-wide text-white/35"
+      className="wizard-keyboard-hide wizard-anim-item mt-4 flex items-center justify-center gap-1.5 text-[12px] text-[#6B6490]"
       style={{ "--wizard-delay": `${delayMs}ms` } as React.CSSProperties}
     >
-      <Lock className="h-3 w-3 text-[#F4BC52]/70" strokeWidth={1.8} />
+      <FortuneIcon name="lock" size={16} />
       ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
     </p>
   );
@@ -475,7 +517,7 @@ export function ReadingWizard() {
   if (step === "result" && result) {
     return (
       <div className="relative h-full overflow-y-auto">
-        <div className="relative z-10 min-h-full px-5 pb-10 pt-4">
+        <div className="relative z-10 min-h-full px-1.5 pb-10 pt-3">
           <FortuneResultView
             result={result}
             profile={{
@@ -514,51 +556,68 @@ export function ReadingWizard() {
   return (
     <div
       data-wizard-scroll
-      className="relative h-full overflow-y-auto overscroll-contain"
+      className="relative h-full overflow-y-auto overscroll-contain sky-copy"
     >
       <div className="wizard-form-aura pointer-events-none absolute inset-0" aria-hidden>
-        <div className="wizard-form-sky" />
-        <div className="wizard-form-wheel">
+        <div className="wizard-form-sky wizard-form-sky-light" />
+        <div className="wizard-form-wheel wizard-form-wheel-light">
           <AstroHeroOrb watermark />
         </div>
-        <div key={`bloom-${step}`} className="wizard-form-bloom wizard-bloom-pulse" />
       </div>
 
       <div className="wizard-keyboard-compact relative z-10 flex min-h-full flex-col px-5 pb-8 pt-4">
-        <div className="relative z-20 mb-2 grid grid-cols-[minmax(4.5rem,1fr)_auto_minmax(4.5rem,1fr)] items-center gap-2">
+        <div className="relative z-20 mb-3 grid grid-cols-[minmax(4.5rem,1fr)_auto_minmax(4.5rem,1fr)] items-center gap-2">
           {backHref ? (
             <Link
               href={backHref}
-              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#F4BC52]/75 transition-opacity active:opacity-60"
+              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] transition-opacity active:opacity-60"
             >
-              <ChevronLeft className="h-5 w-5" strokeWidth={2} />
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
               กลับ
             </Link>
           ) : (
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#F4BC52]/75 transition-opacity active:opacity-60"
+              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] transition-opacity active:opacity-60"
             >
-              <ChevronLeft className="h-5 w-5" strokeWidth={2} />
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
               กลับ
             </button>
           )}
-          <p className="text-center text-[11px] font-medium tracking-[0.42em] text-[#F4BC52]/85">
-            DOODUANG
-          </p>
-          <p className="justify-self-end text-[13px] tabular-nums text-white/45">
-            <span key={stepNumber} className="wizard-step-num text-[#F4BC52]">
-              {stepNumber}
-            </span>
-            <span className="text-white/30"> / 3</span>
-          </p>
+          <div className="flex flex-col items-center justify-self-center">
+            <FortuneIcon name="moon" size={16} className="-mb-0.5" />
+            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
+              DOODUANG
+            </p>
+          </div>
+          <div className="justify-self-end text-right">
+            <p className="text-[13px] font-semibold tabular-nums text-[#5B45B8]">
+              <span key={stepNumber} className="wizard-step-num">
+                {stepNumber}
+              </span>
+              <span className="text-[#9A90C0]">/3</span>
+            </p>
+            <div className="mt-1.5 flex justify-end gap-1">
+              {[1, 2, 3].map((n) => (
+                <span
+                  key={n}
+                  className={cn(
+                    "h-1 w-5 rounded-full transition",
+                    n <= stepNumber ? "bg-[#7B5FD4]" : "bg-white/55"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         <div
           className={cn(
-            "relative mx-auto flex w-full max-w-[340px] flex-1 flex-col py-4",
-            step === "name" ? "justify-start" : "justify-center",
+            "relative mx-auto flex w-full max-w-[340px] flex-1 flex-col",
+            step === "name"
+              ? "wizard-name-stage justify-start pb-4 pt-[min(20vh,148px)]"
+              : "justify-center py-4"
           )}
         >
           <div className="wizard-step-stage">
@@ -600,8 +659,8 @@ export function ReadingWizard() {
                 />
 
                 <WizardShell>
-                  <div className="mb-4 flex items-center justify-center gap-2 text-white/50">
-                    <CalendarDays className="h-4 w-4" strokeWidth={1.7} />
+                  <div className="mb-4 flex items-center justify-center gap-2 text-[#6B6490]">
+                    <FortuneIcon name="calendar" size={18} />
                     <span className="text-[12px] tracking-[0.08em]">เลื่อนเพื่อเลือก</span>
                   </div>
 
@@ -634,7 +693,7 @@ export function ReadingWizard() {
                 <WizardShell>
                   <div className="flex flex-col gap-4">
                     <label className="block">
-                      <span className="mb-2 block text-[13px] font-medium tracking-wide text-white/80">
+                      <span className="mb-2 block text-[13px] font-medium tracking-wide text-[#5E5688]">
                         ชื่อจริง
                       </span>
                       <input
@@ -652,7 +711,7 @@ export function ReadingWizard() {
                     </label>
 
                     <label className="block">
-                      <span className="mb-2 block text-[13px] font-medium tracking-wide text-white/80">
+                      <span className="mb-2 block text-[13px] font-medium tracking-wide text-[#5E5688]">
                         ชื่อเล่น
                       </span>
                       <input
@@ -670,7 +729,7 @@ export function ReadingWizard() {
                     </label>
 
                     {error ? (
-                      <div className="rounded-xl border border-rose-400/25 bg-rose-500/12 px-4 py-3 text-[14px] text-rose-200">
+                      <div className="rounded-xl border border-rose-400/30 bg-rose-50 px-4 py-3 text-[14px] text-rose-600">
                         {error}
                       </div>
                     ) : null}
@@ -678,7 +737,7 @@ export function ReadingWizard() {
                     <FormContinueButton
                       label="เปิดดูดวง"
                       delayMs={280}
-                      className="name-step-cta group relative mt-2 block w-full"
+                      className="mt-2"
                       disabled={!profile.realName.trim() || !profile.nickname.trim()}
                       onClick={() => void runFortune()}
                     />

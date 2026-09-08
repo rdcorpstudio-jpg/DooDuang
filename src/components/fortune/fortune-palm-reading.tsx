@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Lock } from "lucide-react";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import {
@@ -76,30 +77,39 @@ export function FortunePalmReading({
 
   if (!unlocked) {
     return (
-      <div className={cn("relative h-full overflow-y-auto", className)}>
+      <div className={cn("sky-copy relative h-full overflow-y-auto", className)}>
         <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="inline-flex w-fit items-center gap-1 rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-[12px] text-white/75"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.2} />
-            กลับ
-          </button>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+              กลับ
+            </button>
+            <div className="flex flex-col items-center justify-self-center">
+              <FortuneIcon name="moon" size={16} className="-mb-0.5" />
+              <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
+                DOODUANG
+              </p>
+            </div>
+            <span aria-hidden className="justify-self-end" />
+          </div>
           <div className="fortune-glass mt-8 rounded-[22px] px-4 py-6 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#F4BC52]/45">
-              <Lock className="h-5 w-5 text-[#F4BC52]" strokeWidth={1.9} />
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#9B7FE8]/12 ring-1 ring-[#9B7FE8]/30">
+              <Lock className="h-5 w-5 text-[#7B5FD4]" strokeWidth={1.9} />
             </span>
-            <h1 className="mt-3 text-[20px] font-semibold text-white">
+            <h1 className="mt-3 text-[1.4rem] font-bold tracking-tight text-[#241C4F]">
               ดูลายมือ · พรีเมียม
             </h1>
-            <p className="mt-2 text-[13px] leading-relaxed text-white/50">
+            <p className="mt-2 text-[13px] leading-relaxed text-[#5E5688]">
               ถ่ายหรืออัปโหลดรูปฝ่ามือ เพื่ออ่านลายมือ
             </p>
             <button
               type="button"
               onClick={() => setPayOpen(true)}
-              className="mt-5 w-full rounded-full bg-gradient-to-r from-[#F4BC52] to-[#E8A93A] py-3 text-[15px] font-semibold text-[#0C1427]"
+              className="no-sky-lift mt-5 w-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8] py-3 text-[15px] font-semibold text-white outline-none transition active:scale-[0.99]"
             >
               ปลดล็อก · {FORTUNE_UNLOCK_PRICE} บาท
             </button>
@@ -140,30 +150,39 @@ export function FortunePalmReading({
   ];
 
   return (
-    <div className={cn("relative h-full overflow-y-auto", className)}>
+    <div className={cn("sky-copy relative h-full overflow-y-auto", className)}>
       <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
-        <button
-          type="button"
-          onClick={() => {
-            if (step === "result") setStep("upload");
-            else router.back();
-          }}
-          className="inline-flex w-fit items-center gap-1 rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-[12px] text-white/75"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.2} />
-          กลับ
-        </button>
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (step === "result") setStep("upload");
+              else router.back();
+            }}
+            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+          >
+            <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+            กลับ
+          </button>
+          <div className="flex flex-col items-center justify-self-center">
+            <FortuneIcon name="moon" size={16} className="-mb-0.5" />
+            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
+              DOODUANG
+            </p>
+          </div>
+          <span aria-hidden className="justify-self-end" />
+        </div>
 
         {step === "upload" ? (
           <>
-            <header className="mt-4">
-              <h1 className="text-[22px] font-semibold text-white">
+            <header className="mt-5">
+              <h1 className="text-[1.55rem] font-bold tracking-tight text-[#241C4F]">
                 อ่านลายมือ
               </h1>
-              <p className="mt-1 text-[14px] font-medium text-[#46DDED]">
+              <p className="mt-1 text-[14px] font-medium text-[#7B5FD4]">
                 อัปโหลดรูปฝ่ามือ
               </p>
-              <p className="mt-1 text-[12px] text-white/45">
+              <p className="mt-1 text-[12px] leading-relaxed text-[#6B6490]">
                 ใช้รูปฝ่ามือชัด แสงพอ — กดช่องแล้วเลือกถ่ายด้วยกล้องหรืออัปโหลด
               </p>
             </header>
@@ -189,7 +208,7 @@ export function FortunePalmReading({
               />
             </div>
 
-            <p className="mt-5 text-center text-[11px] leading-relaxed text-white/35">
+            <p className="mt-5 text-center text-[11px] leading-relaxed text-[#8A82B0]">
               รูปของคุณประมวลผลบนเครื่องเท่านั้น และไม่ถูกอัปโหลด
             </p>
 
@@ -197,18 +216,18 @@ export function FortunePalmReading({
               type="button"
               disabled={!palm}
               onClick={() => setStep("result")}
-              className="mt-3 w-full rounded-full bg-gradient-to-r from-[#46DDED] to-[#6EA8FF] py-3.5 text-[15px] font-semibold text-[#0C1427] outline-none transition enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-35"
+              className="no-sky-lift mt-3 w-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8] py-3.5 text-[15px] font-semibold text-white outline-none transition enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-35"
             >
               ถัดไป
             </button>
           </>
         ) : (
-          <div className="mt-4 space-y-3 pb-4">
-            <h1 className="text-[20px] font-semibold text-white">
+          <div className="mt-5 space-y-3 pb-4">
+            <h1 className="text-[1.4rem] font-bold tracking-tight text-[#241C4F]">
               ผลอ่านลายมือ
             </h1>
             <div className="fortune-glass flex gap-3 rounded-[20px] p-3.5">
-              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-black/20">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
                 {palmUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -219,11 +238,11 @@ export function FortunePalmReading({
                 ) : null}
               </div>
               <div className="min-w-0">
-                <p className="text-[15px] font-semibold text-white">
+                <p className="text-[15px] font-semibold text-[#241C4F]">
                   ฝ่ามือหลัก ·{" "}
                   {h % 2 === 0 ? "เส้นชัด" : "เส้นละเอียด"}
                 </p>
-                <p className="mt-1 text-[12px] leading-relaxed text-white/50">
+                <p className="mt-1 text-[12px] leading-relaxed text-[#5E5688]">
                   สรุปจากรูปที่คุณถ่าย/อัปโหลด — ใช้เป็นแนวทางคร่าว ๆ
                 </p>
               </div>
@@ -233,12 +252,14 @@ export function FortunePalmReading({
               {lines.map((line, i) => (
                 <div
                   key={line.title}
-                  className={i > 0 ? "border-t border-white/[0.08] pt-3.5" : undefined}
+                  className={
+                    i > 0 ? "border-t border-[#7B6BB0]/12 pt-3.5" : undefined
+                  }
                 >
-                  <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+                  <p className="text-[11px] font-semibold tracking-[0.14em] text-[#7B5FD4]">
                     {line.title}
                   </p>
-                  <p className="mt-1.5 text-[12px] leading-[1.7] text-[#B7C3D8]">
+                  <p className="mt-1.5 text-[12px] leading-[1.7] text-[#5E5688]">
                     {line.body}
                   </p>
                 </div>

@@ -1,35 +1,24 @@
-import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 
 /** Client-safe catalog (no Stripe SDK import). */
 export const PREMIUM_UNLOCK = {
   id: "premium-unlock",
-  name: "ดวงพรีเมียม",
+  name: `แพ็กเกจ ${FORTUNE_PACKAGE_MONTHS} เดือน`,
   price: FORTUNE_UNLOCK_PRICE,
-  description: "ปลดล็อกเนื้อหาพรีเมียมทั้งหมด",
+  months: FORTUNE_PACKAGE_MONTHS,
+  description: `ปลดล็อกเนื้อหาพรีเมียมครบ ${FORTUNE_PACKAGE_MONTHS} เดือน`,
 } as const;
 
+/** Single paid product — 3-month premium package via STRIPE_PRICE_STARTER */
 export const CREDIT_PACKAGES = [
   {
     id: "starter",
-    name: "พรีเมียม",
+    name: PREMIUM_UNLOCK.name,
     credits: 0,
     price: FORTUNE_UNLOCK_PRICE,
-    description: "ปลดล็อกดวงพรีเมียม",
-  },
-  {
-    id: "popular",
-    name: "ยอดนิยม",
-    credits: 10,
-    price: 129,
-    description: "10 ครั้ง คุ้มที่สุด",
+    months: FORTUNE_PACKAGE_MONTHS,
+    description: PREMIUM_UNLOCK.description,
     popular: true,
-  },
-  {
-    id: "premium",
-    name: "พรีเมียมเครดิต",
-    credits: 30,
-    price: 299,
-    description: "30 ครั้ง สำหรับสายมู",
   },
 ] as const;
 
