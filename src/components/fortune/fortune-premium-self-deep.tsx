@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useMemo } from "react";
-import { Compass, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function hashSeed(input: string) {
@@ -252,62 +252,64 @@ export function FortunePremiumSelfDeep({
   const name = nickname.trim() || "คุณ";
 
   return (
-    <section className={cn("space-y-3.5", className)}>
-      <div className="px-0.5 text-center">
-        <p className="text-[11px] font-semibold tracking-[0.2em] text-[#F4BC52]/85">
+    <section
+      className={cn(
+        "fortune-glass overflow-hidden rounded-[20px] px-4 py-4",
+        className
+      )}
+    >
+      <div className="text-center">
+        <p className="text-[11px] font-semibold tracking-[0.16em] text-[#E4C56A]/90">
           PREMIUM · SELF MAP
         </p>
-        <h2 className="font-sacred mt-1.5 text-[1.45rem] leading-snug text-[#F7F8FF]">
+        <h2 className="font-sacred mt-1.5 text-[1.4rem] leading-snug text-[#F7F8FF]">
           คุณ{name}เป็นคนแบบไหนกันนะ
         </h2>
-        <div className="mx-auto mt-2 h-px w-16 bg-gradient-to-r from-transparent via-[#F4BC52]/55 to-transparent" />
       </div>
 
-      <div className="rounded-[18px] fortune-surface px-2 py-3">
+      <div className="mt-4">
         <RadarChart values={data.axes} />
-        <p className="mt-1 px-2 text-center text-[12px] leading-relaxed text-[#C8D8EF]">
+        <p className="mt-1 px-2 text-center text-[12px] leading-relaxed text-[#B7C3D8]">
           6 แกนอุปนิสัยที่คำนวณจากพลังชีวิตของคุณ
         </p>
       </div>
 
-      <div className="rounded-[14px] px-3.5 py-3 ring-1 ring-[#F4BC52]/35 bg-[#F4BC52]/12">
-        <p className="text-[13px] leading-[1.7] text-[#F7F8FF]">
-          {data.top.label} {data.top.score} คะแนน · {data.low.label}{" "}
-          {data.low.score} คะแนน — สันดานติดตัวของคุณคือเครื่องยนต์ที่ขับเคลื่อน
-          ดวงชีวิตทั้งชีวิต
-        </p>
-      </div>
+      <p className="mt-4 border-t border-white/[0.08] pt-3.5 text-[13px] leading-[1.7] text-[#E8EEF8]">
+        {data.top.label} {data.top.score} คะแนน · {data.low.label}{" "}
+        {data.low.score} คะแนน — สันดานติดตัวของคุณคือเครื่องยนต์ที่ขับเคลื่อน
+        ดวงชีวิตทั้งชีวิต
+      </p>
 
-      <div className="space-y-3 rounded-[16px] fortune-surface px-3.5 py-3.5">
+      <div className="mt-4 space-y-3 border-t border-white/[0.08] pt-3.5">
         {data.spectra.map((item) => (
           <SpectrumRow key={item.left} item={item} />
         ))}
       </div>
 
-      <div className="space-y-2.5 rounded-[16px] bg-[#0C1427]/85 px-3.5 py-3.5 ring-1 ring-white/15">
+      <div className="mt-4 space-y-2.5 border-t border-white/[0.08] pt-3.5">
         <p className="text-[15px] font-semibold text-[#F7F8FF]">
           {data.strengthLevel} · {data.styleType}
         </p>
-        <p className="text-[13px] leading-[1.75] text-[#FFE7A8]">
+        <p className="text-[13px] leading-[1.75] text-[#E8EEF8]">
           “{data.top.label}ของคุณสูงถึง {data.top.score} คะแนน แต่
           {data.low.label}อยู่ที่ {data.low.score} คะแนน ดวงนี้เลยเป็นแบบที่จุดแข็งก็ชัด
           จุดอ่อนก็ชัดเช่นกัน”
         </p>
-        <p className="text-[13px] leading-[1.7] text-[#D5E4F7]">
+        <p className="text-[13px] leading-[1.7] text-[#B7C3D8]">
           {data.styleType}ที่ธาตุ{data.strongest.label}แรง เป็นการผสมผสานที่ทำให้คุณ
           มีจังหวะชีวิตเฉพาะตัวชัดเจน
         </p>
       </div>
 
-      <div className="space-y-3">
-        <div className="px-0.5 text-center">
-          <p className="text-[11px] tracking-[0.18em] text-[#9AB8DC]">五行</p>
-          <h3 className="mt-1 text-[16px] font-semibold text-[#F7F8FF]">
-            การกระจายห้าธาตุในตัวคุณ
-          </h3>
-        </div>
+      <div className="mt-4 border-t border-white/[0.08] pt-3.5">
+        <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+          ห้าธาตุในตัวคุณ
+        </p>
+        <h3 className="mt-1 text-[15px] font-semibold text-[#F7F8FF]">
+          การกระจายห้าธาตุ
+        </h3>
 
-        <div className="space-y-2.5 rounded-[16px] fortune-surface px-3.5 py-3.5">
+        <div className="mt-3 space-y-2.5">
           {data.elements.map((el) => (
             <div key={el.key} className="flex items-center gap-2.5">
               <span
@@ -326,19 +328,18 @@ export function FortunePremiumSelfDeep({
                   }}
                 />
               </div>
-              <span className="w-10 shrink-0 text-right text-[12px] tabular-nums text-[#9AB8DC]">
+              <span className="w-10 shrink-0 text-right text-[12px] tabular-nums text-[#B7C3D8]">
                 {el.pct}%
               </span>
             </div>
           ))}
         </div>
 
-        <div className="rounded-[14px] fortune-surface px-3.5 py-3">
-          <div className="mb-1.5 flex items-center gap-1.5">
-            <Compass className="h-3.5 w-3.5 text-[#F4BC52]" strokeWidth={1.8} />
-            <p className="text-[12px] font-semibold text-[#F4BC52]">อ่านธาตุของคุณ</p>
-          </div>
-          <p className="text-[13px] leading-[1.7] text-[#E8EEF8]">
+        <div className="mt-3.5">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+            อ่านธาตุ
+          </p>
+          <p className="mt-1.5 text-[13px] leading-[1.7] text-[#E8EEF8]">
             ธาตุ{data.strongest.label}เด่นสุดที่ {data.strongest.pct}%
             {data.missing.length
               ? ` ในขณะที่${data.missing.map((m) => m.label).join("และ")}เกือบหายไป`
@@ -348,8 +349,8 @@ export function FortunePremiumSelfDeep({
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-[#9AB8DC]/75">
-        <Sparkles className="h-3 w-3 text-[#F4BC52]" strokeWidth={1.8} />
+      <div className="mt-4 flex items-center justify-center gap-1.5 border-t border-white/[0.08] pt-3 text-[11px] text-[#B7C3D8]/80">
+        <Sparkles className="h-3 w-3 text-[#E4C56A]" strokeWidth={1.8} />
         ส่วนพรีเมียมท้ายรายงาน · วิเคราะห์เฉพาะคุณ
       </div>
     </section>

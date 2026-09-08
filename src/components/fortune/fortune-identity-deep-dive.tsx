@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import { Gem, Settings2, Users, UserRound } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function hashSeed(input: string) {
@@ -104,45 +104,33 @@ export function FortuneIdentityDeepDive({
           ใส่ใจรายละเอียด รับผิดชอบ และให้ความสำคัญกับความรู้สึกของคนรอบข้าง
         </p>
 
-        <div className="mt-3.5 grid grid-cols-2 gap-2.5">
-          <div className="fortune-dash-inset rounded-[14px] px-3 py-3">
-            <div className="flex items-center gap-1.5">
-              <Gem className="h-3.5 w-3.5 text-[#e8c547]" strokeWidth={1.7} />
-              <p className="text-[12.5px] font-semibold text-white">จุดแข็ง</p>
-            </div>
-            <ul className="mt-2.5 space-y-1.5 text-[12.5px] text-white/65">
+        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-white/[0.08] pt-3.5">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+              จุดแข็ง
+            </p>
+            <ul className="mt-2 space-y-1.5 text-[12.5px] text-white/65">
               {["รอบคอบ", "อดทน", "รับฟัง"].map((t) => (
-                <li key={t} className="flex gap-1.5">
-                  <span className="text-[#e8c547]/65">•</span>
-                  {t}
-                </li>
+                <li key={t}>· {t}</li>
               ))}
             </ul>
           </div>
-
-          <div className="fortune-dash-inset rounded-[14px] px-3 py-3">
-            <div className="flex items-center gap-1.5">
-              <Settings2 className="h-3.5 w-3.5 text-[#c4a8ff]" strokeWidth={1.7} />
-              <p className="text-[12.5px] font-semibold text-white">สิ่งที่ควรปรับ</p>
-            </div>
-            <ul className="mt-2.5 space-y-1.5 text-[12.5px] text-white/65">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+              ควรปรับ
+            </p>
+            <ul className="mt-2 space-y-1.5 text-[12.5px] text-white/65">
               {["คิดมาก", "เกรงใจ", "แบกภาระ"].map((t) => (
-                <li key={t} className="flex gap-1.5">
-                  <span className="text-[#c4a8ff]/70">•</span>
-                  {t}
-                </li>
+                <li key={t}>· {t}</li>
               ))}
             </ul>
           </div>
         </div>
 
-        <div className="fortune-dash-inset mt-2.5 flex items-start gap-2 rounded-[14px] px-3 py-3">
-          <Users className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#67e8f9]/85" strokeWidth={1.7} />
-          <p className="text-[12.5px] leading-snug text-white/65">
-            <span className="font-medium text-white/85">คนอื่นมองคุณ:</span>{" "}
-            ไว้ใจได้ แต่ไม่ค่อยบอกว่าเหนื่อย
-          </p>
-        </div>
+        <p className="mt-3.5 border-t border-white/[0.08] pt-3 text-[12.5px] leading-[1.65] text-white/65">
+          <span className="font-semibold text-[#E8EEF8]">คนอื่นมองคุณ · </span>
+          ไว้ใจได้ แต่ไม่ค่อยบอกว่าเหนื่อย
+        </p>
       </section>
 
       <section className="fortune-soft-board rounded-[24px] px-3.5 pb-4 pt-3.5">

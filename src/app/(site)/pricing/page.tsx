@@ -2,7 +2,7 @@ import { PricingCard } from "@/components/fortune/pricing-card";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { PageHero } from "@/components/ui/page-hero";
 import { SacredDivider } from "@/components/ui/sacred-mark";
-import { CREDIT_PACKAGES } from "@/lib/stripe";
+import { CREDIT_PACKAGES } from "@/lib/stripe-catalog";
 import { APP_NAME } from "@/lib/site";
 
 export const metadata = {

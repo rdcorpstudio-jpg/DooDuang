@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Lock } from "lucide-react";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
+import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import {
   PhotoSlot,
   PhotoSourceSheet,
@@ -71,6 +72,8 @@ export function FortunePalmReading({
     setPayOpen(false);
   }
 
+  useStripePaymentReturn(handlePaid);
+
   if (!unlocked) {
     return (
       <div className={cn("relative h-full overflow-y-auto", className)}>
@@ -106,6 +109,7 @@ export function FortunePalmReading({
           open={payOpen}
           onClose={() => setPayOpen(false)}
           onPaid={handlePaid}
+          returnPath="/reading/palm"
         />
       </div>
     );
@@ -225,13 +229,16 @@ export function FortunePalmReading({
               </div>
             </div>
 
-            <div className="fortune-glass space-y-3 rounded-[20px] px-3.5 py-3.5">
-              {lines.map((line) => (
-                <div key={line.title}>
-                  <p className="text-[13px] font-semibold text-[#46DDED]">
+            <div className="fortune-glass space-y-3.5 rounded-[20px] px-4 py-4">
+              {lines.map((line, i) => (
+                <div
+                  key={line.title}
+                  className={i > 0 ? "border-t border-white/[0.08] pt-3.5" : undefined}
+                >
+                  <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
                     {line.title}
                   </p>
-                  <p className="mt-0.5 text-[12px] leading-[1.65] text-white/60">
+                  <p className="mt-1.5 text-[12px] leading-[1.7] text-[#B7C3D8]">
                     {line.body}
                   </p>
                 </div>

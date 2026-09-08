@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
+import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import {
   hydrateFortuneProfileFromWizard,
@@ -72,6 +73,10 @@ export function PremiumSalesPage({
 } = {}) {
   const [hasReading, setHasReading] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
+
+  useStripePaymentReturn(() => {
+    onUnlocked?.();
+  });
 
   useEffect(() => {
     hydrateFortuneProfileFromWizard();
@@ -232,10 +237,10 @@ export function PremiumSalesPage({
           หลังชำระเงิน แท็บพรีเมียมจะกลายเป็นหน้าดวงแบบปลดล็อกเต็ม
         </p>
         <Link
-          href="/pricing"
+          href="/login"
           className="block text-center text-[13px] text-[#F4BC52]/85 underline-offset-2 hover:underline"
         >
-          หรือดูแพ็กเครดิตอื่น
+          จัดการบัญชี / เข้าสู่ระบบ
         </Link>
       </div>
 
@@ -243,6 +248,7 @@ export function PremiumSalesPage({
         open={payOpen}
         onClose={() => setPayOpen(false)}
         onPaid={handlePaid}
+        returnPath="/premium"
       />
     </AnimatedPage>
   );

@@ -53,66 +53,98 @@
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
+/* Shrink to visible viewport while typing — avoids iOS crushing inputs */
+.phone-frame--keyboard {
+  height: var(--vv-height, 100dvh);
+  max-height: var(--vv-height, 100dvh);
+  transform: translate3d(0, var(--vv-top, 0px), 0);
+}
+
+html[data-keyboard-open="true"] .wizard-keyboard-hide {
+  display: none !important;
+}
+
+html[data-keyboard-open="true"] .wizard-keyboard-compact {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+html[data-keyboard-open="true"] .wizard-keyboard-compact .wizard-step-header {
+  margin-bottom: 0.75rem !important;
+}
+
+html[data-keyboard-open="true"] .wizard-keyboard-compact .wizard-step-header h1 {
+  font-size: 1.45rem !important;
+}
+
+html[data-keyboard-open="true"] .wizard-keyboard-compact .wizard-form-card {
+  padding: 0.85rem 1rem !important;
+}
+
+html[data-keyboard-open="true"] .wizard-keyboard-compact .name-step-input {
+  min-height: 2.65rem;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
+  gap: 0.65rem;
+}
+
 @layer components {
   .sacred-page-bg {
     @apply bg-transparent;
   }
 
   .sacred-surface {
-    border: 1px solid rgba(228, 197, 106, 0.34);
-    background: rgba(28, 22, 52, 0.62);
-    backdrop-filter: blur(18px) saturate(1.15);
-    -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(16, 18, 36, 0.82);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
   }
 
-  /* Glassmorphism — gold frosted frames */
+  /* Soft panels — single flush rim, no inset double-line */
   .glass-frame {
-    border: 1px solid rgba(228, 197, 106, 0.36);
-    background: rgba(28, 22, 56, 0.58);
-    backdrop-filter: blur(20px) saturate(1.2);
-    -webkit-backdrop-filter: blur(20px) saturate(1.2);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 236, 190, 0.12),
-      0 8px 22px rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(16, 18, 36, 0.8);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
   }
 
   .glass-frame-soft {
-    border: 1px solid rgba(228, 197, 106, 0.26);
-    background: rgba(28, 22, 56, 0.48);
-    backdrop-filter: blur(16px) saturate(1.12);
-    -webkit-backdrop-filter: blur(16px) saturate(1.12);
-    box-shadow: inset 0 1px 0 rgba(255, 236, 190, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(16, 18, 36, 0.72);
+    backdrop-filter: blur(14px) saturate(1.05);
+    -webkit-backdrop-filter: blur(14px) saturate(1.05);
+    box-shadow: none;
   }
 
   .fortune-glass {
-    border: 1px solid rgba(228, 197, 106, 0.34);
-    background: rgba(26, 20, 52, 0.56);
-    backdrop-filter: blur(20px) saturate(1.2);
-    -webkit-backdrop-filter: blur(20px) saturate(1.2);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 236, 190, 0.12),
-      0 10px 24px rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(14, 16, 34, 0.78);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
     transition:
       border-color 180ms ease,
       transform 180ms ease;
   }
 
   .fortune-glass-inset {
-    border: 1px solid rgba(228, 197, 106, 0.22);
-    background: rgba(16, 12, 36, 0.48);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: inset 0 1px 0 rgba(255, 236, 190, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(10, 12, 28, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: none;
   }
 
   .fortune-surface {
-    border: 1px solid rgba(228, 197, 106, 0.3);
-    background: rgba(24, 18, 48, 0.6);
-    backdrop-filter: blur(18px) saturate(1.15);
-    -webkit-backdrop-filter: blur(18px) saturate(1.15);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 236, 190, 0.1),
-      0 8px 20px rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    background: rgba(14, 16, 32, 0.84);
+    backdrop-filter: blur(14px) saturate(1.05);
+    -webkit-backdrop-filter: blur(14px) saturate(1.05);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
   }
 
   .fortune-free-page {
@@ -120,7 +152,7 @@
     --dd-muted: #b7c3d8;
     --dd-gold: #e4c56a;
     --dd-cyan: #6bb8c8;
-    --dd-frame: rgba(228, 197, 106, 0.36);
+    --dd-frame: rgba(255, 255, 255, 0.1);
     color: var(--dd-text);
   }
 
@@ -141,18 +173,16 @@
   }
 
   .fortune-dash-card {
-    border: 1px solid rgba(228, 197, 106, 0.34);
-    background: rgba(26, 20, 52, 0.56);
-    backdrop-filter: blur(20px) saturate(1.18);
-    -webkit-backdrop-filter: blur(20px) saturate(1.18);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 236, 190, 0.1),
-      0 10px 24px rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(14, 16, 34, 0.78);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
   }
 
   .fortune-dash-inset {
-    border: 1px solid rgba(228, 197, 106, 0.22);
-    background: rgba(14, 10, 34, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(10, 12, 28, 0.62);
   }
 
   .fortune-section-title {
@@ -171,53 +201,41 @@
     color: rgba(228, 197, 106, 0.9);
   }
 
-  /* Accent frames — tinted frosted glass */
+  /* Accent frames — denser tinted panels, single flush rim */
   .fortune-frame-magenta {
-    border: 1px solid rgba(210, 150, 220, 0.28) !important;
-    background: rgba(48, 28, 58, 0.58) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 220, 255, 0.1),
-      0 8px 20px rgba(0, 0, 0, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(42, 24, 50, 0.8) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
   }
 
   .fortune-frame-cyan {
-    border: 1px solid rgba(90, 190, 210, 0.26) !important;
-    background: rgba(22, 40, 56, 0.58) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(200, 245, 255, 0.1),
-      0 8px 20px rgba(0, 0, 0, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(18, 34, 50, 0.8) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
   }
 
   .fortune-frame-gold {
-    border: 1px solid rgba(228, 197, 106, 0.4) !important;
-    background: rgba(42, 34, 28, 0.58) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 236, 190, 0.12),
-      0 8px 20px rgba(0, 0, 0, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(28, 24, 40, 0.82) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
   }
 
   .fortune-frame-sky {
-    border: 1px solid rgba(120, 170, 220, 0.26) !important;
-    background: rgba(24, 36, 56, 0.58) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(210, 230, 255, 0.1),
-      0 8px 20px rgba(0, 0, 0, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(20, 32, 50, 0.8) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
   }
 
   .fortune-frame-pink {
-    border: 1px solid rgba(230, 150, 180, 0.26) !important;
-    background: rgba(48, 28, 46, 0.58) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 220, 235, 0.1),
-      0 8px 20px rgba(0, 0, 0, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(42, 24, 40, 0.8) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
   }
 
   .fortune-frame-violet {
-    border: 1px solid rgba(170, 150, 220, 0.26) !important;
-    background: rgba(36, 32, 58, 0.58) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(230, 220, 255, 0.1),
-      0 8px 20px rgba(0, 0, 0, 0.14) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(30, 26, 50, 0.8) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
   }
 
   /* Result page — smooth motion */
@@ -505,15 +523,13 @@
     @apply text-[12px] text-white/40 transition-colors duration-200 hover:text-[#d4b8ff];
   }
 
-  /* Soft select — gold frosted frames */
+  /* Soft select — muted frame, denser fill */
   .soft-select-card {
-    border: 1px solid rgba(228, 197, 106, 0.34);
-    background: rgba(28, 22, 56, 0.58);
-    backdrop-filter: blur(18px) saturate(1.15);
-    -webkit-backdrop-filter: blur(18px) saturate(1.15);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 236, 190, 0.1),
-      0 8px 18px rgba(0, 0, 0, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(16, 18, 36, 0.8);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
     transition:
       transform 0.2s ease,
       border-color 0.2s ease,
@@ -522,11 +538,9 @@
 
   .soft-select-card:hover {
     transform: translateY(-1px);
-    border-color: rgba(228, 197, 106, 0.5);
-    background: rgba(34, 26, 64, 0.66);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 236, 190, 0.12),
-      0 10px 20px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(20, 22, 42, 0.86);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   }
 
   .soft-select-card:active {
@@ -534,11 +548,9 @@
   }
 
   .soft-select-card.is-selected {
-    border-color: rgba(228, 197, 106, 0.58);
-    background: rgba(40, 30, 72, 0.7);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 236, 190, 0.12),
-      0 8px 18px rgba(0, 0, 0, 0.16);
+    border-color: rgba(228, 197, 106, 0.42);
+    background: rgba(24, 22, 44, 0.88);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
   }
 
   .soft-select-orb {
@@ -697,13 +709,11 @@
   }
 
   .wizard-form-card {
-    border: 1px solid rgba(228, 197, 106, 0.34);
-    background: rgba(26, 20, 52, 0.58);
-    backdrop-filter: blur(20px) saturate(1.18);
-    -webkit-backdrop-filter: blur(20px) saturate(1.18);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 236, 190, 0.1),
-      0 10px 24px rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(14, 16, 34, 0.8);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
   }
 
   .name-step-input {

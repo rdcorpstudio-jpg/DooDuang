@@ -4,8 +4,19 @@ import { useState } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export function GoogleSignInButton({ callbackUrl = "/dashboard" }: { callbackUrl?: string }) {
+export function GoogleSignInButton({
+  callbackUrl = "/dashboard",
+  onSuccess,
+  className,
+  label = "เข้าสู่ระบบด้วย Google",
+}: {
+  callbackUrl?: string;
+  onSuccess?: () => void | Promise<void>;
+  className?: string;
+  label?: string;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +51,12 @@ export function GoogleSignInButton({ callbackUrl = "/dashboard" }: { callbackUrl
         throw new Error(data.error || "เข้าสู่ระบบไม่สำเร็จ");
       }
 
+      if (onSuccess) {
+        await onSuccess();
+        setLoading(false);
+        return;
+      }
+
       window.location.href = callbackUrl || "/dashboard";
     } catch (err) {
       setError(err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ");
@@ -48,12 +65,12 @@ export function GoogleSignInButton({ callbackUrl = "/dashboard" }: { callbackUrl
   }
 
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-3", className)}>
       <Button
         type="button"
         variant="secondary"
         className="w-full"
-        onClick={handleClick}
+        onClick={() => void handleClick()}
         disabled={loading}
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden>
@@ -74,7 +91,7 @@ export function GoogleSignInButton({ callbackUrl = "/dashboard" }: { callbackUrl
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
           />
         </svg>
-        {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบด้วย Google"}
+        {loading ? "กำลังเข้าสู่ระบบ..." : label}
       </Button>
       {error && <p className="text-center text-xs text-red-300/80">{error}</p>}
     </div>

@@ -28,9 +28,26 @@ import { cn } from "@/lib/utils";
 
 function scrollFieldIntoView(event: FocusEvent<HTMLInputElement>) {
   const el = event.currentTarget;
-  window.setTimeout(() => {
+  const scroller = el.closest<HTMLElement>("[data-wizard-scroll]");
+
+  const align = () => {
+    if (scroller) {
+      const parentRect = scroller.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const targetTop = parentRect.top + Math.min(96, parentRect.height * 0.18);
+      const delta = elRect.top - targetTop;
+      if (Math.abs(delta) > 8) {
+        scroller.scrollBy({ top: delta, behavior: "smooth" });
+      }
+      return;
+    }
     el.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
-  }, 120);
+  };
+
+  // iOS keyboard animation needs a couple ticks before layout settles.
+  window.setTimeout(align, 80);
+  window.setTimeout(align, 280);
+  window.setTimeout(align, 480);
 }
 type FortuneApiResult = ExtendedFortuneResult & { shareToken?: string | null };
 type Step = "gender" | "birth" | "name" | "loading" | "result";
@@ -256,7 +273,7 @@ function StepHeader({
       <h1 className="font-sacred text-[1.85rem] leading-tight tracking-wide text-white drop-shadow-[0_0_24px_rgba(232,197,71,0.22)]">
         {title}
       </h1>
-      <p className="mt-2 text-[13px] font-light leading-relaxed tracking-wide text-white/50">
+      <p className="wizard-keyboard-hide mt-2 text-[13px] font-light leading-relaxed tracking-wide text-white/50">
         {subtitle}
       </p>
     </div>
@@ -317,7 +334,7 @@ function FormContinueButton({
 function PrivacyNote({ delayMs = 520 }: { delayMs?: number }) {
   return (
     <p
-      className="wizard-anim-item mt-5 flex items-center justify-center gap-1.5 text-[11px] tracking-wide text-white/35"
+      className="wizard-keyboard-hide wizard-anim-item mt-5 flex items-center justify-center gap-1.5 text-[11px] tracking-wide text-white/35"
       style={{ "--wizard-delay": `${delayMs}ms` } as React.CSSProperties}
     >
       <Lock className="h-3 w-3 text-[#F4BC52]/70" strokeWidth={1.8} />
@@ -371,27 +388,7 @@ export function ReadingWizard() {
     }
   }, [ready, step, result, profile]);
 
-  // Keep form above the iOS/Android keyboard inside the fixed phone frame.
-  useEffect(() => {
-    if (step === "loading" || step === "result") return;
-    const root = document.documentElement;
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    const update = () => {
-      const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      root.style.setProperty("--wizard-keyboard-inset", `${inset}px`);
-    };
-
-    update();
-    vv.addEventListener("resize", update);
-    vv.addEventListener("scroll", update);
-    return () => {
-      vv.removeEventListener("resize", update);
-      vv.removeEventListener("scroll", update);
-      root.style.removeProperty("--wizard-keyboard-inset");
-    };
-  }, [step]);
+  // Keyboard inset / visualViewport handled in PhoneFrame.
 
   useEffect(() => {
     if (step !== "loading") return;
@@ -515,7 +512,10 @@ export function ReadingWizard() {
   }
 
   return (
-    <div className="relative h-full overflow-y-auto overscroll-contain">
+    <div
+      data-wizard-scroll
+      className="relative h-full overflow-y-auto overscroll-contain"
+    >
       <div className="wizard-form-aura pointer-events-none absolute inset-0" aria-hidden>
         <div className="wizard-form-sky" />
         <div className="wizard-form-wheel">
@@ -524,13 +524,7 @@ export function ReadingWizard() {
         <div key={`bloom-${step}`} className="wizard-form-bloom wizard-bloom-pulse" />
       </div>
 
-      <div
-        className="relative z-10 flex min-h-full flex-col px-5 pt-4"
-        style={{
-          paddingBottom:
-            "max(2rem, calc(1.25rem + var(--wizard-keyboard-inset, 0px)))",
-        }}
-      >
+      <div className="wizard-keyboard-compact relative z-10 flex min-h-full flex-col px-5 pb-8 pt-4">
         <div className="relative z-20 mb-2 grid grid-cols-[minmax(4.5rem,1fr)_auto_minmax(4.5rem,1fr)] items-center gap-2">
           {backHref ? (
             <Link
@@ -638,7 +632,7 @@ export function ReadingWizard() {
                 />
 
                 <WizardShell>
-                  <div className="space-y-4">
+                  <div className="flex flex-col gap-4">
                     <label className="block">
                       <span className="mb-2 block text-[13px] font-medium tracking-wide text-white/80">
                         ชื่อจริง

@@ -218,10 +218,9 @@ export function FortuneTopicGrid({ className }: { className?: string }) {
       <div
         className="cursor-grab touch-pan-y overflow-hidden rounded-[22px] active:cursor-grabbing"
         style={{
-          border: "1px solid rgba(228, 197, 106, 0.42)",
-          background: `linear-gradient(165deg, rgba(90,60,160,0.38) 0%, rgba(10,14,32,0.72) 45%, rgba(24,18,48,0.66) 100%)`,
-          boxShadow:
-            "0 14px 34px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,236,190,0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
+          background: `linear-gradient(165deg, rgba(40,32,70,0.72) 0%, rgba(12,14,30,0.86) 48%, rgba(16,16,34,0.84) 100%)`,
+          boxShadow: "0 14px 34px rgba(0,0,0,0.28)",
           transform: `translate3d(${isDragging ? dragX * 0.4 : 0}px, 0, 0)`,
           transition: isDragging
             ? "none"

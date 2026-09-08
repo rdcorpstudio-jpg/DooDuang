@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Lock, Pencil } from "lucide-react";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
+import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import {
   PhotoSlot,
   PhotoSourceSheet,
@@ -83,6 +84,8 @@ export function FortuneFaceReading({
     setPayOpen(false);
   }
 
+  useStripePaymentReturn(handlePaid);
+
   if (!unlocked) {
     return (
       <div className={cn("relative h-full overflow-y-auto", className)}>
@@ -129,6 +132,7 @@ export function FortuneFaceReading({
           open={payOpen}
           onClose={() => setPayOpen(false)}
           onPaid={handlePaid}
+          returnPath="/reading/face"
         />
       </div>
     );
@@ -258,7 +262,6 @@ function FaceResult({
   const palaces = [
     {
       title: "วังสวรรค์ (หน้าผาก)",
-      tone: "#60A5FA",
       body:
         h % 2 === 0
           ? "สัดส่วนหน้าผากสมดุล บ่งชี้ช่วงต้นชีวิตและการเรียนที่ราบรื่น"
@@ -266,7 +269,6 @@ function FaceResult({
     },
     {
       title: "วังมนุษย์ (กลางหน้า)",
-      tone: "#F43F5E",
       body:
         (h >> 2) % 2 === 0
           ? "ช่วงกลางหน้าเด่น พลังงานสูง เหมาะกับงานและการเงินวัยกลางคน"
@@ -274,7 +276,6 @@ function FaceResult({
     },
     {
       title: "วังปฐพี (คาง/กราม)",
-      tone: "#F4BC52",
       body:
         (h >> 4) % 2 === 0
           ? "คางค่อนข้างเรียว ควรวางแผนการเงินระยะยาวสำหรับช่วงหลัง"
@@ -328,25 +329,22 @@ function FaceResult({
         </div>
       </div>
 
-      <div className="fortune-glass rounded-[20px] px-3.5 py-3.5">
-        <h2 className="text-[15px] font-semibold text-white">
-          สามวังหลักของใบหน้า
+      <div className="fortune-glass rounded-[20px] px-4 py-4">
+        <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/90">
+          สามวังหลัก
         </h2>
-        <div className="mt-3 space-y-3">
-          {palaces.map((p) => (
-            <div key={p.title} className="flex gap-3">
-              <span
-                className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-[#0C1427]"
-                style={{ background: p.tone }}
-              >
-                ●
-              </span>
-              <div className="min-w-0">
-                <p className="text-[13px] font-semibold text-white">{p.title}</p>
-                <p className="mt-0.5 text-[12px] leading-[1.65] text-white/55">
-                  {p.body}
-                </p>
-              </div>
+        <div className="mt-3.5 space-y-3.5">
+          {palaces.map((p, i) => (
+            <div
+              key={p.title}
+              className={cn(
+                i > 0 && "border-t border-white/[0.08] pt-3.5"
+              )}
+            >
+              <p className="text-[13px] font-semibold text-[#F7F8FF]">{p.title}</p>
+              <p className="mt-1 text-[12px] leading-[1.7] text-[#B7C3D8]">
+                {p.body}
+              </p>
             </div>
           ))}
         </div>

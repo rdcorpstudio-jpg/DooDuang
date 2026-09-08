@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { AnimatedPage } from "@/components/ui/reveal";
@@ -98,7 +98,11 @@ export function PremiumHomePage({
   }
 
   if (!unlocked) {
-    return <PremiumSalesPage onUnlocked={() => setUnlocked(true)} />;
+    return (
+      <Suspense fallback={null}>
+        <PremiumSalesPage onUnlocked={() => setUnlocked(true)} />
+      </Suspense>
+    );
   }
 
   if (!profile && !forceUnlocked) {

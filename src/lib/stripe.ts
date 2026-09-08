@@ -1,4 +1,8 @@
 import Stripe from "stripe";
+import { CREDIT_PACKAGES, PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
+
+export { CREDIT_PACKAGES, PREMIUM_UNLOCK };
+export type { CreditPackageId } from "@/lib/stripe-catalog";
 
 export const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -7,35 +11,14 @@ export const stripe = process.env.STRIPE_SECRET_KEY
     })
   : null;
 
-export const CREDIT_PACKAGES = [
-  {
-    id: "starter",
-    name: "เริ่มต้น",
-    credits: 3,
-    price: 49,
-    priceId: process.env.STRIPE_PRICE_STARTER,
-    description: "3 ครั้งดูดวงพิเศษ",
-  },
-  {
-    id: "popular",
-    name: "ยอดนิยม",
-    credits: 10,
-    price: 129,
-    priceId: process.env.STRIPE_PRICE_POPULAR,
-    description: "10 ครั้ง คุ้มที่สุด",
-    popular: true,
-  },
-  {
-    id: "premium",
-    name: "พรีเมียม",
-    credits: 30,
-    price: 299,
-    priceId: process.env.STRIPE_PRICE_PREMIUM,
-    description: "30 ครั้ง สำหรับสายมู",
-  },
-] as const;
-
-export type CreditPackageId = (typeof CREDIT_PACKAGES)[number]["id"];
+function priceIdForPackage(packageId: string) {
+  if (packageId === PREMIUM_UNLOCK.id || packageId === "starter") {
+    return process.env.STRIPE_PRICE_STARTER;
+  }
+  if (packageId === "popular") return process.env.STRIPE_PRICE_POPULAR;
+  if (packageId === "premium") return process.env.STRIPE_PRICE_PREMIUM;
+  return undefined;
+}
 
 export async function resolveStripePriceId(priceOrProductId: string) {
   if (!stripe) {
@@ -60,4 +43,28 @@ export async function resolveStripePriceId(priceOrProductId: string) {
   }
 
   throw new Error("ต้องใช้ Price ID ที่ขึ้นต้นด้วย price_");
+}
+
+export function resolveCheckoutPackage(packageId: string) {
+  if (packageId === PREMIUM_UNLOCK.id || packageId === "starter") {
+    return {
+      id: PREMIUM_UNLOCK.id,
+      name: PREMIUM_UNLOCK.name,
+      credits: 0,
+      price: PREMIUM_UNLOCK.price,
+      priceId: priceIdForPackage(packageId),
+      purpose: "premium-unlock" as const,
+    };
+  }
+
+  const pkg = CREDIT_PACKAGES.find((p) => p.id === packageId);
+  if (!pkg) return null;
+  return {
+    id: pkg.id,
+    name: pkg.name,
+    credits: pkg.credits,
+    price: pkg.price,
+    priceId: priceIdForPackage(pkg.id),
+    purpose: "credits" as const,
+  };
 }

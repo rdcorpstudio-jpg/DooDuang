@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { APP_NAME, FORTUNE_DISCLAIMER } from "@/lib/site";
 import { SaveReadingForm } from "@/components/fortune/save-reading-form";
 import { LifeInsightMockup } from "@/components/fortune/life-insight-mockup";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
+import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { getUnlockStorageKey, type ExtendedFortuneResult } from "@/lib/fortune/extended";
 import {
   isPremiumUnlocked,
@@ -25,7 +25,7 @@ interface FortuneResultViewProps {
   showBackLink?: boolean;
 }
 
-export function FortuneResultView({
+function FortuneResultViewInner({
   profile,
   readingOption,
   type,
@@ -37,6 +37,21 @@ export function FortuneResultView({
   const [unlocked, setUnlocked] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const seed = `${type}-${profile.realName}-${profile.nickname}-${profile.birthDate}-${profile.gender}`;
+
+  function handlePaid() {
+    setPremiumUnlocked({
+      birthDate: profile.birthDate,
+      nickname: profile.nickname,
+    });
+    try {
+      sessionStorage.setItem(storageKey, "1");
+    } catch {
+      /* ignore */
+    }
+    setUnlocked(true);
+    setPayOpen(false);
+    router.push("/premium");
+  }
 
   useEffect(() => {
     setUnlocked(
@@ -54,20 +69,9 @@ export function FortuneResultView({
     );
   }, [storageKey, profile.birthDate, profile.nickname]);
 
-  function handlePaid() {
-    setPremiumUnlocked({
-      birthDate: profile.birthDate,
-      nickname: profile.nickname,
-    });
-    try {
-      sessionStorage.setItem(storageKey, "1");
-    } catch {
-      /* ignore */
-    }
-    setUnlocked(true);
-    setPayOpen(false);
-    router.push("/premium");
-  }
+  useStripePaymentReturn(() => {
+    handlePaid();
+  });
 
   return (
     <div className="relative mx-auto w-full max-w-[480px] pb-12">
@@ -86,6 +90,7 @@ export function FortuneResultView({
         open={payOpen}
         onClose={() => setPayOpen(false)}
         onPaid={handlePaid}
+        returnPath="/premium"
       />
 
       <footer className="mt-8 space-y-4 px-1 text-center">
@@ -111,10 +116,15 @@ export function FortuneResultView({
             กลับหน้าแรก
           </Link>
         </div>
-        <p className="text-[13px] text-white/30">
-          {FORTUNE_DISCLAIMER} · {APP_NAME}
-        </p>
       </footer>
     </div>
+  );
+}
+
+export function FortuneResultView(props: FortuneResultViewProps) {
+  return (
+    <Suspense fallback={<div className="min-h-[40vh]" />}>
+      <FortuneResultViewInner {...props} />
+    </Suspense>
   );
 }

@@ -1,5 +1,6 @@
 import type { ZodiacSign, ReadingType } from "./zodiac";
 import { ZODIAC_SIGNS } from "./zodiac";
+import { drawTarotSpread } from "./tarot-deck";
 
 const DAILY_FORTUNES: Record<ZodiacSign, string[]> = {
   aries: [
@@ -139,24 +140,6 @@ const OVERALL_FORTUNES: Record<ZodiacSign, string> = {
   pisces: "จินตนาการและสัญชาตญาณเป็นพาหนะ ความฝันอาจกลายเป็นจริง ฟังเสียงภายใน",
 };
 
-const TAROT_CARDS = [
-  { name: "The Fool", meaning: "การเริ่มต้นใหม่ กล้าที่จะก้าวออกไปสู่โลกกว้าง ปล่อยวางความกลัว" },
-  { name: "The Magician", meaning: "คุณมีทักษะและทรัพยากรครบ ลงมือทำสิ่งที่ตั้งใจได้เลย" },
-  { name: "The High Priestess", meaning: "ฟังสัญชาตญาณภายใน คำตอบอยู่ในใจคุณแล้ว" },
-  { name: "The Empress", meaning: "ความอุดมสมบูรณ์และความงาม สิ่งดี ๆ กำลังเติบโต" },
-  { name: "The Emperor", meaning: "ความมั่นคงและการควบคุม วางแผนแล้วลงมือทำ" },
-  { name: "The Lovers", meaning: "การเลือกที่สำคัญ ความรักและความสัมพันธ์ที่ลึกซึ้ด" },
-  { name: "The Chariot", meaning: "ความมุ่งมั่นจะพาคุณไปสู่ชัยชนะ อย่าหยุดกลางคัน" },
-  { name: "Strength", meaning: "ความแข็งแกร่งภายใน อ่อนโยนแต่มั่นคง คุณเอาชนะได้" },
-  { name: "The Hermit", meaning: "ใช้เวลาอยู่กับตัวเอง คำตอบจะมาจากการไตร่ตรอง" },
-  { name: "Wheel of Fortune", meaning: "โชคชะตากำลังหมุน การเปลี่ยนแปลงที่ดีกำลังมา" },
-  { name: "Justice", meaning: "ความยุติธรรมจะมา รับผิดชอบต่อการกระทำของตัวเอง" },
-  { name: "The Star", meaning: "ความหวังและแรงบันดาลใจ หลังจากพายุมักมีสายรุ้ง" },
-  { name: "The Moon", meaning: "สิ่งที่ซ่อนอยู่จะเปิดเผย ระวังความเข้าใจผิด" },
-  { name: "The Sun", meaning: "ความสุขและความสำเร็จ ทุกอย่างสดใส" },
-  { name: "The World", meaning: "บรรลุเป้าหมาย วงจรหนึ่งจบลง เริ่มต้นใหม่ที่สมบูรณ์" },
-];
-
 function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -186,8 +169,10 @@ export function generateFortune(
   const seed = `${type}-${profile.realName}-${profile.nickname}-${profile.birthDate}-${profile.gender}-${date.toISOString().slice(0, 10)}`;
   const { nickname } = profile;
 
-  const personalize = (base: string) => `${nickname} — ${base}`;
-  const titleFor = (label: string) => `${label}ของคุณ ${nickname}`;
+  const name = nickname.replace(/^คุณ\s*/, "").trim();
+  const address = name ? `คุณ${name}` : "คุณ";
+  const personalize = (base: string) => `${address} — ${base}`;
+  const titleFor = (label: string) => `${label}ของ${address}`;
 
   switch (type) {
     case "daily": {
@@ -249,23 +234,24 @@ export function generateFortune(
         },
       };
     case "tarot": {
-      const cardSeed = hashString(seed);
-      const cards = [
-        TAROT_CARDS[cardSeed % TAROT_CARDS.length],
-        TAROT_CARDS[(cardSeed + 7) % TAROT_CARDS.length],
-        TAROT_CARDS[(cardSeed + 13) % TAROT_CARDS.length],
-      ];
+      const cards = drawTarotSpread(seed, 3);
       const positions = ["อดีต", "ปัจจุบัน", "อนาคต"];
       const content = cards
-        .map((card, i) => `${positions[i]} — ${card.name}: ${card.meaning}`)
+        .map((card, i) => {
+          const orient =
+            hashString(`${seed}-orient-${i}`) % 2 === 0
+              ? card.upright
+              : card.reversed;
+          return `${positions[i]} — ${card.nameTh} (${card.nameEn}): ${orient}`;
+        })
         .join("\n\n");
       return {
         title: titleFor("ไพ่ทาโรต์ 3 ใบ"),
         content: personalize(content),
         extras: {
-          ไพ่ใบที่1: `${cards[0].name} (${positions[0]})`,
-          ไพ่ใบที่2: `${cards[1].name} (${positions[1]})`,
-          ไพ่ใบที่3: `${cards[2].name} (${positions[2]})`,
+          ไพ่ใบที่1: `${cards[0].nameTh} (${positions[0]})`,
+          ไพ่ใบที่2: `${cards[1].nameTh} (${positions[1]})`,
+          ไพ่ใบที่3: `${cards[2].nameTh} (${positions[2]})`,
         },
       };
     }

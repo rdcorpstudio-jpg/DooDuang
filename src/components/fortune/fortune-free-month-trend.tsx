@@ -578,30 +578,34 @@ function UnlockedTwelveYearTrend({
                   <p className="text-[12px] leading-[1.65] text-white/60">
                     {band.meaning}
                   </p>
-                  <div className="rounded-[12px] bg-[#F4BC52]/08 px-2.5 py-2 ring-1 ring-[#F4BC52]/2">
-                    <p className="text-[11px] font-semibold text-[#F4BC52]">
-                      จุดเปลี่ยนปีนี้
-                    </p>
-                    <p className="mt-1 text-[12px] leading-snug text-white/80">
-                      {year.turning}
-                    </p>
+
+                  <div className="mt-1 space-y-3 border-t border-white/[0.08] pt-3">
+                    <div>
+                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+                        จุดเปลี่ยน
+                      </p>
+                      <p className="mt-1 text-[12px] leading-[1.65] text-[#E8EEF8]">
+                        {year.turning}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+                        ทำไมถึงเป็นแบบนี้
+                      </p>
+                      <p className="mt-1 text-[12px] leading-[1.65] text-[#E8EEF8]">
+                        {year.reason}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+                        แนวทาง
+                      </p>
+                      <p className="mt-1 text-[12px] leading-[1.65] text-[#E8EEF8]">
+                        {year.guidance}
+                      </p>
+                    </div>
                   </div>
-                  <div className="rounded-[12px] bg-[#46DDED]/08 px-2.5 py-2 ring-1 ring-[#46DDED]/2">
-                    <p className="text-[11px] font-semibold text-[#46DDED]">
-                      ทำไมถึงเป็นแบบนี้
-                    </p>
-                    <p className="mt-1 text-[12px] leading-snug text-white/80">
-                      {year.reason}
-                    </p>
-                  </div>
-                  <div className="rounded-[12px] bg-white/[0.04] px-2.5 py-2 ring-1 ring-white/10">
-                    <p className="text-[11px] font-semibold text-white/70">
-                      แนวทางแก้ไข
-                    </p>
-                    <p className="mt-1 text-[12px] leading-snug text-white/80">
-                      {year.guidance}
-                    </p>
-                  </div>
+
                   <p className="text-[11px] leading-snug text-white/40">
                     จุดเด่น: {band.strength} · ใช้ยังไง: {band.use}
                   </p>
@@ -1108,17 +1112,15 @@ function FreeMonthTrendTeaser({
 
         {hasData && selectedBand && fix ? (
           <>
-            <div className="mt-3 overflow-hidden rounded-[14px] bg-white/[0.04] ring-1 ring-white/[0.08]">
+            <div className="mt-3.5 border-t border-white/[0.08] pt-3">
               <button
                 type="button"
                 aria-expanded={detailOpen}
                 onClick={() => setDetailOpen((v) => !v)}
-                className="flex w-full items-start justify-between gap-2 px-3 py-2.5 text-left outline-none transition hover:bg-white/[0.03] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/25"
+                className="flex w-full items-start justify-between gap-2 text-left outline-none transition active:opacity-80 focus-visible:ring-2 focus-visible:ring-white/25"
               >
                 <div className="min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] text-white/45">{selectedWhen}</p>
-                  </div>
+                  <p className="text-[11px] text-white/45">{selectedWhen}</p>
                   <p className="mt-1 text-[13px] font-semibold text-white">
                     {MONTH_NAMES_TH[selected.monthIndex]} · {selectedBand.label}
                   </p>
@@ -1152,15 +1154,17 @@ function FreeMonthTrendTeaser({
                 )}
               >
                 <div className="overflow-hidden">
-                  <div className="border-t border-white/[0.06] px-3 pb-2.5 pt-2">
+                  <div className="pt-2.5">
                     <p className="text-[12px] leading-[1.65] text-white/60">
                       {selectedDescribe}
                     </p>
-                    <p className="mt-2 text-[11px] font-medium text-[#46DDED]/90">
-                      จุดเด่น: {selectedBand.strength}
+                    <p className="mt-2 text-[12px] leading-[1.65] text-[#D5E0F0]">
+                      <span className="font-semibold text-[#E8EEF8]">จุดเด่น · </span>
+                      {selectedBand.strength}
                     </p>
-                    <p className="mt-1.5 text-[11px] leading-snug text-white/40">
-                      ใช้ยังไง: {selectedBand.use}
+                    <p className="mt-1 text-[12px] leading-[1.65] text-[#D5E0F0]">
+                      <span className="font-semibold text-[#E8EEF8]">ใช้ยังไง · </span>
+                      {selectedBand.use}
                     </p>
                   </div>
                 </div>
@@ -1171,10 +1175,10 @@ function FreeMonthTrendTeaser({
               type="button"
               onClick={onUnlock}
               disabled={!onUnlock}
-              className="mt-2.5 flex w-full items-center gap-3 rounded-[14px] border border-[#BB6CF0]/35 bg-gradient-to-r from-[#F4BC52]/15 to-[#F16DB5]/12 px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#BB6CF0]/45 disabled:opacity-60"
+              className="mt-3 flex w-full items-center gap-3 rounded-[14px] border border-white/10 bg-white/[0.05] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/25 disabled:opacity-60"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F4BC52]/15 ring-1 ring-[#F4BC52]/45">
-                <Lock className="h-4 w-4 text-[#F4BC52]" strokeWidth={1.9} />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.06]">
+                <Lock className="h-4 w-4 text-[#E4C56A]" strokeWidth={1.9} />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[13px] font-semibold text-white">
@@ -1185,11 +1189,10 @@ function FreeMonthTrendTeaser({
                 </span>
               </span>
               <ChevronRight
-                className="h-4 w-4 shrink-0 text-[#F16DB5]"
+                className="h-4 w-4 shrink-0 text-[#E4C56A]"
                 strokeWidth={2.2}
               />
             </button>
-
           </>
         ) : null}
       </div>

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { APP_NAME } from "@/lib/site";
 import { PremiumHomePage } from "@/components/fortune/premium-home-page";
 
@@ -8,5 +9,15 @@ export const metadata = {
 };
 
 export default function PremiumPage() {
-  return <PremiumHomePage />;
+  return (
+    <Suspense
+      fallback={
+        <div className="px-4 py-10 text-center text-[14px] text-[#9AB8DC]">
+          กำลังเปิด…
+        </div>
+      }
+    >
+      <PremiumHomePage />
+    </Suspense>
+  );
 }

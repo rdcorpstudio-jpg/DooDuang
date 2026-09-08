@@ -4,84 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Lock, Sparkles, Star } from "lucide-react";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
+import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import { drawTarotCard, TAROT_DECK_COUNT } from "@/lib/fortune/tarot-deck";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
-
-type TarotCard = {
-  id: string;
-  nameEn: string;
-  nameTh: string;
-  brief: string;
-  deep: string;
-  affirmation: string;
-  reflection: string;
-};
-
-const DECK: TarotCard[] = [
-  {
-    id: "lovers",
-    nameEn: "The Lovers",
-    nameTh: "คู่รัก",
-    brief: "วันนี้เหมาะกับการเลือกอย่างจริงใจ และเปิดใจสื่อสารกับคนสำคัญ",
-    deep: "ไพ่ใบนี้ชี้ถึงความสัมพันธ์ ความกลมกลืน และการตัดสินใจที่สอดคล้องกับหัวใจ ไม่ใช่แค่ความรู้สึกชั่วขณะ แต่เป็นการเลือกที่ยืนบนคุณค่าของตัวเอง เมื่อเลือกแล้ว ให้ยืนข้างการเลือกนั้นอย่างนุ่มนวลและชัดเจน",
-    affirmation: "ฉันเลือกสิ่งที่สอดคล้องกับใจ และสื่อสารด้วยความจริงใจ",
-    reflection: "วันนี้คุณกำลังเลือกระหว่างอะไรอยู่ และทางไหนที่ทำให้คุณรู้สึกเป็นตัวเองมากกว่า?",
-  },
-  {
-    id: "star",
-    nameEn: "The Star",
-    nameTh: "ดวงดาว",
-    brief: "มีแสงแห่งความหวัง — วันนี้เหมาะกับการตั้งใจใหม่แบบเบา ๆ",
-    deep: "ไพ่ดวงดาวบอกถึงการฟื้นพลัง ความเชื่อมั่น และการมองไปข้างหน้าอย่างสงบ หลังช่วงเหนื่อย วันนี้ไม่ต้องเร่งพิสูจน์อะไร แค่รักษาความหวังและลงมือทีละก้าวก็พอ",
-    affirmation: "ฉันเชื่อในจังหวะของตัวเอง และเปิดรับแสงใหม่",
-    reflection: "อะไรคือความหวังเล็ก ๆ ที่คุณอยากดูแลวันนี้?",
-  },
-  {
-    id: "sun",
-    nameEn: "The Sun",
-    nameTh: "ดวงอาทิตย์",
-    brief: "พลังบวกเปิดชัด — โชว์ตัวตนและฉลองความคืบหน้าได้",
-    deep: "ไพ่ดวงอาทิตย์หนุนความมั่นใจ ความอบอุ่น และการมองเห็นผลลัพธ์ วันนี้เหมาะกับการแชร์ความสำเร็จเล็ก ๆ และทำสิ่งที่ทำให้ใจโปร่ง โดยไม่ต้องกดดันตัวเองให้สมบูรณ์แบบ",
-    affirmation: "ฉันฉายแสงอย่างเป็นธรรมชาติ และยินดีกับสิ่งที่ได้ทำ",
-    reflection: "วันนี้คุณอยากฉลองเรื่องไหนของตัวเองบ้าง แม้จะเล็กน้อย?",
-  },
-  {
-    id: "moon",
-    nameEn: "The Moon",
-    nameTh: "พระจันทร์",
-    brief: "สัญชาตญาณทำงานดี — อย่ารีบสรุปจากเงาหรือข่าวลือ",
-    deep: "ไพ่พระจันทร์ชวนให้ฟังความรู้สึกภายใน ระวังการเดาและการกลัวเกินจริง วันนี้เหมาะกับการพัก สังเกตฝัน ความรู้สึก และถามข้อมูลเพิ่มก่อนตัดสินใจใหญ่",
-    affirmation: "ฉันฟังสัญชาตญาณ และตรวจสอบความจริงด้วยใจที่สงบ",
-    reflection: "มีอะไรที่คุณกลัวจากเงา — แต่ยังไม่ได้ตรวจสอบจริง?",
-  },
-  {
-    id: "hermit",
-    nameEn: "The Hermit",
-    nameTh: "ฤๅษี",
-    brief: "วันนี้เหมาะกับการถอยมานิด เพื่อฟังเสียงตัวเองให้ชัด",
-    deep: "ไพ่ฤๅษีเชิญให้เงียบลง มองใน และหาคำตอบจากประสบการณ์ของตัวเอง ไม่จำเป็นต้องตอบทุกคนทันที การอยู่กับตัวเองสั้น ๆ จะช่วยให้ทิศทางกลับมาคม",
-    affirmation: "ฉันให้เวลากับตัวเอง และเชื่อในปัญญาภายใน",
-    reflection: "ถ้าได้อยู่เงียบ ๆ 15 นาที คุณอยากได้คำตอบเรื่องอะไร?",
-  },
-  {
-    id: "wheel",
-    nameEn: "Wheel of Fortune",
-    nameTh: "วงล้อโชคชะตา",
-    brief: "จังหวะกำลังหมุน — พร้อมรับการเปลี่ยนแปลงอย่างยืดหยุ่น",
-    deep: "วงล้อบอกว่าสถานการณ์ไม่หยุดนิ่ง มีทั้งโอกาสและความไม่แน่นอน วันนี้เหมาะกับการปรับแผน ไม่ยึดติดรูปแบบเดิม และใช้โมเมนตัมไปข้างหน้าอย่างมีสติ",
-    affirmation: "ฉันไหลไปกับจังหวะใหม่ และเลือกใช้โอกาสอย่างมีสติ",
-    reflection: "การเปลี่ยนแปลงรอบตัวกำลังเปิดโอกาสอะไรให้คุณ?",
-  },
-];
-
-function hashSeed(input: string) {
-  let h = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h) >>> 0;
-}
 
 function todayKey() {
   const d = new Date();
@@ -107,8 +33,9 @@ export function FortuneDailyTarot({
   className?: string;
 }) {
   const router = useRouter();
-  const card = DECK[hashSeed(`${seed}-tarot-${todayKey()}`) % DECK.length]!;
-  const upright = hashSeed(`${seed}-orient-${todayKey()}`) % 2 === 0;
+  const { card, upright, brief } = drawTarotCard(
+    `${seed}-tarot-${todayKey()}`
+  );
 
   const openKey = `dooduang-tarot-open-${todayKey()}-${seed.slice(0, 24)}`;
   const [opened, setOpened] = useState(false);
@@ -181,6 +108,8 @@ export function FortuneDailyTarot({
     setPayOpen(false);
   }
 
+  useStripePaymentReturn(handlePaid);
+
   return (
     <div className={cn("relative h-full overflow-y-auto", className)}>
       <div className="relative mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
@@ -202,7 +131,7 @@ export function FortuneDailyTarot({
           </h1>
           <p className="mt-1 text-[14px] text-white/50">{formatThaiDate()}</p>
           <p className="mx-auto mt-2 max-w-[20rem] text-[12px] leading-relaxed text-white/40">
-            แหล่งสะท้อนความคิด แรงบันดาลใจ และความเข้าใจทางจิตวิญญาณ
+            สำรับทาโรต์ {TAROT_DECK_COUNT} ใบ · สุ่ม 1 ใบต่อวัน
           </p>
         </header>
 
@@ -294,13 +223,16 @@ export function FortuneDailyTarot({
                 data-slot="tarot-card-art"
               >
                 <div className="flex h-full flex-col items-center justify-between px-4 py-5 text-center">
-                  <p className="text-[11px] tracking-[0.2em] text-white/45">VI</p>
+                  <p className="text-[11px] tracking-[0.2em] text-white/45">
+                    {card.label}
+                  </p>
                   <div className="flex flex-1 flex-col items-center justify-center gap-3">
                     <span
                       className="flex h-24 w-24 items-center justify-center rounded-full"
                       style={{
                         background:
                           "radial-gradient(circle, rgba(244,188,82,0.25), transparent 70%)",
+                        transform: upright ? undefined : "rotate(180deg)",
                       }}
                     >
                       <Star
@@ -312,6 +244,15 @@ export function FortuneDailyTarot({
                     <p className="text-[13px] font-semibold tracking-wide text-white/90">
                       {card.nameEn}
                     </p>
+                    {card.arcana === "minor" && card.suit ? (
+                      <p className="text-[10px] tracking-wide text-white/35">
+                        Minor Arcana
+                      </p>
+                    ) : (
+                      <p className="text-[10px] tracking-wide text-white/35">
+                        Major Arcana
+                      </p>
+                    )}
                   </div>
                   <p className="text-[11px] text-white/40">{card.nameTh}</p>
                 </div>
@@ -322,10 +263,10 @@ export function FortuneDailyTarot({
                   {card.nameTh}
                 </h2>
                 <p className="mt-1 text-[13px] text-white/45">
-                  {upright ? "ปกติ" : "กลับหัว"}
+                  {upright ? "ปกติ (Upright)" : "กลับหัว (Reversed)"}
                 </p>
                 <p className="mx-auto mt-3 max-w-[22rem] text-[14px] leading-[1.7] text-white/75">
-                  {card.brief}
+                  {brief}
                 </p>
               </div>
 
@@ -351,7 +292,7 @@ export function FortuneDailyTarot({
                       ความหมายเชิงลึก
                     </p>
                     <p className="mt-2 text-[13px] leading-[1.7] text-white/75">
-                      {card.deep}
+                      {upright ? card.deep : `${card.reversed} — ${card.deep}`}
                     </p>
                   </div>
                 ) : (
@@ -384,6 +325,7 @@ export function FortuneDailyTarot({
         open={payOpen}
         onClose={() => setPayOpen(false)}
         onPaid={handlePaid}
+        returnPath="/reading/tarot"
       />
     </div>
   );

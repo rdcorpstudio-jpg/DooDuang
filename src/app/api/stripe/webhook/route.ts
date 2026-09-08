@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { stripe } from "@/lib/stripe";
+import { eq, sql } from "drizzle-orm";
+import { stripe, CREDIT_PACKAGES } from "@/lib/stripe";
 import { requireDb } from "@/lib/db";
 import { users, payments } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
-import { CREDIT_PACKAGES } from "@/lib/stripe";
+import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 
 export async function POST(request: Request) {
   if (!stripe) {
@@ -33,29 +33,49 @@ export async function POST(request: Request) {
     const session = event.data.object;
     const userId = session.metadata?.userId;
     const packageId = session.metadata?.packageId;
+    const purpose = session.metadata?.purpose;
     const credits = parseInt(session.metadata?.credits ?? "0", 10);
 
-    if (userId && credits > 0) {
-      const pkg = CREDIT_PACKAGES.find((p) => p.id === packageId);
+    if (!userId) {
+      return NextResponse.json({ received: true });
+    }
 
-      try {
-        const db = requireDb();
-        await db
-          .update(users)
-          .set({ credits: sql`${users.credits} + ${credits}` })
-          .where(eq(users.id, userId));
+    try {
+      const db = requireDb();
+      const existing = await db
+        .select({ id: payments.id })
+        .from(payments)
+        .where(eq(payments.stripeSessionId, session.id))
+        .limit(1);
+
+      if (!existing[0]) {
+        const pkg = CREDIT_PACKAGES.find((p) => p.id === packageId);
+        const amount =
+          purpose === "premium-unlock"
+            ? FORTUNE_UNLOCK_PRICE
+            : (pkg?.price ??
+              (typeof session.amount_total === "number"
+                ? Math.round(session.amount_total / 100)
+                : 0));
 
         await db.insert(payments).values({
           userId,
           stripeSessionId: session.id,
-          amount: pkg?.price ?? 0,
+          amount,
           credits,
           status: "completed",
         });
-      } catch (err) {
-        console.error("Webhook DB error:", err);
-        return NextResponse.json({ error: "DB error" }, { status: 500 });
       }
+
+      if (credits > 0) {
+        await db
+          .update(users)
+          .set({ credits: sql`${users.credits} + ${credits}` })
+          .where(eq(users.id, userId));
+      }
+    } catch (err) {
+      console.error("Webhook DB error:", err);
+      return NextResponse.json({ error: "DB error" }, { status: 500 });
     }
   }
 

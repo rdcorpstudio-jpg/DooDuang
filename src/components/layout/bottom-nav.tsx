@@ -46,11 +46,10 @@ export function BottomNav() {
       style={{
         background:
           "linear-gradient(180deg, rgba(22,16,48,0.9) 0%, rgba(12,10,28,0.96) 100%)",
-        borderTop: "1px solid rgba(228,197,106,0.28)",
+        borderTop: "1px solid rgba(255,255,255,0.1)",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
         paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
-        boxShadow: "inset 0 1px 0 rgba(255,236,190,0.08)",
       }}
     >
       <div className="mx-auto grid max-w-[480px] grid-cols-4 gap-0.5 px-2.5 pt-2">
@@ -63,15 +62,14 @@ export function BottomNav() {
               href={href}
               className={cn(
                 "relative flex flex-col items-center gap-1 rounded-2xl px-1 py-1.5 outline-none transition-all duration-200",
-                "active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#E4C56A]/4",
+                "active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white/25",
                 active ? "text-[#F5F2EA]" : "text-[#9AA3C0]"
               )}
             >
               <span
                 className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-200",
-                  active &&
-                    "bg-[rgba(228,197,106,0.14)] ring-1 ring-[rgba(228,197,106,0.4)]"
+                  active && "bg-white/[0.08] ring-1 ring-white/15"
                 )}
               >
                 <Icon

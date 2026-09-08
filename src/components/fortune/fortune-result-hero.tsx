@@ -51,13 +51,12 @@ export function FortuneResultHero({
 
       <div className="relative px-0.5 pb-1 pt-0.5">
         <section
-          className="relative min-h-[168px] overflow-hidden rounded-[22px] border border-[#F4BC52]/35"
+          className="relative min-h-[168px] overflow-hidden rounded-[22px] border border-white/10"
           style={{
             backgroundImage: "url(/images/mascot/hero-deities.jpg)",
             backgroundSize: "cover",
             backgroundPosition: "78% center",
-            boxShadow:
-              "0 12px 28px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(228,197,106,0.18)",
+            boxShadow: "0 12px 28px rgba(0,0,0,0.28)",
           }}
         >
           <div

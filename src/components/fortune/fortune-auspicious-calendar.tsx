@@ -159,46 +159,47 @@ function DayDetailCards({
   const hasChaos = profile.markers.includes("chaos");
 
   return (
-    <div className="space-y-1.5">
-      <p className="text-[12px] font-semibold tracking-wide text-[#F4BC52]">
+    <div className="space-y-3.5">
+      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/90">
         ฤกษ์มงคล · {titleDate}
       </p>
 
-      <div className="fortune-glass-inset rounded-[14px] px-3 py-2">
+      <div>
         <div className="flex items-center gap-2">
           <EnergyDot energy={profile.energy} size={14} />
           <p className="text-[14px] font-semibold text-[#F7F8FF]">
             {ENERGY_META[profile.energy].label}
           </p>
         </div>
-        <p className="mt-1 text-[13px] leading-[1.45] text-[#9AB8DC]">
+        <p className="mt-1.5 text-[13px] leading-[1.65] text-[#B7C3D8]">
           {adviceForDay({ ...profile, markers: [] })}
         </p>
       </div>
 
-      {primaryMarkers.map((m) => (
-        <div
-          key={m}
-          className="fortune-glass-inset rounded-[14px] px-3 py-2"
-        >
-          <div className="flex items-center gap-2">
-            <MarkerIcon marker={m} size={14} />
-            <p className="text-[14px] font-semibold text-[#F4BC52]">
-              {MARKER_META[m].label}
-            </p>
-          </div>
-          <p className="mt-1 text-[13px] leading-[1.45] text-[#F7F8FF]/88">
-            {MARKER_META[m].hint}
-          </p>
+      {primaryMarkers.length > 0 ? (
+        <div className="space-y-3 border-t border-white/[0.08] pt-3.5">
+          {primaryMarkers.map((m) => (
+            <div key={m}>
+              <div className="flex items-center gap-2">
+                <MarkerIcon marker={m} size={14} />
+                <p className="text-[12px] font-semibold tracking-wide text-[#E4C56A]/90">
+                  {MARKER_META[m].label}
+                </p>
+              </div>
+              <p className="mt-1 text-[13px] leading-[1.65] text-[#E8EEF8]">
+                {MARKER_META[m].hint}
+              </p>
+            </div>
+          ))}
         </div>
-      ))}
+      ) : null}
 
       {hasChaos ? (
-        <div className="rounded-[14px] border border-[#F16DB5]/35 bg-[#F16DB5]/08 px-3 py-2">
-          <p className="text-[14px] font-semibold text-[#F16DB5]">
+        <div className="border-t border-white/[0.08] pt-3.5">
+          <p className="text-[12px] font-semibold tracking-wide text-[#F16DB5]">
             {MARKER_META.chaos.label}
           </p>
-          <p className="mt-1 text-[13px] leading-[1.45] text-[#F7F8FF]/88">
+          <p className="mt-1 text-[13px] leading-[1.65] text-[#E8EEF8]">
             {MARKER_META.chaos.hint}
           </p>
         </div>
@@ -206,9 +207,11 @@ function DayDetailCards({
 
       {(hasChaos && primaryMarkers.includes("victory")) ||
       profile.markers.length > 1 ? (
-        <div className="rounded-[14px] border border-white/10 bg-white/[0.04] px-3 py-2">
-          <p className="text-[12px] font-semibold text-[#9AB8DC]">หมายเหตุ</p>
-          <p className="mt-1 text-[13px] leading-[1.45] text-[#F7F8FF]/85">
+        <div className="border-t border-white/[0.08] pt-3.5">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#B7C3D8]">
+            หมายเหตุ
+          </p>
+          <p className="mt-1 text-[13px] leading-[1.65] text-[#E8EEF8]">
             {adviceForDay(profile)}
           </p>
         </div>

@@ -64,7 +64,9 @@ export function FortuneFreeSelfIntro({
         </h2>
       </div>
       <p className="mt-2.5 text-[15px] leading-[1.75] text-[#D5E4F7]">
-        {nickname ? `${nickname} — ` : null}
+        {nickname
+          ? `คุณ${nickname.replace(/^คุณ\s*/, "").trim()} — `
+          : "คุณ — "}
         {profile.habit}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
