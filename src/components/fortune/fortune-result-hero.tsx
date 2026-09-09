@@ -51,20 +51,17 @@ export function FortuneResultHero({
   const isMale = (gender || "").toLowerCase() === "male";
   // New filenames force a hard cache miss (browser + Next)
   const heroSrc = isMale
-    ? "/images/bg/hero-male-emperor-0909.jpg"
+    ? "/images/bg/hero-male-sage-0909b.jpg"
     : "/images/bg/hero-female-guanyin-0909.jpg";
-  const objectPosition = isMale ? "72% 40%" : "70% 28%";
+  // New male sage matches female layout — figure right, bright copy left
+  const objectPosition = isMale ? "70% 32%" : "70% 28%";
 
-  // Male art is denser — scale type to match woman visual weight
-  const headlineClass = isMale
-    ? "mt-3 max-w-[56%] text-[1.35rem] font-bold leading-[1.28] tracking-tight text-[#1E1744]"
-    : "mt-3 max-w-[56%] text-[1.55rem] font-bold leading-[1.3] tracking-tight text-[#1E1744]";
-  const supportClass = isMale
-    ? "mt-2.5 max-w-[54%] text-[12px] font-medium leading-relaxed text-[#3F3768]"
-    : "mt-2.5 max-w-[54%] text-[13px] font-medium leading-relaxed text-[#3F3768]";
-  const footerClass = isMale
-    ? "text-[11px] font-semibold leading-snug text-[#3F3768]"
-    : "text-[12px] font-semibold leading-snug text-[#3F3768]";
+  // Same type scale for both genders (new male art has open left like woman)
+  const headlineClass =
+    "mt-3 max-w-[56%] text-[1.55rem] font-bold leading-[1.3] tracking-tight text-[#1E1744]";
+  const supportClass =
+    "mt-2.5 max-w-[54%] text-[13px] font-medium leading-relaxed text-[#3F3768]";
+  const footerClass = "text-[12px] font-semibold leading-snug text-[#3F3768]";
 
   return (
     <section
@@ -73,7 +70,7 @@ export function FortuneResultHero({
         className
       )}
     >
-      {/* Deity art — male emperor / Guanyin for female & other */}
+      {/* Deity art — male sage / Guanyin for female & other */}
       <div className="pointer-events-none absolute inset-0">
         {/* native img avoids Next image optimizer cache */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
