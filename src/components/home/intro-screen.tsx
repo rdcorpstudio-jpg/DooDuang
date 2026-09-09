@@ -20,8 +20,6 @@ const FEATURES = [
   { label: "คำแนะนำ", Icon: Lightbulb },
 ] as const;
 
-const HOME_REVIEW_COUNT = 75174;
-
 function Reveal({
   visible,
   delay,
@@ -100,20 +98,6 @@ export function IntroScreen() {
           <p className="mt-1.5 text-[13px] leading-snug text-[#6B6490]">
             ค้นพบแนวทางเรื่องงาน เงิน และความรัก
           </p>
-
-          <div
-            className="no-sky-lift mx-auto mt-3.5 inline-flex max-w-full items-center rounded-full px-3.5 py-1.5"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(44,36,88,0.88) 0%, rgba(58,47,107,0.92) 100%)",
-              boxShadow: "0 8px 20px rgba(58,47,107,0.22)",
-            }}
-            aria-label={`จำนวนรีวิวสะสม ${HOME_REVIEW_COUNT.toLocaleString("th-TH")} รายการ`}
-          >
-            <span className="truncate text-[11px] font-semibold text-white/95">
-              จำนวนรีวิวสะสม {HOME_REVIEW_COUNT.toLocaleString("th-TH")} รายการ
-            </span>
-          </div>
         </Reveal>
 
         <Reveal

@@ -43,9 +43,12 @@ const TABS: Array<{
   },
 ];
 
+const HOME_REVIEW_COUNT = 75174;
+
 /** Bottom nav — home mockup labels */
 export function BottomNav() {
   const pathname = usePathname() || "/";
+  const showReviews = pathname === "/";
 
   return (
     <nav
@@ -60,6 +63,11 @@ export function BottomNav() {
         paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
       }}
     >
+      {showReviews ? (
+        <p className="no-sky-lift px-3 pt-1.5 text-center text-[11px] font-medium tracking-wide text-[#6B6490]">
+          จำนวนรีวิวสะสม {HOME_REVIEW_COUNT.toLocaleString("th-TH")} รายการ
+        </p>
+      ) : null}
       <div className="mx-auto grid max-w-[480px] grid-cols-4 gap-0.5 px-1.5 pt-2 pb-0.5">
         {TABS.map(({ href, label, icon, match }) => {
           const active = match(pathname);
