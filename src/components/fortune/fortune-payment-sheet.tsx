@@ -224,7 +224,7 @@ export function FortunePaymentSheet({
               จำลองชำระสำเร็จ · ดูพรีเมียม
             </button>
             <p className="text-[11px] text-[#9B7FE8]">
-              โหมด local — ข้าม Google / Stripe
+              โหมด local — ข้าม Google / หน้าชำระเงิน
             </p>
           </div>
         ) : null}
