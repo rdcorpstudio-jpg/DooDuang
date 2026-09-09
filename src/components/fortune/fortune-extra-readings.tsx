@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { cn } from "@/lib/utils";
 
 type ReadingItem = {
-  id: "tarot" | "face" | "palm" | "wallpaper";
+  id: "tarot" | "face" | "palm" | "wallpaper" | "couple";
   title: string;
   badge: string;
   locked: boolean;
@@ -40,11 +41,114 @@ const READINGS: ReadingItem[] = [
     title: "วอลเปเปอร์มงคล",
     badge: "พรีเมียม",
     locked: true,
-    icon: "/images/extra/wallpaper.jpg",
+    icon: "/images/extra/wallpaper.png",
+  },
+  {
+    id: "couple",
+    title: "ดวงคู่",
+    badge: "พรีเมียม",
+    locked: true,
+    icon: "/images/extra/couple.png",
   },
 ];
 
-/** Popular features — glass cards with large 3D icons */
+/** Mouse drag-to-scroll — touch uses native overflow; never steal taps */
+function useDragScroll() {
+  const ref = useRef<HTMLDivElement>(null);
+  const state = useRef({
+    active: false,
+    moved: false,
+    startX: 0,
+    scrollLeft: 0,
+    pointerId: -1,
+  });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const onPointerDown = (e: PointerEvent) => {
+      // Touch / pen: native pan-x handles scroll; buttons keep their clicks
+      if (e.pointerType !== "mouse") return;
+      if (e.button !== 0) return;
+      state.current = {
+        active: true,
+        moved: false,
+        startX: e.clientX,
+        scrollLeft: el.scrollLeft,
+        pointerId: e.pointerId,
+      };
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!state.current.active) return;
+      if (e.pointerId !== state.current.pointerId) return;
+      const dx = e.clientX - state.current.startX;
+      if (Math.abs(dx) <= 8) return;
+      if (!state.current.moved) {
+        state.current.moved = true;
+        try {
+          el.setPointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+      }
+      el.scrollLeft = state.current.scrollLeft - dx;
+      e.preventDefault();
+    };
+
+    const end = (e: PointerEvent) => {
+      if (!state.current.active) return;
+      if (e.pointerId !== state.current.pointerId) return;
+      const wasMoved = state.current.moved;
+      try {
+        if (el.hasPointerCapture(e.pointerId)) {
+          el.releasePointerCapture(e.pointerId);
+        }
+      } catch {
+        /* ignore */
+      }
+      state.current.active = false;
+      state.current.pointerId = -1;
+      // Block the click that browsers fire after a drag
+      if (wasMoved) {
+        const suppress = (ev: Event) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          el.removeEventListener("click", suppress, true);
+        };
+        el.addEventListener("click", suppress, true);
+        window.setTimeout(() => {
+          el.removeEventListener("click", suppress, true);
+          state.current.moved = false;
+        }, 0);
+      } else {
+        state.current.moved = false;
+      }
+    };
+
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
+    el.addEventListener("lostpointercapture", end);
+
+    return () => {
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerup", end);
+      el.removeEventListener("pointercancel", end);
+      el.removeEventListener("lostpointercapture", end);
+    };
+  }, []);
+
+  return {
+    ref,
+    didDrag: () => state.current.moved,
+  };
+}
+
+/** Popular features — horizontal scroll cards */
 export function FortuneExtraReadings({
   seed,
   unlocked = false,
@@ -57,17 +161,39 @@ export function FortuneExtraReadings({
   className?: string;
 }) {
   const router = useRouter();
+  const { ref, didDrag } = useDragScroll();
+
+  function openItem(item: ReadingItem, isLocked: boolean) {
+    if (didDrag()) return;
+    if (item.id === "tarot") {
+      router.push(`/reading/tarot?seed=${encodeURIComponent(seed)}`);
+      return;
+    }
+    if (isLocked) {
+      if (onUnlock) {
+        onUnlock();
+        return;
+      }
+      router.push("/premium");
+      return;
+    }
+    if (item.id === "wallpaper") {
+      router.push("/reading/wallpaper");
+      return;
+    }
+    if (item.id === "couple") {
+      router.push("/premium/couple");
+      return;
+    }
+    if (item.id === "face" || item.id === "palm") {
+      router.push(`/reading/${item.id}?seed=${encodeURIComponent(seed)}`);
+    }
+  }
 
   return (
-    <section className={cn("space-y-3.5", className)}>
-      <div className="px-0.5">
-        <div className="mb-2.5 flex items-center gap-2">
-          <FortuneIcon name="moon" size={28} />
-          <p className="font-sacred text-[13px] tracking-[0.22em] text-[#C9A227]">
-            DOODUANG
-          </p>
-        </div>
-        <h2 className="text-[1.5rem] font-bold tracking-tight text-[#2C2458]">
+    <section className={cn("min-w-0 space-y-3.5", className)}>
+      <div className="px-3">
+        <h2 className="dd-section-title text-[1.5rem] font-bold tracking-tight">
           ฟีเจอร์ยอดนิยม
         </h2>
         <p className="mt-1.5 text-[14px] leading-relaxed text-[#5E5688]">
@@ -75,80 +201,70 @@ export function FortuneExtraReadings({
         </p>
       </div>
 
-      <div className="grid grid-cols-4 gap-1.5">
-        {READINGS.map((item) => {
-          const isLocked = item.locked && !unlocked;
+      <div
+        ref={ref}
+        className="extra-readings-scroll w-full min-w-0 cursor-grab overflow-x-auto overscroll-x-contain active:cursor-grabbing"
+        style={{
+          WebkitOverflowScrolling: "touch",
+          touchAction: "pan-x",
+        }}
+      >
+        <div className="flex w-max items-stretch gap-1.5 px-3 pb-0.5">
+          {READINGS.map((item, index) => {
+            const isLocked = item.locked && !unlocked;
 
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => {
-                if (item.id === "tarot") {
-                  router.push(
-                    `/reading/tarot?seed=${encodeURIComponent(seed)}`
-                  );
-                  return;
-                }
-                if (item.id === "wallpaper") {
-                  router.push("/reading/wallpaper");
-                  return;
-                }
-                if (item.id === "face" || item.id === "palm") {
-                  if (isLocked) {
-                    onUnlock?.();
-                    return;
-                  }
-                  router.push(
-                    `/reading/${item.id}?seed=${encodeURIComponent(seed)}`
-                  );
-                }
-              }}
-              className={cn(
-                "fortune-glass relative flex flex-col items-center rounded-[18px] px-1 pb-2.5 pt-2.5 text-center outline-none transition",
-                "active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4"
-              )}
-              aria-label={
-                isLocked ? `${item.title} · ต้องเป็นพรีเมียม` : item.title
-              }
-            >
-              <span className="relative flex h-[5.5rem] w-full items-center justify-center">
-                <Image
-                  src={item.icon}
-                  alt=""
-                  width={110}
-                  height={110}
-                  unoptimized
-                  className={cn(
-                    "object-contain",
-                    item.id === "wallpaper"
-                      ? "h-[5rem] w-[3.8rem] rounded-[10px] object-cover shadow-[0_6px_14px_rgba(80,60,140,0.16)]"
-                      : "h-[5.25rem] w-[5.25rem]"
-                  )}
-                />
-                {isLocked ? (
-                  <span className="absolute right-0 top-0 z-[1]">
-                    <FortuneIcon name="lock" size={24} />
-                  </span>
-                ) : null}
-              </span>
-
-              <p className="mt-0.5 px-0.5 text-[11px] font-semibold leading-snug text-[#2C2458]">
-                {item.title}
-              </p>
-              <span
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => openItem(item, isLocked)}
                 className={cn(
-                  "mt-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold",
-                  isLocked
-                    ? "bg-[#F4BC52]/22 text-[#8A6A12]"
-                    : "bg-[#B9A4F0]/28 text-[#5B45B8]"
+                  "fortune-glass dd-feature-pop relative box-border flex h-[10.5rem] w-[7.25rem] shrink-0 flex-col items-center overflow-hidden rounded-[16px] px-2 pb-2.5 pt-2.5 text-center outline-none transition",
+                  "select-none touch-manipulation active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4"
                 )}
+                style={
+                  {
+                    "--dd-pop-delay": `${80 + index * 70}ms`,
+                  } as CSSProperties
+                }
+                aria-label={
+                  isLocked ? `${item.title} · ต้องเป็นพรีเมียม` : item.title
+                }
               >
-                {isLocked ? "พรีเมียม" : item.badge}
-              </span>
-            </button>
-          );
-        })}
+                <span
+                  className="dd-icon-float relative flex h-[4.75rem] w-[4.75rem] shrink-0 items-center justify-center"
+                  style={
+                    {
+                      "--dd-float-delay": `${index * 0.35}s`,
+                    } as CSSProperties
+                  }
+                >
+                  <Image
+                    src={item.icon}
+                    alt=""
+                    width={104}
+                    height={104}
+                    unoptimized
+                    draggable={false}
+                    className="pointer-events-none h-full w-full object-contain drop-shadow-[0_5px_10px_rgba(80,60,140,0.16)]"
+                  />
+                  {isLocked ? (
+                    <span className="pointer-events-none absolute -right-0.5 top-0.5 z-[1]">
+                      <FortuneIcon name="lock" size={18} />
+                    </span>
+                  ) : null}
+                </span>
+
+                <p className="mt-1 flex h-[2.6rem] w-full shrink-0 items-center justify-center px-0.5 text-[11.5px] font-semibold leading-tight text-[#2C2458]">
+                  <span className="line-clamp-2">{item.title}</span>
+                </p>
+                <span className="mt-auto shrink-0 rounded-full bg-[#B9A4F0]/28 px-2 py-0.5 text-[10px] font-semibold leading-none text-[#5B45B8]">
+                  {isLocked ? "พรีเมียม" : item.badge}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

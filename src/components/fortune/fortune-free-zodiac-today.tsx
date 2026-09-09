@@ -1,126 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
-import {
-  getZodiacByBirthDate,
-  type ZodiacInfo,
-} from "@/lib/fortune/zodiac";
+import { ZodiacSignImage } from "@/components/fortune/zodiac-sign-image";
+import { analyzeFortune, type FortuneFocus } from "@/lib/fortune/analyze";
+import { pickZodiacDaily } from "@/lib/fortune/content/zodiac-daily";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-function hashSeed(input: string) {
-  let h = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h) >>> 0;
-}
-
-const TODAY_BY_ELEMENT: Record<
-  string,
-  Array<{ vibe: string; doToday: string; watch: string }>
-> = {
-  ไฟ: [
-    {
-      vibe: "วันนี้พลังพุ่ง เหมาะเริ่มเรื่องสำคัญและกล้าตัดสินใจ",
-      doToday: "ลงมือกับงานหลัก 1 เรื่องให้เห็นรูป",
-      watch: "อย่าใจร้อนจนข้ามรายละเอียด",
-    },
-    {
-      vibe: "จังหวะดีสำหรับการนำทางและจุดประกายไอเดีย",
-      doToday: "เสนอแนวทางสั้น ๆ ที่ทำได้ทันที",
-      watch: "ระวังพูดแรงเกินไปโดยไม่ตั้งใจ",
-    },
-  ],
-  ดิน: [
-    {
-      vibe: "วันนี้เหมาะจัดระบบ สร้างความมั่นคง และเก็บงานให้จบ",
-      doToday: "ปิดงานค้างอย่างน้อย 1 รายการ",
-      watch: "อย่าแบกทุกอย่างคนเดียวจนช้า",
-    },
-    {
-      vibe: "พลังนิ่งช่วยให้วางแผนระยะสั้นได้ชัด",
-      doToday: "เขียนลำดับความสำคัญของวันนี้",
-      watch: "อย่ายึดแผนเดิมจนปรับไม่ได้",
-    },
-  ],
-  ลม: [
-    {
-      vibe: "วันนี้เหมาะสื่อสาร แลกเปลี่ยน และเชื่อมคน",
-      doToday: "คุยเรื่องสำคัญให้ชัด 1 ประโยค",
-      watch: "อย่ากระจายโฟกัสไปหลายทางพร้อมกัน",
-    },
-    {
-      vibe: "ไอเดียไหลดี แต่ควรเลือกทำทีละเรื่อง",
-      doToday: "จดไอเดียแล้วเลือกทำแค่ 1 ข้อ",
-      watch: "ระวังสัญญาเร็วเกินโดยยังไม่พร้อม",
-    },
-  ],
-  น้ำ: [
-    {
-      vibe: "วันนี้ความรู้สึกคม เหมาะดูแลใจตัวเองและความสัมพันธ์",
-      doToday: "เว้นเวลาเงียบ ๆ ให้ใจได้พัก",
-      watch: "อย่าสรุปจากอารมณ์ชั่วขณะ",
-    },
-    {
-      vibe: "สัญชาตญาณดี ใช้เลือกสิ่งที่สบายใจจริง",
-      doToday: "ฟังตัวเองก่อนตอบรับภาระใหม่",
-      watch: "ระวังรับพลังงานคนรอบข้างมากเกิน",
-    },
-  ],
-};
-
-const DEEP_BY_ELEMENT: Record<
-  string,
-  {
-    personality: string;
-    strength: string;
-    turning: string;
-    advice: string;
-  }
-> = {
-  ไฟ: {
-    personality:
-      "คุณมีพลังขับเคลื่อนสูง ชอบเริ่มต้นและเห็นผลเร็ว จุดศูนย์กลางคือความกล้าตัดสินใจ",
-    strength: "นำทางได้ดี · จุดประกายคนรอบข้าง · ลงมือเร็วเมื่อเป้าหมายชัด",
-    turning:
-      "จุดเปลี่ยนมาเมื่อคุณเลือกโฟกัสเรื่องหลักแทนการไล่ทุกโอกาสพร้อมกัน",
-    advice: "ตั้งเกณฑ์สั้น ๆ ก่อนรับงานใหม่ และเว้นจังหวะพักเพื่อไม่ให้ไฟไหม้ตัวเอง",
-  },
-  ดิน: {
-    personality:
-      "คุณสร้างความมั่นคงด้วยวินัยและรายละเอียด เชื่อในสิ่งที่ลงมือทำซ้ำจนเห็นรูป",
-    strength: "วางแผนเก่ง · รับผิดชอบสูง · ทำให้สิ่งสำคัญจบได้จริง",
-    turning:
-      "จุดเปลี่ยนมาเมื่อยอมปรับแผนที่ยึดไว้ เพื่อให้ระบบใหม่ทำงานได้ลื่นขึ้น",
-    advice: "แบ่งงานที่คนอื่นช่วยได้ และอย่าเก็บมาตรฐานไว้คนเดียวจนช้า",
-  },
-  ลม: {
-    personality:
-      "คุณเชื่อมไอเดียและผู้คนเก่ง สื่อสารชัดเมื่อใจนิ่ง และชอบเรียนรู้สิ่งใหม่",
-    strength: "คิดไว · เชื่อมเครือข่าย · มองหลายมุมได้เร็ว",
-    turning:
-      "จุดเปลี่ยนมาเมื่อเลือกทำ 1 แนวทางจนเห็นผล แทนการเปิดหลายแนวพร้อมกัน",
-    advice: "จดไอเดียแล้วคัดเหลือข้อหลัก แล้วปิดให้จบก่อนเปิดเรื่องใหม่",
-  },
-  น้ำ: {
-    personality:
-      "คุณอ่านบรรยากาศและความรู้สึกได้ละเอียด สัญชาตญาณคมเมื่อมีเวลาเงียบให้ใจ",
-    strength: "เข้าใจคน · โอบอุ้มได้ · เลือกทางที่สอดคล้องใจได้ดี",
-    turning:
-      "จุดเปลี่ยนมาเมื่อแยกความรู้สึกชั่วขณะออกจากข้อตัดสินใจระยะยาว",
-    advice: "ตั้งขอบเขตอารมณ์ก่อนตอบรับภาระ และพักให้พอหลังรับพลังงานคนอื่น",
-  },
-};
-
-/** Free: today's vibe. Premium deep: unlocked zodiac profile. */
+/** Free: today's vibe from analyzeFortune + content bank. Premium deep: unlocked profile. */
 export function FortuneFreeZodiacToday({
   birthDate,
   nickname,
-  seed = "dooduang",
+  birthTime,
+  focus,
+  gender,
   unlocked = false,
   deep = false,
   onUnlock,
@@ -128,25 +23,34 @@ export function FortuneFreeZodiacToday({
 }: {
   birthDate: string;
   nickname: string;
-  seed?: string;
+  birthTime?: string;
+  focus?: FortuneFocus;
+  gender?: string;
   unlocked?: boolean;
-  /** Premium page: show deep zodiac analysis (unlocked content) */
   deep?: boolean;
   onUnlock?: () => void;
   className?: string;
 }) {
-  const zodiac: ZodiacInfo = useMemo(
-    () => getZodiacByBirthDate(birthDate),
-    [birthDate]
+  const analysis = useMemo(
+    () =>
+      analyzeFortune({
+        birthDate,
+        nickname,
+        birthTime,
+        focus,
+        gender,
+      }),
+    [birthDate, nickname, birthTime, focus, gender]
   );
 
-  const today = useMemo(() => {
-    const pool = TODAY_BY_ELEMENT[zodiac.element] ?? TODAY_BY_ELEMENT["ดิน"]!;
-    const i = hashSeed(`${seed}-zoday-${zodiac.id}`) % pool.length;
-    return pool[i]!;
-  }, [seed, zodiac.element, zodiac.id]);
+  const zodiac = analysis.zodiac;
 
-  const deepCopy = DEEP_BY_ELEMENT[zodiac.element] ?? DEEP_BY_ELEMENT["ดิน"]!;
+  const today = useMemo(
+    () => pickZodiacDaily(zodiac.id, analysis.dayTone),
+    [zodiac.id, analysis.dayTone]
+  );
+
+  const [dailyMore, setDailyMore] = useState(false);
 
   const dateLabel = useMemo(
     () =>
@@ -166,111 +70,130 @@ export function FortuneFreeZodiacToday({
         className
       )}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-2 top-6 select-none text-[8rem] leading-none text-[#7B6BB0]/[0.08]"
-      >
-        {zodiac.symbol}
-      </span>
-
+      {/* Header */}
       <div className="relative z-[1] flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <FortuneIcon name="sparkle" size={24} />
-          <p className="text-[15px] font-semibold text-[#2C2458]">
+        <div className="flex min-w-0 items-center gap-2">
+          <FortuneIcon name="sparkle" size={22} />
+          <p className="truncate text-[15px] font-semibold text-[#2C2458]">
             {deep ? "เจาะลึกราศี · พรีเมียม" : "ดวงของคุณวันนี้"}
           </p>
         </div>
-        <div className="shrink-0 rounded-full bg-white/55 px-3 py-1.5 text-[12px] text-[#5E5688] ring-1 ring-[#7B6BB0]/15">
+        <div className="shrink-0 rounded-full bg-white/70 px-3 py-1.5 text-[12px] text-[#5E5688] ring-1 ring-[#7B6BB0]/15">
           {dateLabel}
         </div>
       </div>
 
-      <div className="relative z-[1] mt-4 flex items-center gap-3.5">
-        <span className="relative flex h-14 w-14 shrink-0 items-center justify-center">
-          {zodiac.id === "virgo" ? (
-            <FortuneIcon name="virgo" size={56} />
-          ) : (
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#B9A4F0]/35 text-[1.7rem] text-[#3A2F6B] ring-1 ring-[#B9A4F0]/45">
-              {zodiac.symbol}
-            </span>
-          )}
-        </span>
-        <div className="min-w-0">
-          <h2 className="text-[1.35rem] font-semibold tracking-wide text-[#2C2458]">
-            ราศี{zodiac.thaiName}
-          </h2>
-          <p className="mt-1 text-[13px] text-[#5E5688]">
-            ธาตุ{zodiac.element} · {zodiac.dateRange}
-          </p>
+      {/* Left: medallions (orb) · Right: constellations (star, faint) */}
+      <div className="relative z-[1] mt-3.5 min-h-[5rem]">
+        <div
+          className="pointer-events-none absolute -right-4 top-1/2 z-0 -translate-y-1/2 opacity-[0.28]"
+          aria-hidden
+        >
+          <ZodiacSignImage
+            sign={zodiac.id}
+            variant="star"
+            size={128}
+            alt=""
+          />
+        </div>
+
+        <div className="relative z-[1] flex items-center gap-3.5 pr-14">
+          <ZodiacSignImage
+            sign={zodiac.id}
+            variant="orb"
+            size={72}
+            alt={`ราศี${zodiac.thaiName}`}
+            className="shrink-0 drop-shadow-[0_8px_16px_rgba(120,90,200,0.28)]"
+            priority
+          />
+          <div className="min-w-0">
+            <h2 className="text-[1.4rem] font-semibold tracking-wide text-[#2C2458]">
+              ราศี{zodiac.thaiName}
+            </h2>
+            <p className="mt-1 text-[13px] text-[#5E5688]">
+              {zodiac.dateRange}
+            </p>
+          </div>
         </div>
       </div>
 
-      <p className="relative z-[1] mt-4 text-[16px] font-medium leading-[1.7] text-[#2C2458]">
+      <p className="relative z-[1] mt-3.5 text-[15px] font-semibold leading-[1.7] text-[#2C2458]">
         {nickname
           ? `คุณ${nickname.replace(/^คุณ\s*/, "").trim()} — `
-          : "คุณ — "}
+          : null}
         {today.vibe}
       </p>
 
-      <div className="relative z-[1] mt-3.5 space-y-2.5 border-t border-[#7B6BB0]/15 pt-3.5 text-[15px] leading-[1.65] text-[#4A4278]">
-        <p className="flex items-start gap-2.5">
-          <FortuneIcon name="check" size={28} className="mt-0.5 shrink-0" />
+      <div className="relative z-[1] mt-3 space-y-0 text-[15px] leading-[1.65] text-[#4A4278]">
+        <p className="flex items-start gap-2.5 border-t border-[#7B6BB0]/14 py-3">
+          <FortuneIcon name="check" size={26} className="mt-0.5 shrink-0" />
           <span>
-            <span className="font-semibold text-[#2C2458]">ทำ · </span>
+            <span className="font-semibold text-[#2C2458]">ทำ</span>
+            <span className="mx-1.5 text-[#9A90C0]">·</span>
             {today.doToday}
           </span>
         </p>
-        <p className="flex items-start gap-2.5">
-          <FortuneIcon name="warning" size={28} className="mt-0.5 shrink-0" />
+        <p className="flex items-start gap-2.5 border-t border-[#7B6BB0]/14 py-3">
+          <FortuneIcon name="warning" size={26} className="mt-0.5 shrink-0" />
           <span>
-            <span className="font-semibold text-[#2C2458]">ระวัง · </span>
+            <span className="font-semibold text-[#2C2458]">ระวัง</span>
+            <span className="mx-1.5 text-[#9A90C0]">·</span>
             {today.watch}
           </span>
         </p>
+
+        {/* Free only: inline expand for long daily notes */}
+        {!deep && dailyMore ? (
+          <>
+            <p className="border-t border-[#7B6BB0]/14 py-3 text-[14px] leading-[1.7] text-[#4A4278]">
+              <span className="font-semibold text-[#2C2458]">มุมลึก</span>
+              <span className="mx-1.5 text-[#9A90C0]">·</span>
+              {today.insight}
+            </p>
+            <p className="border-t border-[#7B6BB0]/14 py-3 text-[14px] leading-[1.7] text-[#5E5688]">
+              <span className="font-semibold text-[#2C2458]">ก่อนนอน</span>
+              <span className="mx-1.5 text-[#9A90C0]">·</span>
+              {today.evening}
+            </p>
+            {today.luckyHint ? (
+              <p className="border-t border-[#7B6BB0]/14 py-3 text-[13px] leading-snug text-[#6B6490]">
+                {today.luckyHint}
+              </p>
+            ) : null}
+          </>
+        ) : null}
       </div>
 
-      {deep ? (
-        <div className="mt-4 border-t border-white/[0.08] pt-4">
-          <div className="space-y-4">
-            <div>
-              <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
-                บุคลิก
-              </p>
-              <p className="mt-1.5 text-[13px] leading-[1.75] text-[#E8EEF8]">
-                {deepCopy.personality}
-              </p>
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
-                จุดแข็ง
-              </p>
-              <p className="mt-1.5 text-[13px] leading-[1.75] text-[#E8EEF8]">
-                {deepCopy.strength}
-              </p>
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
-                จุดเปลี่ยน
-              </p>
-              <p className="mt-1.5 text-[13px] leading-[1.75] text-[#E8EEF8]">
-                {deepCopy.turning}
-              </p>
-            </div>
-          </div>
+      {!deep ? (
+        <button
+          type="button"
+          onClick={() => setDailyMore((v) => !v)}
+          aria-expanded={dailyMore}
+          className="relative z-[1] mt-1 inline-flex w-full items-center justify-center gap-1.5 py-2 text-[13px] font-semibold text-[#7B5FD4] outline-none transition active:opacity-70"
+        >
+          {dailyMore ? "ย่อข้อความ" : "อ่านเพิ่มเติม"}
+          <FortuneIcon
+            name="arrow-right"
+            size={18}
+            className={cn("transition", dailyMore ? "rotate-90" : "rotate-0")}
+          />
+        </button>
+      ) : null}
 
-          <div className="mt-4 border-t border-white/[0.08] pt-3.5">
-            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]">
-              คำแนะนำ
-            </p>
-            <p className="mt-1.5 text-[14px] font-medium leading-[1.7] text-[#F7F8FF]">
-              {deepCopy.advice}
-            </p>
-          </div>
+      {deep ? (
+        <div className="relative z-[1] border-t border-[#7B6BB0]/15 pt-3.5">
+          <Link
+            href="/premium/self-map"
+            className="no-sky-lift dd-gold-glass-btn inline-flex h-11 w-full items-center justify-center gap-2 rounded-full text-[15px] font-semibold text-[#5C4810] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/45"
+          >
+            เจาะลึกตัวตน
+            <FortuneIcon name="arrow-right" size={20} />
+          </Link>
         </div>
       ) : unlocked ? (
         <Link
           href="/premium"
-          className="mt-4 flex w-full items-center gap-3 rounded-[16px] border border-[#7B6BB0]/15 bg-white/45 px-3.5 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35"
+          className="mt-1 flex w-full items-center gap-3 rounded-[16px] border border-[#7B6BB0]/15 bg-white/45 px-3.5 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center">
             <FortuneIcon name="sparkle" size={36} />
@@ -290,7 +213,7 @@ export function FortuneFreeZodiacToday({
           type="button"
           onClick={onUnlock}
           disabled={!onUnlock}
-          className="mt-4 flex w-full items-center gap-3 rounded-[16px] border border-[#7B6BB0]/15 bg-white/45 px-3.5 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35 disabled:opacity-60"
+          className="mt-1 flex w-full items-center gap-3 rounded-[16px] border border-[#7B6BB0]/15 bg-white/45 px-3.5 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35 disabled:opacity-60"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center">
             <FortuneIcon name="lock" size={36} />

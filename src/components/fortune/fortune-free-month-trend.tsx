@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
-import {
-  ArrowDownRight,
-  ArrowRight,
-  ArrowUpRight,
-  ChartNoAxesColumn,
-  Minus,
-} from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import Link from "next/link";
 import { MONTH_LABELS_TH, MONTH_NAMES_TH } from "@/components/fortune/life-cycle-graph";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
-import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import { FortuneUnlockBanner } from "@/components/fortune/fortune-unlock-banner";
+import type { FortuneFocus } from "@/lib/fortune/analyze";
+import { monthScoreForDate, yearScoreForCe } from "@/lib/fortune/build-daily-pack";
+import { YEAR_DETAILS, scoreBand } from "@/lib/fortune/year-rhythm";
 import { cn } from "@/lib/utils";
 
 export type FreeMonthPoint = {
@@ -20,232 +17,45 @@ export type FreeMonthPoint = {
   score: number;
 };
 
-type ChartPoint = FreeMonthPoint & {
-  kind: "past" | "future";
-};
-
 function LockMark({ x, y }: { x: number; y: number }) {
+  const size = 30;
   return (
     <g transform={`translate(${x}, ${y})`} className="pointer-events-none">
-      <circle
-        cx={0}
-        cy={0}
-        r={13}
-        fill="#1A1630"
-        stroke="#E4C56A"
-        strokeWidth={1.6}
-      />
-      <circle
-        cx={0}
-        cy={0}
-        r={15.5}
-        fill="none"
-        stroke="rgba(228,197,106,0.32)"
-        strokeWidth={2.2}
-      />
-      <path
-        d="M-3.8 -0.4V-3a3.8 3.8 0 0 1 7.6 0V-0.4"
-        fill="none"
-        stroke="#E4C56A"
-        strokeWidth={1.7}
-        strokeLinecap="round"
-      />
-      <rect
-        x={-5}
-        y={-0.6}
-        width={10}
-        height={6.6}
-        rx={1.6}
-        fill="#E4C56A"
+      <image
+        href="/images/icons/lock-gold.png"
+        x={-size / 2}
+        y={-size / 2}
+        width={size}
+        height={size}
+        preserveAspectRatio="xMidYMid meet"
       />
     </g>
   );
 }
 
 function scoreColor(score: number) {
-  if (score >= 10) return "#4ade80";
-  if (score >= 8) return "#a3e635";
-  if (score >= 6) return "#facc15";
-  if (score >= 4) return "#fb923c";
+  if (score >= 10) return "#15803d";
+  if (score >= 8) return "#3f6212";
+  if (score >= 6) return "#a16207";
+  if (score >= 4) return "#c2410c";
+  return "#be123c";
+}
+
+function scoreDotColor(score: number) {
+  if (score >= 10) return "#22c55e";
+  if (score >= 8) return "#65a30d";
+  if (score >= 6) return "#eab308";
+  if (score >= 4) return "#f97316";
   return "#f43f5e";
 }
 
-function scoreBand(score: number) {
-  if (score >= 10) {
-    return {
-      label: "พลังสูง",
-      meaning:
-        "จังหวะเปิดกว้าง — เหมาะผลักงานสำคัญ ปิดดีล หรือเริ่มเรื่องที่ค้างมานาน",
-      strength: "โฟกัสคม · ตัดสินใจไว · โอกาสเข้าหาง่าย",
-      use: "ใช้พลังไปกับเป้าหมายหลัก 1–2 เรื่อง อย่ากระจายจนหมดแรง",
-    };
-  }
-  if (score >= 8) {
-    return {
-      label: "กำลังดี",
-      meaning: "เดินต่อได้ลื่น ถ้าโฟกัสไม่แตกเกินไป",
-      strength: "นิ่งพอจะวางแผน · มีแรงส่งต่อเนื่อง",
-      use: "เก็บงานที่ใกล้จบให้เสร็จก่อนเปิดงานใหม่",
-    };
-  }
-  if (score >= 6) {
-    return {
-      label: "ปานกลาง",
-      meaning: "คุมจังหวะได้ แต่ควรลดเรื่องที่ไม่จำเป็น",
-      strength: "บาลานซ์ได้ดี · ปรับตัวตามสถานการณ์",
-      use: "ตัดงานที่ไม่เร่งด่วนออก แล้วโฟกัสสิ่งที่กระทบผลจริง",
-    };
-  }
-  if (score >= 4) {
-    return {
-      label: "ชะลอ",
-      meaning: "พลังไม่เต็ม — เหมาะจัดระบบ พักให้พอ และทบทวนแผน",
-      strength: "เห็นจุดอ่อนชัด · ตัดสิ่งที่ไม่จำเป็นได้ง่าย",
-      use: "อย่ารีบขยายงานใหญ่ ใช้ช่วงนี้จัดบ้าน/ระบบก่อน",
-    };
-  }
-  return {
-    label: "ระวัง",
-    meaning: "ช่วงหนัก — อย่ารีบตัดสินใจใหญ่โดยไม่มีข้อมูลพอ",
-    strength: "ได้เรียนรู้ขอบเขตตัวเอง · รู้ว่าอะไรสำคัญจริง",
-    use: "พักให้พอ คุยกับคนที่ไว้ใจ และเลื่อนเรื่องใหญ่ถ้าทำได้",
-  };
+function scoreBadgeBg(score: number) {
+  if (score >= 10) return "rgba(21, 128, 61, 0.18)";
+  if (score >= 8) return "rgba(63, 98, 18, 0.18)";
+  if (score >= 6) return "rgba(161, 98, 7, 0.18)";
+  if (score >= 4) return "rgba(194, 65, 12, 0.18)";
+  return "rgba(190, 18, 60, 0.18)";
 }
-
-function monthDescribe(point: FreeMonthPoint, kind: "past" | "future") {
-  if (kind === "future") {
-    return `ภาพรวมจังหวะ${MONTH_NAMES_TH[point.monthIndex]} — ปลดล็อกเพื่อดูคะแนนและคำแนะนำล่วงหน้า`;
-  }
-  const band = scoreBand(point.score);
-  return `${MONTH_NAMES_TH[point.monthIndex]} ${point.yearCe + 543} · ${band.label} — ${band.meaning}`;
-}
-
-function basicFix(prev: number, cur: number) {
-  const diff = cur - prev;
-  if (diff >= 2) {
-    return {
-      highlight:
-        "จังหวะดีขึ้นชัด — เหมาะเก็บผลงาน โชว์ความสามารถ และปิดเรื่องค้าง",
-      issue: "โอกาสมาเร็ว อาจรับเกินจนสะสมงานและเครียดทีหลัง",
-      tip: "เลือกเป้าหมายหลัก 1 เรื่อง แล้วปิดงานค้างก่อนเปิดแนวใหม่",
-      why: "คะแนนขยับขึ้นแรง แปลว่าพลังพร้อม แต่ยังต้องคุมขอบเขต",
-    };
-  }
-  if (diff <= -2) {
-    return {
-      highlight: "ช่วงชะลอช่วยให้เห็นสิ่งที่ต้องพักและจัดใหม่",
-      issue: "จังหวะชะลอ อาจกดดันตัวเองให้ทำเท่าเดือนก่อน",
-      tip: "ลดภาระประมาณ 20% สัปดาห์นี้ และนอนให้ครบกว่าปกติเล็กน้อย",
-      why: "คะแนนลดลงแรง ไม่ใช่ล้มเหลว — เป็นสัญญาณให้รีเซ็ตจังหวะ",
-    };
-  }
-  if (cur >= 10) {
-    return {
-      highlight: "พลังสูงต่อเนื่อง — จุดแข็งคือความมุ่งมั่นและการลงมือ",
-      issue: "พลังสูงต่อเนื่อง เสี่ยงแบกทุกอย่างคนเดียวจนหมดไฟ",
-      tip: "บอกขอบเขตก่อนรับปาก และแบ่งงานที่คนอื่นช่วยได้",
-      why: "เดือนต่อเดือนยังสูง เหมาะเร่งผล แต่ต้องกันไม่ให้เผาตัวเอง",
-    };
-  }
-  if (cur <= 5) {
-    return {
-      highlight: "ช่วงนี้เหมาะจัดลำดับชีวิตใหม่ให้เบาและชัดขึ้น",
-      issue: "พลังต่ำ ทำหลายอย่างพร้อมกันแล้วเหนื่อยง่าย",
-      tip: "เหลืองานสำคัญวันละ 1–2 เรื่อง และพักสั้น ๆ ระหว่างวัน",
-      why: "คะแนนต่ำไม่ใช่จุดจบ — เป็นจังหวะพักเพื่อกลับมาแรงกว่า",
-    };
-  }
-  return {
-    highlight: "จังหวะคงที่ — จุดเด่นคือความสม่ำเสมอที่สะสมผลได้",
-    issue: "จังหวะค่อนข้างคงที่ อาจเฉื่อยหรือไม่เห็นความคืบหน้า",
-    tip: "ตั้งเช็คพอยต์สัปดาห์ละครั้ง 15 นาที เพื่อปรับแผนเล็ก ๆ",
-    why: "คะแนนใกล้เคียงเดือนก่อน แปลว่าสถานะนิ่ง — ต้องตั้งเป้าเอง",
-  };
-}
-
-function hashSeed(input: string) {
-  let h = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h) >>> 0;
-}
-
-const YEAR_DETAILS = [
-  {
-    overview: "ปีแห่งการตั้งต้นและจัดระบบชีวิตใหม่",
-    turning: "เลือกทิศทางหลักให้ชัดก่อนขยายงาน",
-    reason: "จังหวะนี้เหมาะกับการวางรากฐานมากกว่าเร่งผลลัพธ์",
-    guidance: "โฟกัสเป้าหมายหลักหนึ่งเรื่อง และตัดสิ่งที่ไม่จำเป็น",
-  },
-  {
-    overview: "ปีแห่งการสร้างวินัยและความสม่ำเสมอ",
-    turning: "นิสัยเล็ก ๆ ที่ทำซ้ำจะเริ่มเห็นผล",
-    reason: "พลังงานสนับสนุนงานที่ต้องใช้ความอดทน",
-    guidance: "ตั้งเกณฑ์วัดผลรายเดือนแบบเรียบง่าย",
-  },
-  {
-    overview: "ปีแห่งการเปิดโอกาสและการทดลอง",
-    turning: "โอกาสใหม่เข้ามาเมื่อคุณพร้อมรับผิดชอบ",
-    reason: "ช่วงขยายเครือข่ายและการเรียนรู้",
-    guidance: "ลองแนวทางใหม่ได้ แต่เก็บข้อมูลผลลัพธ์ไว้",
-  },
-  {
-    overview: "ปีแห่งการทดสอบความอดทน",
-    turning: "แรงกดดันช่วยให้เห็นสิ่งที่สำคัญจริง",
-    reason: "จังหวะเหมาะกับการคัดกรองมากกว่าขยาย",
-    guidance: "อย่าตัดสินใจใหญ่ตอนอารมณ์ต่ำ",
-  },
-  {
-    overview: "ปีแห่งการเก็บเกี่ยวผลงาน",
-    turning: "ผลจากความพยายามก่อนหน้าเริ่มชัด",
-    reason: "เหมาะกับการปิดงานสำคัญและสร้างชื่อเสียง",
-    guidance: "ปิดงานค้างก่อนเปิดแนวรบใหม่",
-  },
-  {
-    overview: "ปีแห่งการปรับสมดุลชีวิต",
-    turning: "หันมาดูแลร่างกายและความสัมพันธ์ควบคู่เป้าหมาย",
-    reason: "พลังงานชวนลดความเร่งและเพิ่มคุณภาพชีวิต",
-    guidance: "จัดเวลาพักให้เป็นส่วนหนึ่งของแผนงาน",
-  },
-  {
-    overview: "ปีแห่งการก้าวกระโดด",
-    turning: "โอกาสสำคัญอาจต้องการการตัดสินใจที่กล้า",
-    reason: "จังหวะเหมาะกับการรับผิดชอบที่ใหญ่ขึ้น",
-    guidance: "ตัดสินใจด้วยข้อมูล และอย่ารอความพร้อมสมบูรณ์",
-  },
-  {
-    overview: "ปีแห่งการเชื่อมโยงผู้คน",
-    turning: "ความร่วมมือดีจะพาคุณไปได้ไกลกว่าทำคนเดียว",
-    reason: "พลังด้านคนรอบตัวเด่นขึ้น",
-    guidance: "สื่อสารความต้องการให้ชัดและฟังอีกฝ่าย",
-  },
-  {
-    overview: "ปีแห่งการเข้าใจตัวตนลึกขึ้น",
-    turning: "ปล่อยสิ่งเก่าที่ไม่ได้เป็นคุณอีกต่อไป",
-    reason: "เหมาะกับการทบทวนนิยามความสำเร็จ",
-    guidance: "ลดบทบาทที่ไม่ใช่ และเลือกสิ่งที่สอดคล้องใจ",
-  },
-  {
-    overview: "ปีแห่งการสร้างมรดกและส่งต่อ",
-    turning: "สิ่งที่คุณสร้างเริ่มมีผลต่อคนอื่น",
-    reason: "จังหวะของการสอน แบ่งปัน และวางระบบระยะยาว",
-    guidance: "บันทึกองค์ความรู้และส่งต่อให้ทีม/คนใกล้ตัว",
-  },
-  {
-    overview: "ปีแห่งการปิดวงจรและเริ่มรอบใหม่",
-    turning: "จบเรื่องค้างเพื่อเปิดพื้นที่ให้บทถัดไป",
-    reason: "พลังงานสนับสนุนการเคลียร์และรีเซ็ต",
-    guidance: "ทำบัญชีชีวิต: อะไรเก็บ อะไรปล่อย อะไรเริ่มใหม่",
-  },
-  {
-    overview: "ปีแห่งการยืนหยัดบนรากฐานที่แข็ง",
-    turning: "ความมั่นคงมาจากการเลือกที่ชัดซ้ำ ๆ",
-    reason: "เหมาะกับการขยายจากของที่มีอยู่แล้ว",
-    guidance: "อย่าไล่ทุกโอกาส — ขยายเฉพาะสิ่งที่สอดคล้องแกนชีวิต",
-  },
-] as const;
 
 type YearPoint = {
   i: number;
@@ -258,192 +68,407 @@ type YearPoint = {
   guidance: string;
 };
 
-function YearRhythmChart({
-  years,
+type ChartDatum = {
+  key: string;
+  score: number;
+  label: string;
+  subLabel?: string;
+  isNow?: boolean;
+};
+
+type MonthPoint = {
+  key: string;
+  monthIndex: number;
+  yearCe: number;
+  score: number;
+  label: string;
+  fullLabel: string;
+  isNow: boolean;
+};
+
+/** Horizontally pannable chart — swipe like a stock timeline */
+function StockStylePanChart({
+  points,
   selectedIndex,
   onSelect,
+  ariaLabel,
+  isLocked,
+  alignStart = false,
 }: {
-  years: YearPoint[];
+  points: ChartDatum[];
   selectedIndex: number;
   onSelect: (index: number) => void;
+  ariaLabel: string;
+  isLocked?: (index: number) => boolean;
+  /** Keep the first/selected point near the left edge */
+  alignStart?: boolean;
 }) {
   const gid = useId().replace(/:/g, "");
-  const W = 360;
-  const H = 200;
-  const padL = 26;
-  const padR = 12;
-  const padT = 24;
-  const padB = 36;
-  const plotW = W - padL - padR;
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const tapRef = useRef<{
+    pointerId: number;
+    index: number;
+    x: number;
+    y: number;
+  } | null>(null);
+  const H = 248;
+  const padL = 34;
+  const padR = 24;
+  const padT = 34;
+  const padB = 54;
+  const step = 72;
+  const n = points.length;
+  const W = padL + Math.max(0, n - 1) * step + padR;
   const plotH = H - padT - padB;
-  const scores = years.map((y) => y.score);
-  const { yMin, yMax } = yDomain(scores);
+  const scores = points.map((p) => p.score);
+  const { yMin, yMax } = yDomain(scores.length ? scores : [6]);
   const ticks = tickValues(yMin, yMax);
-  const n = years.length;
-  const xAt = (i: number) =>
-    padL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+  const xAt = (i: number) => padL + i * step;
   const yAt = (score: number) =>
     padT + ((yMax - score) / (yMax - yMin || 1)) * plotH;
 
-  const lineD = years
-    .map((y, i) => `${i === 0 ? "M" : "L"} ${xAt(i).toFixed(1)} ${yAt(y.score).toFixed(1)}`)
-    .join(" ");
-  const areaD = `${lineD} L ${xAt(n - 1).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(0).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`;
-  const nowCe = new Date().getFullYear();
+  const firstLocked = (() => {
+    if (!isLocked) return -1;
+    for (let i = 0; i < n; i++) if (isLocked(i)) return i;
+    return -1;
+  })();
+  const lastClear = firstLocked < 0 ? n - 1 : firstLocked - 1;
+
+  const pathThrough = (from: number, to: number) => {
+    if (to < from || n === 0) return "";
+    const slice = points.slice(from, to + 1);
+    return slice
+      .map(
+        (p, j) =>
+          `${j === 0 ? "M" : "L"} ${xAt(from + j).toFixed(1)} ${yAt(p.score).toFixed(1)}`
+      )
+      .join(" ");
+  };
+
+  const clearLine = lastClear >= 0 ? pathThrough(0, lastClear) : "";
+  const blurFrom = firstLocked >= 0 ? Math.max(0, firstLocked - 1) : -1;
+  const blurLine =
+    blurFrom >= 0 ? pathThrough(blurFrom, n - 1) : "";
+  const fullLine = pathThrough(0, n - 1);
+  const closeArea = (line: string, fromIdx: number, toIdx: number) =>
+    line
+      ? `${line} L ${xAt(toIdx).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(fromIdx).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`
+      : "";
+  const clearAreaD =
+    lastClear >= 0 ? closeArea(pathThrough(0, lastClear), 0, lastClear) : "";
+  const blurAreaD =
+    blurFrom >= 0 ? closeArea(pathThrough(blurFrom, n - 1), blurFrom, n - 1) : "";
+  const areaD =
+    firstLocked >= 0
+      ? clearAreaD
+      : `${fullLine} L ${xAt(Math.max(0, n - 1)).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(0).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`;
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || n === 0) return;
+    const target = alignStart
+      ? Math.max(0, xAt(selectedIndex) - padL)
+      : xAt(selectedIndex) - el.clientWidth / 2;
+    el.scrollTo({
+      left: Math.max(0, target),
+      behavior: alignStart ? "auto" : "smooth",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedIndex, n, W, alignStart]);
+
+  function beginTap(
+    e: ReactPointerEvent<SVGCircleElement>,
+    index: number
+  ) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    tapRef.current = {
+      pointerId: e.pointerId,
+      index,
+      x: e.clientX,
+      y: e.clientY,
+    };
+  }
+
+  function finishTap(e: ReactPointerEvent<SVGCircleElement>) {
+    const tap = tapRef.current;
+    tapRef.current = null;
+    if (!tap || tap.pointerId !== e.pointerId) return;
+    const dx = Math.abs(e.clientX - tap.x);
+    const dy = Math.abs(e.clientY - tap.y);
+    // Ignore if this was a pan gesture on the timeline
+    if (dx > 10 || dy > 10) return;
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect(tap.index);
+  }
 
   return (
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      className="mt-1 w-full"
-      role="img"
-      aria-label="กราฟจังหวะชีวิต 12 ปี กดจุดเพื่อวิเคราะห์รายปี"
-    >
-      <defs>
-        <linearGradient id={`yr-fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(244,188,82,0.32)" />
-          <stop offset="55%" stopColor="rgba(70,221,237,0.1)" />
-          <stop offset="100%" stopColor="rgba(70,221,237,0)" />
-        </linearGradient>
-        <linearGradient id={`yr-stroke-${gid}`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#F4BC52" />
-          <stop offset="45%" stopColor="#BB6CF0" />
-          <stop offset="100%" stopColor="#46DDED" />
-        </linearGradient>
-      </defs>
+    <div className="relative">
+      <p className="mb-2.5 px-0.5 text-[15px] leading-snug text-[#5E5688]">
+        ปัดซ้าย–ขวาเพื่อเลื่อนดู · แตะจุดเพื่อเลือก
+      </p>
+      <div
+        ref={scrollerRef}
+        className="overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
+      >
+        <svg
+          width={W}
+          height={H}
+          viewBox={`0 0 ${W} ${H}`}
+          className="block max-w-none"
+          role="img"
+          aria-label={ariaLabel}
+        >
+          <defs>
+            <linearGradient id={`stk-fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(155,127,232,0.4)" />
+              <stop offset="75%" stopColor="rgba(155,127,232,0.08)" />
+              <stop offset="100%" stopColor="rgba(155,127,232,0)" />
+            </linearGradient>
+          </defs>
 
-      {ticks.map((t) => {
-        const y = yAt(t);
-        return (
-          <g key={t}>
-            <line
-              x1={padL}
-              y1={y}
-              x2={W - padR}
-              y2={y}
-              stroke="rgba(90,70,150,0.14)"
-              strokeWidth={1}
-            />
-            <text
-              x={padL - 5}
-              y={y + 3}
-              textAnchor="end"
-              fill="rgba(58,50,112,0.55)"
-              fontSize={9}
-            >
-              {t}
-            </text>
-          </g>
-        );
-      })}
+          {ticks.map((t) => {
+            const y = yAt(t);
+            return (
+              <g key={t} className="pointer-events-none">
+                <line
+                  x1={0}
+                  y1={y}
+                  x2={W}
+                  y2={y}
+                  stroke="rgba(120,110,160,0.2)"
+                  strokeWidth={1}
+                  strokeDasharray="3 4"
+                />
+                <text x={10} y={y + 5} fill="rgba(90,80,130,0.78)" fontSize={13}>
+                  {t}
+                </text>
+              </g>
+            );
+          })}
 
-      <path d={areaD} fill={`url(#yr-fill-${gid})`} />
-      <path
-        d={lineD}
-        fill="none"
-        stroke={`url(#yr-stroke-${gid})`}
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+          {n > 1 ? (
+            <g className="pointer-events-none">
+              {areaD ? (
+                <path d={areaD} fill={`url(#stk-fill-${gid})`} />
+              ) : null}
+              {blurAreaD ? (
+                <path
+                  d={blurAreaD}
+                  fill={`url(#stk-fill-${gid})`}
+                  opacity={0.38}
+                  style={{ filter: "blur(3.5px)" }}
+                />
+              ) : null}
+              {clearLine ? (
+                <path
+                  d={clearLine}
+                  fill="none"
+                  stroke="#7B5FD4"
+                  strokeWidth={2.2}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              ) : null}
+              {blurLine ? (
+                <path
+                  d={blurLine}
+                  fill="none"
+                  stroke="#7B5FD4"
+                  strokeWidth={2.4}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  opacity={0.34}
+                  style={{ filter: "blur(3.8px)" }}
+                />
+              ) : null}
+            </g>
+          ) : null}
 
-      {years.map((y, i) => {
-        const x = xAt(i);
-        const yy = yAt(y.score);
-        const isSelected = i === selectedIndex;
-        const isNow = y.ce === nowCe;
-        const color = scoreColor(y.score);
-        return (
-          <g key={y.ce}>
-            {isSelected ? (
-              <text
-                x={x}
-                y={yy - 11}
-                textAnchor="middle"
-                fill="#A07E1A"
-                fontSize={11}
-                fontWeight={700}
-              >
-                {y.score}
-              </text>
-            ) : null}
-            <circle
-              cx={x}
-              cy={yy}
-              r={isSelected ? 7 : 4}
-              fill={isSelected ? color : "rgba(255,255,255,0.92)"}
-              stroke={isSelected ? "#fff" : "rgba(90,70,150,0.35)"}
-              strokeWidth={isSelected ? 2 : 1.5}
-              className="pointer-events-none"
-            />
-            <text
-              x={x}
-              y={H - 18}
-              textAnchor="middle"
-              fill={
-                isSelected
-                  ? "rgba(36,28,79,0.95)"
-                  : "rgba(58,50,112,0.62)"
-              }
-              fontSize={isSelected ? 9 : 8}
-              fontWeight={isSelected || isNow ? 600 : 400}
-              className="pointer-events-none"
-            >
-              {String(y.be).slice(-2)}
-            </text>
-            <text
-              x={x}
-              y={H - 7}
-              textAnchor="middle"
-              fill={isNow ? "rgba(160,126,26,0.95)" : "rgba(58,50,112,0.35)"}
-              fontSize={7}
-              className="pointer-events-none"
-            >
-              {isNow ? "ปีนี้" : ""}
-            </text>
-            <circle
-              cx={x}
-              cy={yy}
-              r={14}
-              fill="transparent"
-              className="cursor-pointer outline-none focus:outline-none"
-              style={{ outline: "none" }}
-              role="button"
-              tabIndex={0}
-              aria-label={`วิเคราะห์ปี ${y.be} คะแนน ${y.score}`}
-              aria-pressed={isSelected}
-              onClick={() => onSelect(i)}
-              onPointerDown={(e) => {
-                // avoid native square focus ring after click
-                e.currentTarget.blur();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onSelect(i);
-                }
-              }}
-            />
-          </g>
-        );
-      })}
-    </svg>
+          {points.map((p, i) => {
+            const x = xAt(i);
+            const yy = yAt(p.score);
+            const locked = isLocked?.(i) ?? false;
+            const selected = i === selectedIndex && !locked;
+            const color = scoreDotColor(p.score);
+            return (
+              <g key={p.key}>
+                {selected ? (
+                  <line
+                    x1={x}
+                    y1={padT}
+                    x2={x}
+                    y2={padT + plotH}
+                    stroke="rgba(123,95,212,0.35)"
+                    strokeWidth={1.2}
+                    strokeDasharray="3 3"
+                    className="pointer-events-none"
+                  />
+                ) : null}
+                {selected ? (
+                  <text
+                    x={x}
+                    y={yy - 16}
+                    textAnchor="middle"
+                    fill="#5B45B8"
+                    fontSize={17}
+                    fontWeight={700}
+                    className="pointer-events-none"
+                  >
+                    {p.score}
+                  </text>
+                ) : null}
+                {locked ? (
+                  <>
+                    {/* Blurred soft ghost under lock — lock icon stays sharp */}
+                    <g
+                      className="pointer-events-none"
+                      opacity={0.4}
+                      style={{ filter: "blur(3.2px)" }}
+                    >
+                      <circle
+                        cx={x}
+                        cy={yy}
+                        r={9}
+                        fill="rgba(123,95,212,0.35)"
+                      />
+                      <text
+                        x={x}
+                        y={H - 26}
+                        textAnchor="middle"
+                        fill="rgba(154,144,192,0.95)"
+                        fontSize={14}
+                        fontWeight={600}
+                      >
+                        {p.label}
+                      </text>
+                      {p.subLabel ? (
+                        <text
+                          x={x}
+                          y={H - 8}
+                          textAnchor="middle"
+                          fill="rgba(154,144,192,0.9)"
+                          fontSize={13}
+                          fontWeight={500}
+                        >
+                          {p.subLabel}
+                        </text>
+                      ) : null}
+                    </g>
+                    <LockMark x={x} y={yy} />
+                  </>
+                ) : (
+                  <>
+                    <circle
+                      cx={x}
+                      cy={yy}
+                      r={selected ? 8 : 5}
+                      fill={selected ? color : "rgba(255,255,255,0.95)"}
+                      stroke={selected ? "#fff" : "rgba(90,70,150,0.4)"}
+                      strokeWidth={selected ? 2.2 : 1.5}
+                      className="pointer-events-none"
+                    />
+                    <text
+                      x={x}
+                      y={H - 26}
+                      textAnchor="middle"
+                      fill={
+                        selected || p.isNow
+                          ? "rgba(36,28,79,0.98)"
+                          : "rgba(58,50,112,0.72)"
+                      }
+                      fontSize={selected ? 15 : 14}
+                      fontWeight={selected || p.isNow ? 700 : 600}
+                      className="pointer-events-none"
+                    >
+                      {p.label}
+                    </text>
+                    {p.subLabel || p.isNow ? (
+                      <text
+                        x={x}
+                        y={H - 8}
+                        textAnchor="middle"
+                        fill={
+                          p.isNow
+                            ? "rgba(91,69,184,0.98)"
+                            : "rgba(58,50,112,0.62)"
+                        }
+                        fontSize={13}
+                        fontWeight={p.isNow ? 700 : 500}
+                        className="pointer-events-none"
+                      >
+                        {p.isNow ? "ตอนนี้" : p.subLabel}
+                      </text>
+                    ) : null}
+                  </>
+                )}
+                {/* Hit target — no-tap avoids phone-frame :active scale breaking SVG hits */}
+                <circle
+                  cx={x}
+                  cy={yy}
+                  r={22}
+                  fill="transparent"
+                  className="no-tap cursor-pointer"
+                  style={{ touchAction: "manipulation" }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={
+                    locked
+                      ? `ปลดล็อก${p.label}`
+                      : `${p.label} คะแนน ${p.score}`
+                  }
+                  aria-pressed={selected}
+                  onPointerDown={(e) => beginTap(e, i)}
+                  onPointerUp={finishTap}
+                  onPointerCancel={() => {
+                    tapRef.current = null;
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onSelect(i);
+                    }
+                  }}
+                />
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
   );
 }
 
 function UnlockedTwelveYearTrend({
   seed,
+  birthDate = "2000-01-01",
+  nickname = "",
+  birthTime,
+  focus,
+  gender,
   className,
 }: {
   seed: string;
+  birthDate?: string;
+  nickname?: string;
+  birthTime?: string;
+  focus?: FortuneFocus;
+  gender?: string;
   className?: string;
 }) {
-  const nowCe = new Date().getFullYear();
+  const now = new Date();
+  const nowCe = now.getFullYear();
+  const nowMonth = now.getMonth();
+  const [mode, setMode] = useState<"month" | "year">("month");
+
   const years = useMemo((): YearPoint[] => {
+    const input = { birthDate, nickname, birthTime, focus, gender };
     return Array.from({ length: 12 }, (_, i) => {
       const ce = nowCe - 2 + i;
       const detail = YEAR_DETAILS[i]!;
-      const score = 3 + (hashSeed(`${seed}-year-${ce}`) % 10);
-      return {
+      const score = yearScoreForCe(input, ce);
+    return {
         i,
         ce,
         be: ce + 543,
@@ -451,204 +476,183 @@ function UnlockedTwelveYearTrend({
         ...detail,
       };
     });
-  }, [seed, nowCe]);
+  }, [seed, nowCe, birthDate, nickname, birthTime, focus, gender]);
 
-  const currentIdx = years.findIndex((y) => y.ce === nowCe);
-  const [index, setIndex] = useState(currentIdx >= 0 ? currentIdx : 2);
-  const [dragX, setDragX] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [width, setWidth] = useState(320);
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const startXRef = useRef(0);
-  const lastXRef = useRef(0);
-  const activeRef = useRef(false);
-  const animLockRef = useRef(false);
+  const months = useMemo((): MonthPoint[] => {
+    const input = { birthDate, nickname, birthTime, focus, gender };
+    return Array.from({ length: 36 }, (_, i) => {
+      const offset = i - 18;
+      const d = new Date(nowCe, nowMonth + offset, 1);
+      const yearCe = d.getFullYear();
+      const monthIndex = d.getMonth();
+      const isNow = yearCe === nowCe && monthIndex === nowMonth;
+  return {
+        key: `${yearCe}-${monthIndex}`,
+        monthIndex,
+        yearCe,
+        score: monthScoreForDate(input, yearCe, monthIndex),
+        label: MONTH_LABELS_TH[monthIndex]!,
+        fullLabel: `${MONTH_NAMES_TH[monthIndex]} ${yearCe + 543}`,
+        isNow,
+      };
+    });
+  }, [birthDate, nickname, birthTime, focus, gender, nowCe, nowMonth]);
 
-  useEffect(() => {
-    const el = viewportRef.current;
-    if (!el) return;
-    const measure = () => setWidth(el.clientWidth || 320);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    window.addEventListener("resize", measure);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, []);
+  const yearNowIdx = years.findIndex((y) => y.ce === nowCe);
+  const monthNowIdx = months.findIndex((m) => m.isNow);
+  const [yearIndex, setYearIndex] = useState(yearNowIdx >= 0 ? yearNowIdx : 2);
+  const [monthIndexSel, setMonthIndexSel] = useState(
+    monthNowIdx >= 0 ? monthNowIdx : 18
+  );
 
-  function goTo(next: number) {
-    const clamped = Math.max(0, Math.min(years.length - 1, next));
-    setIndex(clamped);
-    setDragX(0);
-    setDragging(false);
-    animLockRef.current = true;
-    window.setTimeout(() => {
-      animLockRef.current = false;
-    }, 420);
-  }
+  const yearChart = useMemo(
+    (): ChartDatum[] =>
+      years.map((y) => ({
+        key: String(y.ce),
+        score: y.score,
+        label: String(y.be).slice(-2),
+        isNow: y.ce === nowCe,
+      })),
+    [years, nowCe]
+  );
 
-  function onPointerDown(e: PointerEvent<HTMLDivElement>) {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    if (animLockRef.current) return;
-    activeRef.current = true;
-    startXRef.current = e.clientX;
-    lastXRef.current = e.clientX;
-    setWidth(viewportRef.current?.clientWidth || width);
-    setDragging(true);
-    e.currentTarget.setPointerCapture(e.pointerId);
-  }
+  const monthChart = useMemo(
+    (): ChartDatum[] =>
+      months.map((m) => ({
+        key: m.key,
+        score: m.score,
+        label: m.label,
+        subLabel: String(m.yearCe + 543).slice(-2),
+        isNow: m.isNow,
+      })),
+    [months]
+  );
 
-  function onPointerMove(e: PointerEvent<HTMLDivElement>) {
-    if (!activeRef.current) return;
-    lastXRef.current = e.clientX;
-    const dx = e.clientX - startXRef.current;
-    let next = dx;
-    if ((index === 0 && dx > 0) || (index === years.length - 1 && dx < 0)) {
-      next = dx * 0.28;
-    }
-    setDragX(Math.max(-width * 1.05, Math.min(width * 1.05, next)));
-  }
-
-  function onPointerUp(e: PointerEvent<HTMLDivElement>) {
-    if (!activeRef.current) return;
-    activeRef.current = false;
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      /* ignore */
-    }
-    const dx = lastXRef.current - startXRef.current;
-    const threshold = Math.min(56, width * 0.18);
-    setDragging(false);
-    if (dx < -threshold) goTo(index + 1);
-    else if (dx > threshold) goTo(index - 1);
-    else {
-      setDragX(0);
-    }
-  }
-
-  const trackX = -index * width + dragX;
+  const activeYear = years[yearIndex] ?? years[0]!;
+  const activeMonth = months[monthIndexSel] ?? months[0]!;
+  const monthBand = scoreBand(activeMonth.score);
+  const yearBand = scoreBand(activeYear.score);
 
   return (
-    <section className={cn("space-y-2.5", className)}>
-      <div className="flex items-center gap-2 px-0.5">
-        <FortuneIcon name="compass" size={18} className="shrink-0" />
-        <h2 className="text-[15px] font-semibold tracking-wide text-[#241C4F]">
-          จังหวะชีวิต
-          <span className="text-[#A07E1A]"> 12 ปี</span>
-        </h2>
-      </div>
-
-      <YearRhythmChart
-        years={years}
-        selectedIndex={index}
-        onSelect={goTo}
-      />
-
-      <div
-        ref={viewportRef}
-        className="relative overflow-hidden touch-pan-y select-none"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      >
-        <div
-          className="flex"
-          style={{
-            width: width * years.length,
-            transform: `translate3d(${trackX}px, 0, 0)`,
-            transition: dragging
-              ? "none"
-              : "transform 420ms cubic-bezier(0.22, 1, 0.36, 1)",
-            willChange: "transform",
-          }}
-        >
-          {years.map((year, i) => {
-            const band = scoreBand(year.score);
-            const color = scoreColor(year.score);
-            const when =
-              year.ce === nowCe
-                ? "ปีนี้"
-                : year.ce < nowCe
-                  ? "ปีที่ผ่านมา"
-                  : "ปีข้างหน้า";
-            return (
-              <article
-                key={year.ce}
-                className="shrink-0"
-                style={{ width }}
-                aria-hidden={i !== index}
-              >
-                <div className="fortune-glass relative mx-0.5 space-y-2.5 rounded-[18px] px-3.5 py-3.5">
-                  <p className="absolute right-3.5 top-3.5 text-[12px] font-semibold tabular-nums text-[#A07E1A]">
-                    {i + 1}/{years.length}
-                  </p>
-
-                  <div className="pr-10">
-                    <p className="text-[11px] font-medium text-[#6B6490]">
-                      {when}
-                    </p>
-                    <p className="mt-1 text-[15px] font-semibold text-[#241C4F]">
-                      พ.ศ. {year.be} · {band.label}
-                    </p>
-                  </div>
-
-                  <p className="text-[13px] font-medium leading-snug text-[#3A3270]">
-                    {year.overview}
-                  </p>
-                  <p className="text-[12px] leading-[1.65] text-[#5E5688]">
-                    {band.meaning}
-                  </p>
-
-                  <div className="mt-1 space-y-3 border-t border-[#7B6BB0]/14 pt-3">
-                    <div>
-                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
-                        จุดเปลี่ยน
-                      </p>
-                      <p className="mt-1 text-[12px] leading-[1.65] text-[#3A3270]">
-                        {year.turning}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
-                        ทำไมถึงเป็นแบบนี้
-                      </p>
-                      <p className="mt-1 text-[12px] leading-[1.65] text-[#3A3270]">
-                        {year.reason}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
-                        แนวทาง
-                      </p>
-                      <p className="mt-1 text-[12px] leading-[1.65] text-[#3A3270]">
-                        {year.guidance}
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] leading-snug text-[#6B6490]">
-                    จุดเด่น: {band.strength} · ใช้ยังไง: {band.use}
-                  </p>
-                  <p
-                    className="pt-0.5 text-right text-[13px] font-bold tabular-nums"
-                    style={{ color }}
-                  >
-                    {year.score}/12
-                  </p>
-                </div>
-              </article>
-            );
-          })}
+    <section className={cn("space-y-3", className)}>
+      <div className="flex items-start justify-between gap-3 px-0.5">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <FortuneIcon name="compass" size={22} className="shrink-0" />
+            <h2 className="text-[19px] font-semibold tracking-wide text-[#241C4F]">
+              จังหวะชีวิต
+            </h2>
+          </div>
+          <p className="mt-1.5 text-[14px] leading-snug text-[#5E5688]">
+            เลื่อนดูเส้นเวลา · สลับรายเดือน / รายปี
+          </p>
+        </div>
+        <div className="inline-flex shrink-0 rounded-full bg-white/70 p-0.5 ring-1 ring-[#9B7FE8]/22">
+          {(
+            [
+              { id: "month" as const, label: "รายเดือน" },
+              { id: "year" as const, label: "รายปี" },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setMode(tab.id)}
+              className={cn(
+                "rounded-full px-3.5 py-1.5 text-[14px] font-semibold outline-none transition",
+                mode === tab.id
+                  ? "bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8] text-white"
+                  : "text-[#6B6490]"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <p className="text-center text-[11px] text-[#8A82B0]">
-        ปัดซ้าย–ขวา หรือกดจุดบนกราฟเพื่อเปลี่ยนปี
-      </p>
+      {mode === "month" ? (
+        <>
+          <div className="fortune-glass rounded-[18px] px-2.5 py-3">
+            <StockStylePanChart
+              points={monthChart}
+              selectedIndex={monthIndexSel}
+              onSelect={setMonthIndexSel}
+              ariaLabel="กราฟจังหวะชีวิตรายเดือน ปัดเลื่อนดูได้"
+            />
+          </div>
+          <div className="fortune-glass rounded-[18px] px-3.5 py-3.5">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-[14px] font-medium text-[#6B6490]">
+                  {activeMonth.isNow ? "เดือนนี้" : "เดือนที่เลือก"}
+                </p>
+                <p className="mt-0.5 text-[17px] font-semibold text-[#241C4F]">
+                  {activeMonth.fullLabel}
+                </p>
+              </div>
+              <span
+                className="rounded-full px-3 py-1.5 text-[14px] font-semibold tabular-nums"
+                style={{
+                  color: scoreColor(activeMonth.score),
+                  background: scoreBadgeBg(activeMonth.score),
+                }}
+              >
+                {activeMonth.score}/12 · {monthBand.label}
+              </span>
+            </div>
+            <p className="mt-2 text-[15px] leading-relaxed text-[#5E5688]">
+              {monthBand.meaning}
+            </p>
+            <p className="mt-2 text-[13px] leading-relaxed text-[#6B6490]">
+              {activeMonth.isNow
+                ? "แตะจุดเดือนอื่นบนกราฟเพื่อเทียบจังหวะก่อน–หลัง"
+                : `เทียบกับเดือนนี้ · คะแนน ${months[monthNowIdx >= 0 ? monthNowIdx : monthIndexSel]?.score ?? "—"}/12`}
+            </p>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="fortune-glass rounded-[18px] px-2.5 py-3">
+            <StockStylePanChart
+              points={yearChart}
+              selectedIndex={yearIndex}
+              onSelect={setYearIndex}
+              ariaLabel="กราฟจังหวะชีวิตรายปี ปัดเลื่อนดูได้"
+            />
+          </div>
+          <div className="fortune-glass relative space-y-2 rounded-[18px] px-3.5 py-3">
+            <p className="absolute right-3.5 top-3 text-[13px] font-semibold tabular-nums text-[#5B45B8]">
+              {yearIndex + 1}/{years.length}
+            </p>
+            <div className="pr-10">
+              <p className="text-[13px] font-medium text-[#6B6490]">
+                {activeYear.ce === nowCe
+                  ? "ปีนี้"
+                  : activeYear.ce < nowCe
+                    ? "ปีที่ผ่านมา"
+                    : "ปีข้างหน้า"}
+              </p>
+              <p className="mt-1 text-[16px] font-semibold text-[#241C4F]">
+                พ.ศ. {activeYear.be} · {yearBand.label}
+              </p>
+            </div>
+            <p className="text-[14px] font-medium leading-snug text-[#3A3270]">
+              {activeYear.overview}
+            </p>
+            <p className="line-clamp-2 text-[13px] leading-[1.65] text-[#5E5688]">
+              {yearBand.meaning}
+            </p>
+            <Link
+              href={`/premium/year?ce=${activeYear.ce}`}
+              className="no-sky-lift dd-gold-glass-btn mt-0.5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold text-[#5C4810] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/45"
+            >
+              อ่านเพิ่มเติม
+              <FortuneIcon name="arrow-right" size={18} />
+            </Link>
+          </div>
+        </>
+      )}
     </section>
   );
 }
@@ -680,219 +684,6 @@ function tickValues(yMin: number, yMax: number) {
   return ticks;
 }
 
-function RhythmChart({
-  points,
-  selectedIndex,
-  onSelect,
-  isLocked,
-}: {
-  points: ChartPoint[];
-  selectedIndex: number;
-  onSelect: (index: number) => void;
-  isLocked: (index: number) => boolean;
-}) {
-  const gid = useId().replace(/:/g, "");
-  const W = 340;
-  const H = 200;
-  const padL = 30;
-  const padR = 12;
-  const padT = 16;
-  const padB = 32;
-  const plotW = W - padL - padR;
-  const plotH = H - padT - padB;
-
-  /** Fixed readable scale like the mockup */
-  const yMin = 0;
-  const yMax = 15;
-  const ticks = [0, 5, 10, 15];
-
-  const n = points.length;
-  const xAt = (i: number) =>
-    padL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
-  const yAt = (score: number) =>
-    padT + ((yMax - score) / (yMax - yMin)) * plotH;
-
-  const lastFreeIndex = (() => {
-    for (let i = n - 1; i >= 0; i--) {
-      if (!isLocked(i) && points[i]!.kind === "past") return i;
-    }
-    return selectedIndex;
-  })();
-
-  const plotScore = (i: number) => {
-    const p = points[i]!;
-    if (isLocked(i) && p.kind === "future") {
-      return points[Math.max(0, i - 1)]!.score;
-    }
-    return p.score;
-  };
-
-  const lineD = points
-    .map((_, i) => {
-      const cmd = i === 0 ? "M" : "L";
-      return `${cmd} ${xAt(i).toFixed(1)} ${yAt(plotScore(i)).toFixed(1)}`;
-    })
-    .join(" ");
-
-  const areaD = `${lineD} L ${xAt(n - 1).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(0).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`;
-
-  return (
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      className="mt-1 w-full"
-      role="img"
-      aria-label="กราฟจังหวะชีวิตรายเดือน กดจุดเพื่อดูรายละเอียด"
-    >
-      <defs>
-        <linearGradient id={`rm-fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(155,127,232,0.42)" />
-          <stop offset="70%" stopColor="rgba(155,127,232,0.12)" />
-          <stop offset="100%" stopColor="rgba(155,127,232,0)" />
-        </linearGradient>
-      </defs>
-
-      {/* Horizontal dotted grid */}
-      {ticks.map((t) => {
-        const y = yAt(t);
-        return (
-          <g key={t}>
-            <line
-              x1={padL}
-              y1={y}
-              x2={W - padR}
-              y2={y}
-              stroke="rgba(120,110,160,0.28)"
-              strokeWidth={1}
-              strokeDasharray="3 4"
-            />
-            <text
-              x={padL - 8}
-              y={y + 3.5}
-              textAnchor="end"
-              fill="#9A90C0"
-              fontSize={10}
-              fontWeight={500}
-            >
-              {t}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* Vertical month guides */}
-      {points.map((_, i) => (
-        <line
-          key={`v-${i}`}
-          x1={xAt(i)}
-          y1={padT}
-          x2={xAt(i)}
-          y2={padT + plotH}
-          stroke="rgba(120,110,160,0.12)"
-          strokeWidth={1}
-          strokeDasharray="2 4"
-        />
-      ))}
-
-      <path d={areaD} fill={`url(#rm-fill-${gid})`} />
-      <path
-        d={lineD}
-        fill="none"
-        stroke="#8B6FE0"
-        strokeWidth={2.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {points.map((p, i) => {
-        const locked = isLocked(i);
-        const x = xAt(i);
-        const y = yAt(plotScore(i));
-        const isTip = i === lastFreeIndex;
-        const isOpen = !locked && !isTip;
-
-        return (
-          <g key={`${p.kind}-${p.yearCe}-${p.monthIndex}`}>
-            {locked ? (
-              <LockMark x={x} y={y} />
-            ) : isTip ? (
-              <>
-                {/* Current-month focus frame */}
-                <rect
-                  x={x - 14}
-                  y={y - 14}
-                  width={28}
-                  height={28}
-                  rx={4}
-                  fill="none"
-                  stroke="#2C2458"
-                  strokeWidth={1.6}
-                  opacity={0.85}
-                />
-                <circle cx={x} cy={y} r={10} fill="rgba(74,222,128,0.28)" />
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={7}
-                  fill="#3DCF7A"
-                  stroke="#FFFFFF"
-                  strokeWidth={2.5}
-                />
-              </>
-            ) : (
-              <circle
-                cx={x}
-                cy={y}
-                r={6}
-                fill="#FFFFFF"
-                stroke="#8B6FE0"
-                strokeWidth={2.4}
-              />
-            )}
-
-            <text
-              x={x}
-              y={H - 10}
-              textAnchor="middle"
-              fill={isTip ? "#2C2458" : locked ? "#9A90C0" : "#6B6490"}
-              fontSize={11}
-              fontWeight={isTip ? 700 : isOpen ? 600 : 500}
-              className="pointer-events-none"
-            >
-              {MONTH_LABELS_TH[p.monthIndex]}
-            </text>
-
-            <circle
-              cx={x}
-              cy={y}
-              r={16}
-              fill="transparent"
-              className="cursor-pointer outline-none focus:outline-none"
-              style={{ outline: "none" }}
-              role="button"
-              tabIndex={0}
-              aria-label={
-                locked
-                  ? `ปลดล็อก${MONTH_NAMES_TH[p.monthIndex]}`
-                  : `ดู${MONTH_NAMES_TH[p.monthIndex]} คะแนน ${p.score}`
-              }
-              aria-pressed={i === selectedIndex && !locked}
-              onClick={() => onSelect(i)}
-              onPointerDown={(e) => {
-                e.currentTarget.blur();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onSelect(i);
-                }
-              }}
-            />
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
 
 /** Free: month teaser. Unlocked: full 12-year analysis per year */
 export function FortuneFreeMonthTrend({
@@ -900,21 +691,46 @@ export function FortuneFreeMonthTrend({
   unlocked = false,
   onUnlock,
   seed = "dooduang",
+  birthDate,
+  nickname,
+  birthTime,
+  focus,
+  gender,
   className,
 }: {
   points?: FreeMonthPoint[] | null;
   unlocked?: boolean;
   onUnlock?: () => void;
   seed?: string;
+  birthDate?: string;
+  nickname?: string;
+  birthTime?: string;
+  focus?: FortuneFocus;
+  gender?: string;
   className?: string;
 }) {
   if (unlocked) {
-    return <UnlockedTwelveYearTrend seed={seed} className={className} />;
+    return (
+      <UnlockedTwelveYearTrend
+        seed={seed}
+        birthDate={birthDate}
+        nickname={nickname}
+        birthTime={birthTime}
+        focus={focus}
+        gender={gender}
+        className={className}
+      />
+    );
   }
 
   return (
     <FreeMonthTrendTeaser
       points={points}
+      birthDate={birthDate}
+      nickname={nickname}
+      birthTime={birthTime}
+      focus={focus}
+      gender={gender}
       onUnlock={onUnlock}
       className={className}
     />
@@ -923,220 +739,176 @@ export function FortuneFreeMonthTrend({
 
 function FreeMonthTrendTeaser({
   points,
+  birthDate = "2000-01-01",
+  nickname = "",
+  birthTime,
+  focus,
+  gender,
   onUnlock,
   className,
 }: {
   points?: FreeMonthPoint[] | null;
+  birthDate?: string;
+  nickname?: string;
+  birthTime?: string;
+  focus?: FortuneFocus;
+  gender?: string;
   onUnlock?: () => void;
   className?: string;
 }) {
   const now = new Date();
-  const curIdx = now.getMonth();
-  const curYear = now.getFullYear();
-  const prevDate = new Date(curYear, curIdx - 1, 1);
+  const nowMonth = now.getMonth();
+  const nowYear = now.getFullYear();
 
-  const series = useMemo(() => {
-    if (
-      Array.isArray(points) &&
-      points.length >= 2 &&
-      points.every(
-        (p) =>
+  const months = useMemo((): MonthPoint[] => {
+    const input = { birthDate, nickname, birthTime, focus, gender };
+    const scoreMap = new Map<string, number>();
+    if (Array.isArray(points)) {
+      for (const p of points) {
+        if (
           typeof p.score === "number" &&
           Number.isFinite(p.score) &&
           p.score >= 1 &&
           p.score <= 12
-      )
-    ) {
-      return points;
+        ) {
+          scoreMap.set(`${p.yearCe}-${p.monthIndex}`, p.score);
+        }
+      }
     }
-    return null;
-  }, [points]);
 
-  const hasData = !!series;
-  const pastCount = hasData ? series!.length : 0;
+    // Free teaser: current month first, then upcoming months only
+    return Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(nowYear, nowMonth + i, 1);
+      const yearCe = d.getFullYear();
+      const monthIndex = d.getMonth();
+      const key = `${yearCe}-${monthIndex}`;
+      const isNow = i === 0;
+      return {
+        key,
+        monthIndex,
+        yearCe,
+        score:
+          scoreMap.get(key) ?? monthScoreForDate(input, yearCe, monthIndex),
+        label: MONTH_LABELS_TH[monthIndex]!,
+        fullLabel: `${MONTH_NAMES_TH[monthIndex]} ${yearCe + 543}`,
+        isNow,
+      };
+    });
+  }, [
+    points,
+    birthDate,
+    nickname,
+    birthTime,
+    focus,
+    gender,
+    nowMonth,
+    nowYear,
+  ]);
 
-  const chartPoints = useMemo((): ChartPoint[] | null => {
-    if (!series) return null;
-    return series.map((p) => ({ ...p, kind: "past" as const }));
-  }, [series]);
+  const currentIndex = 0;
 
-  /** Free: current month only — history locked until premium */
-  const freeMinIndex = !hasData ? 0 : Math.max(0, pastCount - 1);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const chartPoints = useMemo(
+    (): ChartDatum[] =>
+      months.map((m) => ({
+        key: m.key,
+        score: m.score,
+        label: m.label,
+        subLabel: String(m.yearCe + 543).slice(-2),
+        isNow: m.isNow,
+      })),
+    [months]
+  );
 
   function pointLocked(index: number) {
-    if (!chartPoints) return false;
-    const p = chartPoints[index];
-    if (!p) return true;
-    if (p.kind === "future") return true;
-    return index < freeMinIndex;
+    return index > currentIndex;
   }
-
-  const lastFreeIndex = Math.max(0, pastCount - 1);
-  const safeSelected = hasData
-    ? Math.min(
-        Math.max(selectedIndex ?? lastFreeIndex, freeMinIndex),
-        lastFreeIndex
-      )
-    : 0;
 
   function selectPoint(index: number) {
     if (pointLocked(index)) {
       onUnlock?.();
-      return;
-    }
-    setSelectedIndex(index);
-  }
-
-  const prev = hasData
-    ? series![series!.length - 2]!
-    : {
-        monthIndex: prevDate.getMonth(),
-        yearCe: prevDate.getFullYear(),
-        score: 0,
-      };
-  const cur = hasData
-    ? series![series!.length - 1]!
-    : { monthIndex: curIdx, yearCe: curYear, score: 0 };
-
-  const diff = hasData ? cur.score - prev.score : 0;
-  let deltaLabel = "คงที่";
-  let DeltaIcon = Minus;
-  let deltaColor = "#9AB8DC";
-  if (hasData) {
-    if (diff > 0) {
-      deltaLabel = `สูงขึ้น ${diff}`;
-      DeltaIcon = ArrowUpRight;
-      deltaColor = "#4ade80";
-    } else if (diff < 0) {
-      deltaLabel = `ต่ำลง ${Math.abs(diff)}`;
-      DeltaIcon = ArrowDownRight;
-      deltaColor = "#fb923c";
-    } else {
-      deltaLabel = "เท่าเดิม";
-      DeltaIcon = ArrowRight;
-      deltaColor = "#9AB8DC";
     }
   }
 
-  const trendUp = hasData && diff > 0;
-  const curBand = hasData ? scoreBand(cur.score) : null;
+  const active = months[currentIndex]!;
+  const band = scoreBand(active.score);
+  const hasData = months.length > 0;
 
   return (
-    <section className={cn("fortune-glass space-y-3 rounded-[18px] px-3.5 py-4", className)}>
-      <div className="flex items-start justify-between gap-3">
+    <section className={cn("space-y-3", className)}>
+      <div className="flex items-start justify-between gap-3 px-0.5">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <ChartNoAxesColumn
-              className="h-5 w-5 shrink-0 text-[#7B5FD4]"
-              strokeWidth={2}
-            />
-            <h2 className="text-[17px] font-semibold tracking-wide text-[#2C2458]">
+            <FortuneIcon name="compass" size={22} className="shrink-0" />
+            <h2 className="text-[19px] font-semibold tracking-wide text-[#241C4F]">
               จังหวะชีวิตช่วงนี้
             </h2>
           </div>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-[#5E5688]">
-            ดูแนวโน้มและวางแผนล่วงหน้า
+          <p className="mt-1.5 text-[14px] leading-snug text-[#5E5688]">
+            เริ่มจากเดือนนี้ · อนาคตล็อกไว้
           </p>
         </div>
-        {hasData ? (
-          <span
-            className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-semibold"
-            style={{
-              color: trendUp ? "#2F9E5F" : deltaColor,
-              background: trendUp ? "rgba(74,222,128,0.16)" : `${deltaColor}18`,
-              boxShadow: `inset 0 0 0 1px ${trendUp ? "rgba(74,222,128,0.45)" : `${deltaColor}55`}`,
-            }}
-          >
-            <DeltaIcon className="h-3.5 w-3.5" strokeWidth={2.2} />
-            {trendUp ? "แนวโน้มดีขึ้น" : deltaLabel}
-          </span>
-        ) : null}
       </div>
 
-      {hasData && chartPoints ? (
-        <RhythmChart
-          points={chartPoints}
-          selectedIndex={safeSelected}
-          onSelect={selectPoint}
-          isLocked={pointLocked}
-        />
+      {hasData ? (
+        <div className="fortune-glass rounded-[18px] px-2.5 py-3">
+          <StockStylePanChart
+            points={chartPoints}
+            selectedIndex={currentIndex}
+            onSelect={selectPoint}
+            isLocked={pointLocked}
+            alignStart
+            ariaLabel="กราฟจังหวะชีวิตรายเดือน ปัดเลื่อนดูได้"
+          />
+        </div>
       ) : (
-        <div className="rounded-[14px] border border-dashed border-[#7B6BB0]/25 bg-white/40 px-3 py-5 text-center">
+        <div className="fortune-glass rounded-[18px] border border-dashed border-[#7B6BB0]/25 px-3 py-5 text-center">
           <p className="text-[14px] font-medium text-[#2C2458]">
             ยังไม่มีข้อมูลจังหวะรายเดือน
-          </p>
-          <p className="mt-1.5 text-[12px] leading-relaxed text-[#5E5688]">
-            ส่วนนี้รอคะแนนรายเดือนจากระบบคำนวณ
-          </p>
-        </div>
+        </p>
+      </div>
       )}
 
-      {hasData && curBand ? (
-        <div className="rounded-[16px] border border-[#3DCF7A]/35 bg-[#3DCF7A]/10 px-3.5 py-3.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[12px] font-semibold tracking-wide text-[#2F9E5F]">
-                เดือนปัจจุบัน · {MONTH_NAMES_TH[cur.monthIndex]}{" "}
-                {cur.yearCe + 543}
-              </p>
-              <p className="mt-1 text-[15px] font-semibold text-[#2C2458]">
-                {curBand.label}
-              </p>
-            </div>
-            <p
-              className="shrink-0 text-[1.35rem] font-bold tabular-nums"
-              style={{ color: scoreColor(cur.score) }}
-            >
-              {cur.score}
-              <span className="text-[13px] font-semibold text-[#6B6490]">
-                /12
-              </span>
+      {hasData ? (
+        <div className="fortune-glass rounded-[18px] px-3.5 py-3.5">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[14px] font-medium text-[#6B6490]">เดือนนี้</p>
+              <p className="mt-0.5 text-[17px] font-semibold text-[#241C4F]">
+                {active.fullLabel}
             </p>
           </div>
-          <p className="mt-2.5 text-[13px] leading-[1.65] text-[#3A3270]">
-            {curBand.meaning}
+            <span
+              className="rounded-full px-3 py-1.5 text-[14px] font-semibold tabular-nums"
+              style={{
+                color: scoreColor(active.score),
+                background: scoreBadgeBg(active.score),
+              }}
+            >
+              {active.score}/12 · {band.label}
+            </span>
+          </div>
+          <p className="mt-2 text-[15px] leading-relaxed text-[#5E5688]">
+            {band.meaning}
           </p>
-          <p className="mt-2 text-[13px] leading-[1.65] text-[#4A4278]">
+          <p className="mt-2 text-[13px] leading-relaxed text-[#6B6490]">
             <span className="font-semibold text-[#2C2458]">ใช้ยังไง · </span>
-            {curBand.use}
-          </p>
-        </div>
+            {band.use}
+                  </p>
+                </div>
       ) : null}
 
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[12px] text-[#6B6490]">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-[#3DCF7A]" />
           เดือนปัจจุบัน · ดูได้ฟรี
-        </span>
+              </span>
         <span className="inline-flex items-center gap-1.5">
-          <FortuneIcon name="lock" size={22} />
-          ปลดล็อกเพื่อดูย้อนหลัง
-        </span>
+          <FortuneIcon name="lock-gold" size={22} plain />
+          อนาคต · ล็อกและเบลอไว้
+                </span>
       </div>
 
-      <div className="flex items-center gap-2.5 rounded-[14px] bg-[#4A2B6A] px-3 py-2.5">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-          <FortuneIcon name="finance" size={40} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-semibold leading-snug text-white">
-            เห็นจังหวะชีวิตได้ไกลกว่าเดิม
-          </p>
-          <p className="mt-0.5 text-[11px] leading-snug text-white/65">
-            เจาะลึกเส้นทางชีวิต 12 ปี พร้อมคำแนะนำเฉพาะคุณ
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onUnlock}
-          disabled={!onUnlock}
-          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#7B5FD4] px-3 py-2 text-[11px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-60"
-        >
-          ปลดล็อกพรีเมียม · {FORTUNE_UNLOCK_PRICE} บาท
-          <FortuneIcon name="arrow-right" size={20} />
-        </button>
-      </div>
+      <FortuneUnlockBanner onUnlock={onUnlock} />
     </section>
   );
 }

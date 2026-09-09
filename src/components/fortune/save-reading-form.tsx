@@ -48,11 +48,7 @@ export function SaveReadingForm({ token }: { token: string | null }) {
   }
 
   if (!token) {
-    return (
-      <p className="text-center text-[11px] text-purple-400/45">
-        ดูผลบนหน้านี้ได้เลย แต่ยังบันทึกลิงก์ดูซ้ำไม่ได้
-      </p>
-    );
+    return null;
   }
 
   return (

@@ -159,6 +159,10 @@ export interface FortuneProfile {
   nickname: string;
   birthDate: string;
   gender: string;
+  /** Optional HH:mm */
+  birthTime?: string;
+  /** Optional focus: life | work | money | love | health */
+  focus?: string;
 }
 
 export function generateFortune(

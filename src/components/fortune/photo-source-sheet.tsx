@@ -135,12 +135,12 @@ export function PhotoSourceSheet({
       <button
         type="button"
         aria-label="ปิด"
-        className="absolute inset-0 bg-[#050810]/72 backdrop-blur-[4px]"
+        className="dd-sheet-backdrop absolute inset-0 bg-[#050810]/72 backdrop-blur-[4px]"
         onClick={handleClose}
       />
 
       {mode === "pick" ? (
-        <div className="relative z-[1] w-full max-w-[420px] rounded-t-[22px] border border-white/10 bg-[#121A2E] px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:rounded-[22px]">
+        <div className="dd-sheet-panel relative z-[1] w-full max-w-[420px] rounded-t-[22px] border border-white/10 bg-[#121A2E] px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:rounded-[22px]">
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20" />
           <p className="text-center text-[15px] font-semibold text-white">
             เลือกแหล่งรูป
@@ -193,7 +193,7 @@ export function PhotoSourceSheet({
           />
         </div>
       ) : (
-        <div className="relative z-[1] flex h-[min(90dvh,640px)] w-full max-w-[420px] flex-col overflow-hidden rounded-t-[22px] border border-white/10 bg-[#0A1020] sm:rounded-[22px]">
+        <div className="dd-sheet-panel relative z-[1] flex h-[min(90dvh,640px)] w-full max-w-[420px] flex-col overflow-hidden rounded-t-[22px] border border-white/10 bg-[#0A1020] sm:rounded-[22px]">
           <div className="flex items-center justify-between gap-2 px-3 py-2.5">
             <button
               type="button"

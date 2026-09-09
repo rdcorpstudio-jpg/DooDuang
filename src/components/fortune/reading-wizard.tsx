@@ -24,6 +24,7 @@ import {
   writeFortuneProfile,
   readFortuneProfile,
 } from "@/lib/fortune/profile-storage";
+import type { FortuneFocus } from "@/lib/fortune/analyze";
 import { cn } from "@/lib/utils";
 
 function scrollFieldIntoView(event: FocusEvent<HTMLInputElement>) {
@@ -57,6 +58,9 @@ interface ProfileForm {
   nickname: string;
   birthDate: string;
   gender: Gender | "";
+  /** Kept for cache compat; free wizard no longer collects these */
+  birthTime: string;
+  focus: FortuneFocus;
 }
 
 const READING_TYPE = "overall" as const;
@@ -99,11 +103,17 @@ function writeWizardCache(profile: ProfileForm, result: FortuneApiResult) {
     /* ignore */
   }
   if (profile.nickname.trim() && profile.birthDate) {
+    const existing = readFortuneProfile();
     writeFortuneProfile({
       realName: profile.realName,
       nickname: profile.nickname,
       birthDate: profile.birthDate,
       gender: profile.gender,
+      // Free path must not wipe premium deepen fields
+      birthTime: existing?.birthTime,
+      birthPlace: existing?.birthPlace,
+      focus: existing?.focus,
+      deepenSkipped: existing?.deepenSkipped,
     });
   }
 }
@@ -392,6 +402,8 @@ export function ReadingWizard() {
     nickname: "",
     birthDate: todayIso(),
     gender: "",
+    birthTime: "",
+    focus: "life",
   });
   const [result, setResult] = useState<FortuneApiResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -402,7 +414,11 @@ export function ReadingWizard() {
   useEffect(() => {
     const cached = readWizardCache();
     if (cached) {
-      setProfile(cached.profile);
+      setProfile({
+        ...cached.profile,
+        birthTime: cached.profile.birthTime ?? "",
+        focus: cached.profile.focus ?? "life",
+      });
       setResult(cached.result);
       setStep("result");
     } else {
@@ -414,6 +430,8 @@ export function ReadingWizard() {
             nickname: saved.nickname,
             birthDate: saved.birthDate,
             gender: saved.gender,
+            birthTime: saved.birthTime ?? "",
+            focus: saved.focus ?? "life",
           });
         }
       } catch {
@@ -471,7 +489,13 @@ export function ReadingWizard() {
       const res = await fetch("/api/fortune", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: READING_TYPE, ...profile }),
+        body: JSON.stringify({
+          type: READING_TYPE,
+          realName: profile.realName,
+          nickname: profile.nickname,
+          birthDate: profile.birthDate,
+          gender: profile.gender,
+        }),
         signal: controller.signal,
       });
       const data = await res.json();
@@ -655,7 +679,7 @@ export function ReadingWizard() {
                 <StepHeader
                   step={2}
                   title="วันเดือนปีเกิด"
-                  subtitle="ใช้คำนวณจังหวะชีวิตของคุณ"
+                  subtitle="ดวงเบื้องต้นคำนวณจากวันเกิดของคุณ"
                 />
 
                 <WizardShell>
@@ -670,6 +694,11 @@ export function ReadingWizard() {
                       setProfile((p) => ({ ...p, birthDate }))
                     }
                   />
+
+                  <p className="mt-4 rounded-[14px] bg-[#F3EEFF]/80 px-3 py-2.5 text-center text-[12px] leading-snug text-[#6B6490]">
+                    เวลาเกิดและสถานที่เกิด จะขอตอนสมัครพรีเมียม
+                    เพื่อวิเคราะห์เชิงลึกให้แม่นขึ้น
+                  </p>
 
                   <FormContinueButton
                     label="ไปต่อ"
@@ -687,7 +716,7 @@ export function ReadingWizard() {
                 <StepHeader
                   step={3}
                   title="ชื่อของคุณ"
-                  subtitle="ใช้สำหรับเรียกคุณในคำทำนาย"
+                  subtitle="ใช้เรียกคุณในคำทำนายเบื้องต้น"
                 />
 
                 <WizardShell>
@@ -735,7 +764,7 @@ export function ReadingWizard() {
                     ) : null}
 
                     <FormContinueButton
-                      label="เปิดดูดวง"
+                      label="เปิดดูดวงเบื้องต้น"
                       delayMs={280}
                       className="mt-2"
                       disabled={!profile.realName.trim() || !profile.nickname.trim()}

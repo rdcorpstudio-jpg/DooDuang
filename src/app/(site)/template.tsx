@@ -1,7 +1,8 @@
-"use client";
-
-import { PageTransition } from "@/components/ui/reveal";
-
-export default function SiteTemplate({ children }: { children: React.ReactNode }) {
-  return <PageTransition>{children}</PageTransition>;
+/** Page enter handled by root `app/template.tsx` — avoid double fade. */
+export default function SiteTemplate({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return children;
 }

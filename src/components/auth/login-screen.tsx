@@ -22,11 +22,11 @@ export function LoginScreen({ callbackUrl = "/dashboard" }: { callbackUrl?: stri
         </button>
         <div className="flex flex-col items-center justify-self-center">
           <Sparkle
-            className="mb-0.5 h-3.5 w-3.5 text-[#C9A227]"
+            className="mb-0.5 h-3.5 w-3.5 text-[#7B5FD4]"
             fill="currentColor"
             strokeWidth={0}
           />
-          <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
+          <p className="font-sacred text-[12px] tracking-[0.26em] text-[#7B5FD4]">
             DOODUANG
           </p>
         </div>
@@ -40,11 +40,9 @@ export function LoginScreen({ callbackUrl = "/dashboard" }: { callbackUrl?: stri
             style={{
               background:
                 "radial-gradient(circle at 35% 28%, rgba(255,255,255,0.95), rgba(198,186,240,0.75) 55%, rgba(155,127,232,0.45))",
-              boxShadow:
-                "0 10px 24px rgba(110,79,201,0.22), inset 0 1px 0 rgba(255,255,255,0.85)",
             }}
           >
-            <UserRound className="h-8 w-8 text-[#C9A227]" strokeWidth={1.7} />
+            <UserRound className="h-8 w-8 text-[#7B5FD4]" strokeWidth={1.7} />
           </div>
 
           <h1 className="mt-4 text-[1.55rem] font-bold tracking-tight text-[#241C4F]">
@@ -60,7 +58,7 @@ export function LoginScreen({ callbackUrl = "/dashboard" }: { callbackUrl?: stri
             showIconDivider
             variant="outline"
             className="mt-5 space-y-2"
-            buttonClassName="h-12 gap-2.5 rounded-full border-0 bg-white text-[15px] font-semibold text-[#3A2F6B] shadow-[0_8px_22px_rgba(110,79,201,0.16)] outline-none ring-0 hover:bg-[#FBF8FF] hover:text-[#3A2F6B] focus:outline-none focus-visible:ring-0 active:scale-[0.99]"
+            buttonClassName="h-12 gap-2.5 rounded-full border-0 bg-white text-[15px] font-semibold text-[#3A2F6B] outline-none ring-0 hover:bg-[#FBF8FF] hover:text-[#3A2F6B] focus:outline-none focus-visible:ring-0 active:scale-[0.99]"
           />
 
           <p className="mt-3 text-[12px] text-[#8A82B0]">
@@ -78,9 +76,9 @@ export function LoginScreen({ callbackUrl = "/dashboard" }: { callbackUrl?: stri
           </p>
           <Link
             href="/reading"
-            className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full border border-[#9B7FE8]/55 bg-white/55 text-[14px] font-semibold text-[#5B45B8] outline-none transition active:scale-[0.99] hover:bg-white/80 focus-visible:ring-0"
+            className="dd-gold-glass-btn mt-3 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-semibold text-[#5C4810] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/45"
           >
-            ไปดูดวงฟรี &gt;
+            ไปดูดวงฟรี →
           </Link>
 
           <p className="mt-5 inline-flex items-center justify-center gap-1.5 text-[11px] text-[#8A82B0]">

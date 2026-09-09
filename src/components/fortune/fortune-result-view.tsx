@@ -30,7 +30,6 @@ function FortuneResultViewInner({
   readingOption,
   type,
   shareToken,
-  onRetry,
 }: FortuneResultViewProps) {
   const router = useRouter();
   const storageKey = getUnlockStorageKey(type, profile);
@@ -80,11 +79,25 @@ function FortuneResultViewInner({
         birthDate={profile.birthDate}
         nickname={profile.nickname}
         realName={profile.realName}
+        gender={profile.gender}
         readingTitle={readingOption.title}
         unlocked={unlocked}
         unlocking={false}
         onUnlock={() => setPayOpen(true)}
+        variant="free"
       />
+
+      {!unlocked ? (
+        <div className="fortune-reveal mt-4 px-3">
+          <FortunePaymentSheet
+            open
+            variant="inline"
+            onClose={() => {}}
+            onPaid={handlePaid}
+            returnPath="/premium"
+          />
+        </div>
+      ) : null}
 
       <FortunePaymentSheet
         open={payOpen}
@@ -98,15 +111,6 @@ function FortuneResultViewInner({
           <SaveReadingForm token={shareToken ?? null} />
         </div>
 
-        {onRetry ? (
-          <button
-            type="button"
-            onClick={onRetry}
-            className="no-print text-[15px] text-white/45 hover:text-white/75"
-          >
-            ดูดวงใหม่
-          </button>
-        ) : null}
         <div className="no-print flex items-center justify-center gap-3 text-[14px]">
           <Link href="/reading" className="text-[#c084fc]">
             ดูดวงอีกครั้ง

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ZodiacSignImage } from "@/components/fortune/zodiac-sign-image";
 import { cn } from "@/lib/utils";
 import { ZODIAC_SIGNS, type ZodiacSign } from "@/lib/fortune/zodiac";
 
@@ -63,11 +64,23 @@ export function ZodiacPicker({ selected, onSelect }: ZodiacPickerProps) {
               )}
             >
               {isSelected ? (
-                <span className="pointer-events-none absolute inset-0 bg-[#a967f5]/18" aria-hidden />
+                <span
+                  className="pointer-events-none absolute inset-0 bg-[#a967f5]/18"
+                  aria-hidden
+                />
               ) : null}
 
-              <div className="relative z-[1] mb-1.5 text-2xl leading-none">{zodiac.symbol}</div>
-              <div className="relative z-[1] text-xs font-semibold text-white/90">{zodiac.thaiName}</div>
+              <div className="relative z-[1] mb-1 flex justify-center">
+                <ZodiacSignImage
+                  sign={zodiac.id}
+                  variant="orb"
+                  size={44}
+                  alt={zodiac.thaiName}
+                />
+              </div>
+              <div className="relative z-[1] text-xs font-semibold text-white/90">
+                {zodiac.thaiName}
+              </div>
               <div className="relative z-[1] mt-1 text-[9px] leading-tight text-purple-300/50">
                 {zodiac.dateRange}
               </div>

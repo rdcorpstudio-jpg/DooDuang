@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { AstroHeroOrb } from "@/components/home/astro-hero-orb";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
   "ตรวจสอบข้อมูลพื้นดวง",
   "วิเคราะห์จังหวะชีวิต",
-  "เชื่อมโยงการงาน การเงิน และความสัมพันธ์",
+  "เชื่อมโยงการงาน การเงิน และความรัก",
   "สรุปภาพรวมสำหรับคุณ",
 ] as const;
 
@@ -33,6 +34,7 @@ export function FortuneLoading({
 }: FortuneLoadingProps) {
   const [internalProgress, setInternalProgress] = useState(4);
   const progress = progressProp ?? internalProgress;
+  const pct = Math.round(Math.max(0, Math.min(100, progress)));
 
   useEffect(() => {
     if (progressProp != null) return;
@@ -46,96 +48,98 @@ export function FortuneLoading({
     return () => window.clearInterval(timer);
   }, [progressProp]);
 
-  const activeStep = STEPS.findIndex((_, i) => stepState(progress, i) === "active");
-  const subtitle =
-    activeStep === 0
-      ? "เชื่อมโยงข้อมูลพื้นดวง"
-      : activeStep === 1
-        ? "วิเคราะห์จังหวะชีวิต"
-        : activeStep === 2
-          ? "เชื่อมโยงการงาน การเงิน และความสัมพันธ์"
-          : "สรุปภาพรวมสำหรับคุณ";
-
   return (
-    <div className="fortune-loading absolute inset-0 z-50 flex flex-col overflow-hidden px-5 pb-6 pt-5">
-      <div className="relative z-10 flex items-center justify-between gap-3">
-        <span className="fortune-loading-pill">DOODUANG</span>
-        <span className="fortune-loading-pill fortune-loading-pill-status">
+    <div className="fortune-loading sky-copy absolute inset-0 z-50 flex flex-col overflow-hidden px-5 pb-5 pt-4">
+      <div className="relative z-10 flex items-start justify-between gap-3">
+        <div className="w-[6.5rem]" aria-hidden />
+        <div className="flex flex-col items-center pt-0.5">
+          <FortuneIcon name="sparkle" size={16} className="mb-0.5" />
+          <p className="font-sacred text-[13px] tracking-[0.28em] text-[#C9A227]">
+            DOODUANG
+          </p>
+        </div>
+        <span className="fortune-loading-pill fortune-loading-pill-status mt-0.5">
           <span className="fortune-loading-pulse-dot" />
           กำลังวิเคราะห์
         </span>
       </div>
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center pt-1">
-        <div className="fortune-loading-chart relative mx-auto w-full max-w-[248px]">
+        <div className="fortune-loading-chart relative mx-auto w-full max-w-[220px]">
           <AstroHeroOrb />
         </div>
 
-        <h2 className="mt-0 max-w-[300px] text-center font-sacred text-[1.55rem] leading-[1.28] tracking-wide">
-          <span className="block text-white">กำลังอ่าน</span>
-          <span className="intro-title-accent">จังหวะชีวิตของคุณ</span>
+        <h2 className="mt-1 max-w-[20rem] text-center text-[1.45rem] font-bold leading-[1.35] tracking-tight text-[#241C4F]">
+          กำลังอ่าน จังหวะชีวิตของคุณ
         </h2>
-        <p className="mt-2 text-center text-[13px] font-light tracking-wide text-[#a8b4d8]/85">
-          {subtitle}
+        <p className="mt-1.5 max-w-[18rem] text-center text-[12.5px] leading-snug text-[#5E5688]">
+          วิเคราะห์ข้อมูลเพื่อสรุปคำทำนายเฉพาะคุณ
         </p>
         {(nickname || categoryTitle) && (
-          <p className="mt-1 text-center text-[11px] text-white/30">
+          <p className="mt-1 text-center text-[11px] text-[#8A82B0]">
             {[categoryTitle, nickname].filter(Boolean).join(" · ")}
           </p>
         )}
 
-        <ul className="fortune-loading-card mt-5 w-full max-w-[320px]">
-          {STEPS.map((label, i) => {
-            const state = stepState(progress, i);
-            return (
-              <li
-                key={label}
-                className={cn(
-                  "fortune-loading-row",
-                  state === "active" && "is-active",
-                  state === "done" && "is-done",
-                )}
-              >
-                <span className="min-w-0 flex-1 text-[13px] leading-snug tracking-wide">
-                  {label}
-                </span>
-                <span className="fortune-loading-status" aria-hidden>
-                  {state === "done" ? (
-                    <span className="fortune-loading-check">
-                      <Check className="h-3 w-3" strokeWidth={3} />
-                    </span>
-                  ) : state === "active" ? (
-                    <span className="fortune-loading-dots">
-                      <i />
-                      <i />
-                      <i />
-                    </span>
-                  ) : (
-                    <span className="fortune-loading-empty" />
+        <div className="fortune-loading-card fortune-glass mt-4 w-full max-w-[320px] px-3.5 py-3">
+          <p className="mb-2 text-[12px] font-semibold text-[#241C4F]">
+            ขั้นตอนการวิเคราะห์
+          </p>
+          <ul className="overflow-hidden rounded-[14px]">
+            {STEPS.map((label, i) => {
+              const state = stepState(progress, i);
+              return (
+                <li
+                  key={label}
+                  className={cn(
+                    "fortune-loading-row",
+                    state === "active" && "is-active",
+                    state === "done" && "is-done",
                   )}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+                >
+                  <span className="min-w-0 flex-1 text-[12.5px] leading-snug tracking-wide">
+                    {label}
+                  </span>
+                  <span className="fortune-loading-status" aria-hidden>
+                    {state === "done" ? (
+                      <span className="fortune-loading-check">
+                        <Check className="h-3 w-3" strokeWidth={3} />
+                      </span>
+                    ) : state === "active" ? (
+                      <span className="fortune-loading-dots">
+                        <i />
+                        <i />
+                        <i />
+                      </span>
+                    ) : (
+                      <span className="fortune-loading-empty" />
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
 
-        <div className="mt-5 w-full max-w-[320px]">
-          <div className="relative h-1.5 overflow-visible rounded-full bg-white/[0.08]">
-            <div
-              className="fortune-loading-fill absolute inset-y-0 left-0 rounded-full"
-              style={{ width: `${Math.max(4, progress)}%` }}
-            />
-            <span
-              className="fortune-loading-pct"
-              style={{ left: `${Math.max(4, Math.min(progress, 96))}%` }}
-            >
-              {Math.round(progress)}%
-            </span>
+          <div className="mt-3 px-0.5">
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <span className="text-[11px] font-medium text-[#7A7198]">
+                ความคืบหน้า
+              </span>
+              <span className="text-[12px] font-semibold tabular-nums text-[#6B4EC8]">
+                {pct}%
+              </span>
+            </div>
+            <div className="relative h-2 overflow-hidden rounded-full bg-[#E8E0F8]/90">
+              <div
+                className="fortune-loading-fill absolute inset-y-0 left-0 rounded-full"
+                style={{ width: `${Math.max(4, pct)}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        <p className="mt-7 text-center text-[12px] tracking-wide text-white/35">
-          อีกสักครู่ เราจะพาคุณไปดูภาพรวม
+        <p className="mt-4 text-center text-[12px] tracking-wide text-[#7A7198]">
+          อีกสักครู่ คำทำนายของคุณจะพร้อมอ่าน
         </p>
       </div>
     </div>

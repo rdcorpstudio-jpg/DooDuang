@@ -293,16 +293,6 @@ export function FortuneAuspiciousCalendar({
     setViewMonth(m);
   }
 
-  function shiftYear(delta: number) {
-    if (!canBrowse) {
-      onUnlock?.();
-      return;
-    }
-    const y = viewYear + delta;
-    if (y < yearRange.start || y > yearRange.end) return;
-    setViewYear(y);
-  }
-
   function selectDay(profile: DayProfile) {
     if (!canBrowse && !isFreeDay(profile.iso)) {
       onUnlock?.();
@@ -359,35 +349,8 @@ export function FortuneAuspiciousCalendar({
             </button>
           </div>
 
-          {/* Year row (premium) */}
-          {canBrowse ? (
-            <div className="mt-3 flex items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={() => shiftYear(-1)}
-                disabled={viewYear <= yearRange.start}
-                className="flex h-8 w-8 items-center justify-center text-[#A07E1A] outline-none transition active:opacity-60 disabled:opacity-30"
-                aria-label="ปีก่อน"
-              >
-                <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-              </button>
-              <p className="text-[14px] font-semibold text-[#241C4F]">
-                พ.ศ. {viewYear + 543}
-              </p>
-              <button
-                type="button"
-                onClick={() => shiftYear(1)}
-                disabled={viewYear >= yearRange.end}
-                className="flex h-8 w-8 items-center justify-center text-[#A07E1A] outline-none transition active:opacity-60 disabled:opacity-30"
-                aria-label="ปีถัดไป"
-              >
-                <ChevronRight className="h-5 w-5" strokeWidth={2.2} />
-              </button>
-            </div>
-          ) : null}
-
           {/* Month nav */}
-          <div className="mt-2 flex items-center justify-between gap-2">
+          <div className="mt-3 flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => shiftMonth(-1)}

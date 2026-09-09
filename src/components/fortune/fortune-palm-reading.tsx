@@ -1,34 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Lock } from "lucide-react";
+import { Camera, ChevronLeft, ImageIcon, Lock, RotateCcw, X } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
-import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import { GuidedScanCapture } from "@/components/fortune/guided-scan-capture";
 import {
-  PhotoSlot,
-  PhotoSourceSheet,
-  useObjectUrl,
-} from "@/components/fortune/photo-source-sheet";
+  LockedPreviewTile,
+  UnlockDetailBanner,
+} from "@/components/fortune/locked-reading-teaser";
+import {
+  ShareReadingButton,
+  buildPalmShareText,
+} from "@/components/fortune/share-reading-button";
+import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import { useObjectUrl } from "@/components/fortune/photo-source-sheet";
+import {
+  buildPalmReadingPack,
+  type PalmReadingPack,
+} from "@/lib/fortune/scan/build-palm-pack";
+import {
+  isPremiumUnlocked,
+  setPremiumUnlocked,
+} from "@/lib/fortune/premium-unlock";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-const UNLOCK_KEY = "dooduang-premium-unlocked";
+type Step = "ready" | "analyzing" | "result";
 
-function hashSeed(input: string) {
-  let h = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h) >>> 0;
-}
-
-type Step = "upload" | "result";
-type SlotId = "palm" | "fingers";
-
-/** ลายมือ — camera or upload, then mock result */
+/** ลายมือ — free teaser + soft-lock detail like daily tarot */
 export function FortunePalmReading({
   seed,
   className,
@@ -37,65 +38,76 @@ export function FortunePalmReading({
   className?: string;
 }) {
   const router = useRouter();
+  const uploadRef = useRef<HTMLInputElement>(null);
   const [unlocked, setUnlocked] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
-  const [step, setStep] = useState<Step>("upload");
-  const [palm, setPalm] = useState<File | null>(null);
-  const [fingers, setFingers] = useState<File | null>(null);
-  const [picking, setPicking] = useState<SlotId | null>(null);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [step, setStep] = useState<Step>("ready");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [pack, setPack] = useState<PalmReadingPack | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const palmUrl = useObjectUrl(palm);
-  const fingersUrl = useObjectUrl(fingers);
+  const photoUrl = useObjectUrl(photo);
 
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem(UNLOCK_KEY) === "1") setUnlocked(true);
-    } catch {
-      /* ignore */
-    }
+    setUnlocked(isPremiumUnlocked());
   }, []);
 
-  const h = hashSeed(`${seed}-palm`);
-
-  function onPicked(file: File) {
-    if (picking === "palm") setPalm(file);
-    else if (picking === "fingers") setFingers(file);
-    setPicking(null);
-  }
-
   function handlePaid() {
-    try {
-      sessionStorage.setItem(UNLOCK_KEY, "1");
-    } catch {
-      /* ignore */
-    }
+    setPremiumUnlocked();
     setUnlocked(true);
     setPayOpen(false);
   }
 
   useStripePaymentReturn(handlePaid);
 
+  async function analyze(files: File[]) {
+    const file = files[0];
+    if (!file) return;
+    setPhoto(file);
+    setPack(null);
+    setError(null);
+    setStep("analyzing");
+    try {
+      const next = await buildPalmReadingPack(file, `${seed}-palm`);
+      await new Promise((r) => setTimeout(r, 700));
+      setPack(next);
+      setStep("result");
+    } catch {
+      setError("วิเคราะห์รูปไม่สำเร็จ ลองถ่ายใหม่ในแสงที่ดีกว่า");
+      setStep("ready");
+    }
+  }
+
+  function analyzeDraft() {
+    if (!photo) {
+      setError("อัปโหลดรูปฝ่ามือก่อน");
+      return;
+    }
+    void analyze([photo]);
+  }
+
+  function pickPhoto(file: File | undefined) {
+    if (!file || !file.type.startsWith("image/")) {
+      setError("เลือกรูปภาพฝ่ามืออีกครั้ง");
+      return;
+    }
+    setError(null);
+    setPhoto(file);
+  }
+
+  function reset() {
+    setPhoto(null);
+    setPack(null);
+    setError(null);
+    setStep("ready");
+  }
+
   if (!unlocked) {
     return (
       <div className={cn("sky-copy relative h-full overflow-y-auto", className)}>
         <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
-            >
-              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-              กลับ
-            </button>
-            <div className="flex flex-col items-center justify-self-center">
-              <FortuneIcon name="moon" size={16} className="-mb-0.5" />
-              <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
-                DOODUANG
-              </p>
-            </div>
-            <span aria-hidden className="justify-self-end" />
-          </div>
+          <Header onBack={() => router.back()} />
           <div className="fortune-glass mt-8 rounded-[22px] px-4 py-6 text-center">
             <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#9B7FE8]/12 ring-1 ring-[#9B7FE8]/30">
               <Lock className="h-5 w-5 text-[#7B5FD4]" strokeWidth={1.9} />
@@ -104,12 +116,12 @@ export function FortunePalmReading({
               ดูลายมือ · พรีเมียม
             </h1>
             <p className="mt-2 text-[13px] leading-relaxed text-[#5E5688]">
-              ถ่ายหรืออัปโหลดรูปฝ่ามือ เพื่ออ่านลายมือ
+              ถ่ายฝ่ามือตามกรอบนำทาง เพื่ออ่านธาตุมือและเส้นหลัก
             </p>
             <button
               type="button"
               onClick={() => setPayOpen(true)}
-              className="no-sky-lift mt-5 w-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8] py-3 text-[15px] font-semibold text-white outline-none transition active:scale-[0.99]"
+              className="no-sky-lift dd-gold-glass-btn mt-5 w-full rounded-full py-3 text-[15px] font-semibold text-[#5C4810] outline-none transition active:scale-[0.99]"
             >
               ปลดล็อก · {FORTUNE_UNLOCK_PRICE} บาท
             </button>
@@ -125,156 +137,395 @@ export function FortunePalmReading({
     );
   }
 
-  const lines = [
-    {
-      title: "เส้นชีวิต",
-      body:
-        h % 2 === 0
-          ? "เส้นชัดและโค้งดี สื่อถึงพลังฟื้นตัวและความอดทน"
-          : "เส้นสั้นแต่แน่น ควรรักษาสุขภาพและจังหวะพักให้สม่ำเสมอ",
-    },
-    {
-      title: "เส้นสมอง",
-      body:
-        (h >> 2) % 2 === 0
-          ? "คิดเป็นระบบ ตัดสินใจได้เมื่อมีข้อมูลครบ"
-          : "ไอเดียไว — โฟกัสทีละเรื่องจะเห็นผลชัดขึ้น",
-    },
-    {
-      title: "เส้นหัวใจ",
-      body:
-        (h >> 4) % 2 === 0
-          ? "ใส่ใจคนรอบข้าง อยากความสัมพันธ์ที่จริงใจ"
-          : "ปกป้องใจเก่ง เปิดใจทีละขั้นจะสัมพันธ์ได้ลึกขึ้น",
-    },
-  ];
-
   return (
     <div className={cn("sky-copy relative h-full overflow-y-auto", className)}>
       <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              if (step === "result") setStep("upload");
-              else router.back();
-            }}
-            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
-          >
-            <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-            กลับ
-          </button>
-          <div className="flex flex-col items-center justify-self-center">
-            <FortuneIcon name="moon" size={16} className="-mb-0.5" />
-            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
-              DOODUANG
-            </p>
-          </div>
-          <span aria-hidden className="justify-self-end" />
-        </div>
+        <Header
+          onBack={() => {
+            if (step === "result" || step === "analyzing") reset();
+            else router.back();
+          }}
+        />
 
-        {step === "upload" ? (
+        {step === "ready" ? (
           <>
             <header className="mt-5">
               <h1 className="text-[1.55rem] font-bold tracking-tight text-[#241C4F]">
                 อ่านลายมือ
               </h1>
               <p className="mt-1 text-[14px] font-medium text-[#7B5FD4]">
-                อัปโหลดรูปฝ่ามือ
+                ถ่ายฝ่ามือแล้ววิเคราะห์ด้วย AI
               </p>
               <p className="mt-1 text-[12px] leading-relaxed text-[#6B6490]">
-                ใช้รูปฝ่ามือชัด แสงพอ — กดช่องแล้วเลือกถ่ายด้วยกล้องหรืออัปโหลด
+                อัปโหลดรูปดูพรีวิวก่อน หรือถ่ายด้วยกล้อง — หงายมือให้ชัด
               </p>
             </header>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <PhotoSlot
-                label="ฝ่ามือหงาย"
-                badge="จำเป็น"
-                badgeTone="required"
-                previewUrl={palmUrl}
-                hint={palm ? "พร้อมวิเคราะห์" : "หงายฝ่ามือ นิ้วชิดพอประมาณ"}
-                onPick={() => setPicking("palm")}
-                onClear={() => setPalm(null)}
-              />
-              <PhotoSlot
-                label="มุมนิ้ว/ข้างมือ"
-                badge="ไม่บังคับ"
-                badgeTone="optional"
-                previewUrl={fingersUrl}
-                hint="ช่วยอ่านรายละเอียดเส้นย่อย"
-                onPick={() => setPicking("fingers")}
-                onClear={() => setFingers(null)}
+            <div className="mt-5">
+              <PalmPhotoSlot
+                label="ฝ่ามือ"
+                url={photoUrl}
+                onPick={() => uploadRef.current?.click()}
+                onClear={() => setPhoto(null)}
               />
             </div>
+            <input
+              ref={uploadRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                pickPhoto(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+            />
 
-            <p className="mt-5 text-center text-[11px] leading-relaxed text-[#8A82B0]">
-              รูปของคุณประมวลผลบนเครื่องเท่านั้น และไม่ถูกอัปโหลด
-            </p>
+            {error ? (
+              <p className="mt-3 text-center text-[12px] text-[#E11D48]">{error}</p>
+            ) : null}
 
             <button
               type="button"
-              disabled={!palm}
-              onClick={() => setStep("result")}
-              className="no-sky-lift mt-3 w-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8] py-3.5 text-[15px] font-semibold text-white outline-none transition enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-35"
+              disabled={!photo}
+              onClick={analyzeDraft}
+              className="no-sky-lift dd-gold-glass-btn mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[15px] font-semibold text-[#5C4810] outline-none transition enabled:active:scale-[0.99] disabled:opacity-45"
             >
-              ถัดไป
+              วิเคราะห์ลายมือ
             </button>
+            <button
+              type="button"
+              onClick={() => setScanOpen(true)}
+              className="no-sky-lift mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/70 py-3.5 text-[15px] font-semibold text-[#5B45B8] ring-1 ring-[#9B7FE8]/30 outline-none transition active:scale-[0.99]"
+            >
+              <Camera className="h-4 w-4" strokeWidth={2} />
+              เปิดกล้องสแกน
+            </button>
+            <p className="mt-3 text-center text-[11px] leading-relaxed text-[#8A82B0]">
+              ใช้วิเคราะห์ผลลัพธ์เท่านั้น — ไม่เก็บรูปถาวร
+            </p>
           </>
-        ) : (
-          <div className="mt-5 space-y-3 pb-4">
-            <h1 className="text-[1.4rem] font-bold tracking-tight text-[#241C4F]">
-              ผลอ่านลายมือ
-            </h1>
-            <div className="fortune-glass flex gap-3 rounded-[20px] p-3.5">
-              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
-                {palmUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={palmUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : null}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[15px] font-semibold text-[#241C4F]">
-                  ฝ่ามือหลัก ·{" "}
-                  {h % 2 === 0 ? "เส้นชัด" : "เส้นละเอียด"}
-                </p>
-                <p className="mt-1 text-[12px] leading-relaxed text-[#5E5688]">
-                  สรุปจากรูปที่คุณถ่าย/อัปโหลด — ใช้เป็นแนวทางคร่าว ๆ
-                </p>
-              </div>
-            </div>
+        ) : null}
 
-            <div className="fortune-glass space-y-3.5 rounded-[20px] px-4 py-4">
-              {lines.map((line, i) => (
-                <div
-                  key={line.title}
-                  className={
-                    i > 0 ? "border-t border-[#7B6BB0]/12 pt-3.5" : undefined
-                  }
-                >
-                  <p className="text-[11px] font-semibold tracking-[0.14em] text-[#7B5FD4]">
-                    {line.title}
-                  </p>
-                  <p className="mt-1.5 text-[12px] leading-[1.7] text-[#5E5688]">
-                    {line.body}
-                  </p>
-                </div>
-              ))}
+        {step === "analyzing" ? (
+          <div className="mt-10 flex flex-1 flex-col items-center text-center">
+            <div className="relative h-28 w-28 overflow-hidden rounded-[20px] bg-[#9B7FE8]/12 ring-1 ring-[#9B7FE8]/25">
+              {photoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={photoUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : null}
+            </div>
+            <p className="mt-5 text-[15px] font-semibold text-[#241C4F]">
+              กำลังวิเคราะห์ด้วย AI…
+            </p>
+            <p className="mt-1.5 max-w-[16rem] text-[12px] leading-relaxed text-[#6B6490]">
+              ประมาณธาตุมือ ความหนาแน่นเส้น และจับคู่คลังคำทำนาย
+            </p>
+            <div className="mt-5 h-1.5 w-40 overflow-hidden rounded-full bg-[#9B7FE8]/20">
+              <div className="h-full w-2/3 animate-pulse rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8]" />
             </div>
           </div>
+        ) : null}
+
+        {step === "result" && pack ? (
+          <PalmResult
+            photoUrl={photoUrl}
+            pack={pack}
+            unlocked={unlocked}
+            onUnlock={() => setPayOpen(true)}
+            onRescan={reset}
+          />
+        ) : null}
+      </div>
+
+      <GuidedScanCapture
+        open={scanOpen}
+        mode="palm"
+        onClose={() => setScanOpen(false)}
+        onCaptured={analyze}
+      />
+      <FortunePaymentSheet
+        open={payOpen}
+        onClose={() => setPayOpen(false)}
+        onPaid={handlePaid}
+        returnPath="/reading/palm"
+      />
+    </div>
+  );
+}
+
+function Header({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+      >
+        <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+        กลับ
+      </button>
+      <div className="flex flex-col items-center justify-self-center">
+        <FortuneIcon name="moon" size={16} className="-mb-0.5" />
+        <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
+          DOODUANG
+        </p>
+      </div>
+      <span aria-hidden className="justify-self-end" />
+    </div>
+  );
+}
+
+function PalmPhotoSlot({
+  label,
+  url,
+  onPick,
+  onClear,
+}: {
+  label: string;
+  url: string | null;
+  onPick: () => void;
+  onClear: () => void;
+}) {
+  return (
+    <div className="fortune-glass mx-auto w-full max-w-[220px] overflow-hidden rounded-[18px]">
+      <div className="flex items-center justify-between px-3 pt-2.5">
+        <p className="text-[11px] font-semibold tracking-[0.12em] text-[#7B5FD4]">
+          {label}
+        </p>
+        {url ? (
+          <button
+            type="button"
+            onClick={onClear}
+            className="rounded-full p-1 text-[#8A82B0] outline-none transition active:opacity-60"
+            aria-label={`ลบรูป${label}`}
+          >
+            <X className="h-3.5 w-3.5" strokeWidth={2.2} />
+          </button>
+        ) : null}
+      </div>
+      <button
+        type="button"
+        onClick={onPick}
+        className="relative mt-1.5 flex aspect-[3/4] w-full flex-col items-center justify-center gap-1.5 bg-[#9B7FE8]/08 outline-none transition active:opacity-85"
+      >
+        {url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={url}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <>
+            <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/70 ring-1 ring-[#9B7FE8]/25">
+              <ImageIcon className="h-4 w-4 text-[#7B5FD4]" strokeWidth={1.9} />
+            </span>
+            <span className="text-[12px] font-medium text-[#5B45B8]">
+              อัปโหลด
+            </span>
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
+function PalmResult({
+  photoUrl,
+  pack,
+  unlocked,
+  onUnlock,
+  onRescan,
+}: {
+  photoUrl: string | null;
+  pack: PalmReadingPack;
+  unlocked: boolean;
+  onUnlock: () => void;
+  onRescan: () => void;
+}) {
+  const { result, natureLabel, natureCopy, lines } = pack;
+  const clarity = result.metrics.clarity;
+  const freePersonality =
+    natureCopy.personality.length > 90
+      ? `${natureCopy.personality.slice(0, 90).trim()}…`
+      : natureCopy.personality;
+
+  return (
+    <div className="mt-5 space-y-3 pb-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-[1.4rem] font-bold tracking-tight text-[#241C4F]">
+            ผลอ่านลายมือ
+          </h1>
+          <p className="mt-0.5 text-[12px] text-[#7B5FD4]">{natureLabel}</p>
+          {!unlocked ? (
+            <p className="mt-1 text-[11px] text-[#8A82B0]">
+              ดูเบื้องต้นฟรี · รายละเอียดล็อกไว้
+            </p>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={onRescan}
+          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/70 px-2.5 py-1.5 text-[11px] font-medium text-[#5B45B8] ring-1 ring-[#9B7FE8]/25"
+        >
+          <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
+          สแกนใหม่
+        </button>
+      </div>
+
+      <div className="fortune-glass flex gap-3 rounded-[20px] p-3.5">
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
+          {photoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photoUrl} alt="" className="h-full w-full object-cover" />
+          ) : null}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[15px] font-semibold text-[#241C4F]">
+            {natureLabel}
+          </p>
+          <p className="mt-1 text-[12px] leading-relaxed text-[#5E5688]">
+            {unlocked ? natureCopy.strength : "จุดแข็ง · เงา · คำแนะนำ ล็อกไว้"}
+          </p>
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <p className="text-[11px] text-[#5E5688]">ความชัดของสแกน</p>
+            <p className="text-[11px] font-medium text-[#5B45B8]">{clarity}%</p>
+          </div>
+          <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#9B7FE8]/15">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8]"
+              style={{ width: `${clarity}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="fortune-glass rounded-[20px] px-4 py-4">
+        <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[#7B5FD4]">
+          ธาตุมือของคุณ
+        </h2>
+        {unlocked ? (
+          <ExpandableBody text={natureCopy.personality} />
+        ) : (
+          <p className="mt-1 text-[13px] leading-[1.75] text-[#3A3270]">
+            {freePersonality}
+          </p>
         )}
       </div>
 
-      <PhotoSourceSheet
-        open={picking != null}
-        onClose={() => setPicking(null)}
-        onPicked={onPicked}
-        capture="environment"
+      <div className="grid grid-cols-2 gap-2.5">
+        <LockedPreviewTile
+          title="จุดแข็ง"
+          unlocked={unlocked}
+          preview={natureCopy.strength}
+          onUnlock={onUnlock}
+        />
+        <LockedPreviewTile
+          title="เงา"
+          unlocked={unlocked}
+          preview={natureCopy.shadow}
+          onUnlock={onUnlock}
+        />
+      </div>
+      <LockedPreviewTile
+        title="คำแนะนำ"
+        unlocked={unlocked}
+        preview={natureCopy.advice}
+        onUnlock={onUnlock}
       />
+
+      <div className="grid grid-cols-1 gap-2.5">
+        {lines.map((line) => (
+          <LockedPreviewTile
+            key={line.id}
+            title={line.label}
+            unlocked={unlocked}
+            preview={`${line.copy.title} — ${line.copy.body}`}
+            onUnlock={onUnlock}
+          />
+        ))}
+      </div>
+
+      <UnlockDetailBanner
+        unlocked={unlocked}
+        onUnlock={onUnlock}
+        subtitle={`เส้นชีวิต หัวใจ สมอง · ${FORTUNE_UNLOCK_PRICE} บาท`}
+      >
+        <div className="space-y-3.5">
+          {lines.map((line, i) => (
+            <div
+              key={line.id}
+              className={i > 0 ? "border-t border-[#7B6BB0]/12 pt-3.5" : undefined}
+            >
+              <p className="text-[11px] font-semibold tracking-[0.14em] text-[#7B5FD4]">
+                {line.label}
+              </p>
+              <p className="mt-1 text-[13px] font-semibold text-[#2C2458]">
+                {line.copy.title}
+              </p>
+              {line.copy.blurb ? (
+                <p className="mt-0.5 text-[11px] text-[#7B5FD4]">
+                  {line.copy.blurb}
+                </p>
+              ) : null}
+              <ExpandableBody text={line.copy.body} className="mt-1" />
+              {line.copy.meaning ? (
+                <p className="mt-1.5 text-[12px] leading-relaxed text-[#6B6490]">
+                  <span className="font-semibold text-[#5B45B8]">ความหมาย: </span>
+                  {line.copy.meaning}
+                </p>
+              ) : null}
+              {line.copy.advice ? (
+                <p className="mt-1.5 text-[12px] leading-relaxed text-[#6B6490]">
+                  <span className="font-semibold text-[#5B45B8]">คำแนะนำ: </span>
+                  {line.copy.advice}
+                </p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </UnlockDetailBanner>
+
+      {unlocked ? (
+        <ShareReadingButton
+          title="ผลอ่านลายมือ · DooDuang"
+          text={buildPalmShareText(pack)}
+          variant="primary"
+          className="mt-1"
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function ExpandableBody({
+  text,
+  className,
+}: {
+  text: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const long = text.length > 110;
+  return (
+    <div className={className}>
+      <p className="mt-2 text-[13px] leading-[1.75] text-[#3A3270]">
+        {open || !long ? text : `${text.slice(0, 100).trim()}…`}
+      </p>
+      {long ? (
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="mt-1.5 text-[12px] font-medium text-[#7B5FD4] outline-none"
+        >
+          {open ? "ย่อ" : "อ่านเพิ่มเติม"}
+        </button>
+      ) : null}
     </div>
   );
 }

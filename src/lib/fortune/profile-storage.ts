@@ -1,4 +1,5 @@
 import type { Gender } from "@/components/ui/sacred-form";
+import type { FortuneFocus } from "@/lib/fortune/analyze";
 
 export const FORTUNE_PROFILE_KEY = "dooduang-fortune-profile";
 export const WIZARD_CACHE_KEY = "dooduang-wizard-session";
@@ -8,6 +9,14 @@ export type FortuneUserProfile = {
   nickname: string;
   birthDate: string;
   gender: Gender | "";
+  /** Premium deepen — HH:mm */
+  birthTime?: string;
+  /** Premium deepen — จังหวัด/เมืองเกิด */
+  birthPlace?: string;
+  /** Premium deepen — โฟกัสช่วงนี้ */
+  focus?: FortuneFocus;
+  /** User skipped deepen form after unlock */
+  deepenSkipped?: boolean;
   updatedAt: string;
 };
 
@@ -41,6 +50,10 @@ export function writeFortuneProfile(
     nickname: input.nickname.trim(),
     birthDate: input.birthDate.trim(),
     gender: input.gender || "",
+    birthTime: input.birthTime?.trim() || undefined,
+    birthPlace: input.birthPlace?.trim() || undefined,
+    focus: input.focus,
+    deepenSkipped: input.deepenSkipped,
     updatedAt: input.updatedAt ?? new Date().toISOString(),
   };
   try {
@@ -49,6 +62,24 @@ export function writeFortuneProfile(
     /* ignore */
   }
   return profile;
+}
+
+/** Free tier = day of birth only. Premium deepen unlocks time/place/focus. */
+export function isPremiumDeepenComplete(
+  profile: FortuneUserProfile | null | undefined
+): boolean {
+  if (!profile) return false;
+  const timeOk = Boolean(profile.birthTime && /^\d{1,2}:\d{2}$/.test(profile.birthTime));
+  const placeOk = Boolean(profile.birthPlace && profile.birthPlace.trim().length >= 2);
+  return timeOk && placeOk;
+}
+
+export function needsPremiumDeepen(
+  profile: FortuneUserProfile | null | undefined
+): boolean {
+  if (!profile) return false;
+  if (profile.deepenSkipped) return false;
+  return !isPremiumDeepenComplete(profile);
 }
 
 /** Pull profile from wizard session cache if local profile is empty */
@@ -65,6 +96,10 @@ export function hydrateFortuneProfileFromWizard(): FortuneUserProfile | null {
         nickname?: string;
         birthDate?: string;
         gender?: Gender | "";
+        birthTime?: string;
+        birthPlace?: string;
+        focus?: FortuneFocus;
+        deepenSkipped?: boolean;
       };
     };
     const p = parsed?.profile;
@@ -74,6 +109,10 @@ export function hydrateFortuneProfileFromWizard(): FortuneUserProfile | null {
       nickname: p.nickname,
       birthDate: p.birthDate,
       gender: p.gender ?? "",
+      birthTime: p.birthTime,
+      birthPlace: p.birthPlace,
+      focus: p.focus,
+      deepenSkipped: p.deepenSkipped,
     });
   } catch {
     return null;

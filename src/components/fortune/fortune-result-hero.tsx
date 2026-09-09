@@ -5,9 +5,8 @@ import { ChevronLeft } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { cn } from "@/lib/utils";
 
-function formatPredictionDate(date = new Date()) {
+function formatHeroDate(date = new Date()) {
   return new Intl.DateTimeFormat("th-TH", {
-    weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -15,88 +14,115 @@ function formatPredictionDate(date = new Date()) {
   }).format(date);
 }
 
-/** Hero — text left, Guanyin open on the right */
+/** Hero banner — left editorial copy, deity art by gender flush right */
 export function FortuneResultHero({
   realName,
   nickname,
-  headline = "โฟกัสสิ่งที่สำคัญจริง ๆ",
-  subline = "วันนี้เหมาะกับการตั้งสติก่อนลงมือ — จัดลำดับสิ่งสำคัญ แล้วเดินทีละก้าวอย่างมั่นคง",
-  quote = "ทุกวันคือโอกาสที่ดีขึ้น",
+  gender,
+  headline = "อย่ารีบเกิน จังหวะตัวเอง",
+  subline,
+  quote,
+  tip,
   className,
 }: {
   realName: string;
   nickname: string;
+  gender?: string;
   birthDate?: string;
   powerScore?: number;
   headline?: string;
   subline?: string;
   quote?: string;
+  tip?: string;
   className?: string;
 }) {
   const displayName = realName.trim() || nickname;
-  const dateLabel = formatPredictionDate();
-  const cleanQuote = quote.replace(/^[*“”\s]+|[*“”\s]+$/g, "");
+  const dateLabel = formatHeroDate();
+  const support =
+    (quote || "").trim() ||
+    "ค่อย ๆ ก้าว ในจังหวะที่ใช่สำหรับคุณ";
+  const footerTip =
+    (tip || "").trim() ||
+    (subline || "").trim() ||
+    "วันนี้ ให้เวลากับตัวเองอีกนิด";
+
+  const isMale = (gender || "").toLowerCase() === "male";
+  // New filenames force a hard cache miss (browser + Next)
+  const heroSrc = isMale
+    ? "/images/bg/hero-male-emperor-0909.jpg"
+    : "/images/bg/hero-female-guanyin-0909.jpg";
+  const objectPosition = isMale ? "72% 40%" : "70% 28%";
 
   return (
-    <div className={cn("sky-copy relative", className)}>
-      <div className="relative z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-1 px-0.5">
-        <Link
-          href="/reading"
-          className="result-hero-copy inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-[#7B6BB0]/35 active:opacity-60"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-          กลับ
-        </Link>
-        <span className="justify-self-center" aria-hidden />
-        <span className="justify-self-end" aria-hidden />
+    <section
+      className={cn(
+        "dd-result-hero no-sky-lift relative mx-3 mt-3 min-h-[272px] w-[calc(100%-1.5rem)] overflow-hidden rounded-[22px]",
+        className
+      )}
+    >
+      {/* Deity art — male emperor / Guanyin for female & other */}
+      <div className="pointer-events-none absolute inset-0">
+        {/* native img avoids Next image optimizer cache */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          key={heroSrc}
+          src={heroSrc}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover dd-hero-drift"
+          style={{ objectPosition }}
+          draggable={false}
+        />
       </div>
 
-      <div className="relative mt-1 flex min-h-[268px] flex-col pb-1 pt-2">
-        <div className="relative z-10 max-w-[62%] pr-1">
-          <p className="result-hero-copy text-[15px] leading-snug text-[#2C2458]">
-            <span className="font-bold">สวัสดี</span>{" "}
-            <span className="font-medium">คุณ{displayName}</span>
-          </p>
-
-          <p className="result-hero-copy mt-1.5 flex items-center gap-1.5 text-[12px] text-[#6B6490]">
-            <FortuneIcon name="calendar" size={18} className="shrink-0" />
-            <span>{dateLabel}</span>
-          </p>
-
-          <h2 className="result-hero-copy mt-3.5 text-[1.7rem] font-bold leading-[1.2] tracking-tight text-[#241C4F]">
-            {headline}
-          </h2>
-          <p className="result-hero-copy mt-1.5 text-[12px] font-medium tracking-wide text-[#8A7FB8]">
-            ดูดวงวันนี้ · แนวทางสำหรับคุณ
-          </p>
-          <p className="result-hero-copy mt-1.5 text-[13px] leading-[1.65] text-[#4F4778]">
-            {subline}
+      <div className="relative z-10 flex min-h-[272px] flex-col px-3.5 pb-4 pt-2.5">
+        {/* Top row */}
+        <div className="flex items-start justify-between gap-3">
+          <Link
+            href="/reading"
+            className="inline-flex items-center gap-1 outline-none transition active:opacity-60 focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35"
+            aria-label="กลับ"
+          >
+            <ChevronLeft className="h-5 w-5 text-[#2C2458]" strokeWidth={2.3} />
+            <span className="text-[12px] font-bold tracking-[0.22em] text-[#C9A227]">
+              DOODUANG
+            </span>
+          </Link>
+          <p className="pt-0.5 text-[12px] font-semibold text-[#3A3270]">
+            สวัสดี คุณ{displayName}
           </p>
         </div>
 
-        <div className="relative z-10 mx-auto mt-auto flex w-full max-w-[19rem] flex-col items-center gap-1.5 pt-5">
-          <div className="flex w-full items-center gap-1.5">
-            <span
-              className="h-px flex-1"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(201,162,39,0.8))",
-              }}
-            />
-            <FortuneIcon name="sparkle" size={14} className="shrink-0" />
-            <span
-              className="h-px flex-1"
-              style={{
-                background:
-                  "linear-gradient(90deg, rgba(201,162,39,0.8), transparent)",
-              }}
-            />
+        {/* Tag + date */}
+        <div className="mt-6 flex max-w-[58%] flex-wrap items-center gap-2">
+          <span className="dd-pill-breathe dd-lilac-glass-pill rounded-full px-2.5 py-1 text-[11px] font-semibold text-[#4A3A8A]">
+            ดวงประจำวัน
+          </span>
+          <span className="h-3 w-px shrink-0 bg-[#9B90C8]" aria-hidden />
+          <span className="text-[12px] font-semibold text-[#4A4278]">
+            {dateLabel}
+          </span>
+        </div>
+
+        {/* Headline block */}
+        <h2 className="mt-3 max-w-[56%] text-[1.55rem] font-bold leading-[1.3] tracking-tight text-[#1E1744]">
+          {headline}
+        </h2>
+        <div className="mt-2 h-[2px] w-9 rounded-full bg-[#C9A227] dd-gold-pulse" aria-hidden />
+        <p className="mt-2.5 max-w-[54%] text-[13px] font-medium leading-relaxed text-[#3F3768]">
+          {support}
+        </p>
+
+        {/* Tip row */}
+        <div className="mt-auto max-w-[58%] border-t border-[#9B90C8]/55 pt-3">
+          <div className="flex items-center gap-2">
+            <FortuneIcon name="sparkle" size={15} plain className="fortune-spark shrink-0" />
+            <span className="h-3 w-px shrink-0 bg-[#C9A227]/55" aria-hidden />
+            <p className="text-[12px] font-semibold leading-snug text-[#3F3768]">
+              {footerTip}
+            </p>
           </div>
-          <p className="result-hero-copy text-center text-[12px] font-medium tracking-wide text-[#5A4F88]">
-            “ {cleanQuote} ”
-          </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

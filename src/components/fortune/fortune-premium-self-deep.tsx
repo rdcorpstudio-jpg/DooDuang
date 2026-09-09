@@ -9,6 +9,7 @@ import {
   type PointerEvent,
 } from "react";
 import { Sparkles } from "lucide-react";
+import { analyzeFortune, type FortuneFocus } from "@/lib/fortune/analyze";
 import { cn } from "@/lib/utils";
 
 function hashSeed(input: string) {
@@ -20,6 +21,12 @@ function hashSeed(input: string) {
   return Math.abs(h) >>> 0;
 }
 
+/** Map 1–12 fortune score → UI percent band */
+function pctFromScore(score: number, min = 35, max = 92) {
+  const t = (Math.max(1, Math.min(12, score)) - 1) / 11;
+  return Math.round(min + t * (max - min));
+}
+
 function scoreFrom(seed: string, salt: string, min = 35, max = 92) {
   const n = hashSeed(`${seed}-${salt}`);
   return min + (n % (max - min + 1));
@@ -29,50 +36,50 @@ const AXES = [
   {
     key: "self",
     label: "ความเป็นตัวเอง",
-    high: "คุณมีแกนตัวตนชัด รู้ว่าอยากได้อะไร และไม่ค่อยหลุดตามกระแสคนอื่นง่าย",
-    mid: "คุณมีตัวตนพอสมควร ปรับเข้ากับสถานการณ์ได้โดยไม่ทิ้งแก่นของตัวเองทั้งหมด",
-    low: "คุณอาจเอนตามคนรอบข้างบ่อย — ลองตั้งคำถามสั้น ๆ ว่า ‘อันนี้ใช่ใจฉันไหม’ ก่อนตัดสินใจ",
-    tip: "เขียนสิ่งที่คุณยึดไว้ 3 ข้อ แล้วใช้เป็นเข็มทิศตอนเลือกทาง",
+    high: "คุณรู้ว่าตัวเองต้องการอะไร และไม่ไหลตามคนอื่นง่าย ๆ",
+    mid: "มีแกนของตัวเองอยู่ ปรับตามสถานการณ์ได้โดยไม่ทิ้งของสำคัญไป",
+    low: "เผลอเอนตามคนรอบตัวบ่อย ลองถามสั้น ๆ ว่า ‘อันนี้ใจเราอยากไหม’ ก่อนตอบรับ",
+    tip: "เขียนสิ่งที่ไม่ยอมทิ้งไว้สามข้อ เวลาต้องเลือกทางจะตัดใจง่ายขึ้น",
   },
   {
     key: "express",
     label: "การแสดงออก",
-    high: "คุณสื่อสารและแสดงพลังออกนอกได้ดี คนอื่นรับรู้ความคิดของคุณได้เร็ว",
-    mid: "คุณแสดงออกได้เมื่อจำเป็น แต่ยังเก็บบางส่วนไว้ข้างในอย่างสมดุล",
-    low: "คุณเก็บไว้ในใจมากกว่าพูดออก — เริ่มจากประโยคสั้น ๆ ที่ชัด จะช่วยให้คนเข้าใจคุณมากขึ้น",
-    tip: "ฝึกพูดสิ่งสำคัญ 1 ประโยคต่อวัน โดยไม่ต้องอธิบายยาว",
+    high: "คุณพูดแล้วคนเข้าใจไว คนรอบตัวรู้ว่าคุณคิดอะไรอยู่",
+    mid: "พูดได้เวลาจำเป็น แต่ก็ยังเก็บบางเรื่องไว้กับตัว",
+    low: "คิดในใจมากกว่าพูดออกมา คนจึงเดาใจคุณไม่ค่อยถูก",
+    tip: "วันละหนึ่งประโยค พูดสิ่งที่อยากบอกให้ตรง ไม่ต้องอธิบายยาว",
   },
   {
     key: "money",
     label: "เซนส์เรื่องเงิน",
-    high: "คุณจับจังหวะเงินและมูลค่าได้ดี รู้ว่าอะไรคุ้มและอะไรควรรอ",
-    mid: "คุณจัดการเงินได้พอใช้เมื่อมีแผน แต่บางครั้งอารมณ์ก็แทรกเข้ามาได้",
-    low: "เซนส์เงินยังไม่คม — ตั้งกติกาง่าย ๆ ก่อนใช้จ่ายใหญ่จะช่วยคุมจังหวะได้",
-    tip: "แยกเงิน ‘จำเป็น / อยากได้ / ออม’ แล้วดูสัปดาห์ละครั้ง",
+    high: "คุณดูออกว่าอะไรคุ้ม อะไรควรรอ จับจังหวะเงินได้ดี",
+    mid: "จัดการเงินได้เมื่อมีแผน แต่บางทีอารมณ์ก็แทรกเข้ามา",
+    low: "เงินมักหายไปกับของที่ตอนนั้นก็อยากได้ ยังไม่ค่อยมีเบรก",
+    tip: "แยกเงินเป็น จำเป็น / อยากได้ / เก็บ แล้วเปิดดูสัปดาห์ละครั้ง",
   },
   {
     key: "duty",
     label: "ความรับผิดชอบ",
-    high: "คุณแบกงานและคำมั่นได้หนัก เชื่อถือได้เมื่อคนอื่นวางใจ",
-    mid: "คุณรับผิดชอบเรื่องหลักได้ดี แต่ควรแบ่งงานเมื่อภาระซ้อนกัน",
-    low: "คุณอาจหลีกงานยากหรือเลื่อนออกไป — ตัดงานเป็นก้อนเล็กแล้วปิดทีละก้อน",
-    tip: "รับแค่ 1 คำมั่นหลักต่อช่วงเวลา แล้วทำให้จบก่อนรับเพิ่ม",
+    high: "รับปากแล้วทำจริง คนอื่นวางใจฝากงานกับคุณได้",
+    mid: "เรื่องหลักเอาอยู่ แต่ถ้างานซ้อนกันควรกระจายออกบ้าง",
+    low: "งานยากมักถูกเลื่อนไปก่อน แล้วมากองพร้อมกันตอนท้าย",
+    tip: "รับคำมั่นหลักทีละเรื่อง ทำให้จบก่อนแล้วค่อยรับเพิ่ม",
   },
   {
     key: "learn",
     label: "การเรียนรู้",
-    high: "คุณเปิดรับความรู้ใหม่เร็ว และชอบอัปเกรดตัวเองอยู่เสมอ",
-    mid: "คุณเรียนรู้ได้เมื่อเห็นประโยชน์ชัด แต่ไม่ไล่ทุกคอร์สพร้อมกัน",
-    low: "อาจยึดวิธีเดิมนานไป — ลองทดลองวิธีใหม่เล็ก ๆ แล้ววัดผลสั้น ๆ",
-    tip: "เลือกหัวข้อเดียวต่อเดือน แล้วลงมือใช้จริงอย่างน้อย 3 ครั้ง",
+    high: "รับของใหม่ไว ชอบหาอะไรมาอัปเกรดตัวเองเรื่อย ๆ",
+    mid: "เรียนเมื่อเห็นว่าได้ใช้จริง ไม่ไล่เก็บทุกอย่างพร้อมกัน",
+    low: "ถนัดวิธีเดิมจนไม่ค่อยอยากลองทางใหม่",
+    tip: "เลือกเรื่องเดียวต่อเดือน แล้วเอาไปใช้จริงให้ครบสามครั้ง",
   },
   {
     key: "flex",
     label: "ความยืดหยุ่นทางใจ",
-    high: "ใจคุณยืดได้ดี ฟื้นตัวจากแรงกดดันได้ และปรับแผนเมื่อสถานการณ์เปลี่ยน",
-    mid: "คุณยืดหยุ่นได้ในระดับพอใช้ โดยยังมีกรอบที่ทำให้ไม่หลุดโฟกัส",
-    low: "ใจอาจตึงเมื่อแผนพัง — ฝึกเว้นจังหวะหายใจก่อนตอบสนอง",
-    tip: "เมื่อเครียด ให้ตั้งคำถามว่า ‘มีทางอื่นอีกไหม’ อย่างน้อย 2 ทาง",
+    high: "เจอเรื่องกระทบแล้วฟื้นเร็ว แผนพังก็หาทางใหม่ได้",
+    mid: "ยืดหยุ่นได้พอตัว แต่ยังมีกรอบที่ทำให้ไม่หลุดโฟกัส",
+    low: "พอแผนไม่เป็นไปตามที่คิด ใจจะตึงและคิดวนอยู่นาน",
+    tip: "เวลาเครียด ถามตัวเองว่า ‘ยังมีทางอื่นอีกไหม’ ให้ได้อย่างน้อยสองทาง",
   },
 ] as const;
 
@@ -82,40 +89,40 @@ const SPECTRA = [
     left: "เก็บตัว",
     right: "เข้าสังคม",
     leftHigh:
-      "คุณเติมพลังจากความเงียบและพื้นที่ส่วนตัว การอยู่คนเดียวช่วยให้คิดชัด",
+      "คุณชาร์จแบตจากความเงียบ อยู่คนเดียวแล้วหัวโล่ง คิดอะไรออก",
     rightHigh:
-      "คุณเติมพลังจากผู้คน การคุยแลกเปลี่ยนช่วยเปิดไอเดียและความสัมพันธ์",
-    tip: "จัดสลับจังหวะ ‘คนเดียว / กับคน’ ให้ตรงกับงานวันนั้น",
+      "คุณชาร์จแบตจากคน คุยไปคุยมาแล้วไอเดียมาเอง",
+    tip: "งานที่ต้องคิดลึกเก็บไว้ตอนอยู่คนเดียว เรื่องที่ต้องตัดสินใจร่วมค่อยนัดคุย",
   },
   {
     key: "mind",
     left: "ใช้อารมณ์",
     right: "ใช้เหตุผล",
     leftHigh:
-      "คุณตัดสินใจด้วยความรู้สึกและสัญชาตญาณ ทำให้เห็นนัยที่ตัวเลขไม่บอก",
+      "คุณเชื่อความรู้สึกตัวเอง และมักจับอะไรได้ก่อนที่จะอธิบายเป็นเหตุผล",
     rightHigh:
-      "คุณพึ่งข้อมูลและเหตุผลชัด ช่วยลดการตัดสินใจพลาดจากอารมณ์ชั่วขณะ",
-    tip: "เรื่องใหญ่ให้เช็คทั้ง ‘รู้สึกยังไง’ และ ‘ข้อมูลบอกอะไร’ ก่อนลงมือ",
+      "คุณขอดูข้อมูลก่อน จึงไม่ค่อยพลาดเพราะอารมณ์ชั่ววูบ",
+    tip: "เรื่องใหญ่เช็คสองชั้น ทั้ง ‘ใจว่าไง’ และ ‘ข้อมูลว่าไง’ ค่อยลงมือ",
   },
   {
     key: "agency",
     left: "ประนีประนอม",
     right: "เป็นอิสระ",
     leftHigh:
-      "คุณเก่งเรื่องหาจุดร่วม ทำให้ความสัมพันธ์และทีมเดินต่อได้ราบรื่น",
+      "คุณหาจุดที่ทุกคนอยู่ร่วมกันได้ ความสัมพันธ์รอบตัวจึงไม่ค่อยสะดุด",
     rightHigh:
-      "คุณยึดทางของตัวเองชัด ไม่ยอมให้กรอบคนอื่นบีบจนเสียทิศ",
-    tip: "ยอมประนีประนอมเรื่องรอง แต่ยึดอิสระในเรื่องที่เป็นแก่นของคุณ",
+      "คุณถือทางของตัวเองไว้ ไม่ปล่อยให้ใครมาบีบจนเสียทิศ",
+    tip: "เรื่องรองยอมได้ไม่เสียหาย แต่เรื่องที่เป็นแกนของคุณ ยืนให้มั่น",
   },
   {
     key: "risk",
     left: "ชอบความมั่นคง",
     right: "ชอบความท้าทาย",
     leftHigh:
-      "คุณวางรากฐานและระบบได้ดี ชอบทางที่คาดเดาได้และคุมความเสี่ยง",
+      "คุณชอบทางที่คาดเดาได้ วางระบบและกันความเสี่ยงไว้ก่อนเสมอ",
     rightHigh:
-      "คุณตื่นกับโอกาสใหม่ ชอบทดลองและดันขอบเขตของตัวเอง",
-    tip: "เก็บฐานมั่นคงไว้ก้อนหนึ่ง แล้วเปิดโควต้าทดลองเล็ก ๆ เป็นระยะ",
+      "คุณตื่นตัวกับของใหม่ ได้ลองอะไรที่ยังไม่มีใครทำแล้วรู้สึกมีชีวิต",
+    tip: "กันฐานที่มั่นคงไว้ก้อนหนึ่ง แล้วแบ่งอีกก้อนเล็กไว้ให้ตัวเองได้ลอง",
   },
 ] as const;
 
@@ -124,46 +131,46 @@ const ELEMENTS = [
     key: "wood",
     label: "ไม้",
     color: "#22A06B",
-    high: "ธาตุไม้แรง ทำให้คุณเติบโตและขยายโอกาสได้ดี ชอบเริ่มต้นสิ่งใหม่และผลักดันให้เดินหน้า",
-    mid: "ธาตุไม้อยู่ในระดับพอดี ช่วยให้ปรับตัวและเรียนรู้ได้เมื่อมีเป้าหมายชัด",
-    low: "ธาตุไม่อ่อน คุณอาจลังเลเวลาต้องเริ่มใหม่ — ลองเปิดพื้นที่เล็ก ๆ ให้ตัวเองได้ทดลอง",
-    tip: "เติมไม้ด้วยการเรียนรู้อย่างสม่ำเสมอ และลงมือทีละก้าว",
+    high: "ธาตุไม้แรง คุณชอบเริ่มของใหม่ และดันให้มันโตต่อได้",
+    mid: "ธาตุไม้พอดี พอมีเป้าชัดก็ปรับตัวและเรียนรู้ได้เรื่อย ๆ",
+    low: "ธาตุไม้อ่อน เวลาต้องเริ่มใหม่มักลังเลอยู่นานกว่าจะขยับ",
+    tip: "เติมไม้ด้วยการเรียนรู้ให้สม่ำเสมอ แล้วลงมือทีละก้าวเล็ก ๆ",
   },
   {
     key: "fire",
     label: "ไฟ",
     color: "#E87A2E",
-    high: "ธาตุไฟเด่น พลังขับเคลื่อนสูง กล้าตัดสินใจ และจุดประกายคนรอบข้างได้เร็ว",
-    mid: "ธาตุไฟสมดุล ใช้ความร้อนในจังหวะสำคัญได้ดี โดยไม่ไหม้ตัวเองง่าย",
-    low: "ธาตุไฟเบา อาจขาดแรงส่งตอนเริ่ม — ตั้งเป้าหมายสั้น ๆ ที่เห็นผลเร็วจะช่วยจุดไฟ",
-    tip: "เติมไฟด้วยการลงมือเรื่องหลักให้จบ แล้วค่อยเปิดเรื่องใหม่",
+    high: "ธาตุไฟเด่น มีแรงขับ กล้าตัดสินใจ และจุดใจคนรอบตัวได้เร็ว",
+    mid: "ธาตุไฟพอดี ใช้ความร้อนตอนที่ต้องใช้ โดยไม่ไหม้ตัวเอง",
+    low: "ธาตุไฟเบา คิดไว้เยอะแต่แรงเริ่มไม่ค่อยมา",
+    tip: "เติมไฟด้วยการปิดเรื่องหลักให้จบหนึ่งเรื่อง ความรู้สึกว่าทำได้จะพาต่อ",
   },
   {
     key: "earth",
     label: "ดิน",
     color: "#C9A227",
-    high: "ธาตุดินแน่น สร้างความมั่นคง วางระบบ และรับผิดชอบได้ยาวนาน",
-    mid: "ธาตุดินพอดี ช่วยให้คุณยืนพื้นได้เมื่อสถานการณ์เปลี่ยน",
-    low: "ธาตุดินบาง อาจรู้สึกไร้รากเมื่อแผนพัง — สร้างกิจวัตรเล็ก ๆ ที่ทำซ้ำได้",
-    tip: "เติมดินด้วยวินัยเบา ๆ และการเก็บงานให้จบเป็นชุด",
+    high: "ธาตุดินแน่น อยู่กับอะไรได้นาน วางระบบและรับผิดชอบได้ยาว",
+    mid: "ธาตุดินพอดี ต่อให้สถานการณ์เปลี่ยน คุณก็ยังยืนพื้นได้",
+    low: "ธาตุดินบาง พอแผนพังจะรู้สึกไม่มีที่ยึด",
+    tip: "เติมดินด้วยกิจวัตรเล็ก ๆ ที่ทำซ้ำได้ทุกวัน ไม่ต้องใหญ่",
   },
   {
     key: "metal",
     label: "โลหะ",
     color: "#6B7A94",
-    high: "ธาตุโลหะคม มีมาตรฐานชัด ตัดใจและจัดระเบียบได้ดี",
-    mid: "ธาตุโลหะพอใช้ ช่วยคัดเลือกและตั้งขอบเขตเมื่อจำเป็น",
-    low: "ธาตุโลหะอ่อน อาจปล่อยมาตรฐานหลวมหรือตัดใจยาก — ฝึกตัดสินใจสั้น ๆ ทีละเรื่อง",
-    tip: "เติมโลหะด้วยการตั้งเกณฑ์ชัดก่อนรับงาน และปิดเรื่องที่ไม่จำเป็น",
+    high: "ธาตุโลหะคม มีมาตรฐานของตัวเอง ตัดสิ่งที่ไม่เอาได้เด็ดขาด",
+    mid: "ธาตุโลหะพอใช้ ตั้งขอบเขตและคัดของออกได้เมื่อจำเป็น",
+    low: "ธาตุโลหะอ่อน ปล่อยมาตรฐานหลวมและตัดใจยากกว่าคนอื่น",
+    tip: "เติมโลหะด้วยการตั้งเกณฑ์ให้ชัดก่อนรับงาน แล้วปิดเรื่องที่ไม่ไปไหนต่อ",
   },
   {
     key: "water",
     label: "น้ำ",
     color: "#2F8FBC",
-    high: "ธาตุน้ำลึก อ่านความรู้สึกและบรรยากาศได้ดี สัญชาตญาณคมเมื่อใจนิ่ง",
-    mid: "ธาตุน้ำพอดี ช่วยปรับอารมณ์และเชื่อมคนโดยไม่จมไปกับความรู้สึก",
-    low: "ธาตุน้ำเบา อาจรีบสรุปจากเหตุผลอย่างเดียว — เว้นจังหวะฟังใจก่อนตัดสินใจใหญ่",
-    tip: "เติมน้ำด้วยเวลาเงียบสั้น ๆ และการสังเกตความรู้สึกก่อนตอบรับ",
+    high: "ธาตุน้ำลึก อ่านอารมณ์คนและบรรยากาศได้ไว ยิ่งใจนิ่งยิ่งแม่น",
+    mid: "ธาตุน้ำพอดี เข้าใจความรู้สึกคนได้โดยไม่จมไปกับมัน",
+    low: "ธาตุน้ำเบา มักสรุปจากเหตุผลอย่างเดียวจนข้ามความรู้สึกไป",
+    tip: "เติมน้ำด้วยเวลาเงียบสั้น ๆ ในวัน แล้วฟังใจตัวเองก่อนตอบรับ",
   },
 ] as const;
 
@@ -306,10 +313,10 @@ function RadarChart({
   onSelect?: (index: number) => void;
 }) {
   const gid = useId().replace(/:/g, "");
-  const size = 280;
+  const size = 300;
   const cx = size / 2;
   const cy = size / 2;
-  const maxR = 96;
+  const maxR = 98;
   const n = values.length;
 
   const angleAt = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
@@ -327,11 +334,11 @@ function RadarChart({
     .join(" ");
 
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto w-full max-w-[300px]">
+    <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto w-full max-w-[320px]">
       <defs>
         <linearGradient id={`radar-fill-${gid}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="rgba(201,162,39,0.32)" />
-          <stop offset="100%" stopColor="rgba(123,95,212,0.18)" />
+          <stop offset="0%" stopColor="rgba(155,127,232,0.35)" />
+          <stop offset="100%" stopColor="rgba(123,95,212,0.16)" />
         </linearGradient>
       </defs>
 
@@ -359,7 +366,7 @@ function RadarChart({
             y2={p.y}
             stroke={
               i === selectedIndex
-                ? "rgba(160,126,26,0.45)"
+                ? "rgba(123,95,212,0.5)"
                 : "rgba(90,70,150,0.16)"
             }
             strokeWidth={i === selectedIndex ? 1.5 : 1}
@@ -370,14 +377,14 @@ function RadarChart({
       <polygon
         points={poly}
         fill={`url(#radar-fill-${gid})`}
-        stroke="#C9A227"
+        stroke="#7B5FD4"
         strokeWidth={2}
         strokeLinejoin="round"
       />
 
       {values.map((v, i) => {
         const p = point(i, (v.score / 100) * maxR);
-        const tip = point(i, maxR + 22);
+        const tip = point(i, maxR + 28);
         const selected = i === selectedIndex;
         return (
           <g
@@ -388,16 +395,16 @@ function RadarChart({
             <circle
               cx={tip.x}
               cy={tip.y + 4}
-              r={22}
+              r={26}
               fill="transparent"
             />
             <circle
               cx={p.x}
               cy={p.y}
-              r={selected ? 5 : 3.5}
-              fill="#C9A227"
+              r={selected ? 6 : 4}
+              fill="#7B5FD4"
               stroke={selected ? "#fff" : "none"}
-              strokeWidth={selected ? 2 : 0}
+              strokeWidth={selected ? 2.5 : 0}
             />
             <text
               x={tip.x}
@@ -405,17 +412,17 @@ function RadarChart({
               textAnchor="middle"
               dominantBaseline="middle"
               fill={selected ? "#241C4F" : "#3A3270"}
-              fontSize={9}
+              fontSize={11}
               fontWeight={selected ? 700 : 600}
             >
               {v.label}
             </text>
             <text
               x={tip.x}
-              y={tip.y + 12}
+              y={tip.y + 14}
               textAnchor="middle"
-              fill="#A07E1A"
-              fontSize={10}
+              fill={selected ? "#5B45B8" : "#6B6490"}
+              fontSize={12}
               fontWeight={700}
             >
               {v.score}
@@ -498,10 +505,10 @@ function AxisSwipeReader({
   return (
     <div className="mt-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
+        <p className="text-[13px] font-semibold tracking-[0.08em] text-[#5B45B8]">
           อ่านแกน · กดเรดาร์หรือปัด
         </p>
-        <p className="text-[12px] font-semibold tabular-nums text-[#6B6490]">
+        <p className="text-[13px] font-semibold tabular-nums text-[#6B6490]">
           {index + 1}/{axes.length}
         </p>
       </div>
@@ -529,7 +536,7 @@ function AxisSwipeReader({
               className="w-full min-w-full shrink-0 basis-full px-0.5"
             >
               <div
-                className="rounded-[14px] px-3.5 py-3"
+                className="rounded-[14px] px-3.5 py-3.5"
                 style={{
                   background: "rgba(255,255,255,0.42)",
                   border: "1px solid rgba(255,255,255,0.7)",
@@ -537,16 +544,16 @@ function AxisSwipeReader({
                   WebkitBackdropFilter: "blur(12px)",
                 }}
               >
-                <p className="text-[14px] font-semibold text-[#241C4F]">
+                <p className="text-[16px] font-semibold text-[#241C4F]">
                   {a.label} · {a.score}
                 </p>
-                <p className="mt-0.5 text-[11px] font-medium text-[#A07E1A]">
+                <p className="mt-1 text-[13px] font-medium text-[#5B45B8]">
                   {axisLevel(a.score)}
                 </p>
-                <p className="mt-2 text-[13px] leading-[1.7] text-[#3A3270]">
+                <p className="mt-2.5 text-[14px] leading-[1.7] text-[#3A3270]">
                   {axisReading(a)}
                 </p>
-                <p className="mt-2 text-[12px] leading-snug text-[#5E5688]">
+                <p className="mt-2 text-[13px] leading-snug text-[#5E5688]">
                   แนวทาง: {a.tip}
                 </p>
               </div>
@@ -562,9 +569,9 @@ function AxisSwipeReader({
             type="button"
             onClick={() => goTo(i)}
             className={cn(
-              "rounded-full px-2 py-1 text-[10px] font-semibold outline-none transition",
+              "rounded-full px-2.5 py-1 text-[12px] font-semibold outline-none transition",
               i === index
-                ? "bg-[#C9A227]/20 text-[#8F6F14] ring-1 ring-[#C9A227]/45"
+                ? "bg-[#9B7FE8]/22 text-[#5B45B8] ring-1 ring-[#9B7FE8]/45"
                 : "bg-[#7B6BB0]/10 text-[#5E5688]"
             )}
           >
@@ -609,26 +616,22 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
                 : "hover:bg-[#7B6BB0]/06"
             )}
           >
-            <div className="flex items-center justify-between text-[12px]">
-              <span className="font-medium text-[#241C4F]">
+            <div className="flex items-center justify-between text-[13px]">
+              <span className="font-semibold text-[#241C4F]">
                 {item.left} {item.leftPct}%
               </span>
-              <span className="font-medium text-[#5E5688]">
+              <span className="font-semibold text-[#5E5688]">
                 {item.right} {r}%
               </span>
             </div>
-            <div className="relative h-2 rounded-full bg-[#7B6BB0]/16">
+            <div className="dd-glass-tube relative h-3.5 rounded-full">
               <div
-                className="absolute inset-y-0 left-0 rounded-full"
+                className="dd-glass-tube-fill absolute inset-y-[2px] left-[2px] rounded-full"
                 style={{
-                  width: `${item.leftPct}%`,
+                  width: `calc(${item.leftPct}% - 4px)`,
                   background:
-                    "linear-gradient(90deg, rgba(201,162,39,0.95), rgba(232,170,70,0.7))",
+                    "linear-gradient(90deg, rgba(155,127,232,0.55) 0%, rgba(196,176,245,0.72) 55%, rgba(232,201,106,0.55) 100%)",
                 }}
-              />
-              <span
-                className="absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-[#C9A227] ring-2 ring-white"
-                style={{ left: `calc(${item.leftPct}% - 7px)` }}
               />
             </div>
           </button>
@@ -637,10 +640,10 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
 
       <div>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
+          <p className="text-[13px] font-semibold tracking-[0.08em] text-[#5B45B8]">
             อ่านสเปกตรัม · กดหรือปัด
           </p>
-          <p className="text-[12px] font-semibold tabular-nums text-[#6B6490]">
+          <p className="text-[13px] font-semibold tabular-nums text-[#6B6490]">
             {index + 1}/{items.length}
           </p>
         </div>
@@ -671,7 +674,7 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
                   className="w-full min-w-full shrink-0 basis-full px-0.5"
                 >
                   <div
-                    className="rounded-[14px] px-3.5 py-3"
+                    className="rounded-[14px] px-3.5 py-3.5"
                     style={{
                       background: "rgba(255,255,255,0.42)",
                       border: "1px solid rgba(255,255,255,0.7)",
@@ -679,16 +682,16 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
                       WebkitBackdropFilter: "blur(12px)",
                     }}
                   >
-                    <p className="text-[14px] font-semibold text-[#241C4F]">
+                    <p className="text-[16px] font-semibold text-[#241C4F]">
                       {item.left} {item.leftPct}% · {item.right} {rp}%
                     </p>
-                    <p className="mt-0.5 text-[11px] font-medium text-[#A07E1A]">
+                    <p className="mt-1 text-[13px] font-medium text-[#5B45B8]">
                       เอียงไปทาง{leftSide ? item.left : item.right}
                     </p>
-                    <p className="mt-2 text-[13px] leading-[1.7] text-[#3A3270]">
+                    <p className="mt-2.5 text-[14px] leading-[1.7] text-[#3A3270]">
                       {leftSide ? item.leftHigh : item.rightHigh}
                     </p>
-                    <p className="mt-2 text-[12px] leading-snug text-[#5E5688]">
+                    <p className="mt-2 text-[13px] leading-snug text-[#5E5688]">
                       แนวทาง: {item.tip}
                     </p>
                   </div>
@@ -709,7 +712,7 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
               style={{
                 width: i === index ? 18 : 8,
                 background:
-                  i === index ? "#C9A227" : "rgba(123,107,176,0.28)",
+                  i === index ? "#9B7FE8" : "rgba(123,107,176,0.28)",
               }}
             />
           ))}
@@ -819,23 +822,22 @@ function ElementSwipeReader({
               )}
             >
               <span
-                className="w-10 shrink-0 text-[13px] font-semibold"
+                className="w-11 shrink-0 text-[14px] font-semibold"
                 style={{ color: el.color }}
               >
                 {el.label}
               </span>
-              <div className="relative h-2.5 min-w-0 flex-1 rounded-full bg-[#7B6BB0]/16">
+              <div className="dd-glass-tube relative h-3.5 min-w-0 flex-1 rounded-full">
                 <div
-                  className="absolute inset-y-0 left-0 rounded-full transition-[width]"
+                  className="dd-glass-tube-fill absolute inset-y-[2px] left-[2px] rounded-full transition-[width]"
                   style={{
-                    width: `${Math.max(el.pct, 2)}%`,
-                    background: el.color,
-                    opacity: selected ? 1 : 0.85,
-                    minWidth: el.pct > 0 ? 6 : 0,
+                    width: `calc(${Math.max(el.pct, 2)}% - 4px)`,
+                    background: `linear-gradient(90deg, ${el.color}99 0%, ${el.color}cc 55%, ${el.color}88 100%)`,
+                    minWidth: el.pct > 0 ? 8 : 0,
                   }}
                 />
               </div>
-              <span className="w-10 shrink-0 text-right text-[12px] font-medium tabular-nums text-[#3A3270]">
+              <span className="w-11 shrink-0 text-right text-[13px] font-semibold tabular-nums text-[#3A3270]">
                 {el.pct}%
               </span>
             </button>
@@ -845,7 +847,7 @@ function ElementSwipeReader({
 
       <div className="mt-3.5">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
+          <p className="text-[13px] font-semibold tracking-[0.08em] text-[#5B45B8]">
             อ่านธาตุ · กดหรือปัด
           </p>
           <p className="text-[12px] font-semibold tabular-nums text-[#6B6490]">
@@ -936,16 +938,44 @@ function ElementSwipeReader({
 export function FortunePremiumSelfDeep({
   seed,
   nickname,
+  birthDate = "2000-01-01",
+  birthTime,
+  focus,
+  gender,
   className,
 }: {
   seed: string;
   nickname: string;
+  birthDate?: string;
+  birthTime?: string;
+  focus?: FortuneFocus;
+  gender?: string;
   className?: string;
 }) {
   const data = useMemo(() => {
+    const analysis = analyzeFortune({
+      birthDate,
+      nickname,
+      birthTime,
+      focus,
+      gender,
+    });
+    const byId = Object.fromEntries(
+      analysis.aspects.map((a) => [a.id, a.score])
+    ) as Record<string, number>;
+
+    const axisScores: Record<string, number> = {
+      self: pctFromScore(analysis.dayScore),
+      express: pctFromScore(byId.love ?? analysis.dayScore),
+      money: pctFromScore(byId.money ?? analysis.dayScore),
+      duty: pctFromScore(byId.work ?? analysis.dayScore),
+      learn: pctFromScore(analysis.monthScore),
+      flex: pctFromScore(byId.health ?? analysis.yearScore),
+    };
+
     const axes: AxisRow[] = AXES.map((a) => ({
       ...a,
-      score: scoreFrom(seed, a.key),
+      score: axisScores[a.key] ?? scoreFrom(analysis.seed, a.key),
     }));
     const top = [...axes].sort((a, b) => b.score - a.score)[0]!;
     const topIdx = axes.findIndex((a) => a.key === top.key);
@@ -953,25 +983,36 @@ export function FortunePremiumSelfDeep({
     const spectra: SpectrumRowData[] = [
       {
         ...SPECTRA[0]!,
-        leftPct: scoreFrom(seed, "intro", 55, 88),
+        leftPct: pctFromScore(12 - (byId.love ?? 6) + 1, 40, 85),
       },
       {
         ...SPECTRA[1]!,
-        leftPct: scoreFrom(seed, "emotion", 25, 55),
+        leftPct: pctFromScore(byId.health ?? 6, 25, 70),
       },
       {
         ...SPECTRA[2]!,
-        leftPct: scoreFrom(seed, "compromise", 40, 75),
+        leftPct: pctFromScore(byId.work ?? 6, 35, 80),
       },
       {
         ...SPECTRA[3]!,
-        leftPct: scoreFrom(seed, "stable", 55, 90),
+        leftPct: pctFromScore(analysis.yearScore, 40, 88),
       },
     ];
 
+    const elementBoost: Record<string, string> = {
+      ไฟ: "fire",
+      ดิน: "earth",
+      ลม: "wood",
+      น้ำ: "water",
+    };
+    const boostKey = elementBoost[analysis.zodiac.element] ?? "earth";
+
     const rawElements = ELEMENTS.map((e) => ({
       ...e,
-      weight: hashSeed(`${seed}-el-${e.key}`) % 100,
+      weight:
+        (hashSeed(`${analysis.seed}-el-${e.key}`) % 100) +
+        (e.key === boostKey ? 40 : 0) +
+        (e.key === "metal" ? Math.round(analysis.yearScore * 2) : 0),
     }));
     const sum = rawElements.reduce((s, e) => s + e.weight, 0) || 1;
     let elements = rawElements.map((e) => ({
@@ -992,7 +1033,7 @@ export function FortunePremiumSelfDeep({
       elements,
       strongest,
     };
-  }, [seed]);
+  }, [seed, birthDate, nickname, birthTime, focus, gender]);
 
   const [axisIndex, setAxisIndex] = useState(data.topIdx);
   const name = nickname.trim() || "คุณ";
@@ -1005,10 +1046,10 @@ export function FortunePremiumSelfDeep({
     <div className={cn("space-y-3", className)}>
       <section className="fortune-glass rounded-[20px] px-4 py-4">
         <div className="text-center">
-          <p className="text-[11px] font-semibold tracking-[0.16em] text-[#A07E1A]">
+          <p className="text-[12px] font-semibold tracking-[0.14em] text-[#5B45B8]">
             PREMIUM · SELF MAP
           </p>
-          <h2 className="font-sacred mt-1.5 text-[1.4rem] leading-snug text-[#241C4F]">
+          <h2 className="font-sacred mt-1.5 text-[1.45rem] leading-snug text-[#241C4F]">
             คุณ{name}เป็นคนแบบไหนกันนะ
           </h2>
         </div>
@@ -1019,7 +1060,7 @@ export function FortunePremiumSelfDeep({
             selectedIndex={axisIndex}
             onSelect={setAxisIndex}
           />
-          <p className="mt-1 px-2 text-center text-[12px] leading-relaxed text-[#5E5688]">
+          <p className="mt-2 px-2 text-center text-[13px] leading-relaxed text-[#5E5688]">
             6 แกนอุปนิสัย · กดจุดบนเรดาร์หรือปัดอ่านทีละแกน
           </p>
           <AxisSwipeReader
@@ -1031,17 +1072,17 @@ export function FortunePremiumSelfDeep({
       </section>
 
       <section className="fortune-glass rounded-[20px] px-4 py-4">
-        <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
+        <p className="text-[13px] font-semibold tracking-[0.1em] text-[#5B45B8]">
           สเปกตรัมอุปนิสัย
         </p>
         <SpectrumSwipeReader items={data.spectra} />
       </section>
 
       <section className="fortune-glass rounded-[20px] px-4 py-4">
-        <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
+        <p className="text-[13px] font-semibold tracking-[0.1em] text-[#5B45B8]">
           ห้าธาตุในตัวคุณ
         </p>
-        <h3 className="mt-1 text-[15px] font-semibold text-[#241C4F]">
+        <h3 className="mt-1 text-[16px] font-semibold text-[#241C4F]">
           การกระจายห้าธาตุ
         </h3>
 
@@ -1050,8 +1091,8 @@ export function FortunePremiumSelfDeep({
           initialKey={data.strongest.key}
         />
 
-        <div className="mt-4 flex items-center justify-center gap-1.5 border-t border-[#7B6BB0]/14 pt-3 text-[11px] text-[#6B6490]">
-          <Sparkles className="h-3 w-3 text-[#A07E1A]" strokeWidth={1.8} />
+        <div className="mt-4 flex items-center justify-center gap-1.5 border-t border-[#7B6BB0]/14 pt-3 text-[12px] text-[#6B6490]">
+          <Sparkles className="h-3.5 w-3.5 text-[#7B5FD4]" strokeWidth={1.8} />
           ส่วนพรีเมียมท้ายรายงาน · วิเคราะห์เฉพาะคุณ
         </div>
       </section>

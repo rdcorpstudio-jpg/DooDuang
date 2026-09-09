@@ -3,12 +3,40 @@
 import { usePathname } from "next/navigation";
 
 /**
- * App sky — home uses looping hero video; other routes keep Guanyin still.
+ * App sky — crisp on top, light clear blur down the page (no white wash).
+ * Free reading + premium share celestial city; home keeps video; else Guanyin sky.
  */
+
+const GUANYIN_SKY = {
+  backgroundImage: "url(/images/bg/app-sky.jpg?v=guanyin2)",
+  backgroundSize: "cover" as const,
+  backgroundPosition: "55% 0%",
+  backgroundRepeat: "no-repeat" as const,
+};
+
+const CELESTIAL_SKY = {
+  backgroundImage: "url(/images/bg/celestial-city.jpg?v=2)",
+  backgroundSize: "cover" as const,
+  backgroundPosition: "50% 18%",
+  backgroundRepeat: "no-repeat" as const,
+};
+
+/** Free result (/reading, /r/…) + premium use the same celestial art. */
+function useCelestialSky(pathname: string) {
+  return (
+    pathname.startsWith("/premium") ||
+    pathname.startsWith("/reading") ||
+    pathname.startsWith("/r/") ||
+    pathname.startsWith("/preview/result") ||
+    pathname.startsWith("/preview/premium")
+  );
+}
 
 export function StarfieldBackground() {
   const pathname = usePathname() || "/";
   const isHome = pathname === "/";
+  const celestial = useCelestialSky(pathname);
+  const sky = celestial ? CELESTIAL_SKY : GUANYIN_SKY;
 
   return (
     <div
@@ -29,16 +57,21 @@ export function StarfieldBackground() {
           <source src="/videos/home-hero.mp4?v=wind0908" type="video/mp4" />
         </video>
       ) : (
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url(/images/bg/app-sky.jpg?v=guanyin2)",
-            backgroundSize: "cover",
-            backgroundPosition: "55% 0%",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
+        <div className="absolute inset-0" style={sky} />
       )}
+
+      {/* Clear soft blur only — fades in from top → bottom, no white veil */}
+      <div
+        className="absolute inset-0 origin-center scale-[1.1]"
+        style={{
+          ...(isHome ? GUANYIN_SKY : sky),
+          filter: "blur(10px) saturate(1.02)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
+        }}
+      />
     </div>
   );
 }

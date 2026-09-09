@@ -66,5 +66,7 @@ export function AnimatedPage({
 
 /** Soft route enter used by layout templates. */
 export function PageTransition({ children }: { children: ReactNode }) {
-  return <div className="page-transition h-full">{children}</div>;
+  return (
+    <div className="page-transition h-full min-h-0">{children}</div>
+  );
 }

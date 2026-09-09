@@ -1,57 +1,61 @@
 "use client";
 
-import { ChevronRight, Gem } from "lucide-react";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-/** Horizontal premium CTA — matches features mockup strip */
+/** Gold premium unlock CTA — shared on free result surfaces */
 export function FortuneUnlockBanner({
   unlocked = false,
   unlocking = false,
   onUnlock,
+  showCountdown = false,
   className,
 }: {
   unlocked?: boolean;
   unlocking?: boolean;
   onUnlock?: () => void;
+  showCountdown?: boolean;
   className?: string;
 }) {
   if (unlocked) return null;
 
   return (
-    <section
-      className={cn(
-        "fortune-glass flex items-center gap-3 rounded-[18px] px-3 py-3",
-        className
-      )}
-    >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#B9A4F0]/35 ring-1 ring-[#9B7FE8]/3">
-        <Gem className="h-5 w-5 text-[#7B5FD4]" strokeWidth={1.8} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[14px] font-semibold leading-snug text-[#2C2458]">
-          เห็นจังหวะชีวิตได้ไกลกว่าเดิม
-        </p>
-        <p className="mt-0.5 text-[12px] leading-snug text-[#5E5688]">
-          เจาะลึกเส้นทางชีวิต 12 ปี พร้อมคำแนะนำเฉพาะคุณ
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={onUnlock}
-        disabled={!onUnlock || unlocking}
-        className="inline-flex shrink-0 items-center gap-0.5 rounded-full px-3.5 py-2.5 text-[12px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/55 disabled:opacity-60"
+    <section className={cn("space-y-2", className)}>
+      {showCountdown ? <PremiumOfferCountdown compact /> : null}
+      <div
+        className="no-sky-lift flex items-center gap-2.5 rounded-[14px] px-3 py-2.5 ring-1 ring-[#E8C547]/40"
         style={{
           background:
-            "linear-gradient(135deg, #C4B0F5 0%, #9B7FE8 45%, #7B5FD4 100%)",
-          boxShadow: "0 6px 16px rgba(123,95,212,0.28)",
+            "linear-gradient(118deg, #3D2E0A 0%, #6B5214 38%, #A07E1A 72%, #8A6A12 100%)",
+          boxShadow:
+            "0 10px 22px rgba(122, 92, 18, 0.28), inset 0 1px 0 rgba(255, 236, 180, 0.35)",
         }}
       >
-        {unlocking ? "…" : `ปลดล็อกพรีเมียม · ${FORTUNE_UNLOCK_PRICE} บาท`}
-        {!unlocking ? (
-          <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.4} />
-        ) : null}
-      </button>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+          <FortuneIcon name="finance" size={40} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-semibold leading-snug text-[#FFF8E7]">
+            เห็นจังหวะชีวิตได้ไกลกว่าเดิม
+          </p>
+          <p className="mt-0.5 text-[11px] leading-snug text-[#F5E6B8]/82">
+            เจาะลึกเส้นทางชีวิต 12 ปี พร้อมคำแนะนำเฉพาะคุณ
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onUnlock}
+          disabled={!onUnlock || unlocking}
+          className="dd-gold-glass-btn inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-2 text-[11px] font-semibold text-[#5C4810] outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/45 disabled:opacity-60"
+        >
+          {unlocking
+            ? "…"
+            : `ปลดล็อกพรีเมียม · ${FORTUNE_UNLOCK_PRICE} บาท`}
+          {!unlocking ? <FortuneIcon name="arrow-right" size={20} /> : null}
+        </button>
+      </div>
     </section>
   );
 }

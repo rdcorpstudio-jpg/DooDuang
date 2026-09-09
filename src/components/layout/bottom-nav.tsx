@@ -60,7 +60,7 @@ export function BottomNav() {
         paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
       }}
     >
-      <div className="mx-auto grid max-w-[480px] grid-cols-4 gap-0.5 px-1.5 pt-1.5">
+      <div className="mx-auto grid max-w-[480px] grid-cols-4 gap-0.5 px-1.5 pt-2 pb-0.5">
         {TABS.map(({ href, label, icon, match }) => {
           const active = match(pathname);
 
@@ -69,20 +69,21 @@ export function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                "relative flex flex-col items-center gap-0.5 rounded-2xl px-1 py-1 outline-none transition-all duration-200",
-                "active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35",
+                "fortune-tap relative flex min-h-[3.35rem] flex-col items-center gap-0.5 rounded-2xl px-1 py-1.5 outline-none transition-all duration-200",
+                "focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35",
                 active ? "text-[#5B45B8]" : "text-[#8A82B0]"
               )}
             >
               <span
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full transition",
-                  active && "bg-[#7B5FD4]/18 ring-1 ring-[#9B7FE8]/35"
+                  "flex h-11 w-11 items-center justify-center rounded-full transition duration-200",
+                  active &&
+                    "dd-nav-icon-pop bg-[#7B5FD4]/18 ring-1 ring-[#9B7FE8]/35"
                 )}
               >
                 <FortuneIcon
                   name={icon}
-                  size={active ? 30 : 28}
+                  size={active ? 32 : 30}
                   className={cn(
                     "transition duration-200",
                     active ? "opacity-100" : "opacity-75"
@@ -91,7 +92,7 @@ export function BottomNav() {
               </span>
               <span
                 className={cn(
-                  "text-[10px] tracking-wide",
+                  "text-[13px] leading-tight tracking-wide",
                   active ? "font-semibold text-[#5B45B8]" : "font-medium"
                 )}
               >

@@ -1,3 +1,5 @@
+import { assignPremiumWallpaperIfNeeded } from "@/lib/fortune/premium-wallpaper";
+
 /** Global entitlement — premium tab, face, palm, report */
 export const PREMIUM_UNLOCK_KEY = "dooduang-premium-unlocked";
 
@@ -38,4 +40,6 @@ export function setPremiumUnlocked(profile?: {
   } catch {
     /* ignore */
   }
+  // One random HQ wallpaper per premium unlock (kept stable after first assign)
+  assignPremiumWallpaperIfNeeded();
 }

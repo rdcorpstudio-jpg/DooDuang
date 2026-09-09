@@ -159,13 +159,7 @@ export function TarotPrayerSheet({
           <button
             type="button"
             onClick={onReady}
-            className="no-sky-lift mt-6 inline-flex h-12 w-full items-center justify-center rounded-full text-[15px] font-semibold text-white outline-none transition active:scale-[0.99]"
-            style={{
-              background:
-                "linear-gradient(90deg, #6A48C8 0%, #8B6AD8 52%, #B29AEF 100%)",
-              boxShadow:
-                "0 12px 28px rgba(106,72,200,0.34), inset 0 1px 0 rgba(255,255,255,0.35)",
-            }}
+            className="no-sky-lift dd-gold-glass-btn mt-6 inline-flex h-12 w-full items-center justify-center rounded-full text-[15px] font-semibold text-[#5C4810] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/45"
           >
             พร้อมแล้ว · ไปเปิดไพ่
           </button>
