@@ -7,6 +7,7 @@ import {
   ChartNoAxesColumn,
   Lightbulb,
   Lock,
+  Star,
   UserRound,
 } from "lucide-react";
 import { AstroHeroOrb } from "@/components/home/astro-hero-orb";
@@ -19,6 +20,11 @@ const FEATURES = [
   { label: "จังหวะชีวิต", Icon: ChartNoAxesColumn },
   { label: "คำแนะนำ", Icon: Lightbulb },
 ] as const;
+
+const HOME_RATING = {
+  score: 4.9,
+  reviews: 75174,
+} as const;
 
 function Reveal({
   visible,
@@ -98,6 +104,33 @@ export function IntroScreen() {
           <p className="mt-1.5 text-[13px] leading-snug text-[#6B6490]">
             ค้นพบแนวทางเรื่องงาน เงิน และความรัก
           </p>
+
+          <div
+            className="no-sky-lift mx-auto mt-3.5 inline-flex max-w-full items-center gap-2 rounded-full px-3.5 py-1.5"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(44,36,88,0.88) 0%, rgba(58,47,107,0.92) 100%)",
+              boxShadow: "0 8px 20px rgba(58,47,107,0.22)",
+            }}
+            aria-label={`คะแนน ${HOME_RATING.score} จากจำนวนรีวิวสะสม ${HOME_RATING.reviews.toLocaleString("th-TH")} รายการ`}
+          >
+            <span className="flex items-center gap-0.5" aria-hidden>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className="h-3 w-3 fill-[#F0B429] text-[#F0B429]"
+                  strokeWidth={0}
+                />
+              ))}
+            </span>
+            <span className="text-[12px] font-bold tabular-nums text-white">
+              {HOME_RATING.score.toFixed(1)}
+            </span>
+            <span className="h-3 w-px shrink-0 bg-white/35" aria-hidden />
+            <span className="truncate text-[11px] font-semibold text-white/95">
+              จำนวนรีวิวสะสม {HOME_RATING.reviews.toLocaleString("th-TH")} รายการ
+            </span>
+          </div>
         </Reveal>
 
         <Reveal
