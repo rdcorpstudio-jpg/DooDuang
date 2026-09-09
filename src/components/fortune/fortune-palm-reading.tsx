@@ -73,8 +73,12 @@ export function FortunePalmReading({
       await new Promise((r) => setTimeout(r, 700));
       setPack(next);
       setStep("result");
-    } catch {
-      setError("วิเคราะห์รูปไม่สำเร็จ ลองถ่ายใหม่ในแสงที่ดีกว่า");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "วิเคราะห์ด้วย AI ไม่สำเร็จ ลองใหม่อีกครั้ง"
+      );
       setStep("ready");
     }
   }

@@ -3,6 +3,15 @@ import type {
   PalmReadingPack,
 } from "@/lib/fortune/scan/types";
 
+export class AiScanError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = "AiScanError";
+    this.code = code;
+  }
+}
+
 async function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -12,33 +21,65 @@ async function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
-/** Call server OpenAI vision scan. Returns null if unavailable / failed. */
+function messageForScanFailure(status: number, code?: string, error?: string) {
+  if (status === 503 || code === "NO_API_KEY") {
+    return "ยังไม่ได้ตั้งค่า OPENAI_API_KEY บนเซิร์ฟเวอร์";
+  }
+  if (status === 413) {
+    return error || "รูปใหญ่เกินไป ลองถ่ายใหม่";
+  }
+  if (status === 400) {
+    return error || "รูปไม่ถูกต้อง";
+  }
+  if (status === 502 || code === "AI_FAILED") {
+    return "วิเคราะห์ด้วย AI ไม่สำเร็จ ลองใหม่อีกครั้ง";
+  }
+  return error || "เชื่อมต่อ AI ไม่สำเร็จ";
+}
+
+/** Call server OpenAI vision scan. Throws if unavailable / failed. */
 export async function requestAiScanPack(
   mode: "face",
   files: File | File[]
-): Promise<FaceReadingPack | null>;
+): Promise<FaceReadingPack>;
 export async function requestAiScanPack(
   mode: "palm",
   files: File | File[]
-): Promise<PalmReadingPack | null>;
+): Promise<PalmReadingPack>;
 export async function requestAiScanPack(
   mode: "face" | "palm",
   files: File | File[]
-): Promise<FaceReadingPack | PalmReadingPack | null> {
+): Promise<FaceReadingPack | PalmReadingPack> {
+  const list = Array.isArray(files) ? files : [files];
+  const imageDataUrls = await Promise.all(list.map(fileToDataUrl));
+  let res: Response;
   try {
-    const list = Array.isArray(files) ? files : [files];
-    const imageDataUrls = await Promise.all(list.map(fileToDataUrl));
-    const res = await fetch("/api/fortune/scan", {
+    res = await fetch("/api/fortune/scan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mode, imageDataUrls }),
     });
-    if (!res.ok) return null;
-    const data = (await res.json()) as {
-      pack?: FaceReadingPack | PalmReadingPack;
-    };
-    return data.pack ?? null;
   } catch {
-    return null;
+    throw new AiScanError("เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ");
   }
+
+  let data: {
+    pack?: FaceReadingPack | PalmReadingPack;
+    error?: string;
+    code?: string;
+  } = {};
+  try {
+    data = (await res.json()) as typeof data;
+  } catch {
+    throw new AiScanError("เซิร์ฟเวอร์ตอบกลับผิดพลาด");
+  }
+
+  if (!res.ok || !data.pack) {
+    throw new AiScanError(
+      messageForScanFailure(res.status, data.code, data.error),
+      data.code
+    );
+  }
+
+  return data.pack;
 }
