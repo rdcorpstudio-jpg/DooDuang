@@ -2295,6 +2295,33 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   transition: width 90ms linear;
 }
 
+/* Account / dashboard route loading */
+@keyframes account-load-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes account-load-bar {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+.account-load-ring {
+  border: 2.5px solid rgba(155, 127, 232, 0.22);
+  border-top-color: #9b7fe8;
+  border-right-color: rgba(201, 162, 39, 0.85);
+  animation: account-load-spin 0.85s linear infinite;
+}
+
+.account-load-bar {
+  animation: account-load-bar 1.15s ease-in-out infinite;
+}
+
 @keyframes dd-soft-shimmer {
   0% {
     background-position: 0% 50%;
