@@ -9,7 +9,7 @@ export const PREMIUM_UNLOCK = {
   description: `ปลดล็อกเนื้อหาพรีเมียมครบ ${FORTUNE_PACKAGE_MONTHS} เดือน`,
 } as const;
 
-/** Single paid product — 3-month premium package via STRIPE_PRICE_STARTER */
+/** Single paid product — 1-month premium package via STRIPE_PRICE_STARTER */
 export const CREDIT_PACKAGES = [
   {
     id: "starter",

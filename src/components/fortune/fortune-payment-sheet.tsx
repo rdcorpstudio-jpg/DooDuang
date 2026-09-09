@@ -20,7 +20,7 @@ type SessionUser = {
 };
 
 const PERKS = [
-  `ใช้งานเต็ม ${FORTUNE_PACKAGE_MONTHS} เดือน · เฉลี่ย ${Math.round(FORTUNE_UNLOCK_PRICE / FORTUNE_PACKAGE_MONTHS)} บาท/เดือน`,
+  `ใช้งานพรีเมียม ${FORTUNE_PACKAGE_MONTHS} เดือน`,
   "ปฏิทินฤกษ์ 12 ปี · จังหวะชีวิตรายเดือน/รายปี",
   "แผนที่ตัวตน · ราศีเชิงลึก · งานเงินรักฉบับเต็ม",
   "โหงวเฮ้ง · ลายมือ · ดวงคู่ · วอลเปเปอร์มงคล",
@@ -143,7 +143,10 @@ export function FortunePaymentSheet({
   if (!open) return null;
   if (!isPage && !isInline && !host) return null;
 
-  const monthly = Math.round(FORTUNE_UNLOCK_PRICE / FORTUNE_PACKAGE_MONTHS);
+  const monthly =
+    FORTUNE_PACKAGE_MONTHS > 1
+      ? Math.round(FORTUNE_UNLOCK_PRICE / FORTUNE_PACKAGE_MONTHS)
+      : null;
 
   const body = (
     <div
@@ -189,7 +192,9 @@ export function FortunePaymentSheet({
         </p>
       </div>
       <p className="mt-1.5 text-[12px] text-[#7A72A0]">
-        เฉลี่ย {monthly} บาท/เดือน
+        {monthly !== null
+          ? `เฉลี่ย ${monthly} บาท/เดือน`
+          : `ใช้งานได้ ${FORTUNE_PACKAGE_MONTHS} เดือน`}
       </p>
 
       <div className="mx-auto mt-4 max-w-[19rem] border-y border-[#7B6BB0]/14 py-3.5">

@@ -35,7 +35,7 @@ import {
   writeFortuneProfile,
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
-import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import { getPremiumUnlockedUntil, isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -116,6 +116,7 @@ export function AccountDashboard({
   const router = useRouter();
   const [profile, setProfile] = useState<FortuneUserProfile | null>(null);
   const [premium, setPremium] = useState(false);
+  const [premiumUntil, setPremiumUntil] = useState<Date | null>(null);
   const [editing, setEditing] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -137,6 +138,7 @@ export function AccountDashboard({
           : null
       )
     );
+    setPremiumUntil(getPremiumUnlockedUntil());
     if (loaded) {
       setDraft({
         realName: loaded.realName,
@@ -304,6 +306,13 @@ export function AccountDashboard({
             </p>
             <p className="text-[11px] text-[#8A82B0]">
               {FORTUNE_UNLOCK_PRICE} บาท
+              {premium && premiumUntil
+                ? ` · ถึง ${new Intl.DateTimeFormat("th-TH", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  }).format(premiumUntil)}`
+                : null}
             </p>
           </div>
           <Link
