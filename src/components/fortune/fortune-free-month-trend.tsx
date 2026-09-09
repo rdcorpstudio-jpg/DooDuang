@@ -592,7 +592,7 @@ function UnlockedTwelveYearTrend({
                 </p>
               </div>
               <span
-                className="rounded-full px-3 py-1.5 text-[14px] font-semibold tabular-nums"
+                className="no-sky-lift rounded-full px-3 py-1.5 text-[14px] font-semibold tabular-nums"
                 style={{
                   color: scoreColor(activeMonth.score),
                   background: scoreBadgeBg(activeMonth.score),
@@ -878,7 +878,7 @@ function FreeMonthTrendTeaser({
             </p>
           </div>
             <span
-              className="rounded-full px-3 py-1.5 text-[14px] font-semibold tabular-nums"
+              className="no-sky-lift rounded-full px-3 py-1.5 text-[14px] font-semibold tabular-nums"
               style={{
                 color: scoreColor(active.score),
                 background: scoreBadgeBg(active.score),
