@@ -441,10 +441,6 @@ function PalmResult({
     water: "ธาตุน้ำ",
   } as const;
   const elementTitle = ELEMENT_TITLE_TH[result.nature] ?? "ธาตุมือ";
-  const freePersonality =
-    natureCopy.personality.length > 90
-      ? `${natureCopy.personality.slice(0, 90).trim()}…`
-      : natureCopy.personality;
 
   return (
     <div className="mt-5 space-y-3 pb-4">
@@ -492,7 +488,7 @@ function PalmResult({
             {elementTitle}
           </p>
           <p className="mt-1 text-[12px] leading-relaxed text-[#5E5688]">
-            {unlocked ? natureCopy.strength : freePersonality}
+            {unlocked ? natureCopy.strength : natureCopy.personality}
           </p>
           <div className="mt-2 flex items-center justify-between gap-2">
             <p className="text-[11px] text-[#5E5688]">ความชัดของสแกน</p>
@@ -515,7 +511,7 @@ function PalmResult({
           <ExpandableBody text={natureCopy.personality} />
         ) : (
           <p className="mt-1 text-[13px] leading-[1.75] text-[#3A3270]">
-            {freePersonality}
+            {natureCopy.personality}
           </p>
         )}
       </div>

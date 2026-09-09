@@ -478,10 +478,6 @@ function FaceResult({
 }) {
   const { result, shapeLabel, shapeCopy, aspects } = pack;
   const clarity = result.metrics.clarity;
-  const freeBody =
-    shapeCopy.body.length > 90
-      ? `${shapeCopy.body.slice(0, 90).trim()}…`
-      : shapeCopy.body;
 
   return (
     <div className="mt-5 space-y-3 pb-4">
@@ -581,7 +577,7 @@ function FaceResult({
           <ExpandableBody text={shapeCopy.body} />
         ) : (
           <p className="mt-1 text-[13px] leading-[1.75] text-[#3A3270]">
-            {freeBody}
+            {shapeCopy.body}
           </p>
         )}
       </div>

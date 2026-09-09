@@ -142,10 +142,6 @@ export function AspectDetailPage({
   const active = domains.find((d) => d.domainId === domainId) ?? domains[0]!;
   const name = profile.nickname.replace(/^คุณ\s*/, "").trim();
   const address = name ? `คุณ${name}` : "คุณ";
-  const freeBody =
-    active.body.length > 110
-      ? `${active.body.slice(0, 110).trim()}…`
-      : active.body;
 
   if (!ready) {
     return (
@@ -195,7 +191,7 @@ export function AspectDetailPage({
 
         <section className="fortune-glass mt-4 rounded-[20px] px-4 py-4">
           <p className="text-[15px] leading-[1.8] text-[#3A3270]">
-            {unlocked ? active.body : freeBody}
+            {active.body}
           </p>
           {unlocked ? (
             <ul className="mt-3.5 space-y-2.5">
