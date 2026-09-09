@@ -41,7 +41,18 @@ export function GoogleSignInButton({
 
     try {
       const auth = getFirebaseAuth();
-      const result = await signInWithPopup(auth, new GoogleAuthProvider());
+      // Clear stale Firebase/Google session on this browser before popup
+      // (common cause of auth/invalid-credential when another device works)
+      try {
+        await auth.signOut();
+      } catch {
+        // ignore
+      }
+      const provider = new GoogleAuthProvider();
+      provider.addScope("profile");
+      provider.addScope("email");
+      provider.setCustomParameters({ prompt: "select_account" });
+      const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
 
       const res = await fetch("/api/auth/firebase", {
@@ -69,7 +80,26 @@ export function GoogleSignInButton({
 
       window.location.href = callbackUrl || "/dashboard";
     } catch (err) {
-      setError(err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ");
+      const raw = err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ";
+      const code =
+        err && typeof err === "object" && "code" in err
+          ? String((err as { code?: string }).code ?? "")
+          : "";
+      let message = raw;
+      if (
+        code === "auth/invalid-credential" ||
+        raw.includes("auth/invalid-credential") ||
+        raw.includes("UNAUTHENTICATED")
+      ) {
+        message =
+          "ล็อกอิน Google ไม่สำเร็จ — ตรวจว่าเปิด Google Sign-in ใน Firebase แล้ว และเพิ่มโดเมนเว็บใน Authorized domains";
+      } else if (code === "auth/popup-closed-by-user") {
+        message = "ปิดหน้าต่างล็อกอินก่อนสำเร็จ";
+      } else if (code === "auth/unauthorized-domain") {
+        message =
+          "โดเมนนี้ยังไม่อนุญาตใน Firebase — เพิ่มโดเมนใน Authentication → Settings → Authorized domains";
+      }
+      setError(message);
       setLoading(false);
     }
   }
