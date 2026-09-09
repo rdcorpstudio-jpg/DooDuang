@@ -48,9 +48,6 @@ export function GoogleSignInButton({
 
     // LINE / FB in-app browsers block Google popup — hand off to Safari/Chrome first
     if (isInAppBrowser()) {
-      setError(
-        "เบราว์เซอร์ในแอปบล็อกหน้าต่างล็อกอิน — กดปุ่มเปิดในเบราว์เซอร์หลักด้านบน"
-      );
       openInExternalBrowser(
         typeof window !== "undefined"
           ? `${window.location.origin}/login?callbackUrl=${encodeURIComponent(callbackUrl || "/dashboard")}`
@@ -122,11 +119,12 @@ export function GoogleSignInButton({
         code === "auth/popup-blocked" ||
         raw.toLowerCase().includes("popup")
       ) {
-        message =
-          "เบราว์เซอร์บล็อกหน้าต่างล็อกอิน — ลองเปิดใน Safari / Chrome แล้วล็อกอินใหม่";
         if (isInAppBrowser()) {
           openInExternalBrowser();
+          setLoading(false);
+          return;
         }
+        message = "เบราว์เซอร์บล็อกหน้าต่างล็อกอิน — ลองใหม่ใน Safari / Chrome";
       } else if (code === "auth/unauthorized-domain") {
         message =
           "โดเมนนี้ยังไม่อนุญาตใน Firebase — เพิ่มโดเมนใน Authentication → Settings → Authorized domains";
@@ -192,11 +190,7 @@ export function GoogleSignInButton({
         {showIconDivider ? (
           <span className="h-4 w-px shrink-0 bg-[#D4CEE8]" aria-hidden />
         ) : null}
-        {loading
-          ? "กำลังเข้าสู่ระบบ..."
-          : inApp
-            ? "เปิด Safari แล้วล็อกอิน Google"
-            : label}
+        {loading ? "กำลังเข้าสู่ระบบ..." : label}
       </Button>
       {error && <p className="text-center text-xs text-red-500/80">{error}</p>}
     </div>

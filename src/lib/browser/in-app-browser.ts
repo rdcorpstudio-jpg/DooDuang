@@ -62,7 +62,7 @@ export function buildExternalBrowserUrl(pageUrl: string) {
 
   if (isAndroid()) {
     const stripped = url.replace(/^https?:\/\//i, "");
-    return `intent://${stripped}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
+    return `intent://${stripped}#Intent;scheme=https;package=com.android.chrome;action=android.intent.action.VIEW;end`;
   }
 
   return url;
