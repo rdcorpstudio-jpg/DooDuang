@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import {
   clearOAuthPending,
   completeAppLogin,
+  GoogleSignInButton,
   readCallback,
   rememberCallback,
   resolveFirebaseUserAfterRedirect,
@@ -27,6 +28,7 @@ export function AuthCompleteClient({
 }) {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState("กำลังเข้าสู่ระบบ…");
+  const next = safeCallback(callbackUrl || "/dashboard");
 
   useEffect(() => {
     if (!isFirebaseClientConfigured()) {
@@ -35,12 +37,12 @@ export function AuthCompleteClient({
     }
 
     let cancelled = false;
-    const next = safeCallback(callbackUrl || readCallback("/dashboard"));
-    rememberCallback(next);
+    const target = safeCallback(callbackUrl || readCallback("/dashboard"));
+    rememberCallback(target);
 
     void (async () => {
       try {
-        // Fresh start — strip start=1 so Google cannot return into another redirect loop
+        // Fresh start — strip start=1 so return URL cannot restart redirect
         if (start === "1") {
           if (redirectStartLock) return;
           redirectStartLock = true;
@@ -52,7 +54,7 @@ export function AuthCompleteClient({
             /* ignore */
           }
           setStatus("กำลังเปิด Google…");
-          await startGoogleRedirect(next);
+          await startGoogleRedirect(target);
           return;
         }
 
@@ -62,10 +64,10 @@ export function AuthCompleteClient({
             const user = await resolveFirebaseUserAfterRedirect();
             if (!user) {
               clearOAuthPending();
-              throw new Error("ไม่พบบัญชี Google หลังล็อกอิน — กดลองใหม่");
+              throw new Error("NO_GOOGLE_USER");
             }
             setStatus("กำลังบันทึกเซสชัน…");
-            await completeAppLogin(user, { callbackUrl: next });
+            await completeAppLogin(user, { callbackUrl: target });
           })().catch((err) => {
             completeLoginPromise = null;
             throw err;
@@ -76,7 +78,12 @@ export function AuthCompleteClient({
       } catch (err) {
         if (cancelled) return;
         clearOAuthPending();
-        setError(err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ");
+        const raw = err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ";
+        setError(
+          raw === "NO_GOOGLE_USER"
+            ? "Safari บล็อกการล็อกอินแบบเปลี่ยนหน้า — กดปุ่มด้านล่างเพื่อเข้าสู่ระบบอีกครั้ง"
+            : raw
+        );
       }
     })();
 
@@ -96,17 +103,16 @@ export function AuthCompleteClient({
       ) : (
         <div className="fortune-glass w-full max-w-sm rounded-[24px] px-5 py-7">
           <p className="text-[15px] font-semibold text-[#241C4F]">เข้าสู่ระบบไม่สำเร็จ</p>
-          <p className="mt-2 text-[13px] leading-relaxed text-red-500/90">{error}</p>
-          <Link
-            href={`/auth/complete?callbackUrl=${encodeURIComponent(safeCallback(callbackUrl || "/dashboard"))}&start=1`}
-            className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#7B5FD4] text-[14px] font-semibold text-white"
-            onClick={() => {
-              redirectStartLock = false;
-              completeLoginPromise = null;
-            }}
-          >
-            ลองเข้าสู่ระบบอีกครั้ง
-          </Link>
+          <p className="mt-2 text-[13px] leading-relaxed text-[#5E5688]">{error}</p>
+          <GoogleSignInButton
+            callbackUrl={next}
+            label="เข้าสู่ระบบด้วย Google"
+            coloredIcon
+            showIconDivider
+            variant="outline"
+            className="mt-5 space-y-2"
+            buttonClassName="h-12 gap-2.5 rounded-full border-0 bg-white text-[15px] font-semibold text-[#3A2F6B]"
+          />
           <Link
             href="/login"
             className="mt-3 inline-flex h-10 w-full items-center justify-center text-[13px] font-medium text-[#5E5688]"
