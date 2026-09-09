@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
@@ -34,15 +33,13 @@ export function GoogleSignInButton({
   buttonClassName?: string;
   label?: string;
   variant?: "primary" | "secondary" | "ghost" | "outline";
-  /** Official multicolor Google G */
   coloredIcon?: boolean;
-  /** Thin vertical rule between G and label (login mockup) */
   showIconDivider?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const searchParams = useSearchParams();
   const autoStarted = useRef(false);
+  const runRef = useRef<() => Promise<void>>(async () => {});
 
   async function runGoogleSignIn() {
     if (!isFirebaseClientConfigured()) {
@@ -50,7 +47,7 @@ export function GoogleSignInButton({
       return;
     }
 
-    // LINE / FB: hand off to Safari/Chrome — login continues there via autologin=1
+    // LINE / FB: hand off to Safari — continue with autologin=1 there
     if (isInAppBrowser()) {
       openInExternalBrowser(loginHandoffUrl(callbackUrl));
       return;
@@ -90,7 +87,6 @@ export function GoogleSignInButton({
         throw new Error(data.error || "เข้าสู่ระบบไม่สำเร็จ");
       }
 
-      // Drop autologin flag from URL so refresh doesn't re-open popup
       try {
         const url = new URL(window.location.href);
         if (url.searchParams.has("autologin")) {
@@ -143,18 +139,21 @@ export function GoogleSignInButton({
     }
   }
 
+  runRef.current = runGoogleSignIn;
+
   // After LINE → Safari handoff: start Google login automatically once
   useEffect(() => {
     if (autoStarted.current) return;
-    if (searchParams.get("autologin") !== "1") return;
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.get("autologin") !== "1") return;
     if (isInAppBrowser()) return;
     autoStarted.current = true;
     const t = window.setTimeout(() => {
-      void runGoogleSignIn();
-    }, 400);
+      void runRef.current();
+    }, 450);
     return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, []);
 
   return (
     <div className={cn("space-y-3", className)}>
