@@ -2,6 +2,7 @@ import type { FortuneProfile } from "./engine";
 import type { ReadingType } from "./zodiac";
 import { READING_OPTIONS } from "./zodiac";
 import type { ExtendedFortuneResult, FortuneSection, FortuneTab } from "./extended";
+import { FORTUNE_TONE_RULES, FORTUNE_TONE_SYSTEM } from "./tone";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const TIMEOUT_MS = 8_000;
@@ -10,7 +11,7 @@ const TAB_LABELS: Record<ReadingType, [string, string, string]> = {
   career: ["พลังการงาน", "โอกาส", "เป้าหมาย"],
   love: ["แกนหัวใจ", "พลังอารมณ์", "ทิศทางความรัก"],
   money: ["แกนการเงิน", "โชคลาภ & โอกาส", "ทิศทางความมั่งคั่ง"],
-  overall: ["แกนชีวิต", "พลังจักรวาล", "เส้นทางอนาคต"],
+  overall: ["แกนชีวิต", "จังหวะพลัง", "เส้นทางอนาคต"],
   daily: ["พลังวันนี้", "อารมณ์ & พลังงาน", "ทิศทางวันนี้"],
   health: ["แกนสุขภาพ", "พลังกาย & ใจ", "ทิศทางสมดุล"],
   tarot: ["ไพ่แกนหลัก", "พลังปัจจุบัน", "ทิศทางอนาคต"],
@@ -131,13 +132,12 @@ export async function generateFortuneWithOpenAI(
         messages: [
           {
             role: "system",
-            content:
-              "คุณเป็นนักพยากรณ์ชาวไทย โทนอบอุ่น จริงใจ ไม่ขู่ ไม่แพทย์ ไม่การเงินมืออาชีพ เป็นการบันเทิง ตอบเป็น JSON ตามสคีมาเท่านั้น",
+            content: FORTUNE_TONE_SYSTEM,
           },
           {
             role: "user",
             content: JSON.stringify({
-              instruction: `เขียนคำทำนายภาษาไทยสำหรับ${reading?.title ?? type} ของผู้ใช้คนนี้ ให้เฉพาะตัว ไม่ใช้ประโยคกลาง ๆ ซ้ำ`,
+              instruction: `เขียนคำทำนายภาษาไทยสำหรับ${reading?.title ?? type} ของผู้ใช้คนนี้ ให้เฉพาะตัว ไม่ใช้ประโยคกลาง ๆ ซ้ำ โทนบาลานซ์ มีทั้งจุดดีและจุดเสี่ยง`,
               profile: {
                 nickname: profile.nickname,
                 birthDate: profile.birthDate,
@@ -146,28 +146,28 @@ export async function generateFortuneWithOpenAI(
               tabLabels: labels,
               schema: {
                 title: "string สั้น",
-                preview: "string 2 ประโยค",
+                preview: "string 2 ประโยค ต้องมีทั้งโอกาสและข้อควรระวัง",
                 tabs: [
                   {
                     id: "section-0",
                     label: labels[0],
                     heroTitle: "string",
                     sections: [
-                      { heading: "string", content: "2-3 ประโยค" },
-                      { heading: "string", content: "2-3 ประโยค" },
+                      { heading: "string", content: "2-3 ประโยค มีจุดใช้ได้ + จุดเสี่ยง" },
+                      { heading: "string", content: "2-3 ประโยค มีจุดใช้ได้ + จุดเสี่ยง" },
                     ],
-                    summary: "1 ประโยค",
+                    summary: "1 ประโยค จบด้วยเงื่อนไขหรือข้อควรระวังสั้น ๆ",
                   },
                 ],
-                highlights: [{ label: "string", value: "string สั้น" }],
+                highlights: [{ label: "string", value: "string สั้น ไม่อวย" }],
                 premium: {
                   heroTitle: "string",
-                  teaser: "1 ประโยค",
+                  teaser: "1 ประโยค บาลานซ์",
                   sections: [
-                    { heading: "string", content: "2-3 ประโยค" },
-                    { heading: "string", content: "2-3 ประโยค" },
+                    { heading: "string", content: "2-3 ประโยค มีจุดใช้ได้ + จุดเสี่ยง" },
+                    { heading: "string", content: "2-3 ประโยค มีจุดใช้ได้ + จุดเสี่ยง" },
                   ],
-                  summary: "1 ประโยค",
+                  summary: "1 ประโยค มีเงื่อนไขหรือข้อควรระวัง",
                 },
               },
               rules: [
@@ -176,6 +176,7 @@ export async function generateFortuneWithOpenAI(
                 "highlights อย่างน้อย 3",
                 "เรียกชื่อเล่นในเนื้อหา",
                 "ห้าม markdown",
+                ...FORTUNE_TONE_RULES,
               ],
             }),
           },

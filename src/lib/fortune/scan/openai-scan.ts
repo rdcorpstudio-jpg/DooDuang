@@ -13,6 +13,7 @@ import type {
   PalmReadingPack,
   PalmReadingResult,
 } from "@/lib/fortune/scan/types";
+import { SCAN_TONE_RULES, SCAN_TONE_SYSTEM } from "@/lib/fortune/tone";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const TIMEOUT_MS = 25_000;
@@ -214,8 +215,7 @@ async function callOpenAIVision(params: {
         messages: [
           {
             role: "system",
-            content:
-              "คุณเป็นนักโหงวเฮ้ง/อ่านลายมือชาวไทย โทนอบอุ่น จริงใจ ไม่ขู่ ไม่แพทย์ เป็นการบันเทิง ตอบเป็น JSON ตามสคีมาเท่านั้น",
+            content: SCAN_TONE_SYSTEM,
           },
           {
             role: "user",
@@ -312,6 +312,7 @@ export async function analyzeFaceWithOpenAI(
         "อ่านทั้งด้านหน้าและด้านข้างประกอบกัน อย่าใช้แค่มุมเดียว",
         "ห้าม markdown",
         "ถ้าเห็นไม่ชัด ให้ประเมินเท่าที่มองเห็นได้",
+        ...SCAN_TONE_RULES,
       ],
     }),
   });
@@ -374,6 +375,7 @@ export async function analyzePalmWithOpenAI(
         "ต้องมี lines ครบ life heart head",
         "ห้าม markdown",
         "ถ้าเห็นไม่ชัด ให้ประเมินเท่าที่มองเห็นได้",
+        ...SCAN_TONE_RULES,
       ],
     }),
   });
