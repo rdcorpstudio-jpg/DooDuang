@@ -12,6 +12,7 @@ import {
   isPremiumUnlocked,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
+import { getPremiumOnboardPath, readFortuneProfile } from "@/lib/fortune/profile-storage";
 import type { FortuneProfile } from "@/lib/fortune/engine";
 import type { ReadingOption } from "@/lib/fortune/zodiac";
 
@@ -49,7 +50,7 @@ function FortuneResultViewInner({
     }
     setUnlocked(true);
     setPayOpen(false);
-    router.push("/premium");
+    router.push(getPremiumOnboardPath(readFortuneProfile()));
   }
 
   useEffect(() => {

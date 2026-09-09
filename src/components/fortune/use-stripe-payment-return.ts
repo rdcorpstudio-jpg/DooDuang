@@ -4,7 +4,10 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { confirmStripePremiumUnlock } from "@/components/fortune/fortune-payment-sheet";
 import { setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
-import { readFortuneProfile } from "@/lib/fortune/profile-storage";
+import {
+  getPremiumOnboardPath,
+  readFortuneProfile,
+} from "@/lib/fortune/profile-storage";
 
 /** After Stripe redirect (?payment=success&session_id=...), confirm + unlock. */
 export function useStripePaymentReturn(onUnlocked?: () => void) {
@@ -24,10 +27,12 @@ export function useStripePaymentReturn(onUnlocked?: () => void) {
 
     let cancelled = false;
     void (async () => {
+      let unlockedOk = false;
       try {
         const result = await confirmStripePremiumUnlock(sessionId);
         if (cancelled) return;
         if (result.premiumUnlocked) {
+          unlockedOk = true;
           const profile = readFortuneProfile();
           setPremiumUnlocked(
             profile
@@ -41,7 +46,11 @@ export function useStripePaymentReturn(onUnlocked?: () => void) {
         handled.current = null;
       } finally {
         if (!cancelled) {
-          router.replace(pathname || "/premium");
+          if (unlockedOk) {
+            router.replace(getPremiumOnboardPath(readFortuneProfile()));
+          } else {
+            router.replace(pathname || "/premium");
+          }
         }
       }
     })();

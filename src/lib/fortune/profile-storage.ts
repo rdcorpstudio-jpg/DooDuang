@@ -140,6 +140,26 @@ export function needsPremiumDeepen(
   return !isPremiumDeepenComplete(profile);
 }
 
+/** Basic wizard fields required before premium deepen (gender → birth → name) */
+export function hasBasicFortuneProfile(
+  profile: FortuneUserProfile | null | undefined
+): boolean {
+  if (!profile) return false;
+  return (
+    profile.nickname.trim().length > 0 &&
+    /^\d{4}-\d{2}-\d{2}$/.test(profile.birthDate) &&
+    Boolean(profile.gender)
+  );
+}
+
+/** After unlock: collect gender/birth/name first, else deepen on /premium */
+export function getPremiumOnboardPath(
+  profile: FortuneUserProfile | null | undefined = null
+): string {
+  if (!hasBasicFortuneProfile(profile)) return "/reading?afterPremium=1";
+  return "/premium";
+}
+
 /** Pull profile from wizard session cache if local profile is empty */
 export function hydrateFortuneProfileFromWizard(): FortuneUserProfile | null {
   const existing = readFortuneProfile();

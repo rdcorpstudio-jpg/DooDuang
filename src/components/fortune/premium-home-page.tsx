@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState, Suspense } from "react";
-import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { LifeInsightMockup } from "@/components/fortune/life-insight-mockup";
 import { PremiumDeepenForm } from "@/components/fortune/premium-deepen-form";
 import { PremiumSalesPage } from "@/components/fortune/premium-sales-page";
 import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import {
+  getPremiumOnboardPath,
+  hasBasicFortuneProfile,
   hydrateFortuneProfileFromWizard,
   needsPremiumDeepen,
   readFortuneProfile,
@@ -82,6 +83,7 @@ export function PremiumHomePage({
   forceUnlocked?: boolean;
   previewSeed?: string;
 } = {}) {
+  const router = useRouter();
   const [ready, setReady] = useState(false);
   const [unlocked, setUnlocked] = useState(forceUnlocked);
   const [profile, setProfile] = useState<FortuneUserProfile | null>(null);
@@ -98,7 +100,12 @@ export function PremiumHomePage({
     setUnlocked(isUnlocked);
     setShowDeepen(isUnlocked && needsPremiumDeepen(next));
     setReady(true);
-  }, [forceUnlocked]);
+
+    // Paid but no gender/birth/name yet → wizard starts at เลือกเพศ
+    if (isUnlocked && !forceUnlocked && !hasBasicFortuneProfile(next)) {
+      router.replace(getPremiumOnboardPath(next));
+    }
+  }, [forceUnlocked, router]);
 
   const seed = useMemo(() => {
     if (previewSeed) return previewSeed;
@@ -122,6 +129,10 @@ export function PremiumHomePage({
             const next = mergeProfile();
             setProfile(next);
             setUnlocked(true);
+            if (!hasBasicFortuneProfile(next)) {
+              router.replace(getPremiumOnboardPath(next));
+              return;
+            }
             setShowDeepen(needsPremiumDeepen(next));
           }}
         />
@@ -129,31 +140,10 @@ export function PremiumHomePage({
     );
   }
 
-  if (!profile && !forceUnlocked) {
+  if (!hasBasicFortuneProfile(profile) && !forceUnlocked) {
     return (
-      <AnimatedPage className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-4 pb-6 pt-8">
-        <section className="fortune-glass rounded-[20px] px-4 py-6 text-center">
-          <Sparkles
-            className="mx-auto h-8 w-8 text-[#F4BC52]"
-            strokeWidth={1.7}
-          />
-          <h1 className="font-sacred mt-3 text-[1.6rem] text-[#F7F8FF]">
-            ยังไม่มีข้อมูลดวง
-          </h1>
-          <p className="mx-auto mt-2 max-w-[18rem] text-[14px] leading-relaxed text-[#9AB8DC]">
-            ดูดวงฟรีก่อนหนึ่งครั้ง แล้วกลับมาที่แท็บพรีเมียม
-          </p>
-          <Link
-            href="/reading"
-            className="mt-5 inline-flex w-full items-center justify-center rounded-full px-4 py-3.5 text-[15px] font-semibold text-[#1A1208]"
-            style={{
-              background:
-                "linear-gradient(135deg, #FFF0C4 0%, #F4BC52 40%, #C9922E 100%)",
-            }}
-          >
-            เริ่มดูดวง
-          </Link>
-        </section>
+      <AnimatedPage className="mx-auto w-full max-w-[480px] px-4 py-10 text-center text-[14px] text-[#9AB8DC]">
+        กำลังไปหน้าเลือกเพศ…
       </AnimatedPage>
     );
   }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FocusEvent } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Check,
   ChevronLeft,
@@ -397,6 +398,10 @@ function PrivacyNote({ delayMs = 520 }: { delayMs?: number }) {
 }
 
 export function ReadingWizard() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const afterPremium = searchParams.get("afterPremium") === "1";
+
   const [step, setStep] = useState<Step>("gender");
   const [profile, setProfile] = useState<ProfileForm>({
     realName: "",
@@ -413,6 +418,32 @@ export function ReadingWizard() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Premium onboard: always start at gender (or resume missing fields), skip free result cache
+    if (afterPremium) {
+      clearWizardCache();
+      try {
+        const saved = readFortuneProfile();
+        if (saved) {
+          setProfile({
+            realName: saved.realName,
+            nickname: saved.nickname,
+            birthDate: saved.birthDate,
+            gender: saved.gender,
+            birthTime: saved.birthTime ?? "",
+            focus: saved.focus ?? "life",
+          });
+          if (!saved.gender) setStep("gender");
+          else if (!saved.birthDate) setStep("birth");
+          else if (!saved.nickname.trim()) setStep("name");
+          else setStep("gender");
+        }
+      } catch {
+        /* ignore */
+      }
+      setReady(true);
+      return;
+    }
+
     const cached = readWizardCache();
     if (cached) {
       setProfile({
@@ -440,14 +471,15 @@ export function ReadingWizard() {
       }
     }
     setReady(true);
-  }, []);
+  }, [afterPremium]);
 
   useEffect(() => {
     if (!ready) return;
+    if (afterPremium) return;
     if (step === "result" && result) {
       writeWizardCache(profile, result);
     }
-  }, [ready, step, result, profile]);
+  }, [ready, step, result, profile, afterPremium]);
 
   // Keyboard inset / visualViewport handled in PhoneFrame.
 
@@ -466,10 +498,48 @@ export function ReadingWizard() {
     return () => window.clearInterval(tick);
   }, [step]);
 
+  function finishPremiumOnboard() {
+    if (!profile.gender) {
+      setError("กรุณาเลือกเพศ");
+      setStep("gender");
+      return;
+    }
+    if (!profile.birthDate) {
+      setError("กรุณาเลือกวันเกิด");
+      setStep("birth");
+      return;
+    }
+    if (!profile.realName.trim() || !profile.nickname.trim()) {
+      setError("กรุณากรอกชื่อจริงและชื่อเล่น");
+      setStep("name");
+      return;
+    }
+
+    const existing = readFortuneProfile();
+    writeFortuneProfile({
+      realName: profile.realName,
+      nickname: profile.nickname,
+      birthDate: profile.birthDate,
+      gender: profile.gender,
+      birthTime: existing?.birthTime,
+      birthPlace: existing?.birthPlace,
+      focus: existing?.focus ?? profile.focus,
+      deepenSkipped: existing?.deepenSkipped,
+      profileLockedUntil: existing?.profileLockedUntil,
+    });
+    clearWizardCache();
+    router.replace("/premium");
+  }
+
   async function runFortune() {
     if (!profile.gender) {
       setError("กรุณาเลือกเพศ");
       setStep("gender");
+      return;
+    }
+
+    if (afterPremium) {
+      finishPremiumOnboard();
       return;
     }
 
@@ -765,7 +835,9 @@ export function ReadingWizard() {
                     ) : null}
 
                     <FormContinueButton
-                      label="เปิดดูดวงเบื้องต้น"
+                      label={
+                        afterPremium ? "ไปกรอกข้อมูลเชิงลึก" : "เปิดดูดวงเบื้องต้น"
+                      }
                       delayMs={280}
                       className="mt-2"
                       disabled={!profile.realName.trim() || !profile.nickname.trim()}

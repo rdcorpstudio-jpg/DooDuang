@@ -5,7 +5,10 @@ import { AnimatedPage } from "@/components/ui/reveal";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
-import { readFortuneProfile } from "@/lib/fortune/profile-storage";
+import {
+  getPremiumOnboardPath,
+  readFortuneProfile,
+} from "@/lib/fortune/profile-storage";
 
 /** Premium sales — checkout only (former page 2) */
 export function PremiumSalesPage({
@@ -27,6 +30,7 @@ export function PremiumSalesPage({
         : null
     );
     onUnlocked?.();
+    router.replace(getPremiumOnboardPath(profile));
   }
 
   return (
