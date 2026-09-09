@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,9 @@ import { cn } from "@/lib/utils";
 
 function loginHandoffUrl(callbackUrl: string) {
   if (typeof window === "undefined") return undefined;
-  return `${window.location.origin}/login?callbackUrl=${encodeURIComponent(callbackUrl || "/dashboard")}`;
+  const cb = encodeURIComponent(callbackUrl || "/dashboard");
+  // autologin=1 → Safari opens login and starts Google popup once
+  return `${window.location.origin}/login?callbackUrl=${cb}&autologin=1`;
 }
 
 export function GoogleSignInButton({
@@ -38,14 +41,16 @@ export function GoogleSignInButton({
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const autoStarted = useRef(false);
 
-  async function handleClick() {
+  async function runGoogleSignIn() {
     if (!isFirebaseClientConfigured()) {
       setError("ยังไม่ได้ตั้งค่า Firebase");
       return;
     }
 
-    // LINE / FB WebView: one button → deep-link to Safari/Chrome (no extra UI)
+    // LINE / FB: hand off to Safari/Chrome — login continues there via autologin=1
     if (isInAppBrowser()) {
       openInExternalBrowser(loginHandoffUrl(callbackUrl));
       return;
@@ -56,8 +61,6 @@ export function GoogleSignInButton({
 
     try {
       const auth = getFirebaseAuth();
-      // Clear stale Firebase/Google session on this browser before popup
-      // (common cause of auth/invalid-credential when another device works)
       try {
         await auth.signOut();
       } catch {
@@ -87,6 +90,17 @@ export function GoogleSignInButton({
         throw new Error(data.error || "เข้าสู่ระบบไม่สำเร็จ");
       }
 
+      // Drop autologin flag from URL so refresh doesn't re-open popup
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("autologin")) {
+          url.searchParams.delete("autologin");
+          window.history.replaceState({}, "", url.pathname + url.search);
+        }
+      } catch {
+        /* ignore */
+      }
+
       if (onSuccess) {
         await onSuccess();
         setLoading(false);
@@ -114,10 +128,12 @@ export function GoogleSignInButton({
         code === "auth/popup-blocked" ||
         raw.toLowerCase().includes("popup")
       ) {
-        // Silent handoff — same Google button, no extra error/button
-        openInExternalBrowser(loginHandoffUrl(callbackUrl));
-        setLoading(false);
-        return;
+        if (isInAppBrowser()) {
+          openInExternalBrowser(loginHandoffUrl(callbackUrl));
+          setLoading(false);
+          return;
+        }
+        message = "เบราว์เซอร์บล็อกหน้าต่างล็อกอิน — อนุญาตป๊อปอัปแล้วลองใหม่";
       } else if (code === "auth/unauthorized-domain") {
         message =
           "โดเมนนี้ยังไม่อนุญาตใน Firebase — เพิ่มโดเมนใน Authentication → Settings → Authorized domains";
@@ -126,6 +142,19 @@ export function GoogleSignInButton({
       setLoading(false);
     }
   }
+
+  // After LINE → Safari handoff: start Google login automatically once
+  useEffect(() => {
+    if (autoStarted.current) return;
+    if (searchParams.get("autologin") !== "1") return;
+    if (isInAppBrowser()) return;
+    autoStarted.current = true;
+    const t = window.setTimeout(() => {
+      void runGoogleSignIn();
+    }, 400);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -137,7 +166,7 @@ export function GoogleSignInButton({
           "w-full outline-none focus:outline-none focus-visible:ring-0",
           buttonClassName
         )}
-        onClick={() => void handleClick()}
+        onClick={() => void runGoogleSignIn()}
         disabled={loading}
       >
         {coloredIcon ? (

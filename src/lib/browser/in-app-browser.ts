@@ -14,29 +14,15 @@ export function getInAppBrowserKind(
   const s = ua.toLowerCase();
   if (!s) return null;
 
-  // LINE WebView — UA usually contains "Line/x.y"
+  // Only clear in-app browsers — do NOT guess generic iOS WebView
+  // (false positives break Google login in real Safari)
   if (s.includes("line/") || /\bline\/\d/.test(s)) return "line";
-
   if (s.includes("fban") || s.includes("fbav") || s.includes("fb_iab"))
     return "facebook";
   if (s.includes("instagram")) return "instagram";
   if (s.includes("tiktok") || s.includes("bytedance") || s.includes("musical_ly"))
     return "tiktok";
-
-  // Android WebView
-  if (s.includes("; wv)") || s.includes("webview")) return "other";
-
-  // iOS embedded WebView (not full Safari): AppleWebKit without Version/ + Safari/
-  if (
-    isIOS(ua) &&
-    s.includes("applewebkit") &&
-    !s.includes("crios") &&
-    !s.includes("fxios") &&
-    !s.includes("edgios") &&
-    !(s.includes("version/") && s.includes("safari/"))
-  ) {
-    return "other";
-  }
+  if (s.includes("; wv)")) return "other";
 
   return null;
 }

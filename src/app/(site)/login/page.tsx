@@ -1,7 +1,7 @@
 import { LoginScreen } from "@/components/auth/login-screen";
 
 interface LoginPageProps {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; autologin?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {

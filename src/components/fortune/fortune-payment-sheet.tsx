@@ -248,6 +248,7 @@ export function FortunePaymentSheet({
             </p>
             <GoogleSignInButton
               label="เข้าสู่ระบบด้วย Google"
+              callbackUrl="/premium"
               className="space-y-2"
               variant="outline"
               coloredIcon
