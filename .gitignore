@@ -34,3 +34,6 @@ drizzle/meta/
 
 # Vercel
 .vercel
+
+# Local recovery scratch
+scripts/_recover/
