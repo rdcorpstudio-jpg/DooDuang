@@ -22,6 +22,13 @@ import {
   type FaceReadingPack,
 } from "@/lib/fortune/scan/build-face-pack";
 import {
+  canRescanScan,
+  hasSavedScan,
+  readSavedFaceScan,
+  saveFaceScan,
+  scanCooldownDaysLeft,
+} from "@/lib/fortune/scan/scan-cooldown";
+import {
   isPremiumUnlocked,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
@@ -50,14 +57,26 @@ export function FortuneFaceReading({
   const [photos, setPhotos] = useState<File[]>([]);
   const [pack, setPack] = useState<FaceReadingPack | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [canRescan, setCanRescan] = useState(true);
+  const [cooldownDays, setCooldownDays] = useState(0);
+  const [hasSaved, setHasSaved] = useState(false);
 
   const frontPreviewUrl = useObjectUrl(frontFile);
   const sidePreviewUrl = useObjectUrl(sideFile);
   const photoUrl = useObjectUrl(photos[0] ?? null);
   const photoRightUrl = useObjectUrl(photos[1] ?? null);
 
+  function refreshCooldown() {
+    setCanRescan(canRescanScan("face"));
+    setCooldownDays(scanCooldownDaysLeft("face"));
+    setHasSaved(hasSavedScan("face"));
+  }
+
   useEffect(() => {
     setUnlocked(isPremiumUnlocked());
+    const saved = readSavedFaceScan();
+    if (saved) setPack(saved.pack);
+    refreshCooldown();
   }, []);
 
   function handlePaid() {
@@ -69,6 +88,10 @@ export function FortuneFaceReading({
   useStripePaymentReturn(handlePaid);
 
   async function analyze(files: File[]) {
+    if (!canRescanScan("face")) {
+      setError(`สแกนได้อีกครั้งในอีก ${scanCooldownDaysLeft("face")} วัน`);
+      return;
+    }
     if (files.length < 2) {
       setError("ต้องมีรูปด้านหน้าและด้านข้าง");
       return;
@@ -76,13 +99,14 @@ export function FortuneFaceReading({
     setFrontFile(files[0] ?? null);
     setSideFile(files[1] ?? null);
     setPhotos(files.slice(0, 2));
-    setPack(null);
     setError(null);
     setStep("analyzing");
     try {
       const next = await buildFaceReadingPack(files.slice(0, 2), `${seed}-face`);
       await new Promise((r) => setTimeout(r, 700));
+      saveFaceScan(next);
       setPack(next);
+      refreshCooldown();
       setStep("result");
     } catch (err) {
       setError(
@@ -106,6 +130,10 @@ export function FortuneFaceReading({
     slot: "front" | "side",
     file: File | undefined
   ) {
+    if (!canRescan) {
+      setError(`สแกนได้อีกครั้งในอีก ${cooldownDays} วัน — กดดูผลล่าสุดได้`);
+      return;
+    }
     if (!file || !file.type.startsWith("image/")) {
       setError("เลือกรูปภาพอีกครั้ง");
       return;
@@ -115,11 +143,39 @@ export function FortuneFaceReading({
     else setSideFile(file);
   }
 
-  function reset() {
+  function goReady() {
     setFrontFile(null);
     setSideFile(null);
     setPhotos([]);
-    setPack(null);
+    setError(null);
+    setStep("ready");
+    refreshCooldown();
+    const saved = readSavedFaceScan();
+    if (saved) setPack(saved.pack);
+  }
+
+  function viewSaved() {
+    const saved = readSavedFaceScan();
+    if (!saved) {
+      setError("ยังไม่มีผลโหงวเฮ้งที่บันทึกไว้");
+      return;
+    }
+    setPack(saved.pack);
+    setPhotos([]);
+    setFrontFile(null);
+    setSideFile(null);
+    setError(null);
+    setStep("result");
+  }
+
+  function startNewScan() {
+    if (!canRescanScan("face")) {
+      setError(`สแกนได้อีกครั้งในอีก ${scanCooldownDaysLeft("face")} วัน`);
+      return;
+    }
+    setFrontFile(null);
+    setSideFile(null);
+    setPhotos([]);
     setError(null);
     setStep("ready");
   }
@@ -166,7 +222,7 @@ export function FortuneFaceReading({
       <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
         <Header
           onBack={() => {
-            if (step === "result" || step === "analyzing") reset();
+            if (step === "result" || step === "analyzing") goReady();
             else router.back();
           }}
         />
@@ -181,10 +237,24 @@ export function FortuneFaceReading({
                 ถ่ายด้านหน้า + ด้านข้าง แล้ววิเคราะห์ด้วย AI
               </p>
               <p className="mt-1 text-[12px] leading-relaxed text-[#6B6490]">
-                อัปโหลดทีละรูป หรือถ่ายด้วยกล้อง — ต้องครบ 2 มุม
+                {canRescan
+                  ? "อัปโหลดทีละรูป หรือถ่ายด้วยกล้อง — ต้องครบ 2 มุม · สแกนได้ 1 ครั้ง / 7 วัน"
+                  : `สแกนรอบถัดไปในอีก ${cooldownDays} วัน — กดดูผลล่าสุดได้`}
               </p>
             </header>
 
+            {hasSaved ? (
+              <button
+                type="button"
+                onClick={viewSaved}
+                className="no-sky-lift mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#6A48C8] py-3.5 text-[15px] font-semibold text-white outline-none transition active:scale-[0.99]"
+              >
+                ดูผลล่าสุดอีกครั้ง
+              </button>
+            ) : null}
+
+            {canRescan ? (
+              <>
             <div className="mt-5 grid grid-cols-2 gap-3">
               <PhotoSlot
                 label="ด้านหน้า"
@@ -243,6 +313,17 @@ export function FortuneFaceReading({
             <p className="mt-3 text-center text-[11px] leading-relaxed text-[#8A82B0]">
               ใช้วิเคราะห์ผลลัพธ์เท่านั้น — ไม่เก็บรูปถาวร
             </p>
+              </>
+            ) : (
+              <>
+                {error ? (
+                  <p className="mt-3 text-center text-[12px] text-[#E11D48]">{error}</p>
+                ) : null}
+                <p className="mt-4 rounded-[16px] bg-white/65 px-3.5 py-3 text-center text-[12px] leading-relaxed text-[#5E5688] ring-1 ring-[#7B6BB0]/12">
+                  คูลดาวน์ 7 วัน · ดูผลเดิมได้ตลอดจนกว่าจะสแกนรอบใหม่
+                </p>
+              </>
+            )}
           </>
         ) : null}
 
@@ -261,7 +342,9 @@ export function FortuneFaceReading({
             pack={pack}
             unlocked={unlocked}
             onUnlock={() => setPayOpen(true)}
-            onRescan={reset}
+            canRescan={canRescan}
+            cooldownDays={cooldownDays}
+            onRescan={startNewScan}
           />
         ) : null}
       </div>
@@ -362,6 +445,8 @@ function FaceResult({
   unlocked,
   onUnlock,
   onRescan,
+  canRescan,
+  cooldownDays,
 }: {
   photoUrl: string | null;
   photoRightUrl: string | null;
@@ -369,6 +454,8 @@ function FaceResult({
   unlocked: boolean;
   onUnlock: () => void;
   onRescan: () => void;
+  canRescan: boolean;
+  cooldownDays: number;
 }) {
   const { result, shapeLabel, shapeCopy, aspects } = pack;
   const clarity = result.metrics.clarity;
@@ -391,14 +478,20 @@ function FaceResult({
             </p>
           ) : null}
         </div>
-        <button
-          type="button"
-          onClick={onRescan}
-          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/70 px-2.5 py-1.5 text-[11px] font-medium text-[#5B45B8] ring-1 ring-[#9B7FE8]/25"
-        >
-          <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
-          สแกนใหม่
-        </button>
+        {canRescan ? (
+          <button
+            type="button"
+            onClick={onRescan}
+            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/70 px-2.5 py-1.5 text-[11px] font-medium text-[#5B45B8] ring-1 ring-[#9B7FE8]/25"
+          >
+            <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
+            สแกนใหม่
+          </button>
+        ) : (
+          <span className="inline-flex shrink-0 items-center rounded-full bg-[#F3EEFF] px-2.5 py-1.5 text-[11px] font-medium text-[#7A72A0]">
+            สแกนใหม่ใน {cooldownDays} วัน
+          </span>
+        )}
       </div>
 
       <div className="fortune-glass overflow-hidden rounded-[20px] p-3.5">
