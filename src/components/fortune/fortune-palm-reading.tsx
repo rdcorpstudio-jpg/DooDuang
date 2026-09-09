@@ -30,6 +30,7 @@ import {
   savePalmScan,
   scanCooldownDaysLeft,
 } from "@/lib/fortune/scan/scan-cooldown";
+import { handElementArt } from "@/lib/fortune/scan/hand-element-art";
 import {
   isPremiumUnlocked,
   setPremiumUnlocked,
@@ -415,7 +416,6 @@ function PalmPhotoSlot({
 }
 
 function PalmResult({
-  photoUrl,
   pack,
   unlocked,
   onUnlock,
@@ -423,7 +423,7 @@ function PalmResult({
   canRescan,
   cooldownDays,
 }: {
-  photoUrl: string | null;
+  photoUrl?: string | null;
   pack: PalmReadingPack;
   unlocked: boolean;
   onUnlock: () => void;
@@ -431,8 +431,16 @@ function PalmResult({
   canRescan: boolean;
   cooldownDays: number;
 }) {
-  const { result, natureLabel, natureCopy, lines } = pack;
+  const { result, natureCopy, lines } = pack;
   const clarity = result.metrics.clarity;
+  const elementSrc = handElementArt(result.nature);
+  const ELEMENT_TITLE_TH = {
+    earth: "ธาตุดิน",
+    air: "ธาตุลม",
+    fire: "ธาตุไฟ",
+    water: "ธาตุน้ำ",
+  } as const;
+  const elementTitle = ELEMENT_TITLE_TH[result.nature] ?? "ธาตุมือ";
   const freePersonality =
     natureCopy.personality.length > 90
       ? `${natureCopy.personality.slice(0, 90).trim()}…`
@@ -445,7 +453,9 @@ function PalmResult({
           <h1 className="text-[1.4rem] font-bold tracking-tight text-[#241C4F]">
             ผลอ่านลายมือ
           </h1>
-          <p className="mt-0.5 text-[12px] text-[#7B5FD4]">{natureLabel}</p>
+          <p className="mt-0.5 text-[12px] text-[#7B5FD4]">
+            อ่านจากฝ่ามือ · ธาตุและเส้นหลัก
+          </p>
           {!unlocked ? (
             <p className="mt-1 text-[11px] text-[#8A82B0]">
               ดูเบื้องต้นฟรี · รายละเอียดล็อกไว้
@@ -469,25 +479,20 @@ function PalmResult({
       </div>
 
       <div className="fortune-glass flex gap-3 rounded-[20px] p-3.5">
-        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
-          {photoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={photoUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src="/images/app-icon.png"
-              alt=""
-              className="h-[4.25rem] w-[4.25rem] object-contain"
-            />
-          )}
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#9B7FE8]/10 ring-1 ring-[#C9A227]/25">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={elementSrc}
+            alt=""
+            className="h-full w-full object-cover"
+          />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] font-semibold text-[#241C4F]">
-            {natureLabel}
+          <p className="text-[17px] font-bold tracking-tight text-[#241C4F]">
+            {elementTitle}
           </p>
           <p className="mt-1 text-[12px] leading-relaxed text-[#5E5688]">
-            {unlocked ? natureCopy.strength : "จุดแข็ง · เงา · คำแนะนำ ล็อกไว้"}
+            {unlocked ? natureCopy.strength : freePersonality}
           </p>
           <div className="mt-2 flex items-center justify-between gap-2">
             <p className="text-[11px] text-[#5E5688]">ความชัดของสแกน</p>
