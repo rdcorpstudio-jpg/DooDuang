@@ -554,19 +554,25 @@ function PalmResult({
         subtitle={`เส้นชีวิต หัวใจ สมอง · ${FORTUNE_UNLOCK_PRICE} บาท`}
       >
         <div className="space-y-3.5">
-          {lines.map((line, i) => (
+          {lines.map((line, i) => {
+            const titleDup =
+              line.copy.title.trim() === line.label.trim() ||
+              !line.copy.title.trim();
+            return (
             <div
               key={line.id}
               className={i > 0 ? "border-t border-[#7B6BB0]/12 pt-3.5" : undefined}
             >
-              <p className="text-[11px] font-semibold tracking-[0.14em] text-[#7B5FD4]">
+              <p className="text-[17px] font-bold tracking-tight text-[#241C4F]">
                 {line.label}
               </p>
-              <p className="mt-1 text-[13px] font-semibold text-[#2C2458]">
-                {line.copy.title}
-              </p>
+              {!titleDup ? (
+                <p className="mt-1 text-[13px] font-semibold text-[#5B45B8]">
+                  {line.copy.title}
+                </p>
+              ) : null}
               {line.copy.blurb ? (
-                <p className="mt-0.5 text-[11px] text-[#7B5FD4]">
+                <p className="mt-1 text-[12px] text-[#7B5FD4]">
                   {line.copy.blurb}
                 </p>
               ) : null}
@@ -584,7 +590,8 @@ function PalmResult({
                 </p>
               ) : null}
             </div>
-          ))}
+            );
+          })}
         </div>
       </UnlockDetailBanner>
 
