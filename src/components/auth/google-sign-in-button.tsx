@@ -4,15 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import {
   GoogleAuthProvider,
   getRedirectResult,
+  onAuthStateChanged,
   signInWithPopup,
   signInWithRedirect,
+  type User,
   type UserCredential,
 } from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
 import {
   isInAppBrowser,
-  isIOS,
   openInExternalBrowser,
 } from "@/lib/browser/in-app-browser";
 import { cn } from "@/lib/utils";
@@ -20,8 +21,73 @@ import { cn } from "@/lib/utils";
 const CALLBACK_KEY = "dooduang-login-callback";
 const OAUTH_PENDING_KEY = "dooduang-oauth-pending";
 
-/** getRedirectResult can only be consumed once — share across Strict Mode remounts */
+/** Shared across mounts — getRedirectResult is one-shot */
 let redirectResultPromise: Promise<UserCredential | null> | null = null;
+
+export function authCompletePath(callbackUrl: string) {
+  const cb = encodeURIComponent(safeCallback(callbackUrl));
+  return `/auth/complete?callbackUrl=${cb}&start=1`;
+}
+
+function loginHandoffUrl(callbackUrl: string) {
+  if (typeof window === "undefined") return undefined;
+  return `${window.location.origin}${authCompletePath(callbackUrl)}`;
+}
+
+export function safeCallback(callbackUrl: string) {
+  const raw = (callbackUrl || "/dashboard").trim() || "/dashboard";
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
+  if (raw.startsWith("/login") || raw.startsWith("/auth/")) return "/dashboard";
+  return raw;
+}
+
+export function rememberCallback(callbackUrl: string) {
+  try {
+    sessionStorage.setItem(CALLBACK_KEY, safeCallback(callbackUrl));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function readCallback(fallback = "/dashboard") {
+  try {
+    return sessionStorage.getItem(CALLBACK_KEY) || safeCallback(fallback);
+  } catch {
+    return safeCallback(fallback);
+  }
+}
+
+export function clearCallback() {
+  try {
+    sessionStorage.removeItem(CALLBACK_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function markOAuthPending() {
+  try {
+    sessionStorage.setItem(OAUTH_PENDING_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearOAuthPending() {
+  try {
+    sessionStorage.removeItem(OAUTH_PENDING_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function wasOAuthPending() {
+  try {
+    return sessionStorage.getItem(OAUTH_PENDING_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 function getRedirectResultOnce() {
   if (!redirectResultPromise) {
@@ -33,73 +99,18 @@ function getRedirectResultOnce() {
   return redirectResultPromise;
 }
 
-function loginHandoffUrl(callbackUrl: string) {
-  if (typeof window === "undefined") return undefined;
-  const cb = encodeURIComponent(safeCallback(callbackUrl));
-  return `${window.location.origin}/login?callbackUrl=${cb}&autologin=1`;
-}
-
-function safeCallback(callbackUrl: string) {
-  const raw = (callbackUrl || "/dashboard").trim() || "/dashboard";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
-  if (raw.startsWith("/login")) return "/dashboard";
-  return raw;
-}
-
-function rememberCallback(callbackUrl: string) {
-  try {
-    sessionStorage.setItem(CALLBACK_KEY, safeCallback(callbackUrl));
-  } catch {
-    /* ignore */
-  }
-}
-
-function readCallback(fallback: string) {
-  try {
-    return sessionStorage.getItem(CALLBACK_KEY) || safeCallback(fallback);
-  } catch {
-    return safeCallback(fallback);
-  }
-}
-
-function clearAutologinFromUrl() {
-  try {
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has("autologin")) return;
-    url.searchParams.delete("autologin");
-    window.history.replaceState({}, "", url.pathname + url.search);
-  } catch {
-    /* ignore */
-  }
-}
-
-function markOAuthPending() {
-  try {
-    sessionStorage.setItem(OAUTH_PENDING_KEY, "1");
-  } catch {
-    /* ignore */
-  }
-}
-
-function clearOAuthPending() {
-  try {
-    sessionStorage.removeItem(OAUTH_PENDING_KEY);
-  } catch {
-    /* ignore */
-  }
-}
-
-function wasOAuthPending() {
-  try {
-    return sessionStorage.getItem(OAUTH_PENDING_KEY) === "1";
-  } catch {
-    return false;
-  }
+function makeProvider() {
+  const provider = new GoogleAuthProvider();
+  provider.addScope("profile");
+  provider.addScope("email");
+  provider.setCustomParameters({ prompt: "select_account" });
+  return provider;
 }
 
 async function exchangeIdToken(idToken: string) {
   const res = await fetch("/api/auth/firebase", {
     method: "POST",
+    credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ idToken }),
   });
@@ -116,24 +127,79 @@ async function exchangeIdToken(idToken: string) {
 }
 
 async function verifyAppSession() {
-  const res = await fetch("/api/auth/session", { cache: "no-store" });
+  const res = await fetch("/api/auth/session", {
+    cache: "no-store",
+    credentials: "same-origin",
+  });
   if (!res.ok) return false;
   const data = (await res.json()) as { user?: { id?: string } | null };
   return Boolean(data.user?.id);
 }
 
-function makeProvider() {
-  const provider = new GoogleAuthProvider();
-  provider.addScope("profile");
-  provider.addScope("email");
-  provider.setCustomParameters({ prompt: "select_account" });
-  return provider;
+/** Safari often drops getRedirectResult — wait for currentUser instead */
+function waitForFirebaseUser(timeoutMs = 8000): Promise<User | null> {
+  const auth = getFirebaseAuth();
+  if (auth.currentUser) return Promise.resolve(auth.currentUser);
+
+  return new Promise((resolve) => {
+    const timer = window.setTimeout(() => {
+      unsub();
+      resolve(auth.currentUser);
+    }, timeoutMs);
+
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      window.clearTimeout(timer);
+      unsub();
+      resolve(user);
+    });
+  });
 }
 
-function shouldUseRedirect(force = false) {
-  if (force) return true;
-  if (typeof window === "undefined") return false;
-  return isIOS();
+export async function resolveFirebaseUserAfterRedirect(): Promise<User | null> {
+  const cred = await getRedirectResultOnce();
+  if (cred?.user) return cred.user;
+
+  const auth = getFirebaseAuth();
+  if (auth.currentUser) return auth.currentUser;
+
+  if (wasOAuthPending()) {
+    return waitForFirebaseUser();
+  }
+  return null;
+}
+
+export async function completeAppLogin(
+  user: User,
+  opts?: { callbackUrl?: string; onSuccess?: () => void | Promise<void> }
+) {
+  const idToken = await user.getIdToken();
+  await exchangeIdToken(idToken);
+  clearOAuthPending();
+
+  const ok = await verifyAppSession();
+  if (!ok) {
+    throw new Error(
+      "เข้าสู่ระบบแล้ว แต่เซสชันยังไม่ติด — ลองใหม่ใน Safari หรือปิดตัวบล็อกคุกกี้"
+    );
+  }
+
+  const next = readCallback(opts?.callbackUrl || "/dashboard");
+  clearCallback();
+
+  if (opts?.onSuccess) {
+    await opts.onSuccess();
+    return { navigated: false as const, next };
+  }
+
+  window.location.replace(next || "/dashboard");
+  return { navigated: true as const, next };
+}
+
+export async function startGoogleRedirect(callbackUrl: string) {
+  rememberCallback(callbackUrl);
+  markOAuthPending();
+  await signInWithRedirect(getFirebaseAuth(), makeProvider());
 }
 
 export function GoogleSignInButton({
@@ -159,48 +225,13 @@ export function GoogleSignInButton({
   const [error, setError] = useState<string | null>(null);
   const bootstrapped = useRef(false);
 
-  async function finishLogin(idToken: string) {
-    await exchangeIdToken(idToken);
-    clearAutologinFromUrl();
-    clearOAuthPending();
-
-    const ok = await verifyAppSession();
-    if (!ok) {
-      throw new Error(
-        "เข้าสู่ระบบแล้ว แต่เซสชันยังไม่ติด — ลองใหม่หรือเปิด Safari โดยตรง"
-      );
-    }
-
-    const next = readCallback(callbackUrl);
-    try {
-      sessionStorage.removeItem(CALLBACK_KEY);
-    } catch {
-      /* ignore */
-    }
-
-    if (onSuccess) {
-      await onSuccess();
-      setLoading(false);
-      return;
-    }
-
-    window.location.replace(next || "/dashboard");
-  }
-
-  async function startRedirectLogin() {
-    rememberCallback(callbackUrl);
-    markOAuthPending();
-    // Drop autologin before leaving so return URL cannot restart Google
-    clearAutologinFromUrl();
-    await signInWithRedirect(getFirebaseAuth(), makeProvider());
-  }
-
-  async function runGoogleSignIn(opts?: { forceRedirect?: boolean }) {
+  async function runGoogleSignIn() {
     if (!isFirebaseClientConfigured()) {
       setError("ยังไม่ได้ตั้งค่า Firebase");
       return;
     }
 
+    // LINE / FB: open Safari on dedicated complete page
     if (isInAppBrowser()) {
       openInExternalBrowser(loginHandoffUrl(callbackUrl));
       return;
@@ -210,20 +241,28 @@ export function GoogleSignInButton({
     setError(null);
 
     try {
-      if (shouldUseRedirect(opts?.forceRedirect)) {
-        await startRedirectLogin();
-        return;
-      }
-
+      // Prefer popup on direct tap (user gesture). iOS often allows this.
       const result = await signInWithPopup(getFirebaseAuth(), makeProvider());
-      const idToken = await result.user.getIdToken();
-      await finishLogin(idToken);
+      await completeAppLogin(result.user, { callbackUrl, onSuccess });
+      setLoading(false);
     } catch (err) {
       const raw = err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ";
       const code =
         err && typeof err === "object" && "code" in err
           ? String((err as { code?: string }).code ?? "")
           : "";
+
+      if (
+        code === "auth/popup-blocked" ||
+        code === "auth/cancelled-popup-request" ||
+        raw.toLowerCase().includes("popup")
+      ) {
+        // Fall back: dedicated page owns redirect return
+        rememberCallback(callbackUrl);
+        window.location.assign(authCompletePath(callbackUrl));
+        return;
+      }
+
       let message = raw;
       if (
         code === "auth/invalid-credential" ||
@@ -234,16 +273,6 @@ export function GoogleSignInButton({
           "ล็อกอิน Google ไม่สำเร็จ — ตรวจว่าเปิด Google Sign-in ใน Firebase แล้ว และเพิ่มโดเมนเว็บใน Authorized domains";
       } else if (code === "auth/popup-closed-by-user") {
         message = "ปิดหน้าต่างล็อกอินก่อนสำเร็จ";
-      } else if (
-        code === "auth/popup-blocked" ||
-        raw.toLowerCase().includes("popup")
-      ) {
-        try {
-          await startRedirectLogin();
-          return;
-        } catch {
-          message = "เบราว์เซอร์บล็อกหน้าต่างล็อกอิน — กำลังลองวิธีอื่น";
-        }
       } else if (code === "auth/unauthorized-domain") {
         message =
           "โดเมนนี้ยังไม่อนุญาตใน Firebase — เพิ่มโดเมนใน Authentication → Settings → Authorized domains";
@@ -253,49 +282,23 @@ export function GoogleSignInButton({
     }
   }
 
-  // Finish Google redirect OR start LINE→Safari autologin — never both
+  // If user lands back on a page that still has this button after redirect
   useEffect(() => {
     if (bootstrapped.current) return;
     if (!isFirebaseClientConfigured()) return;
+    if (!wasOAuthPending()) return;
     bootstrapped.current = true;
 
     let cancelled = false;
-
     void (async () => {
-      const sp = new URLSearchParams(window.location.search);
-      const wantsAutologin = sp.get("autologin") === "1" && !isInAppBrowser();
-      const returningFromGoogle = wasOAuthPending();
-
       try {
-        const result = await getRedirectResultOnce();
-        if (cancelled) return;
-
-        if (result?.user) {
-          setLoading(true);
-          const idToken = await result.user.getIdToken();
-          await finishLogin(idToken);
-          return;
-        }
-
-        clearAutologinFromUrl();
-
-        // Came back from Google without a usable result — stop, don't loop
-        if (returningFromGoogle) {
-          clearOAuthPending();
-          return;
-        }
-
-        // Fresh handoff from LINE: start Google redirect once
-        if (wantsAutologin) {
-          setLoading(true);
-          await startRedirectLogin();
-        }
+        const user = await resolveFirebaseUserAfterRedirect();
+        if (cancelled || !user) return;
+        setLoading(true);
+        await completeAppLogin(user, { callbackUrl, onSuccess });
       } catch (err) {
         if (cancelled) return;
-        clearAutologinFromUrl();
-        clearOAuthPending();
-        const raw = err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ";
-        setError(raw);
+        setError(err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ");
         setLoading(false);
       }
     })();

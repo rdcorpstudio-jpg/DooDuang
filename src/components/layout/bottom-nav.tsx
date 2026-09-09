@@ -39,6 +39,7 @@ const TABS: Array<{
     match: (p) =>
       p.startsWith("/dashboard") ||
       p.startsWith("/login") ||
+      p.startsWith("/auth/") ||
       p.startsWith("/pricing"),
   },
 ];
