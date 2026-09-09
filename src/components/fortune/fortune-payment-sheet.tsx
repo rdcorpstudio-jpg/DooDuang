@@ -189,7 +189,7 @@ export function FortunePaymentSheet({
         </p>
       </div>
       <p className="mt-1.5 text-[12px] text-[#7A72A0]">
-        เฉลี่ย {monthly} บาท/เดือน · ชำระผ่าน Stripe
+        เฉลี่ย {monthly} บาท/เดือน
       </p>
 
       <div className="mx-auto mt-4 max-w-[19rem] border-y border-[#7B6BB0]/14 py-3.5">
@@ -281,10 +281,10 @@ export function FortunePaymentSheet({
               {step === "redirecting" ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  กำลังไปหน้า Stripe…
+                  กำลังไปหน้าชำระเงิน…
                 </>
               ) : (
-                <>ชำระ {FORTUNE_UNLOCK_PRICE} บาทด้วย Stripe</>
+                <>ชำระ {FORTUNE_UNLOCK_PRICE} บาท</>
               )}
             </button>
           </div>
