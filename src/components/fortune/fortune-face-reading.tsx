@@ -516,7 +516,7 @@ function FaceResult({
       <div className="fortune-glass overflow-hidden rounded-[20px] p-3.5">
         <div className="flex gap-3">
           <div className="flex shrink-0 gap-1.5">
-            <div className="relative h-24 w-[4.5rem] overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
+            <div className="relative flex h-24 w-[4.5rem] items-center justify-center overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
               {photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -524,9 +524,16 @@ function FaceResult({
                   alt=""
                   className="h-full w-full object-cover"
                 />
-              ) : null}
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src="/icon.png"
+                  alt=""
+                  className="h-12 w-12 object-contain"
+                />
+              )}
             </div>
-            <div className="relative h-24 w-[4.5rem] overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
+            <div className="relative flex h-24 w-[4.5rem] items-center justify-center overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
               {photoRightUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -534,7 +541,14 @@ function FaceResult({
                   alt=""
                   className="h-full w-full object-cover"
                 />
-              ) : null}
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src="/icon.png"
+                  alt=""
+                  className="h-12 w-12 object-contain opacity-80"
+                />
+              )}
             </div>
           </div>
           <div className="min-w-0 flex-1">

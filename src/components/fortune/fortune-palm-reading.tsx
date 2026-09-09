@@ -469,11 +469,18 @@ function PalmResult({
       </div>
 
       <div className="fortune-glass flex gap-3 rounded-[20px] p-3.5">
-        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
+        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photoUrl} alt="" className="h-full w-full object-cover" />
-          ) : null}
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src="/icon.png"
+              alt=""
+              className="h-[4.25rem] w-[4.25rem] object-contain"
+            />
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-semibold text-[#241C4F]">
