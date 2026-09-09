@@ -95,21 +95,9 @@ export function FortuneTopicGrid({
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-[15px] font-semibold text-[#2C2458]">{d.name}</p>
-              <p
-                className={cn(
-                  "mt-0.5 line-clamp-2 text-[12px] leading-snug",
-                  unlocked
-                    ? "text-[#5E5688]"
-                    : "select-none text-[#9A90C0] blur-[2px]"
-                )}
-              >
+              <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-[#5E5688]">
                 {d.blurb}
               </p>
-              {!unlocked ? (
-                <p className="mt-1 text-[10px] font-medium text-[#B8921F]">
-                  พรีเมียม · ดูเบื้องต้นได้
-                </p>
-              ) : null}
             </div>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/70 ring-1 ring-[#7B6BB0]/18">
               <ChevronRight className="h-5 w-5 text-[#7B5FD4]" strokeWidth={2.4} />

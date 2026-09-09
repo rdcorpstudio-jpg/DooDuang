@@ -212,14 +212,25 @@ export function AspectDetailPage({
           ) : null}
         </section>
 
+        {/* Free: open 2 blocks (preview + highlights). Premium: full detail. */}
         {!unlocked ? (
           <div className="mt-3 grid grid-cols-1 gap-2.5">
-            <LockedPreviewTile
-              title="จุดเด่นวันนี้"
-              unlocked={false}
-              preview={active.highlights.join(" · ")}
-              onUnlock={() => setPayOpen(true)}
-            />
+            <section className="fortune-glass rounded-[18px] px-3.5 py-3.5">
+              <p className="text-[12px] font-semibold tracking-[0.04em] text-[#C9A227]">
+                ★ จุดเด่นวันนี้
+              </p>
+              <ul className="mt-2.5 space-y-2">
+                {active.highlights.slice(0, 3).map((h) => (
+                  <li
+                    key={h}
+                    className="flex items-start gap-2 text-[13px] leading-snug text-[#4A4278]"
+                  >
+                    <FortuneIcon name="check" size={20} className="mt-0.5 shrink-0" />
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
             {active.why ? (
               <LockedPreviewTile
                 title="ทำไมวันนี้เป็นแบบนี้"
