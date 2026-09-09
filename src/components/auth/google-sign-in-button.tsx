@@ -1,20 +1,91 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  getRedirectResult,
+  signInWithPopup,
+  signInWithRedirect,
+} from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
 import {
   isInAppBrowser,
+  isIOS,
   openInExternalBrowser,
 } from "@/lib/browser/in-app-browser";
 import { cn } from "@/lib/utils";
 
+const CALLBACK_KEY = "dooduang-login-callback";
+
 function loginHandoffUrl(callbackUrl: string) {
   if (typeof window === "undefined") return undefined;
   const cb = encodeURIComponent(callbackUrl || "/dashboard");
-  // autologin=1 → Safari opens login and starts Google popup once
+  // autologin=1 → Safari continues with redirect login (no popup)
   return `${window.location.origin}/login?callbackUrl=${cb}&autologin=1`;
+}
+
+function rememberCallback(callbackUrl: string) {
+  try {
+    sessionStorage.setItem(CALLBACK_KEY, callbackUrl || "/dashboard");
+  } catch {
+    /* ignore */
+  }
+}
+
+function readCallback(fallback: string) {
+  try {
+    return sessionStorage.getItem(CALLBACK_KEY) || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function clearAutologinFromUrl() {
+  try {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("autologin")) {
+      url.searchParams.delete("autologin");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+async function exchangeIdToken(idToken: string) {
+  const res = await fetch("/api/auth/firebase", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken }),
+  });
+  const text = await res.text();
+  let data: { error?: string } = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error("เซิร์ฟเวอร์ล็อกอินตอบกลับผิดพลาด กรุณาลองใหม่");
+  }
+  if (!res.ok) {
+    throw new Error(data.error || "เข้าสู่ระบบไม่สำเร็จ");
+  }
+}
+
+function makeProvider() {
+  const provider = new GoogleAuthProvider();
+  provider.addScope("profile");
+  provider.addScope("email");
+  provider.setCustomParameters({ prompt: "select_account" });
+  return provider;
+}
+
+/** Prefer redirect on iOS Safari — popups are often blocked */
+function shouldUseRedirect(force = false) {
+  if (force) return true;
+  if (typeof window === "undefined") return false;
+  if (isIOS()) return true;
+  const sp = new URLSearchParams(window.location.search);
+  return sp.get("autologin") === "1";
 }
 
 export function GoogleSignInButton({
@@ -38,16 +109,41 @@ export function GoogleSignInButton({
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const redirectHandled = useRef(false);
   const autoStarted = useRef(false);
-  const runRef = useRef<() => Promise<void>>(async () => {});
 
-  async function runGoogleSignIn() {
+  async function finishLogin(idToken: string) {
+    await exchangeIdToken(idToken);
+    clearAutologinFromUrl();
+    const next = readCallback(callbackUrl);
+
+    if (onSuccess) {
+      await onSuccess();
+      setLoading(false);
+      return;
+    }
+
+    window.location.href = next || "/dashboard";
+  }
+
+  async function startRedirectLogin() {
+    const auth = getFirebaseAuth();
+    rememberCallback(callbackUrl);
+    try {
+      await auth.signOut();
+    } catch {
+      /* ignore */
+    }
+    await signInWithRedirect(auth, makeProvider());
+  }
+
+  async function runGoogleSignIn(opts?: { forceRedirect?: boolean }) {
     if (!isFirebaseClientConfigured()) {
       setError("ยังไม่ได้ตั้งค่า Firebase");
       return;
     }
 
-    // LINE / FB: hand off to Safari — continue with autologin=1 there
+    // LINE / FB: open Safari first
     if (isInAppBrowser()) {
       openInExternalBrowser(loginHandoffUrl(callbackUrl));
       return;
@@ -57,53 +153,20 @@ export function GoogleSignInButton({
     setError(null);
 
     try {
+      if (shouldUseRedirect(opts?.forceRedirect)) {
+        await startRedirectLogin();
+        return; // page will navigate away
+      }
+
       const auth = getFirebaseAuth();
       try {
         await auth.signOut();
       } catch {
-        // ignore
-      }
-      const provider = new GoogleAuthProvider();
-      provider.addScope("profile");
-      provider.addScope("email");
-      provider.setCustomParameters({ prompt: "select_account" });
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-
-      const res = await fetch("/api/auth/firebase", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
-
-      const text = await res.text();
-      let data: { error?: string } = {};
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        throw new Error("เซิร์ฟเวอร์ล็อกอินตอบกลับผิดพลาด กรุณาลองใหม่");
-      }
-      if (!res.ok) {
-        throw new Error(data.error || "เข้าสู่ระบบไม่สำเร็จ");
-      }
-
-      try {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has("autologin")) {
-          url.searchParams.delete("autologin");
-          window.history.replaceState({}, "", url.pathname + url.search);
-        }
-      } catch {
         /* ignore */
       }
-
-      if (onSuccess) {
-        await onSuccess();
-        setLoading(false);
-        return;
-      }
-
-      window.location.href = callbackUrl || "/dashboard";
+      const result = await signInWithPopup(auth, makeProvider());
+      const idToken = await result.user.getIdToken();
+      await finishLogin(idToken);
     } catch (err) {
       const raw = err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ";
       const code =
@@ -124,12 +187,13 @@ export function GoogleSignInButton({
         code === "auth/popup-blocked" ||
         raw.toLowerCase().includes("popup")
       ) {
-        if (isInAppBrowser()) {
-          openInExternalBrowser(loginHandoffUrl(callbackUrl));
-          setLoading(false);
+        // Fallback: full-page redirect (not blocked like popups)
+        try {
+          await startRedirectLogin();
           return;
+        } catch {
+          message = "เบราว์เซอร์บล็อกหน้าต่างล็อกอิน — กำลังลองวิธีอื่น";
         }
-        message = "เบราว์เซอร์บล็อกหน้าต่างล็อกอิน — อนุญาตป๊อปอัปแล้วลองใหม่";
       } else if (code === "auth/unauthorized-domain") {
         message =
           "โดเมนนี้ยังไม่อนุญาตใน Firebase — เพิ่มโดเมนใน Authentication → Settings → Authorized domains";
@@ -139,9 +203,36 @@ export function GoogleSignInButton({
     }
   }
 
-  runRef.current = runGoogleSignIn;
+  // Complete redirect return from Google
+  useEffect(() => {
+    if (redirectHandled.current) return;
+    if (!isFirebaseClientConfigured()) return;
+    redirectHandled.current = true;
 
-  // After LINE → Safari handoff: start Google login automatically once
+    let cancelled = false;
+    void (async () => {
+      try {
+        const auth = getFirebaseAuth();
+        const result = await getRedirectResult(auth);
+        if (cancelled || !result?.user) return;
+        setLoading(true);
+        const idToken = await result.user.getIdToken();
+        await finishLogin(idToken);
+      } catch (err) {
+        if (cancelled) return;
+        const raw = err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ";
+        setError(raw);
+        setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // After LINE → Safari: start redirect login (no popup = no block)
   useEffect(() => {
     if (autoStarted.current) return;
     if (typeof window === "undefined") return;
@@ -150,9 +241,10 @@ export function GoogleSignInButton({
     if (isInAppBrowser()) return;
     autoStarted.current = true;
     const t = window.setTimeout(() => {
-      void runRef.current();
-    }, 450);
+      void runGoogleSignIn({ forceRedirect: true });
+    }, 300);
     return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
