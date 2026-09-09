@@ -23,6 +23,8 @@ import {
 } from "@/lib/fortune/scan/build-palm-pack";
 import {
   canRescanScan,
+  clearSavedScan,
+  fileToStoredDataUrl,
   hasSavedScan,
   readSavedPalmScan,
   savePalmScan,
@@ -53,12 +55,14 @@ export function FortunePalmReading({
   const [step, setStep] = useState<Step>("ready");
   const [photo, setPhoto] = useState<File | null>(null);
   const [pack, setPack] = useState<PalmReadingPack | null>(null);
+  const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [canRescan, setCanRescan] = useState(true);
   const [cooldownDays, setCooldownDays] = useState(0);
   const [hasSaved, setHasSaved] = useState(false);
 
-  const photoUrl = useObjectUrl(photo);
+  const livePhotoUrl = useObjectUrl(photo);
+  const photoUrl = livePhotoUrl ?? savedPhotoUrls[0] ?? null;
 
   function refreshCooldown() {
     setCanRescan(canRescanScan("palm"));
@@ -69,7 +73,10 @@ export function FortunePalmReading({
   useEffect(() => {
     setUnlocked(isPremiumUnlocked());
     const saved = readSavedPalmScan();
-    if (saved) setPack(saved.pack);
+    if (saved) {
+      setPack(saved.pack);
+      setSavedPhotoUrls(saved.photoDataUrls ?? []);
+    }
     refreshCooldown();
   }, []);
 
@@ -93,10 +100,14 @@ export function FortunePalmReading({
     setStep("analyzing");
     try {
       const next = await buildPalmReadingPack(file, `${seed}-palm`);
-      await new Promise((r) => setTimeout(r, 700));
-      savePalmScan(next);
+      const thumb = await fileToStoredDataUrl(file);
+      // ลบผลเก่าแล้วเก็บผลใหม่แทน
+      clearSavedScan("palm");
+      savePalmScan(next, [thumb]);
       setPack(next);
+      setSavedPhotoUrls([thumb]);
       refreshCooldown();
+      await new Promise((r) => setTimeout(r, 700));
       setStep("result");
     } catch (err) {
       setError(
@@ -135,7 +146,10 @@ export function FortunePalmReading({
     setStep("ready");
     refreshCooldown();
     const saved = readSavedPalmScan();
-    if (saved) setPack(saved.pack);
+    if (saved) {
+      setPack(saved.pack);
+      setSavedPhotoUrls(saved.photoDataUrls ?? []);
+    }
   }
 
   function viewSaved() {
@@ -145,6 +159,7 @@ export function FortunePalmReading({
       return;
     }
     setPack(saved.pack);
+    setSavedPhotoUrls(saved.photoDataUrls ?? []);
     setPhoto(null);
     setError(null);
     setStep("result");
@@ -155,6 +170,7 @@ export function FortunePalmReading({
       setError(`สแกนได้อีกครั้งในอีก ${scanCooldownDaysLeft("palm")} วัน`);
       return;
     }
+    // พร้อมสแกนใหม่ — ผลเก่าจะถูกลบและแทนที่เมื่อวิเคราะห์สำเร็จ
     setPhoto(null);
     setError(null);
     setStep("ready");

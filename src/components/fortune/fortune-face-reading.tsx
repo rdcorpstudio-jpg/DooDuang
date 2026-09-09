@@ -23,6 +23,8 @@ import {
 } from "@/lib/fortune/scan/build-face-pack";
 import {
   canRescanScan,
+  clearSavedScan,
+  fileToStoredDataUrl,
   hasSavedScan,
   readSavedFaceScan,
   saveFaceScan,
@@ -56,6 +58,7 @@ export function FortuneFaceReading({
   const [sideFile, setSideFile] = useState<File | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
   const [pack, setPack] = useState<FaceReadingPack | null>(null);
+  const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [canRescan, setCanRescan] = useState(true);
   const [cooldownDays, setCooldownDays] = useState(0);
@@ -63,8 +66,10 @@ export function FortuneFaceReading({
 
   const frontPreviewUrl = useObjectUrl(frontFile);
   const sidePreviewUrl = useObjectUrl(sideFile);
-  const photoUrl = useObjectUrl(photos[0] ?? null);
-  const photoRightUrl = useObjectUrl(photos[1] ?? null);
+  const livePhotoUrl = useObjectUrl(photos[0] ?? null);
+  const livePhotoRightUrl = useObjectUrl(photos[1] ?? null);
+  const photoUrl = livePhotoUrl ?? savedPhotoUrls[0] ?? null;
+  const photoRightUrl = livePhotoRightUrl ?? savedPhotoUrls[1] ?? null;
 
   function refreshCooldown() {
     setCanRescan(canRescanScan("face"));
@@ -75,7 +80,10 @@ export function FortuneFaceReading({
   useEffect(() => {
     setUnlocked(isPremiumUnlocked());
     const saved = readSavedFaceScan();
-    if (saved) setPack(saved.pack);
+    if (saved) {
+      setPack(saved.pack);
+      setSavedPhotoUrls(saved.photoDataUrls ?? []);
+    }
     refreshCooldown();
   }, []);
 
@@ -103,10 +111,16 @@ export function FortuneFaceReading({
     setStep("analyzing");
     try {
       const next = await buildFaceReadingPack(files.slice(0, 2), `${seed}-face`);
-      await new Promise((r) => setTimeout(r, 700));
-      saveFaceScan(next);
+      const thumbs = await Promise.all(
+        files.slice(0, 2).map((f) => fileToStoredDataUrl(f))
+      );
+      // ลบผลเก่าแล้วเก็บผลใหม่แทน
+      clearSavedScan("face");
+      saveFaceScan(next, thumbs);
       setPack(next);
+      setSavedPhotoUrls(thumbs);
       refreshCooldown();
+      await new Promise((r) => setTimeout(r, 700));
       setStep("result");
     } catch (err) {
       setError(
@@ -151,7 +165,10 @@ export function FortuneFaceReading({
     setStep("ready");
     refreshCooldown();
     const saved = readSavedFaceScan();
-    if (saved) setPack(saved.pack);
+    if (saved) {
+      setPack(saved.pack);
+      setSavedPhotoUrls(saved.photoDataUrls ?? []);
+    }
   }
 
   function viewSaved() {
@@ -161,6 +178,7 @@ export function FortuneFaceReading({
       return;
     }
     setPack(saved.pack);
+    setSavedPhotoUrls(saved.photoDataUrls ?? []);
     setPhotos([]);
     setFrontFile(null);
     setSideFile(null);
@@ -173,6 +191,7 @@ export function FortuneFaceReading({
       setError(`สแกนได้อีกครั้งในอีก ${scanCooldownDaysLeft("face")} วัน`);
       return;
     }
+    // พร้อมสแกนใหม่ — ผลเก่าจะถูกลบและแทนที่เมื่อวิเคราะห์สำเร็จ
     setFrontFile(null);
     setSideFile(null);
     setPhotos([]);
