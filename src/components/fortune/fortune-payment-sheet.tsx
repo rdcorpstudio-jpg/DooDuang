@@ -352,6 +352,8 @@ export function FortunePaymentSheet({
     );
   }
 
+  if (!host) return null;
+
   return createPortal(
     <div
       className="no-sky-lift absolute inset-0 z-[80] flex items-center justify-center px-3.5"
