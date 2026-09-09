@@ -142,8 +142,8 @@ export function FortuneFreeZodiacToday({
           </span>
         </p>
 
-        {/* Free only: inline expand for long daily notes */}
-        {!deep && dailyMore ? (
+        {/* Premium: มุมลึก / ก่อนนอน / lucky hint */}
+        {!deep && unlocked && dailyMore ? (
           <>
             <p className="border-t border-[#7B6BB0]/14 py-3 text-[14px] leading-[1.7] text-[#4A4278]">
               <span className="font-semibold text-[#2C2458]">มุมลึก</span>
@@ -167,16 +167,41 @@ export function FortuneFreeZodiacToday({
       {!deep ? (
         <button
           type="button"
-          onClick={() => setDailyMore((v) => !v)}
-          aria-expanded={dailyMore}
-          className="relative z-[1] mt-1 inline-flex w-full items-center justify-center gap-1.5 py-2 text-[13px] font-semibold text-[#7B5FD4] outline-none transition active:opacity-70"
+          onClick={() => {
+            if (!unlocked) {
+              onUnlock?.();
+              return;
+            }
+            setDailyMore((v) => !v);
+          }}
+          aria-expanded={unlocked ? dailyMore : false}
+          disabled={!unlocked && !onUnlock}
+          className="relative z-[1] mt-1 inline-flex w-full items-center justify-center gap-1.5 py-2 text-[13px] font-semibold text-[#7B5FD4] outline-none transition active:opacity-70 disabled:opacity-60"
         >
-          {dailyMore ? "ย่อข้อความ" : "อ่านเพิ่มเติม"}
-          <FortuneIcon
-            name="arrow-right"
-            size={18}
-            className={cn("transition", dailyMore ? "rotate-90" : "rotate-0")}
-          />
+          {!unlocked ? (
+            <>
+              <FortuneIcon name="lock" size={16} />
+              อ่านเพิ่มเติม · พรีเมียม
+            </>
+          ) : dailyMore ? (
+            <>
+              ย่อข้อความ
+              <FortuneIcon
+                name="arrow-right"
+                size={18}
+                className="rotate-90 transition"
+              />
+            </>
+          ) : (
+            <>
+              อ่านเพิ่มเติม
+              <FortuneIcon
+                name="arrow-right"
+                size={18}
+                className="rotate-0 transition"
+              />
+            </>
+          )}
         </button>
       ) : null}
 
