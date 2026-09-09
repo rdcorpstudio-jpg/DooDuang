@@ -13,20 +13,31 @@ export function getInAppBrowserKind(
 ): InAppBrowserKind {
   const s = ua.toLowerCase();
   if (!s) return null;
-  if (s.includes(" line/") || s.includes("line/")) return "line";
+
+  // LINE WebView — UA usually contains "Line/x.y"
+  if (s.includes("line/") || /\bline\/\d/.test(s)) return "line";
+
   if (s.includes("fban") || s.includes("fbav") || s.includes("fb_iab"))
     return "facebook";
   if (s.includes("instagram")) return "instagram";
   if (s.includes("tiktok") || s.includes("bytedance") || s.includes("musical_ly"))
     return "tiktok";
-  // Generic WebView hints (Android)
+
+  // Android WebView
+  if (s.includes("; wv)") || s.includes("webview")) return "other";
+
+  // iOS embedded WebView (not full Safari): AppleWebKit without Version/ + Safari/
   if (
-    (s.includes("; wv)") || s.includes("webview")) &&
-    !s.includes("chrome/") &&
-    !s.includes("safari/")
+    isIOS(ua) &&
+    s.includes("applewebkit") &&
+    !s.includes("crios") &&
+    !s.includes("fxios") &&
+    !s.includes("edgios") &&
+    !(s.includes("version/") && s.includes("safari/"))
   ) {
     return "other";
   }
+
   return null;
 }
 

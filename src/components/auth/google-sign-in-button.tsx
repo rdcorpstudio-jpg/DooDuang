@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
-import { OpenInBrowserBanner } from "@/components/auth/open-in-browser-banner";
 import { Button } from "@/components/ui/button";
 import {
   isInAppBrowser,
   openInExternalBrowser,
 } from "@/lib/browser/in-app-browser";
 import { cn } from "@/lib/utils";
+
+function loginHandoffUrl(callbackUrl: string) {
+  if (typeof window === "undefined") return undefined;
+  return `${window.location.origin}/login?callbackUrl=${encodeURIComponent(callbackUrl || "/dashboard")}`;
+}
 
 export function GoogleSignInButton({
   callbackUrl = "/dashboard",
@@ -34,11 +38,6 @@ export function GoogleSignInButton({
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [inApp, setInApp] = useState(false);
-
-  useEffect(() => {
-    setInApp(isInAppBrowser());
-  }, []);
 
   async function handleClick() {
     if (!isFirebaseClientConfigured()) {
@@ -46,13 +45,9 @@ export function GoogleSignInButton({
       return;
     }
 
-    // LINE / FB in-app browsers block Google popup — hand off to Safari/Chrome first
+    // LINE / FB WebView: one button → deep-link to Safari/Chrome (no extra UI)
     if (isInAppBrowser()) {
-      openInExternalBrowser(
-        typeof window !== "undefined"
-          ? `${window.location.origin}/login?callbackUrl=${encodeURIComponent(callbackUrl || "/dashboard")}`
-          : undefined
-      );
+      openInExternalBrowser(loginHandoffUrl(callbackUrl));
       return;
     }
 
@@ -119,12 +114,10 @@ export function GoogleSignInButton({
         code === "auth/popup-blocked" ||
         raw.toLowerCase().includes("popup")
       ) {
-        if (isInAppBrowser()) {
-          openInExternalBrowser();
-          setLoading(false);
-          return;
-        }
-        message = "เบราว์เซอร์บล็อกหน้าต่างล็อกอิน — ลองใหม่ใน Safari / Chrome";
+        // Silent handoff — same Google button, no extra error/button
+        openInExternalBrowser(loginHandoffUrl(callbackUrl));
+        setLoading(false);
+        return;
       } else if (code === "auth/unauthorized-domain") {
         message =
           "โดเมนนี้ยังไม่อนุญาตใน Firebase — เพิ่มโดเมนใน Authentication → Settings → Authorized domains";
@@ -136,7 +129,6 @@ export function GoogleSignInButton({
 
   return (
     <div className={cn("space-y-3", className)}>
-      {inApp ? <OpenInBrowserBanner compact /> : null}
       <Button
         type="button"
         variant={variant}
