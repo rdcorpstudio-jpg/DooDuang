@@ -6,6 +6,7 @@ import { Camera, ChevronLeft, ImageIcon, Lock, RotateCcw, X } from "lucide-react
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { GuidedScanCapture } from "@/components/fortune/guided-scan-capture";
+import { ScanAnalyzingPanel } from "@/components/fortune/scan-analyzing-panel";
 import {
   LockedPreviewTile,
   UnlockDetailBanner,
@@ -246,39 +247,11 @@ export function FortuneFaceReading({
         ) : null}
 
         {step === "analyzing" ? (
-          <div className="mt-10 flex flex-1 flex-col items-center text-center">
-            <div className="flex items-center gap-2">
-              <div className="relative h-24 w-20 overflow-hidden rounded-[16px] bg-[#9B7FE8]/12 ring-1 ring-[#9B7FE8]/25">
-                {photoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={photoUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : null}
-              </div>
-              <div className="relative h-24 w-20 overflow-hidden rounded-[16px] bg-[#9B7FE8]/12 ring-1 ring-[#9B7FE8]/25">
-                {photoRightUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={photoRightUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : null}
-              </div>
-            </div>
-            <p className="mt-5 text-[15px] font-semibold text-[#241C4F]">
-              กำลังวิเคราะห์ด้วย AI…
-            </p>
-            <p className="mt-1.5 max-w-[16rem] text-[12px] leading-relaxed text-[#6B6490]">
-              อ่านทั้งด้านหน้าและด้านข้าง แล้วจับคู่กับคลังคำทำนาย
-            </p>
-            <div className="mt-5 h-1.5 w-40 overflow-hidden rounded-full bg-[#9B7FE8]/20">
-              <div className="h-full w-2/3 animate-pulse rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8]" />
-            </div>
-          </div>
+          <ScanAnalyzingPanel
+            mode="face"
+            photoUrl={photoUrl}
+            photoRightUrl={photoRightUrl}
+          />
         ) : null}
 
         {step === "result" && pack ? (
