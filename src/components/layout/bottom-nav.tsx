@@ -44,6 +44,7 @@ const TABS: Array<{
 ];
 
 const HOME_REVIEW_COUNT = 75174;
+const HOME_RATING = 5.0;
 
 /** Bottom nav — home mockup labels */
 export function BottomNav() {
@@ -64,8 +65,22 @@ export function BottomNav() {
       }}
     >
       {showReviews ? (
-        <p className="no-sky-lift px-3 pt-1.5 text-center text-[11px] font-medium tracking-wide text-[#6B6490]">
-          จำนวนรีวิวสะสม {HOME_REVIEW_COUNT.toLocaleString("th-TH")} รายการ
+        <p
+          className="no-sky-lift flex items-center justify-center gap-1.5 px-3 pt-1.5 text-[11px] font-medium tracking-wide text-[#6B6490]"
+          aria-label={`คะแนน ${HOME_RATING.toFixed(1)} จำนวนรีวิวสะสม ${HOME_REVIEW_COUNT.toLocaleString("th-TH")} รายการ`}
+        >
+          <span className="tracking-[0.08em] text-[#C9A227]" aria-hidden>
+            ★★★★★
+          </span>
+          <span className="font-semibold tabular-nums text-[#5B45B8]">
+            {HOME_RATING.toFixed(1)}
+          </span>
+          <span className="text-[#B0A8C8]" aria-hidden>
+            ·
+          </span>
+          <span>
+            จำนวนรีวิวสะสม {HOME_REVIEW_COUNT.toLocaleString("th-TH")} รายการ
+          </span>
         </p>
       ) : null}
       <div className="mx-auto grid max-w-[480px] grid-cols-4 gap-0.5 px-1.5 pt-2 pb-0.5">
