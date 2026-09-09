@@ -476,7 +476,7 @@ function PalmResult({
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src="/icon.png"
+              src="/images/app-icon.png"
               alt=""
               className="h-[4.25rem] w-[4.25rem] object-contain"
             />
