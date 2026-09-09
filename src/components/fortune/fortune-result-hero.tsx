@@ -1,3 +1,4 @@
+import { APP_BRAND_MARK } from "@/lib/site";
 "use client";
 
 import Link from "next/link";
@@ -93,9 +94,7 @@ export function FortuneResultHero({
             aria-label="กลับ"
           >
             <ChevronLeft className="h-5 w-5 text-[#2C2458]" strokeWidth={2.3} />
-            <span className="text-[12px] font-bold tracking-[0.22em] text-[#C9A227]">
-              DOODUANG
-            </span>
+            <span className="text-[12px] font-bold tracking-[0.22em] text-[#C9A227]">{APP_BRAND_MARK}</span>
           </Link>
           <p className="pt-0.5 text-[12px] font-semibold text-[#3A3270]">
             สวัสดี คุณ{displayName}

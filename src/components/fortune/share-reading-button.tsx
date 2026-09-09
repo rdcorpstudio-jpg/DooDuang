@@ -6,7 +6,7 @@ import type {
   FaceReadingPack,
   PalmReadingPack,
 } from "@/lib/fortune/scan/types";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, APP_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 function appOrigin() {
@@ -28,7 +28,7 @@ export function buildFaceShareText(pack: FaceReadingPack) {
     .join("\n\n");
 
   return [
-    `ผลโหงวเฮ้งจาก DooDuang`,
+    `ผลโหงวเฮ้งจาก ${APP_NAME}`,
     `${shapeLabel} — ${shapeCopy.title}`,
     shapeCopy.blurb,
     "",
@@ -55,7 +55,7 @@ export function buildPalmShareText(pack: PalmReadingPack) {
     .join("\n\n");
 
   return [
-    `ผลอ่านลายมือจาก DooDuang`,
+    `ผลอ่านลายมือจาก ${APP_NAME}`,
     `ธาตุมือ: ${natureLabel}`,
     "",
     natureCopy.personality,

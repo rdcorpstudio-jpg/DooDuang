@@ -6,8 +6,11 @@ export function Footer() {
     <footer className="shrink-0 border-t sacred-chrome px-4 py-3.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-baseline gap-0.5">
-          <span className="font-sacred text-[12px] text-white/55">{APP_NAME_PRIMARY}</span>
+          <span className="font-sacred text-[12px] text-white/55">
+            {APP_NAME_PRIMARY}
+          </span>
           <span className="font-sacred intro-title-accent text-[12px] opacity-80">
+            {" "}
             {APP_NAME_ACCENT}
           </span>
         </div>

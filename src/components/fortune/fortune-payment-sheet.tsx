@@ -7,7 +7,7 @@ import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
 import { PREMIUM_LIST_PRICE } from "@/lib/fortune/premium-offer-countdown";
-import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK } from "@/lib/site";
 import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
 import { cn } from "@/lib/utils";
 
@@ -168,7 +168,7 @@ export function FortunePaymentSheet({
       </div>
 
       <p className="mt-3 font-sacred text-[11px] tracking-[0.2em] text-[#C9A227]">
-        DOODUANG · PREMIUM
+        {`${APP_BRAND_MARK} · PREMIUM`}
       </p>
       <h2
         id={titleId}

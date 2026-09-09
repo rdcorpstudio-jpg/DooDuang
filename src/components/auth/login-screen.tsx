@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, Lock, Sparkle, UserRound } from "lucide-react";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { AnimatedPage } from "@/components/ui/reveal";
+import { APP_BRAND_MARK } from "@/lib/site";
 
 export function LoginScreen({ callbackUrl = "/dashboard" }: { callbackUrl?: string }) {
   const router = useRouter();
@@ -26,8 +27,8 @@ export function LoginScreen({ callbackUrl = "/dashboard" }: { callbackUrl?: stri
             fill="currentColor"
             strokeWidth={0}
           />
-          <p className="font-sacred text-[12px] tracking-[0.26em] text-[#7B5FD4]">
-            DOODUANG
+          <p className="font-sacred text-[12px] tracking-[0.18em] text-[#7B5FD4]">
+            {APP_BRAND_MARK}
           </p>
         </div>
         <span aria-hidden className="justify-self-end" />

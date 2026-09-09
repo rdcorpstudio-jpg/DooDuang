@@ -1,3 +1,4 @@
+import { APP_BRAND_MARK } from "@/lib/site";
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
@@ -71,9 +72,7 @@ export function PremiumDetailShell({
           </Link>
           <div className="flex flex-col items-center justify-self-center">
             <FortuneIcon name="moon" size={16} className="dd-icon-float -mb-0.5" />
-            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
-              DOODUANG
-            </p>
+            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">{APP_BRAND_MARK}</p>
           </div>
           <span aria-hidden className="justify-self-end" />
         </div>

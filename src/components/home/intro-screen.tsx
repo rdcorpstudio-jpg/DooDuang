@@ -11,7 +11,12 @@ import {
 } from "lucide-react";
 import { AstroHeroOrb } from "@/components/home/astro-hero-orb";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
-import { APP_NAME_ACCENT, APP_NAME_PRIMARY } from "@/lib/site";
+import {
+  APP_BRAND_MARK,
+  APP_NAME_ACCENT,
+  APP_NAME_PRIMARY,
+  APP_TAGLINE,
+} from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const FEATURES = [
@@ -67,8 +72,8 @@ export function IntroScreen() {
       <Reveal visible={mounted} delay={0} className="relative z-20 shrink-0">
         <div className="flex flex-col items-center">
           <FortuneIcon name="sparkle" size={18} className="mb-0.5" />
-          <p className="font-sacred text-[13px] tracking-[0.28em] text-[#C9A227]">
-            DOODUANG
+          <p className="font-sacred text-[13px] tracking-[0.18em] text-[#C9A227]">
+            {APP_BRAND_MARK}
           </p>
         </div>
       </Reveal>
@@ -92,11 +97,11 @@ export function IntroScreen() {
           className="-mt-1 w-full max-w-[320px] text-center"
         >
           <h1 className="font-sacred text-[2.15rem] font-bold leading-[1.15] tracking-wide text-[#2C2458] sm:text-[2.35rem]">
-            <span>{APP_NAME_PRIMARY}</span>
+            <span>{APP_NAME_PRIMARY}</span>{" "}
             <span className="text-[#5B45B8]">{APP_NAME_ACCENT}</span>
           </h1>
           <p className="mt-2.5 text-[14px] font-medium leading-snug text-[#3A3270]">
-            อ่านจังหวะชีวิตในแบบของคุณ
+            {APP_TAGLINE}
           </p>
           <p className="mt-1.5 text-[13px] leading-snug text-[#6B6490]">
             ค้นพบแนวทางเรื่องงาน เงิน และความรัก

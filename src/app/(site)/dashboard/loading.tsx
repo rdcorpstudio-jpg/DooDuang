@@ -1,3 +1,4 @@
+import { APP_BRAND_MARK } from "@/lib/site";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 
 /** Shown while /dashboard (บัญชี) server data loads */
@@ -12,9 +13,7 @@ export default function DashboardLoading() {
         <FortuneIcon name="profile" size={34} plain />
       </div>
 
-      <p className="mt-5 font-sacred text-[12px] tracking-[0.22em] text-[#C9A227]">
-        DOODUANG
-      </p>
+      <p className="mt-5 font-sacred text-[12px] tracking-[0.22em] text-[#C9A227]">{APP_BRAND_MARK}</p>
       <p className="mt-2 text-[15px] font-semibold text-[#241C4F]">
         กำลังเปิดบัญชี…
       </p>

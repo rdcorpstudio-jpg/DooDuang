@@ -1,3 +1,4 @@
+import { APP_BRAND_MARK } from "@/lib/site";
 "use client";
 
 import { useEffect, useState } from "react";
@@ -54,9 +55,7 @@ export function FortuneLoading({
         <div className="w-[6.5rem]" aria-hidden />
         <div className="flex flex-col items-center pt-0.5">
           <FortuneIcon name="sparkle" size={16} className="mb-0.5" />
-          <p className="font-sacred text-[13px] tracking-[0.28em] text-[#C9A227]">
-            DOODUANG
-          </p>
+          <p className="font-sacred text-[13px] tracking-[0.28em] text-[#C9A227]">{APP_BRAND_MARK}</p>
         </div>
         <span className="fortune-loading-pill fortune-loading-pill-status mt-0.5">
           <span className="fortune-loading-pulse-dot" />

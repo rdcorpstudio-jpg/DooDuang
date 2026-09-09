@@ -27,7 +27,7 @@ export async function Header() {
             style={{ mixBlendMode: "screen" }}
             unoptimized
           />
-          <span className="flex items-baseline gap-0.5">
+          <span className="flex items-baseline gap-1">
             <span className="font-sacred text-[1.05rem] text-white transition-opacity group-hover:opacity-90">
               {APP_NAME_PRIMARY}
             </span>

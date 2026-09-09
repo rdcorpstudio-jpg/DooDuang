@@ -1,9 +1,11 @@
-export const APP_NAME = "ดูดวงชะตา";
-export const APP_NAME_PRIMARY = "ดูดวง";
-export const APP_NAME_ACCENT = "ชะตา";
-export const APP_TAGLINE = "เปิดประตูสู่โลกแห่งการทำนาย";
+export const APP_NAME = "แม่มั่งมี พามู";
+export const APP_NAME_PRIMARY = "แม่มั่งมี";
+export const APP_NAME_ACCENT = "พามู";
+/** Short mark for eyebrows / watermarks */
+export const APP_BRAND_MARK = "แม่มั่งมี";
+export const APP_TAGLINE = "พามู พาดูดวง พามั่งมี";
 export const APP_PURPOSE =
-  "DooDuang เป็นเว็บดูดวงออนไลน์ เปิดไพ่ทาโรต์ ดูดวงความรัก การงาน การเงิน และสุขภาพได้ทันที โดยไม่ต้องเข้าสู่ระบบ กรอกอีเมลหลังดูดวงเพื่อรับลิงก์ดูผลซ้ำ";
+  "แม่มั่งมี พามู เป็นเว็บดูดวงออนไลน์ เปิดไพ่ทาโรต์ ดูดวงความรัก การงาน การเงิน และสุขภาพได้ทันที โดยไม่ต้องเข้าสู่ระบบ กรอกอีเมลหลังดูดวงเพื่อรับลิงก์ดูผลซ้ำ";
 export const FORTUNE_UNLOCK_PRICE = 399;
 /** Premium access duration after purchase (months) */
 export const FORTUNE_PACKAGE_MONTHS = 1;

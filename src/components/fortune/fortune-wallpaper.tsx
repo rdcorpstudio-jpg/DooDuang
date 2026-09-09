@@ -16,7 +16,7 @@ import {
   isPremiumUnlocked,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
-import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import { FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const LOAD_MS = 3200;
@@ -117,9 +117,7 @@ export function FortuneWallpaper({ className }: { className?: string }) {
           </button>
           <div className="flex flex-col items-center justify-self-center">
             <FortuneIcon name="moon" size={14} className="-mb-0.5" />
-            <p className="font-sacred text-[11px] tracking-[0.26em] text-[#C9A227]">
-              DOODUANG
-            </p>
+            <p className="font-sacred text-[11px] tracking-[0.26em] text-[#C9A227]">{APP_BRAND_MARK}</p>
           </div>
           <span
             className={cn(

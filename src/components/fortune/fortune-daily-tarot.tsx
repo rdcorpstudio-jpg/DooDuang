@@ -8,7 +8,7 @@ import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet"
 import { TarotPrayerSheet } from "@/components/fortune/tarot-prayer-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { drawTarotCard, TAROT_DECK_COUNT } from "@/lib/fortune/tarot-deck";
-import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import { FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 function todayKey() {
@@ -136,9 +136,7 @@ export function FortuneDailyTarot({
           </button>
           <div className="flex flex-col items-center justify-self-center">
             <FortuneIcon name="moon" size={16} className="-mb-0.5" />
-            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
-              DOODUANG
-            </p>
+            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">{APP_BRAND_MARK}</p>
           </div>
           <p className="justify-self-end text-right text-[11px] text-[#8A82B0]">
             1 ใบ / วัน

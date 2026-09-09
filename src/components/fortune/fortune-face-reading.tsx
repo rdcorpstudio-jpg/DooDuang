@@ -34,7 +34,7 @@ import {
   isPremiumUnlocked,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
-import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import { FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK, APP_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type Step = "ready" | "analyzing" | "result";
@@ -397,9 +397,7 @@ function Header({ onBack }: { onBack: () => void }) {
       </button>
       <div className="flex flex-col items-center justify-self-center">
         <FortuneIcon name="moon" size={16} className="-mb-0.5" />
-        <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
-          DOODUANG
-        </p>
+        <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">{APP_BRAND_MARK}</p>
       </div>
       <span aria-hidden className="justify-self-end" />
     </div>
@@ -646,7 +644,7 @@ function FaceResult({
 
       {unlocked ? (
         <ShareReadingButton
-          title="ผลโหงวเฮ้ง · DooDuang"
+          title={`ผลโหงวเฮ้ง · ${APP_NAME}`}
           text={buildFaceShareText(pack)}
           variant="primary"
           className="mt-1"

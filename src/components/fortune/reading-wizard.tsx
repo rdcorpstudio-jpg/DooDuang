@@ -1,3 +1,4 @@
+import { APP_BRAND_MARK } from "@/lib/site";
 "use client";
 
 import { useEffect, useState, type FocusEvent } from "react";
@@ -682,9 +683,7 @@ export function ReadingWizard() {
           )}
           <div className="flex flex-col items-center justify-self-center">
             <FortuneIcon name="moon" size={16} className="-mb-0.5" />
-            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">
-              DOODUANG
-            </p>
+            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">{APP_BRAND_MARK}</p>
           </div>
           <div className="justify-self-end text-right">
             <p className="text-[13px] font-semibold tabular-nums text-[#5B45B8]">
