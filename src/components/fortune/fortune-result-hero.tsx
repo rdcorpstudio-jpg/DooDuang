@@ -36,7 +36,9 @@ export function FortuneResultHero({
   tip?: string;
   className?: string;
 }) {
-  const displayName = realName.trim() || nickname;
+  // Prefer nickname so profile edits show on the card immediately
+  const displayName =
+    (nickname || "").trim() || (realName || "").trim() || "สมาชิก";
   const dateLabel = formatHeroDate();
   const support =
     (quote || "").trim() ||
@@ -52,6 +54,17 @@ export function FortuneResultHero({
     ? "/images/bg/hero-male-emperor-0909.jpg"
     : "/images/bg/hero-female-guanyin-0909.jpg";
   const objectPosition = isMale ? "72% 40%" : "70% 28%";
+
+  // Male art is denser — scale type to match woman visual weight
+  const headlineClass = isMale
+    ? "mt-3 max-w-[56%] text-[1.35rem] font-bold leading-[1.28] tracking-tight text-[#1E1744]"
+    : "mt-3 max-w-[56%] text-[1.55rem] font-bold leading-[1.3] tracking-tight text-[#1E1744]";
+  const supportClass = isMale
+    ? "mt-2.5 max-w-[54%] text-[12px] font-medium leading-relaxed text-[#3F3768]"
+    : "mt-2.5 max-w-[54%] text-[13px] font-medium leading-relaxed text-[#3F3768]";
+  const footerClass = isMale
+    ? "text-[11px] font-semibold leading-snug text-[#3F3768]"
+    : "text-[12px] font-semibold leading-snug text-[#3F3768]";
 
   return (
     <section
@@ -104,22 +117,27 @@ export function FortuneResultHero({
         </div>
 
         {/* Headline block */}
-        <h2 className="mt-3 max-w-[56%] text-[1.55rem] font-bold leading-[1.3] tracking-tight text-[#1E1744]">
-          {headline}
-        </h2>
-        <div className="mt-2 h-[2px] w-9 rounded-full bg-[#C9A227] dd-gold-pulse" aria-hidden />
-        <p className="mt-2.5 max-w-[54%] text-[13px] font-medium leading-relaxed text-[#3F3768]">
-          {support}
-        </p>
+        <h2 className={headlineClass}>{headline}</h2>
+        <div
+          className="mt-2 h-[2px] w-9 rounded-full bg-[#C9A227] dd-gold-pulse"
+          aria-hidden
+        />
+        <p className={supportClass}>{support}</p>
 
         {/* Tip row */}
         <div className="mt-auto max-w-[58%] border-t border-[#9B90C8]/55 pt-3">
           <div className="flex items-center gap-2">
-            <FortuneIcon name="sparkle" size={15} plain className="fortune-spark shrink-0" />
-            <span className="h-3 w-px shrink-0 bg-[#C9A227]/55" aria-hidden />
-            <p className="text-[12px] font-semibold leading-snug text-[#3F3768]">
-              {footerTip}
-            </p>
+            <FortuneIcon
+              name="sparkle"
+              size={15}
+              plain
+              className="fortune-spark shrink-0"
+            />
+            <span
+              className="h-3 w-px shrink-0 bg-[#C9A227]/55"
+              aria-hidden
+            />
+            <p className={footerClass}>{footerTip}</p>
           </div>
         </div>
       </div>

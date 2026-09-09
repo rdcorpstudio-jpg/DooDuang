@@ -27,7 +27,10 @@ import { ZodiacSignImage } from "@/components/fortune/zodiac-sign-image";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { getZodiacByBirthDate } from "@/lib/fortune/zodiac";
 import {
+  canEditFortuneProfile,
   hydrateFortuneProfileFromWizard,
+  profileEditCooldownDaysLeft,
+  PROFILE_EDIT_COOLDOWN_MS,
   readFortuneProfile,
   writeFortuneProfile,
   type FortuneUserProfile,
@@ -115,6 +118,7 @@ export function AccountDashboard({
   const [premium, setPremium] = useState(false);
   const [editing, setEditing] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [draft, setDraft] = useState({
     realName: "",
     nickname: "",
@@ -156,7 +160,12 @@ export function AccountDashboard({
     user.name?.trim() ||
     "สมาชิก";
 
+  const editAllowed = canEditFortuneProfile(profile);
+  const cooldownDays = profileEditCooldownDaysLeft(profile);
+
   function openEdit() {
+    if (!editAllowed) return;
+    setSaveError(null);
     setDraft({
       realName: profile?.realName ?? "",
       nickname: profile?.nickname ?? "",
@@ -167,7 +176,27 @@ export function AccountDashboard({
   }
 
   function saveProfile() {
-    if (!draft.nickname.trim() || !draft.birthDate) return;
+    setSaveError(null);
+    if (!draft.nickname.trim()) {
+      setSaveError("กรอกชื่อเล่นก่อนบันทึก");
+      return;
+    }
+    if (!draft.birthDate) {
+      setSaveError("เลือกวันเกิดก่อนบันทึก");
+      return;
+    }
+    if (!draft.gender) {
+      setSaveError("เลือกเพศก่อนบันทึก");
+      return;
+    }
+    if (profile && !canEditFortuneProfile(profile)) {
+      setSaveError(
+        `แก้ไขโปรไฟล์ได้อีกครั้งในอีก ${profileEditCooldownDaysLeft(profile)} วัน`
+      );
+      setEditing(false);
+      return;
+    }
+
     const existing = readFortuneProfile();
     const next = writeFortuneProfile({
       realName: draft.realName,
@@ -178,8 +207,31 @@ export function AccountDashboard({
       birthPlace: existing?.birthPlace,
       focus: existing?.focus,
       deepenSkipped: existing?.deepenSkipped,
+      // One save → lock for 3 weeks
+      profileLockedUntil: new Date(
+        Date.now() + PROFILE_EDIT_COOLDOWN_MS
+      ).toISOString(),
     });
-    setProfile(next);
+
+    // Confirm persistence
+    const verified = readFortuneProfile();
+    if (
+      !verified ||
+      verified.nickname !== next.nickname ||
+      verified.birthDate !== next.birthDate ||
+      verified.gender !== next.gender
+    ) {
+      setSaveError("บันทึกไม่สำเร็จ ลองปิดโหมดไม่ระบุตัวตนแล้วเปิดใหม่");
+      return;
+    }
+
+    setProfile(verified);
+    setDraft({
+      realName: verified.realName,
+      nickname: verified.nickname,
+      birthDate: verified.birthDate,
+      gender: verified.gender,
+    });
     setEditing(false);
   }
 
@@ -279,16 +331,26 @@ export function AccountDashboard({
             </p>
           </div>
           {!editing ? (
-            <button
-              type="button"
-              onClick={openEdit}
-              className="inline-flex items-center gap-1 rounded-full bg-[#EDE6FF] px-2.5 py-1.5 text-[12px] font-medium text-[#6A48C8] outline-none transition active:scale-[0.98]"
-            >
-              <Pencil className="h-3 w-3" strokeWidth={2} />
-              แก้ไข
-            </button>
+            editAllowed ? (
+              <button
+                type="button"
+                onClick={openEdit}
+                className="inline-flex items-center gap-1 rounded-full bg-[#EDE6FF] px-2.5 py-1.5 text-[12px] font-medium text-[#6A48C8] outline-none transition active:scale-[0.98]"
+              >
+                <Pencil className="h-3 w-3" strokeWidth={2} />
+                แก้ไข
+              </button>
+            ) : (
+              <span className="rounded-full bg-[#F3EEFF] px-2.5 py-1.5 text-[11px] font-medium text-[#7A72A0]">
+                แก้ได้อีกใน {cooldownDays} วัน
+              </span>
+            )
           ) : null}
         </div>
+
+        {saveError ? (
+          <p className="mb-2 text-center text-[12px] text-red-500/90">{saveError}</p>
+        ) : null}
 
         {editing ? (
           <div className="space-y-3">
@@ -356,11 +418,17 @@ export function AccountDashboard({
                 })}
               </div>
             </div>
+            <p className="text-center text-[11px] text-[#8A82B0]">
+              บันทึกแล้วจะแก้ไขได้อีกครั้งหลัง 3 สัปดาห์
+            </p>
             <div className="flex gap-2 pt-1">
               {profile ? (
                 <button
                   type="button"
-                  onClick={() => setEditing(false)}
+                  onClick={() => {
+                    setEditing(false);
+                    setSaveError(null);
+                  }}
                   className="flex-1 rounded-full bg-white/70 py-3 text-[14px] font-medium text-[#5E5688] ring-1 ring-[#7B6BB0]/15"
                 >
                   ยกเลิก
@@ -369,7 +437,11 @@ export function AccountDashboard({
               <button
                 type="button"
                 onClick={saveProfile}
-                disabled={!draft.nickname.trim() || !draft.birthDate}
+                disabled={
+                  !draft.nickname.trim() ||
+                  !draft.birthDate ||
+                  !draft.gender
+                }
                 className="flex-1 rounded-full bg-[#6A48C8] py-3 text-[14px] font-semibold text-white disabled:opacity-50"
               >
                 บันทึกโปรไฟล์

@@ -139,6 +139,13 @@ export function BirthDatePicker({
   const [month, setMonth] = useState(initial.month);
   const [day, setDay] = useState(initial.day);
 
+  // Commit visible wheel value when parent has no ISO yet (enables Save)
+  useEffect(() => {
+    if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) return;
+    onChange(toIso(initial.year, initial.month, initial.day));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once on mount for empty value
+  }, []);
+
   const years = useMemo(
     () =>
       Array.from({ length: maxYear - minYear + 1 }, (_, i) => {

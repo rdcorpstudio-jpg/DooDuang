@@ -4,6 +4,9 @@ import type { FortuneFocus } from "@/lib/fortune/analyze";
 export const FORTUNE_PROFILE_KEY = "dooduang-fortune-profile";
 export const WIZARD_CACHE_KEY = "dooduang-wizard-session";
 
+/** After each successful profile save, next edit unlocks in 3 weeks. */
+export const PROFILE_EDIT_COOLDOWN_MS = 21 * 24 * 60 * 60 * 1000;
+
 export type FortuneUserProfile = {
   realName: string;
   nickname: string;
@@ -17,6 +20,8 @@ export type FortuneUserProfile = {
   focus?: FortuneFocus;
   /** User skipped deepen form after unlock */
   deepenSkipped?: boolean;
+  /** ISO — cannot edit again until this time */
+  profileLockedUntil?: string;
   updatedAt: string;
 };
 
@@ -42,9 +47,30 @@ export function readFortuneProfile(): FortuneUserProfile | null {
   }
 }
 
+export function canEditFortuneProfile(
+  profile: FortuneUserProfile | null | undefined
+): boolean {
+  if (!profile?.profileLockedUntil) return true;
+  const until = Date.parse(profile.profileLockedUntil);
+  if (Number.isNaN(until)) return true;
+  return Date.now() >= until;
+}
+
+export function profileEditCooldownDaysLeft(
+  profile: FortuneUserProfile | null | undefined
+): number {
+  if (!profile?.profileLockedUntil) return 0;
+  const until = Date.parse(profile.profileLockedUntil);
+  if (Number.isNaN(until)) return 0;
+  const ms = until - Date.now();
+  if (ms <= 0) return 0;
+  return Math.max(1, Math.ceil(ms / (24 * 60 * 60 * 1000)));
+}
+
 export function writeFortuneProfile(
   input: Omit<FortuneUserProfile, "updatedAt"> & { updatedAt?: string }
 ): FortuneUserProfile {
+  const existing = readFortuneProfile();
   const profile: FortuneUserProfile = {
     realName: input.realName.trim(),
     nickname: input.nickname.trim(),
@@ -54,12 +80,40 @@ export function writeFortuneProfile(
     birthPlace: input.birthPlace?.trim() || undefined,
     focus: input.focus,
     deepenSkipped: input.deepenSkipped,
+    profileLockedUntil:
+      input.profileLockedUntil !== undefined
+        ? input.profileLockedUntil
+        : existing?.profileLockedUntil,
     updatedAt: input.updatedAt ?? new Date().toISOString(),
   };
   try {
     localStorage.setItem(FORTUNE_PROFILE_KEY, JSON.stringify(profile));
+    // Keep wizard session in sync so old cache cannot overwrite a saved profile
+    const raw = sessionStorage.getItem(WIZARD_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as {
+        step?: string;
+        profile?: Record<string, unknown>;
+        result?: unknown;
+      };
+      if (parsed?.step === "result" && parsed.profile) {
+        sessionStorage.setItem(
+          WIZARD_CACHE_KEY,
+          JSON.stringify({
+            ...parsed,
+            profile: {
+              ...parsed.profile,
+              realName: profile.realName,
+              nickname: profile.nickname,
+              birthDate: profile.birthDate,
+              gender: profile.gender,
+            },
+          })
+        );
+      }
+    }
   } catch {
-    /* ignore */
+    /* ignore storage failures */
   }
   return profile;
 }
@@ -69,8 +123,12 @@ export function isPremiumDeepenComplete(
   profile: FortuneUserProfile | null | undefined
 ): boolean {
   if (!profile) return false;
-  const timeOk = Boolean(profile.birthTime && /^\d{1,2}:\d{2}$/.test(profile.birthTime));
-  const placeOk = Boolean(profile.birthPlace && profile.birthPlace.trim().length >= 2);
+  const timeOk = Boolean(
+    profile.birthTime && /^\d{1,2}:\d{2}$/.test(profile.birthTime)
+  );
+  const placeOk = Boolean(
+    profile.birthPlace && profile.birthPlace.trim().length >= 2
+  );
   return timeOk && placeOk;
 }
 

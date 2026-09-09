@@ -109,11 +109,12 @@ function writeWizardCache(profile: ProfileForm, result: FortuneApiResult) {
       nickname: profile.nickname,
       birthDate: profile.birthDate,
       gender: profile.gender,
-      // Free path must not wipe premium deepen fields
+      // Free path must not wipe premium deepen fields / edit cooldown
       birthTime: existing?.birthTime,
       birthPlace: existing?.birthPlace,
       focus: existing?.focus,
       deepenSkipped: existing?.deepenSkipped,
+      profileLockedUntil: existing?.profileLockedUntil,
     });
   }
 }

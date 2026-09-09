@@ -92,7 +92,7 @@ export function LifeInsightMockup({
     : undefined;
   const deepTime = isPremiumPage ? birthTime : undefined;
   const deepPlace = isPremiumPage ? birthPlace : undefined;
-  const displayName = realName ?? nickname;
+  const displayName = (nickname || "").trim() || (realName || "").trim() || "สมาชิก";
 
   const analyzeInput = useMemo(
     () => ({
