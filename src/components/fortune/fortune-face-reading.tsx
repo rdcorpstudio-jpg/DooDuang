@@ -667,22 +667,9 @@ function ExpandableBody({
   text: string;
   className?: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const long = text.length > 110;
   return (
     <div className={className}>
-      <p className="text-[13px] leading-[1.75] text-[#3A3270]">
-        {open || !long ? text : `${text.slice(0, 100).trim()}…`}
-      </p>
-      {long ? (
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="mt-1.5 text-[12px] font-medium text-[#7B5FD4] outline-none"
-        >
-          {open ? "ย่อ" : "อ่านเพิ่มเติม"}
-        </button>
-      ) : null}
+      <p className="text-[13px] leading-[1.75] text-[#3A3270]">{text}</p>
     </div>
   );
 }
