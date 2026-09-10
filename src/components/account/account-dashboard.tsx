@@ -39,29 +39,12 @@ import { getPremiumUnlockedUntil, isPremiumUnlocked } from "@/lib/fortune/premiu
 import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-export type AccountHistoryItem = {
-  id: string;
-  type: string;
-  preview: string;
-  createdAt: string;
-};
-
 type AccountUser = {
   id: string;
   name?: string | null;
   email?: string | null;
   image?: string | null;
   credits: number;
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  daily: "ดวงรายวัน",
-  love: "ความรัก",
-  career: "การงาน",
-  money: "การเงิน",
-  health: "สุขภาพ",
-  overall: "ภาพรวมชีวิต",
-  tarot: "ไพ่ทาโรต์",
 };
 
 const QUICK_LINKS = [
@@ -108,10 +91,8 @@ function genderLabel(gender: string) {
 /** Logged-in account / profile — light lilac glass to match fortune UI */
 export function AccountDashboard({
   user,
-  history,
 }: {
   user: AccountUser;
-  history: AccountHistoryItem[];
 }) {
   const router = useRouter();
   const [profile, setProfile] = useState<FortuneUserProfile | null>(null);
@@ -602,42 +583,6 @@ export function AccountDashboard({
           </span>
           <ChevronRight className="h-4 w-4 text-[#7B5FD4]" strokeWidth={2.2} />
         </Link>
-      </section>
-
-      {/* History */}
-      <section className="fortune-glass rounded-[20px] px-3.5 py-4">
-        <h2 className="text-[17px] font-semibold text-[#2C2458]">
-          ประวัติดูดวง
-        </h2>
-        <p className="mt-0.5 text-[12px] text-[#6B6490]">
-          บันทึกบนบัญชีที่ล็อกอิน
-        </p>
-        {history.length === 0 ? (
-          <p className="mt-4 py-6 text-center text-[13px] text-[#8A82B0]">
-            ยังไม่มีประวัติ — ลองดูดวงแล้วบันทึกไว้
-          </p>
-        ) : (
-          <ul className="mt-3 space-y-2">
-            {history.map((item) => (
-              <li
-                key={item.id}
-                className="rounded-[14px] bg-white/65 px-3 py-2.5 ring-1 ring-[#7B6BB0]/12"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[13px] font-medium text-[#2C2458]">
-                    {TYPE_LABELS[item.type] ?? item.type}
-                  </span>
-                  <span className="text-[11px] text-[#8A82B0]">
-                    {new Date(item.createdAt).toLocaleDateString("th-TH")}
-                  </span>
-                </div>
-                <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed text-[#5E5688]">
-                  {item.preview}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
       </section>
 
       <button

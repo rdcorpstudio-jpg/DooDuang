@@ -54,7 +54,7 @@ export function LoginScreen({
             เข้าสู่ระบบ
           </h1>
           <p className="mt-1.5 text-[13px] leading-relaxed text-[#5E5688]">
-            บันทึกประวัติและปลดล็อกสิทธิ์พรีเมียม
+            ปลดล็อกสิทธิ์พรีเมียมและบันทึกโปรไฟล์
           </p>
 
           <GoogleSignInButton

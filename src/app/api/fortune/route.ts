@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { requireDb } from "@/lib/db";
-import { readings } from "@/lib/db/schema";
 import { generateReading } from "@/lib/fortune/generate";
 import { READING_OPTIONS, type ReadingType } from "@/lib/fortune/zodiac";
-import { createShareToken } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const maxDuration = 15;
@@ -49,38 +45,15 @@ export async function POST(request: Request) {
     };
 
     const fortune = await generateReading(type, profile);
-    const shareToken = createShareToken();
-    const session = await auth().catch(() => null);
 
-    try {
-      const db = requireDb();
-      await db.insert(readings).values({
-        userId: session?.user.id,
-        type,
-        input: JSON.stringify(profile),
-        result: JSON.stringify(fortune),
-        shareToken,
-        isPaid: false,
-      });
-    } catch (err) {
-      console.error("Failed to save reading:", err);
-      return NextResponse.json({
-        title: fortune.title,
-        preview: fortune.preview,
-        tabs: fortune.tabs,
-        highlights: fortune.highlights,
-        premium: fortune.premium,
-        shareToken: null,
-      });
-    }
-
+    // Do not persist readings to DB (avoids history bloat). Share links disabled.
     return NextResponse.json({
       title: fortune.title,
       preview: fortune.preview,
       tabs: fortune.tabs,
       highlights: fortune.highlights,
       premium: fortune.premium,
-      shareToken,
+      shareToken: null,
     });
   } catch {
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });

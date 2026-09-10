@@ -18,7 +18,7 @@ export default function DashboardLoading() {
         กำลังเปิดบัญชี…
       </p>
       <p className="mt-1.5 text-center text-[12px] text-[#8A82B0]">
-        โหลดโปรไฟล์และประวัติของคุณ
+        โหลดโปรไฟล์ของคุณ
       </p>
 
       <div className="mt-6 h-1.5 w-36 overflow-hidden rounded-full bg-[#9B7FE8]/20">
