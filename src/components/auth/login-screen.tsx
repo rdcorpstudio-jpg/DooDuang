@@ -1,18 +1,44 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Lock, Sparkle, UserRound } from "lucide-react";
-import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import {
+  GoogleSignInButton,
+  startGoogleRedirect,
+} from "@/components/auth/google-sign-in-button";
 import { AnimatedPage } from "@/components/ui/reveal";
+import { isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { APP_BRAND_MARK } from "@/lib/site";
 
 export function LoginScreen({
   callbackUrl = "/premium?checkout=1",
+  autoStartGoogle = false,
 }: {
   callbackUrl?: string;
+  /** From LINE/Safari handoff — open Google immediately, no middle page */
+  autoStartGoogle?: boolean;
 }) {
   const router = useRouter();
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (!autoStartGoogle || started.current) return;
+    if (!isFirebaseClientConfigured()) return;
+    started.current = true;
+    // Strip autologin so refresh won't loop
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("autologin")) {
+        url.searchParams.delete("autologin");
+        window.history.replaceState({}, "", url.pathname + url.search);
+      }
+    } catch {
+      /* ignore */
+    }
+    void startGoogleRedirect(callbackUrl);
+  }, [autoStartGoogle, callbackUrl]);
 
   return (
     <AnimatedPage className="sky-copy relative flex min-h-full flex-col px-4 pb-8 pt-3">
@@ -54,7 +80,9 @@ export function LoginScreen({
             เข้าสู่ระบบ
           </h1>
           <p className="mt-1.5 text-[13px] leading-relaxed text-[#5E5688]">
-            ปลดล็อกสิทธิ์พรีเมียมและบันทึกโปรไฟล์
+            {autoStartGoogle
+              ? "กำลังเปิด Google…"
+              : "ปลดล็อกสิทธิ์พรีเมียมและบันทึกโปรไฟล์"}
           </p>
 
           <GoogleSignInButton

@@ -27,12 +27,15 @@ let redirectResultPromise: Promise<UserCredential | null> | null = null;
 
 export function authCompletePath(callbackUrl: string) {
   const cb = encodeURIComponent(safeCallback(callbackUrl));
-  return `/auth/complete?callbackUrl=${cb}&start=1`;
+  // Return URL after Google — no start=1 middle hop
+  return `/auth/complete?callbackUrl=${cb}`;
 }
 
+/** Open Safari/Chrome on the real login page (then auto-start Google). */
 function loginHandoffUrl(callbackUrl: string) {
   if (typeof window === "undefined") return undefined;
-  return `${window.location.origin}${authCompletePath(callbackUrl)}`;
+  const cb = encodeURIComponent(safeCallback(callbackUrl));
+  return `${window.location.origin}/login?callbackUrl=${cb}&autologin=1`;
 }
 
 /** After login → premium checkout (not account) */
@@ -277,7 +280,7 @@ export function GoogleSignInButton({
       return;
     }
 
-    // LINE / FB: open Safari on dedicated complete page
+    // LINE / FB: open Safari on /login (auto-starts Google — no middle page)
     if (isInAppBrowser()) {
       openInExternalBrowser(loginHandoffUrl(callbackUrl));
       return;
@@ -303,9 +306,17 @@ export function GoogleSignInButton({
         code === "auth/cancelled-popup-request" ||
         raw.toLowerCase().includes("popup")
       ) {
-        // Fall back: dedicated page owns redirect return
-        rememberCallback(callbackUrl);
-        window.location.assign(authCompletePath(callbackUrl));
+        // Same page → Google (no /auth/complete middle screen)
+        try {
+          await startGoogleRedirect(callbackUrl);
+        } catch (redirectErr) {
+          setError(
+            redirectErr instanceof Error
+              ? redirectErr.message
+              : "เปิดหน้าล็อกอิน Google ไม่สำเร็จ"
+          );
+          setLoading(false);
+        }
         return;
       }
 

@@ -7,7 +7,8 @@ interface LoginPageProps {
 }
 
 function safeCallback(callbackUrl?: string) {
-  const raw = (callbackUrl || "/premium?checkout=1").trim() || "/premium?checkout=1";
+  const raw =
+    (callbackUrl || "/premium?checkout=1").trim() || "/premium?checkout=1";
   if (!raw.startsWith("/") || raw.startsWith("//")) return "/premium?checkout=1";
   if (raw.startsWith("/login") || raw.startsWith("/auth/")) {
     return "/premium?checkout=1";
@@ -24,15 +25,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const session = await auth().catch(() => null);
   if (session?.user) {
-    redirect(next);
+    // Already logged in → pay (not account)
+    redirect(next.includes("checkout=1") ? next : "/api/stripe/checkout");
   }
 
-  // Legacy LINE handoff → dedicated auth complete (avoids login-page bounce)
-  if (autologin === "1") {
-    redirect(
-      `/auth/complete?callbackUrl=${encodeURIComponent(next)}&start=1`
-    );
-  }
-
-  return <LoginScreen callbackUrl={next} />;
+  return (
+    <LoginScreen callbackUrl={next} autoStartGoogle={autologin === "1"} />
+  );
 }
