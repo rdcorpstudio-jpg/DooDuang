@@ -28,7 +28,7 @@ export function AuthCompleteClient({
 }) {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState("กำลังเข้าสู่ระบบ…");
-  const next = safeCallback(callbackUrl || "/dashboard");
+  const next = safeCallback(callbackUrl || "/premium?checkout=1");
 
   useEffect(() => {
     if (!isFirebaseClientConfigured()) {
@@ -37,7 +37,7 @@ export function AuthCompleteClient({
     }
 
     let cancelled = false;
-    const target = safeCallback(callbackUrl || readCallback("/dashboard"));
+    const target = safeCallback(callbackUrl || readCallback("/premium?checkout=1"));
     rememberCallback(target);
 
     void (async () => {

@@ -7,9 +7,14 @@ interface LoginPageProps {
 }
 
 function safeCallback(callbackUrl?: string) {
-  const raw = (callbackUrl || "/dashboard").trim() || "/dashboard";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
-  if (raw.startsWith("/login") || raw.startsWith("/auth/")) return "/dashboard";
+  const raw = (callbackUrl || "/premium?checkout=1").trim() || "/premium?checkout=1";
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/premium?checkout=1";
+  if (raw.startsWith("/login") || raw.startsWith("/auth/")) {
+    return "/premium?checkout=1";
+  }
+  if (raw === "/dashboard" || raw.startsWith("/dashboard?")) {
+    return "/premium?checkout=1";
+  }
   return raw;
 }
 

@@ -152,12 +152,11 @@ export function hasBasicFortuneProfile(
   );
 }
 
-/** After unlock: collect gender/birth/name first, else deepen on /premium */
+/** After unlock: always start reading wizard at gender → birth → name */
 export function getPremiumOnboardPath(
-  profile: FortuneUserProfile | null | undefined = null
+  _profile: FortuneUserProfile | null | undefined = null
 ): string {
-  if (!hasBasicFortuneProfile(profile)) return "/reading?afterPremium=1";
-  return "/premium";
+  return "/reading?afterPremium=1";
 }
 
 /** Pull profile from wizard session cache if local profile is empty */

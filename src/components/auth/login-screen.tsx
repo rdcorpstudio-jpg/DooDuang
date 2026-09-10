@@ -7,7 +7,11 @@ import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { APP_BRAND_MARK } from "@/lib/site";
 
-export function LoginScreen({ callbackUrl = "/dashboard" }: { callbackUrl?: string }) {
+export function LoginScreen({
+  callbackUrl = "/premium?checkout=1",
+}: {
+  callbackUrl?: string;
+}) {
   const router = useRouter();
 
   return (

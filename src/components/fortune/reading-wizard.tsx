@@ -419,7 +419,7 @@ export function ReadingWizard() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Premium onboard: always start at gender (or resume missing fields), skip free result cache
+    // Premium onboard: always start at gender first
     if (afterPremium) {
       clearWizardCache();
       try {
@@ -433,14 +433,11 @@ export function ReadingWizard() {
             birthTime: saved.birthTime ?? "",
             focus: saved.focus ?? "life",
           });
-          if (!saved.gender) setStep("gender");
-          else if (!saved.birthDate) setStep("birth");
-          else if (!saved.nickname.trim()) setStep("name");
-          else setStep("gender");
         }
       } catch {
         /* ignore */
       }
+      setStep("gender");
       setReady(true);
       return;
     }

@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { usePathname, useRouter } from "next/navigation";
 import { Check, ChevronLeft, Loader2, Lock, X } from "lucide-react";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
@@ -30,6 +31,8 @@ const IS_LOCAL_DEV =
   process.env.NODE_ENV === "development" ||
   process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
 
+const LOGIN_THEN_CHECKOUT = "/premium?checkout=1";
+
 /** Stripe checkout — sheet modal, full page, or inline card on free result */
 export function FortunePaymentSheet({
   open,
@@ -46,6 +49,8 @@ export function FortunePaymentSheet({
   variant?: "sheet" | "page" | "inline";
 }) {
   const titleId = useId();
+  const router = useRouter();
+  const pathname = usePathname();
   const isPage = variant === "page";
   const isInline = variant === "inline";
   const [host, setHost] = useState<HTMLElement | null>(null);
@@ -53,6 +58,8 @@ export function FortunePaymentSheet({
   const [loadingSession, setLoadingSession] = useState(true);
   const [step, setStep] = useState<CheckoutStep>("ready");
   const [error, setError] = useState<string | null>(null);
+  const [wantsAutoCheckout, setWantsAutoCheckout] = useState(false);
+  const autoCheckoutStarted = useRef(false);
 
   const resolvedReturn =
     returnPath ||
@@ -78,6 +85,14 @@ export function FortunePaymentSheet({
     if (!open) return;
     setStep("ready");
     setError(null);
+    autoCheckoutStarted.current = false;
+    try {
+      setWantsAutoCheckout(
+        new URLSearchParams(window.location.search).get("checkout") === "1"
+      );
+    } catch {
+      setWantsAutoCheckout(false);
+    }
     void refreshSession();
   }, [open, refreshSession]);
 
@@ -104,7 +119,7 @@ export function FortunePaymentSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose, step, isPage, isInline]);
 
-  async function startCheckout() {
+  const startCheckout = useCallback(async () => {
     setError(null);
     setStep("redirecting");
     try {
@@ -138,7 +153,37 @@ export function FortunePaymentSheet({
       setStep("ready");
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
     }
-  }
+  }, [resolvedReturn]);
+
+  // Logged in + ?checkout=1 → Stripe immediately (no second tap)
+  useEffect(() => {
+    if (!open || loadingSession || !user) return;
+    if (!wantsAutoCheckout) return;
+    if (autoCheckoutStarted.current || step === "redirecting") return;
+    autoCheckoutStarted.current = true;
+
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("checkout")) {
+        url.searchParams.delete("checkout");
+        const qs = url.searchParams.toString();
+        router.replace(qs ? `${pathname}?${qs}` : pathname || "/premium");
+      }
+    } catch {
+      /* ignore */
+    }
+
+    void startCheckout();
+  }, [
+    open,
+    loadingSession,
+    user,
+    wantsAutoCheckout,
+    step,
+    startCheckout,
+    router,
+    pathname,
+  ]);
 
   if (!open) return null;
   if (!isPage && !isInline && !host) return null;
@@ -248,13 +293,15 @@ export function FortunePaymentSheet({
             </p>
             <GoogleSignInButton
               label="เข้าสู่ระบบด้วย Google"
-              callbackUrl="/premium"
+              callbackUrl={LOGIN_THEN_CHECKOUT}
               className="space-y-2"
               variant="outline"
               coloredIcon
               buttonClassName="h-12 rounded-full border-[#C8B8F0]/55 bg-white text-[15px] font-semibold text-[#241C4F] shadow-[0_8px_22px_rgba(110,79,201,0.14)] hover:bg-[#FBF8FF] hover:border-[#9B7FE8]/45 hover:text-[#241C4F]"
               onSuccess={async () => {
                 await refreshSession();
+                autoCheckoutStarted.current = true;
+                await startCheckout();
               }}
             />
           </div>

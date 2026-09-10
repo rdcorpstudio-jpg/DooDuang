@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         );
       }
       const login = new URL("/login", request.url);
-      login.searchParams.set("callbackUrl", returnPath || "/premium");
+      login.searchParams.set("callbackUrl", returnPath || "/premium?checkout=1");
       return NextResponse.redirect(login);
     }
 

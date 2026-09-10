@@ -34,10 +34,16 @@ function loginHandoffUrl(callbackUrl: string) {
   return `${window.location.origin}${authCompletePath(callbackUrl)}`;
 }
 
+/** After login → premium checkout (not account) */
+export const DEFAULT_LOGIN_CALLBACK = "/premium?checkout=1";
+
 export function safeCallback(callbackUrl: string) {
-  const raw = (callbackUrl || "/dashboard").trim() || "/dashboard";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
-  if (raw.startsWith("/login") || raw.startsWith("/auth/")) return "/dashboard";
+  const raw = (callbackUrl || DEFAULT_LOGIN_CALLBACK).trim() || DEFAULT_LOGIN_CALLBACK;
+  if (!raw.startsWith("/") || raw.startsWith("//")) return DEFAULT_LOGIN_CALLBACK;
+  if (raw.startsWith("/login") || raw.startsWith("/auth/")) return DEFAULT_LOGIN_CALLBACK;
+  if (raw === "/dashboard" || raw.startsWith("/dashboard?")) {
+    return DEFAULT_LOGIN_CALLBACK;
+  }
   return raw;
 }
 
@@ -49,7 +55,7 @@ export function rememberCallback(callbackUrl: string) {
   }
 }
 
-export function readCallback(fallback = "/dashboard") {
+export function readCallback(fallback = DEFAULT_LOGIN_CALLBACK) {
   try {
     return sessionStorage.getItem(CALLBACK_KEY) || safeCallback(fallback);
   } catch {
@@ -184,7 +190,7 @@ export async function completeAppLogin(
     );
   }
 
-  const next = readCallback(opts?.callbackUrl || "/dashboard");
+  const next = readCallback(opts?.callbackUrl || DEFAULT_LOGIN_CALLBACK);
   clearCallback();
 
   if (opts?.onSuccess) {
@@ -192,7 +198,7 @@ export async function completeAppLogin(
     return { navigated: false as const, next };
   }
 
-  window.location.replace(next || "/dashboard");
+  window.location.replace(next || DEFAULT_LOGIN_CALLBACK);
   return { navigated: true as const, next };
 }
 
@@ -203,7 +209,7 @@ export async function startGoogleRedirect(callbackUrl: string) {
 }
 
 export function GoogleSignInButton({
-  callbackUrl = "/dashboard",
+  callbackUrl = DEFAULT_LOGIN_CALLBACK,
   onSuccess,
   className,
   buttonClassName,
