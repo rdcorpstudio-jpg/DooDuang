@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { Check, ChevronLeft, Loader2, Lock, X } from "lucide-react";
-import { GoogleSignInButton, goToStripeCheckout } from "@/components/auth/google-sign-in-button";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
 import { PREMIUM_LIST_PRICE } from "@/lib/fortune/premium-offer-countdown";
