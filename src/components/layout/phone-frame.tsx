@@ -18,6 +18,8 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
   const hideNav =
     pathname.startsWith("/auth") ||
     pathname.startsWith("/login") ||
+    pathname === "/mae" ||
+    pathname.startsWith("/mae/") ||
     keyboardOpen;
 
   useEffect(() => {
@@ -63,6 +65,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
         className={cn(
           "phone-frame",
           keyboardOpen && "phone-frame--keyboard",
+          pathname.startsWith("/mae") && "phone-frame--mae",
           className
         )}
       >

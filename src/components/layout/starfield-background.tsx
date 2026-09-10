@@ -35,6 +35,9 @@ function useCelestialSky(pathname: string) {
 export function StarfieldBackground() {
   const pathname = usePathname() || "/";
   const isHome = pathname === "/";
+  if (pathname === "/mae" || pathname.startsWith("/mae/")) {
+    return null;
+  }
   const celestial = useCelestialSky(pathname);
   const sky = celestial ? CELESTIAL_SKY : GUANYIN_SKY;
 
