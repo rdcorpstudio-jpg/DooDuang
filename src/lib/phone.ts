@@ -19,3 +19,11 @@ export function normalizeThaiMobile(input: string): string | null {
   if (!/^[689]\d{8}$/.test(national)) return null;
   return `+66${national}`;
 }
+
+/** BoostSMS uses 08xxxxxxxx, not E.164. */
+export function toThaiNationalMobile(e164: string) {
+  if (e164.startsWith("+66") && e164.length === 12) {
+    return `0${e164.slice(3)}`;
+  }
+  return e164;
+}

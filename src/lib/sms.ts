@@ -1,3 +1,5 @@
+import { toThaiNationalMobile } from "@/lib/phone";
+
 export type SmsSendInput = {
   to: string;
   message: string;
@@ -46,6 +48,34 @@ async function sendTwilio(input: SmsSendInput) {
   }
 }
 
+async function sendBoostSms(input: SmsSendInput) {
+  const secret = process.env.BOOSTSMS_SECRET_KEY;
+  const sender = process.env.BOOSTSMS_SENDER?.trim();
+  if (!secret || !sender) {
+    throw new Error("SMS is not configured");
+  }
+
+  const res = await fetch("https://app.boost-sms.com/api/v1/sms/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${secret}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": crypto.randomUUID(),
+    },
+    body: JSON.stringify({
+      to: toThaiNationalMobile(input.to),
+      message: input.message,
+      sender,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    console.error("BoostSMS failed:", res.status, text);
+    throw new Error("SMS send failed");
+  }
+}
+
 async function sendHttp(input: SmsSendInput) {
   const url = process.env.SMS_HTTP_URL;
   if (!url) {
@@ -82,6 +112,11 @@ export async function sendSms(input: SmsSendInput) {
 
   if (provider === "twilio") {
     await sendTwilio(input);
+    return;
+  }
+
+  if (provider === "boostsms") {
+    await sendBoostSms(input);
     return;
   }
 
