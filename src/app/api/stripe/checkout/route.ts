@@ -4,15 +4,36 @@ import {
   createPremiumCheckoutUrl,
   resolveCheckoutPackage,
 } from "@/lib/stripe";
+import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
-export async function GET() {
-  return NextResponse.json(
-    { error: "เปิด URL นี้ตรง ๆ ไม่ได้" },
-    { status: 405 }
-  );
+/** After login: browser hits this and 303s straight to Stripe (no React spinner wait). */
+export async function GET(request: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      const login = new URL("/login", request.url);
+      login.searchParams.set("callbackUrl", "/premium?checkout=1");
+      return NextResponse.redirect(login);
+    }
+
+    const url = await createPremiumCheckoutUrl({
+      userId: session.user.id,
+      email: session.user.email,
+      origin: new URL(request.url).origin,
+      returnPath: "/premium",
+      packageId: PREMIUM_UNLOCK.id,
+    });
+    return NextResponse.redirect(url, 303);
+  } catch (err) {
+    console.error("Stripe go failed:", err);
+    const premium = new URL("/premium?checkout=1", request.url);
+    premium.searchParams.set("payError", "1");
+    return NextResponse.redirect(premium);
+  }
 }
 
 async function readPackageId(request: Request) {
@@ -55,7 +76,7 @@ export async function POST(request: Request) {
       return NextResponse.redirect(login);
     }
 
-    const pkg = resolveCheckoutPackage(packageId);
+    const pkg = resolveCheckoutPackage(packageId || PREMIUM_UNLOCK.id);
     if (!pkg || !pkg.priceId) {
       return NextResponse.json({ error: "แพ็กเกจไม่ถูกต้อง" }, { status: 400 });
     }

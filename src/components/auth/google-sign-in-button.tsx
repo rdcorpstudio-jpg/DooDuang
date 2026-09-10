@@ -214,9 +214,9 @@ export async function completeAppLogin(
   const wantPay = !opts?.onSuccess && wantsCheckoutAfterLogin(next);
   const idToken = await user.getIdToken();
 
-  // One server round-trip: set cookie (+ Stripe URL when paying)
+  // Login only (fast) — then browser navigates to Stripe via /api/stripe/checkout
   const data = await exchangeIdToken(idToken, {
-    checkout: wantPay,
+    checkout: false,
     returnPath: "/premium",
   });
   clearOAuthPending();
@@ -227,14 +227,14 @@ export async function completeAppLogin(
     return { navigated: false as const, next };
   }
 
-  if (data.checkoutUrl) {
-    window.location.replace(data.checkoutUrl);
+  if (wantPay) {
+    // Leave this page immediately; Stripe session is created on the next hop
+    window.location.replace("/api/stripe/checkout");
     return { navigated: true as const, next };
   }
 
-  if (wantPay) {
-    // Fallback if server skipped checkoutUrl
-    await goToStripeCheckout("/premium");
+  if (data.checkoutUrl) {
+    window.location.replace(data.checkoutUrl);
     return { navigated: true as const, next };
   }
 
