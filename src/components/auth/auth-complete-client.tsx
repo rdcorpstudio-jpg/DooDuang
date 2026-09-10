@@ -60,7 +60,7 @@ export function AuthCompleteClient({
 
         if (!completeLoginPromise) {
           completeLoginPromise = (async () => {
-            setStatus("กำลังไปหน้าชำระเงิน…");
+            setStatus("กำลังเปิดหน้าชำระเงิน…");
             const user = await resolveFirebaseUserAfterRedirect();
             if (!user) {
               clearOAuthPending();

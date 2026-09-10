@@ -16,6 +16,7 @@ import {
   isInAppBrowser,
   openInExternalBrowser,
 } from "@/lib/browser/in-app-browser";
+import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
 import { cn } from "@/lib/utils";
 
 const CALLBACK_KEY = "dooduang-login-callback";
@@ -165,6 +166,38 @@ export async function resolveFirebaseUserAfterRedirect(): Promise<User | null> {
   return null;
 }
 
+export function wantsCheckoutAfterLogin(callbackUrl: string) {
+  const next = safeCallback(callbackUrl);
+  if (next.includes("checkout=1")) return true;
+  if (next === "/premium" || next.startsWith("/premium?")) return true;
+  return next === DEFAULT_LOGIN_CALLBACK;
+}
+
+/** Create Stripe session and leave the app — no intermediate pay button page */
+export async function goToStripeCheckout(returnPath = "/premium") {
+  const res = await fetch("/api/stripe/checkout", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      packageId: PREMIUM_UNLOCK.id,
+      returnPath,
+    }),
+  });
+  const data = (await res.json().catch(() => ({}))) as {
+    url?: string;
+    error?: string;
+    code?: string;
+  };
+  if (res.status === 401 || data.code === "UNAUTHENTICATED") {
+    throw new Error("ต้องเข้าสู่ระบบก่อนชำระเงิน");
+  }
+  if (!res.ok || !data.url) {
+    throw new Error(data.error || "สร้างลิงก์ชำระเงินไม่สำเร็จ");
+  }
+  window.location.replace(data.url);
+}
+
 export async function completeAppLogin(
   user: User,
   opts?: { callbackUrl?: string; onSuccess?: () => void | Promise<void> }
@@ -180,6 +213,12 @@ export async function completeAppLogin(
   if (opts?.onSuccess) {
     await opts.onSuccess();
     return { navigated: false as const, next };
+  }
+
+  // Default path: login → Stripe Checkout immediately
+  if (wantsCheckoutAfterLogin(next)) {
+    await goToStripeCheckout("/premium");
+    return { navigated: true as const, next };
   }
 
   window.location.replace(next || DEFAULT_LOGIN_CALLBACK);

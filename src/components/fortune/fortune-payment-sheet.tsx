@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { Check, ChevronLeft, Loader2, Lock, X } from "lucide-react";
-import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { GoogleSignInButton, goToStripeCheckout } from "@/components/auth/google-sign-in-button";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
 import { PREMIUM_LIST_PRICE } from "@/lib/fortune/premium-offer-countdown";
@@ -306,9 +306,10 @@ export function FortunePaymentSheet({
               coloredIcon
               buttonClassName="h-12 rounded-full border-[#C8B8F0]/55 bg-white text-[15px] font-semibold text-[#241C4F] shadow-[0_8px_22px_rgba(110,79,201,0.14)] hover:bg-[#FBF8FF] hover:border-[#9B7FE8]/45 hover:text-[#241C4F]"
               onSuccess={async () => {
-                await refreshSession();
-                autoCheckoutStarted.current = true;
-                await startCheckout();
+                // Stay off the pay sheet — jump to Stripe right away
+                await goToStripeCheckout(
+                  resolvedReturn.split("?")[0] || "/premium"
+                );
               }}
             />
           </div>
