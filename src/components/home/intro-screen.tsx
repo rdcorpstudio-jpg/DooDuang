@@ -68,7 +68,7 @@ export function IntroScreen() {
   }, []);
 
   return (
-    <section className="sky-copy relative flex h-full min-h-full flex-col overflow-hidden px-5 pb-3 pt-4">
+    <section className="sky-copy relative flex min-h-full flex-col px-5 pb-3 pt-4">
       <Reveal visible={mounted} delay={0} className="relative z-20 shrink-0">
         <div className="flex flex-col items-center">
           <FortuneIcon name="sparkle" size={18} className="mb-0.5" />
