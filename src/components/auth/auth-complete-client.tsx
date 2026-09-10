@@ -60,13 +60,12 @@ export function AuthCompleteClient({
 
         if (!completeLoginPromise) {
           completeLoginPromise = (async () => {
-            setStatus("กำลังยืนยันบัญชี…");
+            setStatus("กำลังไปหน้าชำระเงิน…");
             const user = await resolveFirebaseUserAfterRedirect();
             if (!user) {
               clearOAuthPending();
               throw new Error("NO_GOOGLE_USER");
             }
-            setStatus("กำลังบันทึกเซสชัน…");
             await completeAppLogin(user, { callbackUrl: target });
           })().catch((err) => {
             completeLoginPromise = null;

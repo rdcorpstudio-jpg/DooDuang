@@ -68,8 +68,15 @@ export function FortunePaymentSheet({
       : "/premium");
 
   const refreshSession = useCallback(async () => {
-    setLoadingSession(true);
     setError(null);
+    let autoPay = false;
+    try {
+      autoPay =
+        new URLSearchParams(window.location.search).get("checkout") === "1";
+    } catch {
+      /* ignore */
+    }
+    if (!autoPay) setLoadingSession(true);
     try {
       const res = await fetch("/api/auth/session", { cache: "no-store" });
       const data = (await res.json()) as { user?: SessionUser | null };

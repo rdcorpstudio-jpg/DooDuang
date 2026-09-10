@@ -132,18 +132,8 @@ async function exchangeIdToken(idToken: string) {
   }
 }
 
-async function verifyAppSession() {
-  const res = await fetch("/api/auth/session", {
-    cache: "no-store",
-    credentials: "same-origin",
-  });
-  if (!res.ok) return false;
-  const data = (await res.json()) as { user?: { id?: string } | null };
-  return Boolean(data.user?.id);
-}
-
-/** Safari often drops getRedirectResult — wait for currentUser instead */
-function waitForFirebaseUser(timeoutMs = 8000): Promise<User | null> {
+/** Safari often drops getRedirectResult — wait briefly for currentUser instead */
+function waitForFirebaseUser(timeoutMs = 2500): Promise<User | null> {
   const auth = getFirebaseAuth();
   if (auth.currentUser) return Promise.resolve(auth.currentUser);
 
@@ -180,15 +170,9 @@ export async function completeAppLogin(
   opts?: { callbackUrl?: string; onSuccess?: () => void | Promise<void> }
 ) {
   const idToken = await user.getIdToken();
+  // Cookie is set by this response — no need for a second /session round-trip
   await exchangeIdToken(idToken);
   clearOAuthPending();
-
-  const ok = await verifyAppSession();
-  if (!ok) {
-    throw new Error(
-      "เข้าสู่ระบบแล้ว แต่เซสชันยังไม่ติด — ลองใหม่ใน Safari หรือปิดตัวบล็อกคุกกี้"
-    );
-  }
 
   const next = readCallback(opts?.callbackUrl || DEFAULT_LOGIN_CALLBACK);
   clearCallback();
