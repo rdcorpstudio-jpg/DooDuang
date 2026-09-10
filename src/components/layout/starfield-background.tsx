@@ -22,7 +22,7 @@ const CELESTIAL_SKY = {
 };
 
 /** Free result (/reading, /r/…) + premium use the same celestial art. */
-function useCelestialSky(pathname: string) {
+function isCelestialSky(pathname: string) {
   return (
     pathname.startsWith("/premium") ||
     pathname.startsWith("/reading") ||
@@ -38,7 +38,7 @@ export function StarfieldBackground() {
   if (pathname === "/mae" || pathname.startsWith("/mae/")) {
     return null;
   }
-  const celestial = useCelestialSky(pathname);
+  const celestial = isCelestialSky(pathname);
   const sky = celestial ? CELESTIAL_SKY : GUANYIN_SKY;
 
   return (
