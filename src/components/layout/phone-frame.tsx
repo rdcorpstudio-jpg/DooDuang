@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { StarfieldBackground } from "@/components/layout/starfield-background";
 import { BottomNav } from "@/components/layout/bottom-nav";
@@ -12,7 +13,12 @@ interface PhoneFrameProps {
 
 /** Sync app shell to visualViewport so iOS keyboard doesn't crush inputs. */
 export function PhoneFrame({ children, className }: PhoneFrameProps) {
+  const pathname = usePathname() || "/";
   const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const hideNav =
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/login") ||
+    keyboardOpen;
 
   useEffect(() => {
     const root = document.documentElement;
@@ -63,7 +69,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
         <StarfieldBackground />
         <div className="phone-comfort relative z-[2] flex h-full flex-col">
           <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
-          {keyboardOpen ? null : <BottomNav />}
+          {hideNav ? null : <BottomNav />}
         </div>
       </div>
     </div>

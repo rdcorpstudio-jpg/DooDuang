@@ -42,7 +42,6 @@ export function AuthCompleteClient({
 
     void (async () => {
       try {
-        // Fresh start — strip start=1 so return URL cannot restart redirect
         if (start === "1") {
           if (redirectStartLock) return;
           redirectStartLock = true;
@@ -60,12 +59,13 @@ export function AuthCompleteClient({
 
         if (!completeLoginPromise) {
           completeLoginPromise = (async () => {
-            setStatus("กำลังเปิดหน้าชำระเงิน…");
+            setStatus("พาไปชำระเงิน…");
             const user = await resolveFirebaseUserAfterRedirect();
             if (!user) {
               clearOAuthPending();
               throw new Error("NO_GOOGLE_USER");
             }
+            // Single request → Stripe URL (no second wait on /premium)
             await completeAppLogin(user, { callbackUrl: target });
           })().catch((err) => {
             completeLoginPromise = null;

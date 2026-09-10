@@ -114,15 +114,22 @@ function makeProvider() {
   return provider;
 }
 
-async function exchangeIdToken(idToken: string) {
+async function exchangeIdToken(
+  idToken: string,
+  opts?: { checkout?: boolean; returnPath?: string }
+) {
   const res = await fetch("/api/auth/firebase", {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ idToken }),
+    body: JSON.stringify({
+      idToken,
+      checkout: Boolean(opts?.checkout),
+      returnPath: opts?.returnPath || "/premium",
+    }),
   });
   const text = await res.text();
-  let data: { error?: string } = {};
+  let data: { error?: string; checkoutUrl?: string; ok?: boolean } = {};
   try {
     data = text ? JSON.parse(text) : {};
   } catch {
@@ -131,10 +138,11 @@ async function exchangeIdToken(idToken: string) {
   if (!res.ok) {
     throw new Error(data.error || "เข้าสู่ระบบไม่สำเร็จ");
   }
+  return data;
 }
 
 /** Safari often drops getRedirectResult — wait briefly for currentUser instead */
-function waitForFirebaseUser(timeoutMs = 2500): Promise<User | null> {
+function waitForFirebaseUser(timeoutMs = 1200): Promise<User | null> {
   const auth = getFirebaseAuth();
   if (auth.currentUser) return Promise.resolve(auth.currentUser);
 
@@ -202,12 +210,16 @@ export async function completeAppLogin(
   user: User,
   opts?: { callbackUrl?: string; onSuccess?: () => void | Promise<void> }
 ) {
-  const idToken = await user.getIdToken();
-  // Cookie is set by this response — no need for a second /session round-trip
-  await exchangeIdToken(idToken);
-  clearOAuthPending();
-
   const next = readCallback(opts?.callbackUrl || DEFAULT_LOGIN_CALLBACK);
+  const wantPay = !opts?.onSuccess && wantsCheckoutAfterLogin(next);
+  const idToken = await user.getIdToken();
+
+  // One server round-trip: set cookie (+ Stripe URL when paying)
+  const data = await exchangeIdToken(idToken, {
+    checkout: wantPay,
+    returnPath: "/premium",
+  });
+  clearOAuthPending();
   clearCallback();
 
   if (opts?.onSuccess) {
@@ -215,8 +227,13 @@ export async function completeAppLogin(
     return { navigated: false as const, next };
   }
 
-  // Default path: login → Stripe Checkout immediately
-  if (wantsCheckoutAfterLogin(next)) {
+  if (data.checkoutUrl) {
+    window.location.replace(data.checkoutUrl);
+    return { navigated: true as const, next };
+  }
+
+  if (wantPay) {
+    // Fallback if server skipped checkoutUrl
     await goToStripeCheckout("/premium");
     return { navigated: true as const, next };
   }

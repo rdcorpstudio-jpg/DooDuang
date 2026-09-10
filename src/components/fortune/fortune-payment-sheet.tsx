@@ -305,12 +305,6 @@ export function FortunePaymentSheet({
               variant="outline"
               coloredIcon
               buttonClassName="h-12 rounded-full border-[#C8B8F0]/55 bg-white text-[15px] font-semibold text-[#241C4F] shadow-[0_8px_22px_rgba(110,79,201,0.14)] hover:bg-[#FBF8FF] hover:border-[#9B7FE8]/45 hover:text-[#241C4F]"
-              onSuccess={async () => {
-                // Stay off the pay sheet — jump to Stripe right away
-                await goToStripeCheckout(
-                  resolvedReturn.split("?")[0] || "/premium"
-                );
-              }}
             />
           </div>
         ) : (

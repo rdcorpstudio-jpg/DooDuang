@@ -7,9 +7,12 @@ import {
 import { createSessionToken, SESSION_COOKIE } from "@/lib/auth";
 import { db, requireDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import { createPremiumCheckoutUrl } from "@/lib/stripe";
+import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 function loginErrorResponse(err: unknown) {
   const message = err instanceof Error ? err.message : String(err);
@@ -43,6 +46,10 @@ function loginErrorResponse(err: unknown) {
     lower.includes("token")
   ) {
     return NextResponse.json({ error: "เข้าสู่ระบบไม่สำเร็จ" }, { status: 401 });
+  }
+
+  if (lower.includes("stripe") || lower.includes("price")) {
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
   return NextResponse.json({ error: "เข้าสู่ระบบไม่สำเร็จ" }, { status: 401 });
@@ -79,6 +86,9 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const idToken = typeof body.idToken === "string" ? body.idToken : "";
+    const wantCheckout = body.checkout === true;
+    const returnPath =
+      typeof body.returnPath === "string" ? body.returnPath : "/premium";
     if (!idToken) {
       return NextResponse.json({ error: "ไม่พบ token" }, { status: 400 });
     }
@@ -139,8 +149,21 @@ export async function POST(request: Request) {
       });
     }
 
+    let checkoutUrl: string | undefined;
+    if (wantCheckout) {
+      checkoutUrl = await createPremiumCheckoutUrl({
+        userId,
+        email: profile.email,
+        origin: new URL(request.url).origin,
+        returnPath,
+        packageId: PREMIUM_UNLOCK.id,
+      });
+    }
+
     const token = await createSessionToken(userId);
-    const response = NextResponse.json({ ok: true });
+    const response = NextResponse.json(
+      checkoutUrl ? { ok: true, checkoutUrl } : { ok: true }
+    );
     const secure =
       process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
     response.cookies.set(SESSION_COOKIE, token, {

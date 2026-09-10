@@ -79,3 +79,48 @@ export function resolveCheckoutPackage(packageId: string) {
     purpose: "premium-unlock" as const,
   };
 }
+
+/** Shared Stripe Checkout URL for premium unlock */
+export async function createPremiumCheckoutUrl(opts: {
+  userId: string;
+  email?: string | null;
+  origin: string;
+  returnPath?: string;
+  packageId?: string;
+}): Promise<string> {
+  if (!stripe) {
+    throw new Error("Stripe ยังไม่ได้ตั้งค่า");
+  }
+
+  const pkg = resolveCheckoutPackage(opts.packageId || PREMIUM_UNLOCK.id);
+  if (!pkg?.priceId) {
+    throw new Error("แพ็กเกจไม่ถูกต้อง");
+  }
+
+  const priceId = await resolveStripePriceId(pkg.priceId);
+  const safeReturn =
+    opts.returnPath &&
+    opts.returnPath.startsWith("/") &&
+    !opts.returnPath.startsWith("//")
+      ? opts.returnPath
+      : "/premium";
+
+  const checkoutSession = await stripe.checkout.sessions.create({
+    mode: "payment",
+    customer_email: opts.email ?? undefined,
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: `${opts.origin}${safeReturn}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${opts.origin}${safeReturn}?payment=cancelled`,
+    metadata: {
+      userId: opts.userId,
+      packageId: pkg.id,
+      credits: String(pkg.credits),
+      purpose: pkg.purpose,
+    },
+  });
+
+  if (!checkoutSession.url) {
+    throw new Error("ไม่สามารถสร้าง checkout ได้");
+  }
+  return checkoutSession.url;
+}

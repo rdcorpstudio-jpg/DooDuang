@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import {
-  stripe,
-  resolveStripePriceId,
+  createPremiumCheckoutUrl,
   resolveCheckoutPackage,
 } from "@/lib/stripe";
 
@@ -56,51 +55,24 @@ export async function POST(request: Request) {
       return NextResponse.redirect(login);
     }
 
-    if (!stripe) {
-      return NextResponse.json(
-        { error: "Stripe ยังไม่ได้ตั้งค่า" },
-        { status: 503 }
-      );
-    }
-
     const pkg = resolveCheckoutPackage(packageId);
     if (!pkg || !pkg.priceId) {
       return NextResponse.json({ error: "แพ็กเกจไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const priceId = await resolveStripePriceId(pkg.priceId);
-    const origin = new URL(request.url).origin;
-    const safeReturn =
-      returnPath.startsWith("/") && !returnPath.startsWith("//")
-        ? returnPath
-        : "/premium";
-
-    const checkoutSession = await stripe.checkout.sessions.create({
-      mode: "payment",
-      customer_email: session.user.email ?? undefined,
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}${safeReturn}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}${safeReturn}?payment=cancelled`,
-      metadata: {
-        userId: session.user.id,
-        packageId: pkg.id,
-        credits: String(pkg.credits),
-        purpose: pkg.purpose,
-      },
+    const url = await createPremiumCheckoutUrl({
+      userId: session.user.id,
+      email: session.user.email,
+      origin: new URL(request.url).origin,
+      returnPath,
+      packageId: pkg.id,
     });
 
-    if (!checkoutSession.url) {
-      return NextResponse.json(
-        { error: "ไม่สามารถสร้าง checkout ได้" },
-        { status: 500 }
-      );
-    }
-
     if (wantsJson) {
-      return NextResponse.json({ url: checkoutSession.url });
+      return NextResponse.json({ url });
     }
 
-    return NextResponse.redirect(checkoutSession.url, 303);
+    return NextResponse.redirect(url, 303);
   } catch (err) {
     console.error("Stripe checkout failed:", err);
     const message = err instanceof Error ? err.message : "";
@@ -116,7 +88,11 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    if (message.includes("default") || message.includes("price_")) {
+    if (
+      message.includes("default") ||
+      message.includes("price_") ||
+      message.includes("Stripe")
+    ) {
       return NextResponse.json({ error: message }, { status: 400 });
     }
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
