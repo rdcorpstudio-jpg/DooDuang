@@ -1,4 +1,3 @@
-import { APP_BRAND_MARK } from "@/lib/site";
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
@@ -12,6 +11,7 @@ import {
   readFortuneProfile,
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
+import { APP_BRAND_MARK } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export function usePremiumProfileGate() {

@@ -1,10 +1,10 @@
-import { APP_BRAND_MARK } from "@/lib/site";
 "use client";
 
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { AstroHeroOrb } from "@/components/home/astro-hero-orb";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { APP_BRAND_MARK } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const STEPS = [

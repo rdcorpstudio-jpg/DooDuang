@@ -1,4 +1,3 @@
-import { APP_BRAND_MARK } from "@/lib/site";
 "use client";
 
 import { useEffect, useState, type FocusEvent } from "react";
@@ -27,6 +26,7 @@ import {
   readFortuneProfile,
 } from "@/lib/fortune/profile-storage";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
+import { APP_BRAND_MARK } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 function scrollFieldIntoView(event: FocusEvent<HTMLInputElement>) {

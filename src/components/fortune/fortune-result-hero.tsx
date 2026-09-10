@@ -1,9 +1,9 @@
-import { APP_BRAND_MARK } from "@/lib/site";
 "use client";
 
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { APP_BRAND_MARK } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 function formatHeroDate(date = new Date()) {
