@@ -45,6 +45,7 @@
   justify-content: center;
   align-items: stretch;
   background: #ffffff;
+  overflow-x: hidden;
 }
 
 .phone-frame svg :focus,
@@ -55,8 +56,10 @@
 
 .phone-frame {
   width: min(100vw, calc(100dvh * 9 / 16));
+  max-width: 100vw;
   height: 100dvh;
   overflow: hidden;
+  overflow-x: hidden;
   position: relative;
   background: #e9e2f8;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
@@ -79,7 +82,12 @@
 
 .phone-frame *::-webkit-scrollbar {
   width: 5px;
-  height: 5px;
+  height: 0; /* kill horizontal scrollbar chrome */
+}
+
+.phone-frame *::-webkit-scrollbar:horizontal {
+  height: 0;
+  display: none;
 }
 
 .phone-frame *::-webkit-scrollbar-track {
@@ -108,6 +116,10 @@
 /* Scales px/rem Tailwind sizes together — better for older eyes */
 .phone-comfort {
   zoom: var(--dd-comfort-zoom, 1.14);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 @supports not (zoom: 1) {

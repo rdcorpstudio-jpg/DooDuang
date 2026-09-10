@@ -67,8 +67,10 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
         )}
       >
         <StarfieldBackground />
-        <div className="phone-comfort relative z-[2] flex h-full flex-col">
-          <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+        <div className="phone-comfort relative z-[2] flex h-full min-w-0 max-w-full flex-col overflow-x-hidden">
+          <div className="min-h-0 min-w-0 max-w-full flex-1 overflow-x-hidden overflow-y-hidden">
+            {children}
+          </div>
           {hideNav ? null : <BottomNav />}
         </div>
       </div>
