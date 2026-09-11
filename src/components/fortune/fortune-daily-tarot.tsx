@@ -191,7 +191,7 @@ export function FortuneDailyTarot({
               >
                 <span className="relative block h-full w-full overflow-hidden rounded-[13px] bg-[#101827]">
                   <Image
-                    src="/images/tarot/card-back.jpg?v=1"
+                    src="/images/tarot/card-back.webp?v=1"
                     alt="หลังไพ่ทาโรต์"
                     fill
                     sizes="248px"

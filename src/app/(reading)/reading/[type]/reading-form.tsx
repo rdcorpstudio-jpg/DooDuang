@@ -40,17 +40,17 @@ const GENDER_ICONS: Record<
   { src: string; alt: string; sizeClass: string }
 > = {
   female: {
-    src: "/images/icons/gender-female.png?v=gold3d4",
+    src: "/images/icons/gender-female.webp?v=gold3d4",
     alt: "หญิง",
     sizeClass: "h-9 w-9",
   },
   male: {
-    src: "/images/icons/gender-male.png?v=gold3d4",
+    src: "/images/icons/gender-male.webp?v=gold3d4",
     alt: "ชาย",
     sizeClass: "h-9 w-9",
   },
   other: {
-    src: "/images/icons/gender-other.png?v=gold3d4",
+    src: "/images/icons/gender-other.webp?v=gold3d4",
     alt: "อื่นๆ",
     sizeClass: "h-9 w-9",
   },
@@ -147,7 +147,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
         <div
           className="absolute inset-0 bg-cover bg-no-repeat"
           style={{
-            backgroundImage: "url(/images/bg/mae-app-bg.jpg?v=gate4)",
+            backgroundImage: "url(/images/bg/mae-app-bg.webp?v=gate4)",
             backgroundPosition: "50% 30%",
           }}
         />

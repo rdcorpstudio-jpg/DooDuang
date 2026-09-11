@@ -94,10 +94,8 @@ export function AuthCompleteClient({
             callbackUrl={next}
             label="เข้าสู่ระบบด้วย Google"
             coloredIcon
-            showIconDivider
-            variant="outline"
-            className="mt-5 space-y-2"
-            buttonClassName="h-12 gap-2.5 rounded-full border-[rgba(213,177,111,0.3)] bg-transparent text-[15px] font-semibold text-[#f4f1ea] hover:bg-white/[0.04]"
+            className="mt-5 w-full space-y-2"
+            buttonClassName="h-12 text-[15px]"
           />
           <Link
             href={`/login?callbackUrl=${encodeURIComponent(next)}`}

@@ -342,10 +342,8 @@ export function FortunePaymentSheet({
             <GoogleSignInButton
               label="เข้าสู่ระบบด้วย Google"
               callbackUrl={LOGIN_THEN_CHECKOUT}
-              className="space-y-2"
-              variant="outline"
+              className="w-full space-y-2"
               coloredIcon
-              buttonClassName="h-11 rounded-full border-[rgba(213,177,111,0.4)] bg-transparent text-[14px] font-semibold text-[#f4f1ea] hover:bg-white/[0.04] hover:border-[rgba(213,177,111,0.55)] hover:text-[#f4f1ea]"
             />
           </div>
         ) : (

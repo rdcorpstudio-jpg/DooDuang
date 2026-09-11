@@ -1218,14 +1218,20 @@ html[data-keyboard-open="true"] .phone-comfort {
 }
 
 /* Popular features row — full-bleed, no scrollbar chrome.
-   pan-x + pan-y so vertical page scroll still works when touching the row. */
+   Must allow pan-y: ancestors with only pan-x block vertical page scroll
+   when the finger lands on the cards (touch-action intersects). */
 .extra-readings-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
-  touch-action: pan-x pan-y;
+  touch-action: pan-x pan-y !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
+}
+
+.extra-readings-scroll .mae-aspect-card,
+.extra-readings-scroll button {
+  touch-action: manipulation;
 }
 
 .extra-readings-scroll::-webkit-scrollbar {

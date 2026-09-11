@@ -251,6 +251,9 @@ export async function startGoogleRedirect(callbackUrl: string) {
   await signInWithRedirect(getFirebaseAuth(), makeProvider());
 }
 
+export const GOOGLE_WHITE_BUTTON_CLASS =
+  "!flex h-11 w-full min-w-0 flex-row flex-nowrap items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full border border-[#dadce0] bg-white px-3 py-0 text-[14px] font-semibold leading-none text-[#3c4043] shadow-none outline-none transition hover:bg-[#f8f9fa] hover:text-[#3c4043] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.99]";
+
 export function GoogleSignInButton({
   callbackUrl = DEFAULT_LOGIN_CALLBACK,
   onSuccess,
@@ -370,10 +373,11 @@ export function GoogleSignInButton({
     <div className={cn("space-y-3", className)}>
       <Button
         type="button"
-        variant={variant}
+        variant={coloredIcon ? "outline" : variant}
         size="lg"
         className={cn(
           "w-full outline-none focus:outline-none focus-visible:ring-0",
+          coloredIcon && GOOGLE_WHITE_BUTTON_CLASS,
           buttonClassName
         )}
         onClick={() => void runGoogleSignIn()}
@@ -424,7 +428,7 @@ export function GoogleSignInButton({
             aria-hidden
           />
         ) : null}
-        <span className="min-w-0 flex-1 truncate text-left sm:text-center">
+        <span className="min-w-0 shrink truncate text-center">
           {loading ? "กำลังเข้าสู่ระบบ..." : label}
         </span>
       </Button>

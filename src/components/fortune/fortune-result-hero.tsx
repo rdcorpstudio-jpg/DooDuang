@@ -47,7 +47,7 @@ export function FortuneResultHero({
     (subline || "").trim() ||
     "วันนี้ ให้เวลากับตัวเองอีกนิด";
 
-  const heroSrc = "/images/bg/hero-tarot-celestial.jpg?v=tarot1";
+  const heroSrc = "/images/bg/hero-tarot-celestial.webp?v=tarot1";
 
   return (
     <section

@@ -16,11 +16,11 @@ import { cn } from "@/lib/utils";
 const WEEKDAY_SHORT = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"] as const;
 
 const SHIRT_DETAILS = [
-  { id: "green", name: "เขียว", meaning: "การงาน", src: "/images/shirts/green.png" },
-  { id: "purple", name: "ม่วง", meaning: "โชคลาภ", src: "/images/shirts/purple.png" },
-  { id: "orange", name: "ส้ม", meaning: "ความมั่นใจ", src: "/images/shirts/orange.png" },
-  { id: "red", name: "แดง", meaning: "พลังใจ", src: "/images/shirts/red.png" },
-  { id: "black", name: "ดำ", meaning: "คุ้มครอง", src: "/images/shirts/black.png" },
+  { id: "green", name: "เขียว", meaning: "การงาน", src: "/images/shirts/green.webp" },
+  { id: "purple", name: "ม่วง", meaning: "โชคลาภ", src: "/images/shirts/purple.webp" },
+  { id: "orange", name: "ส้ม", meaning: "ความมั่นใจ", src: "/images/shirts/orange.webp" },
+  { id: "red", name: "แดง", meaning: "พลังใจ", src: "/images/shirts/red.webp" },
+  { id: "black", name: "ดำ", meaning: "คุ้มครอง", src: "/images/shirts/black.webp" },
 ] as const;
 
 /** Calendar + shirt — shirt of the day from day tone */

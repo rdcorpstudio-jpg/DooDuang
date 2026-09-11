@@ -29,7 +29,7 @@ export function pickShirtForTone(tone: FortuneTone) {
       id: "purple",
       name: "ม่วง",
       meaning: "โชคลาภ",
-      src: "/images/shirts/purple.png",
+      src: "/images/shirts/purple.webp",
     };
   }
   if (tone === "mid") {
@@ -37,14 +37,14 @@ export function pickShirtForTone(tone: FortuneTone) {
       id: "green",
       name: "เขียว",
       meaning: "การงาน",
-      src: "/images/shirts/green.png",
+      src: "/images/shirts/green.webp",
     };
   }
   return {
     id: "black",
     name: "ดำ",
     meaning: "คุ้มครอง",
-    src: "/images/shirts/black.png",
+    src: "/images/shirts/black.webp",
   };
 }
 

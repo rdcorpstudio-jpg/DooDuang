@@ -27,7 +27,7 @@ const NUMBER_MEANINGS = [
 ] as const;
 
 function numberSrc(n: number) {
-  return `/images/numbers/${n}.png`;
+  return `/images/numbers/${n}.webp`;
 }
 
 /** Compact lucky numbers only (shirts moved to calendar preview row) */

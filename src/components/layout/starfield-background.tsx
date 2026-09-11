@@ -9,7 +9,7 @@ import { isMaeCelestialPath } from "@/lib/mae-shell";
  */
 
 const GUANYIN_SKY = {
-  backgroundImage: "url(/images/bg/app-sky.jpg?v=guanyin2)",
+  backgroundImage: "url(/images/bg/app-sky.webp?v=guanyin2)",
   backgroundSize: "cover" as const,
   backgroundPosition: "55% 0%",
   backgroundRepeat: "no-repeat" as const,
@@ -17,7 +17,7 @@ const GUANYIN_SKY = {
 
 /** Free + premium shell — mountain night plate (dark sky / gold horizon) */
 const CELESTIAL_SKY = {
-  backgroundImage: "url(/images/bg/mae-mountain-night.jpg?v=mtn1)",
+  backgroundImage: "url(/images/bg/mae-mountain-night.webp?v=mtn1)",
   backgroundSize: "cover" as const,
   backgroundPosition: "50% 18%",
   backgroundRepeat: "no-repeat" as const,
@@ -49,7 +49,7 @@ export function StarfieldBackground() {
           loop
           playsInline
           preload="auto"
-          poster="/images/bg/app-sky.jpg"
+          poster="/images/bg/app-sky.webp"
         >
           <source src="/videos/home-hero.mp4?v=wind0908" type="video/mp4" />
         </video>

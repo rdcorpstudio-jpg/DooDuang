@@ -12,18 +12,18 @@ import type { AuspiciousActivityId } from "@/lib/fortune/content/premium-rituals
 import { cn } from "@/lib/utils";
 
 const ACT_ICONS: Record<AuspiciousActivityId, string> = {
-  talk: "/images/rituals/talk.png?v=mae-transparent2",
-  money: "/images/rituals/money.png?v=mae-transparent2",
-  start: "/images/rituals/start.png?v=mae-transparent2",
-  travel: "/images/rituals/travel.png?v=mae-transparent2",
-  forgive: "/images/rituals/forgive.png?v=mae-transparent2",
-  rest: "/images/rituals/rest.png?v=mae-transparent2",
+  talk: "/images/rituals/talk.webp?v=mae-transparent2",
+  money: "/images/rituals/money.webp?v=mae-transparent2",
+  start: "/images/rituals/start.webp?v=mae-transparent2",
+  travel: "/images/rituals/travel.webp?v=mae-transparent2",
+  forgive: "/images/rituals/forgive.webp?v=mae-transparent2",
+  rest: "/images/rituals/rest.webp?v=mae-transparent2",
 };
 
 const NIGHT_ICONS = {
-  moon: "/images/night/moon.png?v=1",
-  stones: "/images/night/stones.png?v=1",
-  sprout: "/images/night/sprout.png?v=1",
+  moon: "/images/night/moon.webp?v=1",
+  stones: "/images/night/stones.webp?v=1",
+  sprout: "/images/night/sprout.webp?v=1",
 } as const;
 
 type Props = {

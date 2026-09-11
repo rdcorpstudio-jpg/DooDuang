@@ -123,7 +123,7 @@ function GenderAssetIcon({
 export function GenderMoonIcon({ className }: { className?: string }) {
   return (
     <GenderAssetIcon
-      src="/images/icons/female-gold.png"
+      src="/images/icons/female-gold.webp"
       className={className}
     />
   );
@@ -133,7 +133,7 @@ export function GenderMoonIcon({ className }: { className?: string }) {
 export function GenderSunIcon({ className }: { className?: string }) {
   return (
     <GenderAssetIcon
-      src="/images/icons/male-lavender.png"
+      src="/images/icons/male-lavender.webp"
       className={className}
     />
   );
@@ -143,7 +143,7 @@ export function GenderSunIcon({ className }: { className?: string }) {
 export function GenderStarIcon({ className }: { className?: string }) {
   return (
     <GenderAssetIcon
-      src="/images/icons/star-gold.png"
+      src="/images/icons/star-gold.webp"
       className={className}
     />
   );
@@ -159,7 +159,7 @@ export function BrandStarIcon({
 }) {
   return (
     <Image
-      src="/images/icons/star-gold.png"
+      src="/images/icons/star-gold.webp"
       alt=""
       width={size}
       height={size}

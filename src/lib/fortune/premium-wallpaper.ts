@@ -19,7 +19,7 @@ export const PREMIUM_WALLPAPERS: PremiumWallpaper[] = Array.from(
       id,
       title: `วอลเปเปอร์มงคล · เลข ${n}`,
       subtitle: "ของขวัญพรีเมียมเฉพาะคุณ · โหลดคุณภาพเต็มไฟล์",
-      src: `/images/wallpaper/premium/${id}.jpg`,
+      src: `/images/wallpaper/premium/${id}.webp`,
       fileName: `dooduang-${id}.jpg`,
     };
   }

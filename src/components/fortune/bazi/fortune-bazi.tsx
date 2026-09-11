@@ -1,0 +1,144 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, Loader2 } from "lucide-react";
+import { BaziResultView } from "@/components/fortune/bazi/bazi-result-view";
+import { buildBaziChart } from "@/lib/fortune/bazi";
+import type { BaziInput } from "@/lib/fortune/bazi";
+import { readFortuneProfile } from "@/lib/fortune/profile-storage";
+import { cn } from "@/lib/utils";
+
+/** ปาจื้อ — ใช้ข้อมูลพรีเมียมที่มีอยู่แล้ว ไม่กรอกซ้ำ */
+export function FortuneBazi({ className }: { className?: string }) {
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
+  const [missing, setMissing] = useState(false);
+  const [input, setInput] = useState<BaziInput | null>(null);
+  const [nickname, setNickname] = useState<string | undefined>();
+
+  useEffect(() => {
+    const profile = readFortuneProfile();
+    if (
+      profile?.birthDate &&
+      profile.gender &&
+      /^\d{4}-\d{2}-\d{2}$/.test(profile.birthDate)
+    ) {
+      const gender =
+        profile.gender === "female" || profile.gender === "male"
+          ? profile.gender
+          : "other";
+      setInput({
+        birthDate: profile.birthDate,
+        birthTime: profile.birthTime?.trim() || undefined,
+        gender,
+        timezone: "Asia/Bangkok",
+        birthPlace: profile.birthPlace,
+      });
+      setNickname(profile.nickname);
+      setMissing(false);
+    } else {
+      setMissing(true);
+    }
+    setReady(true);
+  }, []);
+
+  const { chart, computeError } = useMemo(() => {
+    if (!input) return { chart: null, computeError: null as string | null };
+    try {
+      return { chart: buildBaziChart(input), computeError: null };
+    } catch (err) {
+      return {
+        chart: null,
+        computeError:
+          err instanceof Error ? err.message : "คำนวณปาจื้อไม่สำเร็จ",
+      };
+    }
+  }, [input]);
+
+  if (!ready) {
+    return (
+      <div
+        className={cn(
+          "flex h-full items-center justify-center text-[#d5b16f]/80",
+          className
+        )}
+      >
+        <Loader2 className="h-5 w-5 animate-spin" strokeWidth={2.2} />
+      </div>
+    );
+  }
+
+  if (missing) {
+    return (
+      <div
+        className={cn(
+          "relative flex h-full flex-col overflow-y-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] pt-3",
+          className
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-0.5 self-start text-[14px] font-medium text-white/85 outline-none transition active:opacity-60"
+        >
+          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+          กลับ
+        </button>
+
+        <div className="mae-aspect-card mx-auto mt-16 w-full max-w-[320px] px-4 py-6 text-center">
+          <p className="mae-gold-text text-[1.15rem] font-bold">ปาจื้อ 八字</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-[#c5cdd9]/80">
+            ยังไม่มีข้อมูลวันเกิดในโปรไฟล์
+            <br />
+            กรอกครั้งเดียวตอนดูดวงพรีเมียม แล้วกลับมาที่นี่ได้เลย
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push("/reading")}
+            className="mae-gold-cta mt-5 inline-flex h-11 w-full items-center justify-center rounded-full text-[14px] font-bold outline-none transition active:scale-[0.99]"
+          >
+            ไปกรอกข้อมูลดูดวง
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (computeError || !chart) {
+    return (
+      <div
+        className={cn(
+          "relative flex h-full flex-col overflow-y-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] pt-3",
+          className
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-0.5 self-start text-[14px] font-medium text-white/85 outline-none transition active:opacity-60"
+        >
+          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+          กลับ
+        </button>
+        <div className="mae-aspect-card mx-auto mt-16 w-full max-w-[320px] px-4 py-6 text-center">
+          <p className="text-[14px] font-semibold text-[#ff8fa3]">
+            คำนวณปาจื้อไม่สำเร็จ
+          </p>
+          <p className="mt-2 text-[12px] leading-relaxed text-[#c5cdd9]/75">
+            {computeError || "ข้อมูลวันเกิดไม่ถูกต้อง"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <BaziResultView
+      chart={chart}
+      nickname={nickname}
+      className={className}
+      onBack={() => router.back()}
+    />
+  );
+}

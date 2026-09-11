@@ -518,7 +518,7 @@ function FaceResult({
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src="/images/app-icon.png"
+                  src="/images/app-icon.webp"
                   alt=""
                   className="h-12 w-12 object-contain"
                 />
@@ -535,7 +535,7 @@ function FaceResult({
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src="/images/app-icon.png"
+                  src="/images/app-icon.webp"
                   alt=""
                   className="h-12 w-12 object-contain opacity-80"
                 />

@@ -23,7 +23,7 @@ function LockMark({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x}, ${y})`} className="pointer-events-none">
       <image
-        href="/images/icons/lock-gold.png"
+        href="/images/icons/lock-gold.webp"
         x={-size / 2}
         y={-size / 2}
         width={size}

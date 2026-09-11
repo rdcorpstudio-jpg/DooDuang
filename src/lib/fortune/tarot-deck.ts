@@ -650,28 +650,28 @@ export const TAROT_DECK_COUNT = TAROT_DECK.length; // 78
 
 /** Rider–Waite AI pack filenames under /public/images/tarot */
 const MAJOR_IMAGE_FILES = [
-  "00_THE_FOOL.jpg",
-  "01_I_THE_MAGICIAN.jpg",
-  "02_II_THE_HIGH_PRIESTESS.jpg",
-  "03_III_THE_EMPRESS.jpg",
-  "04_IV_THE_EMPEROR.jpg",
-  "05_V_THE_HIEROPHANT.jpg",
-  "06_VI_THE_LOVERS.jpg",
-  "07_VII_THE_CHARIOT.jpg",
-  "08_VIII_STRENGTH.jpg",
-  "09_IX_THE_HERMIT.jpg",
-  "10_X_WHEEL_OF_FORTUNE.jpg",
-  "11_XI_JUSTICE.jpg",
-  "12_XII_THE_HANGED_MAN.jpg",
-  "13_XIII_DEATH.jpg",
-  "14_XIV_TEMPERANCE.jpg",
-  "15_XV_THE_DEVIL.jpg",
-  "16_XVI_THE_TOWER.jpg",
-  "17_XVII_THE_STAR.jpg",
-  "18_XVIII_THE_MOON.jpg",
-  "19_XIX_THE_SUN.jpg",
-  "20_XX_JUDGEMENT.jpg",
-  "21_XXI_THE_WORLD.jpg",
+  "00_THE_FOOL.webp",
+  "01_I_THE_MAGICIAN.webp",
+  "02_II_THE_HIGH_PRIESTESS.webp",
+  "03_III_THE_EMPRESS.webp",
+  "04_IV_THE_EMPEROR.webp",
+  "05_V_THE_HIEROPHANT.webp",
+  "06_VI_THE_LOVERS.webp",
+  "07_VII_THE_CHARIOT.webp",
+  "08_VIII_STRENGTH.webp",
+  "09_IX_THE_HERMIT.webp",
+  "10_X_WHEEL_OF_FORTUNE.webp",
+  "11_XI_JUSTICE.webp",
+  "12_XII_THE_HANGED_MAN.webp",
+  "13_XIII_DEATH.webp",
+  "14_XIV_TEMPERANCE.webp",
+  "15_XV_THE_DEVIL.webp",
+  "16_XVI_THE_TOWER.webp",
+  "17_XVII_THE_STAR.webp",
+  "18_XVIII_THE_MOON.webp",
+  "19_XIX_THE_SUN.webp",
+  "20_XX_JUDGEMENT.webp",
+  "21_XXI_THE_WORLD.webp",
 ] as const;
 
 const MINOR_RANK_FILES = [
@@ -714,7 +714,7 @@ export function tarotCardImageSrc(card: TarotCardDef): string {
       Math.max(0, card.number - 1)
     );
     const idx = meta.start + rankIdx;
-    file = `${String(idx).padStart(2, "0")}_${MINOR_RANK_FILES[rankIdx]}_OF_${meta.file}.jpg`;
+    file = `${String(idx).padStart(2, "0")}_${MINOR_RANK_FILES[rankIdx]}_OF_${meta.file}.webp`;
   }
   return `/images/tarot/${file}?v=rws1`;
 }

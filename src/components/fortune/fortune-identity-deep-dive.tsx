@@ -19,7 +19,7 @@ const DOMAINS = [
     id: "work",
     name: "การงาน",
     detailTitle: "การงานวันนี้",
-    image: "/images/daily/work.png?v=2",
+    image: "/images/daily/work.webp?v=2",
     bodies: [
       "พลังงานงานอาจไม่เต็มร้อย งานบางอย่างอาจล่าช้ากว่าที่คิด แนะนำให้ใจเย็นและค่อย ๆ เคลียร์ทีละเรื่อง",
       "หลายอย่างอาจเข้ามาพร้อมกัน ลองจัดลำดับก่อนเริ่ม แล้วโฟกัสงานสำคัญวันละหนึ่งเรื่อง",
@@ -30,7 +30,7 @@ const DOMAINS = [
     id: "money",
     name: "การเงิน",
     detailTitle: "การเงินวันนี้",
-    image: "/images/daily/money.png?v=2",
+    image: "/images/daily/money.webp?v=2",
     bodies: [
       "ใส่ใจรายจ่ายเล็ก ๆ ที่เกิดซ้ำ และเผื่อเงินสำหรับสิ่งจำเป็นไว้ก่อน",
       "โอกาสเรื่องเงินมี แต่ควรเช็กตัวเลขให้ชัดก่อนตัดสินใจใหญ่",
@@ -41,7 +41,7 @@ const DOMAINS = [
     id: "love",
     name: "ความรัก",
     detailTitle: "ความรักวันนี้",
-    image: "/images/daily/love.png?v=2",
+    image: "/images/daily/love.webp?v=2",
     bodies: [
       "การบอกความต้องการอย่างตรงไปตรงมา ช่วยให้เข้าใจกันมากขึ้น",
       "บรรยากาศอบอุ่นถ้าเปิดใจฟังก่อนตัดสิน อย่ารีบสรุปจากความรู้สึกชั่วขณะ",
@@ -52,7 +52,7 @@ const DOMAINS = [
     id: "health",
     name: "สุขภาพ",
     detailTitle: "สุขภาพวันนี้",
-    image: "/images/daily/health.png?v=2",
+    image: "/images/daily/health.webp?v=2",
     bodies: [
       "ร่างกายฟื้นตัวได้ดีถ้าพักให้พอ ลดงานดึกและเติมน้ำให้สม่ำเสมอ",
       "พลังกายยังใช้ได้ แต่ระวังสะสมความเครียดที่คอและไหล่",

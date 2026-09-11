@@ -232,7 +232,7 @@ export function MaeLanding() {
             loop
             playsInline
             preload="auto"
-            poster="/images/bg/mae-bg-poster.jpg?v=new1"
+            poster="/images/bg/mae-bg-poster.webp?v=new1"
           >
             <source src="/videos/mae-bg.mp4?v=new1" type="video/mp4" />
           </video>
@@ -254,7 +254,7 @@ export function MaeLanding() {
         >
           <Reveal visible={mounted} delay={60} variant="glow">
             <Image
-              src="/images/brand/mae-wordmark-sm.png?v=clear1"
+              src="/images/brand/mae-wordmark-sm.webp?v=clear1"
               alt="แม่มั่งมี พามู"
               width={400}
               height={200}

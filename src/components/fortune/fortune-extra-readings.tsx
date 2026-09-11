@@ -7,7 +7,7 @@ import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { cn } from "@/lib/utils";
 
 type ReadingItem = {
-  id: "tarot" | "face" | "palm" | "wallpaper" | "couple";
+  id: "tarot" | "face" | "palm" | "wallpaper" | "couple" | "bazi";
   title: string;
   badge: string;
   locked: boolean;
@@ -20,35 +20,42 @@ const READINGS: ReadingItem[] = [
     title: "ไพ่รายวัน",
     badge: "ดูฟรี",
     locked: false,
-    icon: "/images/extra/tarot.png?v=gold1",
+    icon: "/images/extra/tarot.webp?v=mae6",
+  },
+  {
+    id: "bazi",
+    title: "ปาจื้อ",
+    badge: "พรีเมียม",
+    locked: false,
+    icon: "/images/extra/bazi.webp?v=mae6",
   },
   {
     id: "face",
     title: "ดูโหงวเฮ้ง",
     badge: "พรีเมียม",
     locked: true,
-    icon: "/images/extra/face.png?v=gold1",
+    icon: "/images/extra/face.webp?v=mae6",
   },
   {
     id: "palm",
     title: "ดูลายมือ",
     badge: "พรีเมียม",
     locked: true,
-    icon: "/images/extra/palm.png?v=gold1",
+    icon: "/images/extra/palm.webp?v=mae6",
   },
   {
     id: "wallpaper",
     title: "วอลเปเปอร์มงคล",
     badge: "พรีเมียม",
     locked: true,
-    icon: "/images/extra/wallpaper.png?v=gold1",
+    icon: "/images/extra/wallpaper.webp?v=mae6",
   },
   {
     id: "couple",
     title: "ดวงคู่",
     badge: "พรีเมียม",
     locked: true,
-    icon: "/images/extra/couple.png",
+    icon: "/images/extra/couple.webp?v=mae6",
   },
 ];
 
@@ -169,6 +176,11 @@ export function FortuneExtraReadings({
       router.push(`/reading/tarot?seed=${encodeURIComponent(seed)}`);
       return;
     }
+    if (item.id === "bazi") {
+      // UI scaffold — open for review; lock gate later with real engine
+      router.push("/reading/bazi");
+      return;
+    }
     if (isLocked) {
       if (onUnlock) {
         onUnlock();
@@ -203,11 +215,8 @@ export function FortuneExtraReadings({
 
       <div
         ref={ref}
-        className="extra-readings-scroll w-full min-w-0 cursor-grab overflow-x-auto overscroll-x-contain active:cursor-grabbing"
-        style={{
-          WebkitOverflowScrolling: "touch",
-          touchAction: "pan-x",
-        }}
+        className="extra-readings-scroll no-tap w-full min-w-0 cursor-grab overflow-x-auto overscroll-x-contain active:cursor-grabbing"
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
         <div className="flex w-max items-stretch gap-2 px-3 pb-0.5">
           {READINGS.map((item, index) => {
@@ -220,10 +229,11 @@ export function FortuneExtraReadings({
                 onClick={() => openItem(item, isLocked)}
                 className={cn(
                   "mae-aspect-card dd-feature-pop relative box-border flex h-[10.5rem] w-[7.25rem] shrink-0 flex-col items-center overflow-hidden px-2 pb-2.5 pt-2.5 text-center outline-none transition",
-                  "select-none touch-manipulation active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#e0cc9f]/35"
+                  "no-tap select-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#e0cc9f]/35"
                 )}
                 style={
                   {
+                    touchAction: "manipulation",
                     "--dd-pop-delay": `${80 + index * 70}ms`,
                   } as CSSProperties
                 }
@@ -232,7 +242,7 @@ export function FortuneExtraReadings({
                 }
               >
                 <span
-                  className="dd-icon-float relative flex h-[4.75rem] w-[4.75rem] shrink-0 items-center justify-center"
+                  className="dd-icon-float relative flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center"
                   style={
                     {
                       "--dd-float-delay": `${index * 0.35}s`,
@@ -255,11 +265,11 @@ export function FortuneExtraReadings({
                   ) : null}
                 </span>
 
-                <p className="mae-aspect-title mt-1 flex h-[2.6rem] w-full shrink-0 items-center justify-center px-0.5 text-[11.5px] font-semibold leading-tight">
+                <p className="mae-aspect-title mt-2 flex min-h-[2.2rem] w-full shrink-0 items-center justify-center px-0.5 text-[11.5px] font-semibold leading-snug text-[#e8d19a]">
                   <span className="line-clamp-2">{item.title}</span>
                 </p>
                 <span
-                  className="mt-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-none text-[#e8d19a]"
+                  className="mt-2 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-none text-[#e8d19a]"
                   style={{
                     background: "rgba(213,177,111,0.14)",
                     boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",

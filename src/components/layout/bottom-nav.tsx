@@ -15,25 +15,25 @@ const TABS: Array<{
   {
     href: "/",
     label: "หน้าแรก",
-    src: "/images/icons/home.png",
+    src: "/images/icons/home.webp",
     match: (p) => p === "/" || p === "/mae" || p.startsWith("/mae/"),
   },
   {
     href: "/reading",
     label: "ดูดวง",
-    src: "/images/icons/crystal-ball.png",
+    src: "/images/icons/crystal-ball.webp",
     match: (p) => p.startsWith("/reading") || p.startsWith("/r/"),
   },
   {
     href: "/premium",
     label: "พรีเมียม",
-    src: "/images/icons/sparkle.png",
+    src: "/images/icons/sparkle.webp",
     match: (p) => p.startsWith("/premium"),
   },
   {
     href: "/dashboard",
     label: "บัญชี",
-    src: "/images/icons/profile.png",
+    src: "/images/icons/profile.webp",
     match: (p) =>
       p.startsWith("/dashboard") ||
       p.startsWith("/login") ||
