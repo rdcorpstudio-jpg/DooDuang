@@ -11,9 +11,9 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 const TONE_RING: Record<string, string> = {
-  high: "from-[#7B5FD4] to-[#9B7FE8]",
-  mid: "from-[#8B7CC8] to-[#B8A9E8]",
-  low: "from-[#A89878] to-[#C9B896]",
+  high: "from-[#8a6a28] to-[#d5b16f]",
+  mid: "from-[#6a5840] to-[#c4a86a]",
+  low: "from-[#5a5040] to-[#a89870]",
 };
 
 export function PremiumOutlookPage() {
@@ -26,7 +26,7 @@ export function PremiumOutlookPage() {
 
   if (!ready || !pack) {
     return (
-      <div className="px-4 py-10 text-center text-[14px] text-[#8A82B0]">
+      <div className="px-4 py-10 text-center text-[14px] text-[#f7f4ec]/55">
         กำลังเปิด…
       </div>
     );
@@ -34,7 +34,7 @@ export function PremiumOutlookPage() {
 
   return (
     <PremiumDetailShell title="จังหวะ 3 วัน">
-      <p className="mt-1 text-[13px] text-[#6B6490]">
+      <p className="mt-1 text-[13px] text-[#f7f4ec]/65">
         สรุปสั้นบนการ์ด · อ่านรายละเอียดทีละวันด้านล่าง
       </p>
 
@@ -42,32 +42,34 @@ export function PremiumOutlookPage() {
         {pack.outlook.map((d) => (
           <div
             key={d.iso}
-            className="rounded-[16px] bg-white/70 px-2 py-3 text-center ring-1 ring-[#9B7FE8]/2"
+            className="mae-aspect-card rounded-[16px] px-2 py-3 text-center"
           >
             <span
               className={cn(
-                "mx-auto flex h-12 w-12 flex-col items-center justify-center rounded-full bg-gradient-to-br leading-none text-white",
+                "mx-auto flex h-12 w-12 flex-col items-center justify-center rounded-full bg-gradient-to-br leading-none text-white shadow-[0_4px_12px_rgba(0,0,0,0.3)]",
                 TONE_RING[d.tone]
               )}
             >
               <span className="text-[15px] font-bold">{d.score}</span>
               <span className="text-[9px] font-semibold opacity-85">/12</span>
             </span>
-            <p className="mt-1.5 text-[12px] font-semibold text-[#241C4F]">
+            <p className="mt-1.5 text-[12px] font-semibold text-[#f7f4ec]">
               {d.label}
             </p>
-            <p className="text-[10px] text-[#8A82B0]">{d.shortDate}</p>
+            <p className="text-[10px] text-[#f7f4ec]/55">{d.shortDate}</p>
           </div>
         ))}
       </div>
 
       {pack.outlook.map((d) => (
-        <DetailSection
-          key={d.iso}
-          eyebrow={d.label}
-          title={d.copy.vibe}
-        >
-          <p className="mb-2 inline-flex rounded-full bg-[#9B7FE8]/12 px-2.5 py-0.5 text-[11px] font-medium text-[#5B45B8]">
+        <DetailSection key={d.iso} eyebrow={d.label} title={d.copy.vibe}>
+          <p
+            className="mb-2 inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-medium text-[#e8d19a]"
+            style={{
+              background: "rgba(213,177,111,0.12)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.32)",
+            }}
+          >
             {d.copy.doHint}
           </p>
           <p>{d.copy.body}</p>

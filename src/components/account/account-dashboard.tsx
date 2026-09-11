@@ -88,7 +88,7 @@ function genderLabel(gender: string) {
   return GENDER_OPTIONS.find((g) => g.id === gender)?.label ?? "—";
 }
 
-/** Logged-in account / profile — light lilac glass to match fortune UI */
+/** Logged-in account / profile — Mae navy-gold account panel */
 export function AccountDashboard({
   user,
 }: {
@@ -230,20 +230,20 @@ export function AccountDashboard({
   }
 
   return (
-    <AnimatedPage className="sky-copy mx-auto w-full max-w-[480px] space-y-3.5 px-4 pb-10 pt-4">
+    <AnimatedPage className="no-sky-lift mx-auto w-full max-w-[480px] space-y-3.5 px-4 pb-10 pt-4">
       <header className="px-0.5 text-center">
-        <p className="text-[12px] font-semibold tracking-[0.2em] text-[#8B7BC8]">
+        <p className="mae-gold-text text-[12px] font-semibold tracking-[0.2em]">
           โปรไฟล์
         </p>
-        <h1 className="mt-1 text-[1.45rem] font-bold tracking-tight text-[#241C4F]">
+        <h1 className="mae-gold-text mt-1 text-[1.45rem] font-bold tracking-tight">
           บัญชีของคุณ
         </h1>
       </header>
 
       {/* Identity */}
-      <section className="fortune-glass relative overflow-hidden rounded-[22px] px-4 py-5">
+      <section className="mae-aspect-card relative overflow-hidden rounded-[22px] px-4 py-5">
         <div className="relative z-[1] flex items-center gap-3.5">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-[#B9A4F0]/45">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full shadow-[0_0_0_2px_rgba(213,177,111,0.45)]">
             {user.image ? (
               <Image
                 src={user.image}
@@ -253,25 +253,28 @@ export function AccountDashboard({
                 unoptimized
               />
             ) : (
-              <span className="flex h-full w-full items-center justify-center bg-[#EDE6FF]">
-                <UserRound className="h-7 w-7 text-[#7B5FD4]" strokeWidth={1.7} />
+              <span className="flex h-full w-full items-center justify-center bg-[rgba(213,177,111,0.12)]">
+                <UserRound className="h-7 w-7 text-[#d5b16f]" strokeWidth={1.7} />
               </span>
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-[1.25rem] font-semibold text-[#2C2458]">
+            <h2 className="truncate text-[1.25rem] font-semibold text-[#f7f4ec]">
               คุณ{displayName}
             </h2>
-            <p className="mt-0.5 truncate text-[13px] text-[#6B6490]">
+            <p className="mt-0.5 truncate text-[13px] text-[#f7f4ec]/65">
               {user.email ?? "เข้าสู่ระบบแล้ว"}
             </p>
             <p
               className={cn(
                 "mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
                 premium
-                  ? "bg-[#FFF3D6] text-[#A07E1A]"
-                  : "bg-[#EDE6FF] text-[#6A48C8]"
+                  ? "bg-[rgba(213,177,111,0.18)] text-[#e8d19a]"
+                  : "bg-[rgba(213,177,111,0.1)] text-[#d5b16f]"
               )}
+              style={{
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+              }}
             >
               <Crown className="h-3 w-3" strokeWidth={2} />
               {premium ? "พรีเมียมใช้งานอยู่" : "สมาชิกทั่วไป"}
@@ -280,12 +283,18 @@ export function AccountDashboard({
         </div>
 
         <div className="relative z-[1] mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-[14px] bg-white/65 px-3 py-2.5 ring-1 ring-[#7B6BB0]/12">
-            <p className="text-[11px] text-[#8A82B0]">แพ็กเกจ</p>
-            <p className="mt-0.5 text-[15px] font-semibold text-[#2C2458]">
+          <div
+            className="rounded-[14px] px-3 py-2.5"
+            style={{
+              background: "rgba(213,177,111,0.08)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+            }}
+          >
+            <p className="text-[11px] text-[#e8d19a]/75">แพ็กเกจ</p>
+            <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
               {FORTUNE_PACKAGE_MONTHS} เดือน
             </p>
-            <p className="text-[11px] text-[#8A82B0]">
+            <p className="text-[11px] text-[#f7f4ec]/55">
               {FORTUNE_UNLOCK_PRICE} บาท
               {premium && premiumUntil
                 ? ` · ถึง ${new Intl.DateTimeFormat("th-TH", {
@@ -298,25 +307,29 @@ export function AccountDashboard({
           </div>
           <Link
             href="/premium"
-            className="rounded-[14px] bg-white/65 px-3 py-2.5 ring-1 ring-[#7B6BB0]/12 outline-none transition active:scale-[0.99]"
+            className="rounded-[14px] px-3 py-2.5 outline-none transition active:scale-[0.99]"
+            style={{
+              background: "rgba(213,177,111,0.08)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+            }}
           >
-            <p className="text-[11px] text-[#8A82B0]">สถานะ</p>
-            <p className="mt-0.5 text-[15px] font-semibold text-[#2C2458]">
+            <p className="text-[11px] text-[#e8d19a]/75">สถานะ</p>
+            <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
               {premium ? "ปลดล็อกแล้ว" : "ยังไม่ปลดล็อก"}
             </p>
-            <p className="text-[11px] text-[#6A48C8]">ดูพรีเมียม →</p>
+            <p className="text-[11px] text-[#d5b16f]">ดูพรีเมียม →</p>
           </Link>
         </div>
       </section>
 
       {/* Fortune profile */}
-      <section className="fortune-glass rounded-[20px] px-3.5 py-4">
+      <section className="mae-aspect-card rounded-[20px] px-3.5 py-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div>
-            <h2 className="text-[17px] font-semibold text-[#2C2458]">
+            <h2 className="mae-gold-text text-[17px] font-semibold">
               โปรไฟล์ดวง
             </h2>
-            <p className="text-[12px] text-[#6B6490]">
+            <p className="text-[12px] text-[#f7f4ec]/65">
               ใช้ดูดวงทุกหน้าในแอป
             </p>
           </div>
@@ -325,13 +338,23 @@ export function AccountDashboard({
               <button
                 type="button"
                 onClick={openEdit}
-                className="inline-flex items-center gap-1 rounded-full bg-[#EDE6FF] px-2.5 py-1.5 text-[12px] font-medium text-[#6A48C8] outline-none transition active:scale-[0.98]"
+                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-medium text-[#e8d19a] outline-none transition active:scale-[0.98]"
+                style={{
+                  background: "rgba(213,177,111,0.12)",
+                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+                }}
               >
                 <Pencil className="h-3 w-3" strokeWidth={2} />
                 แก้ไข
               </button>
             ) : (
-              <span className="rounded-full bg-[#F3EEFF] px-2.5 py-1.5 text-[11px] font-medium text-[#7A72A0]">
+              <span
+                className="rounded-full px-2.5 py-1.5 text-[11px] font-medium text-[#e8d19a]/80"
+                style={{
+                  background: "rgba(213,177,111,0.1)",
+                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                }}
+              >
                 แก้ได้อีกใน {cooldownDays} วัน
               </span>
             )
@@ -345,7 +368,7 @@ export function AccountDashboard({
         {editing ? (
           <div className="space-y-3">
             <label className="block">
-              <span className="mb-1.5 block text-[13px] font-medium text-[#5E5688]">
+              <span className="mb-1.5 block text-[13px] font-medium text-[#9aa3b2]">
                 ชื่อจริง (ไม่บังคับ)
               </span>
               <input
@@ -358,7 +381,7 @@ export function AccountDashboard({
               />
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-[13px] font-medium text-[#5E5688]">
+              <span className="mb-1.5 block text-[13px] font-medium text-[#9aa3b2]">
                 ชื่อเล่น
               </span>
               <input
@@ -371,7 +394,7 @@ export function AccountDashboard({
               />
             </label>
             <div>
-              <span className="mb-1.5 block text-[13px] font-medium text-[#5E5688]">
+              <span className="mb-1.5 block text-[13px] font-medium text-[#9aa3b2]">
                 วันเกิด
               </span>
               <BirthDatePicker
@@ -382,7 +405,7 @@ export function AccountDashboard({
               />
             </div>
             <div>
-              <span className="mb-1.5 block text-[13px] font-medium text-[#5E5688]">
+              <span className="mb-1.5 block text-[13px] font-medium text-[#9aa3b2]">
                 เพศ
               </span>
               <div className="grid grid-cols-3 gap-1.5">
@@ -398,9 +421,17 @@ export function AccountDashboard({
                       className={cn(
                         "rounded-full py-2.5 text-[13px] font-medium outline-none transition active:scale-[0.98]",
                         selected
-                          ? "bg-[#6A48C8] text-white"
-                          : "bg-white/70 text-[#4A4278] ring-1 ring-[#7B6BB0]/18"
+                          ? "mae-gold-cta"
+                          : "text-[#f7f4ec]/75"
                       )}
+                      style={
+                        selected
+                          ? undefined
+                          : {
+                              background: "rgba(213,177,111,0.08)",
+                              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                            }
+                      }
                     >
                       {opt.label}
                     </button>
@@ -408,7 +439,7 @@ export function AccountDashboard({
                 })}
               </div>
             </div>
-            <p className="text-center text-[11px] text-[#8A82B0]">
+            <p className="text-center text-[11px] text-[#f7f4ec]/55">
               บันทึกแล้วจะแก้ไขได้อีกครั้งหลัง 3 สัปดาห์
             </p>
             <div className="flex gap-2 pt-1">
@@ -419,7 +450,10 @@ export function AccountDashboard({
                     setEditing(false);
                     setSaveError(null);
                   }}
-                  className="flex-1 rounded-full bg-white/70 py-3 text-[14px] font-medium text-[#5E5688] ring-1 ring-[#7B6BB0]/15"
+                  className="flex-1 rounded-full py-3 text-[14px] font-medium text-[#f7f4ec]/70"
+                  style={{
+                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                  }}
                 >
                   ยกเลิก
                 </button>
@@ -432,7 +466,7 @@ export function AccountDashboard({
                   !draft.birthDate ||
                   !draft.gender
                 }
-                className="flex-1 rounded-full bg-[#6A48C8] py-3 text-[14px] font-semibold text-white disabled:opacity-50"
+                className="mae-gold-cta flex-1 rounded-full py-3 text-[14px] font-semibold disabled:opacity-50"
               >
                 บันทึกโปรไฟล์
               </button>
@@ -440,8 +474,14 @@ export function AccountDashboard({
           </div>
         ) : profile ? (
           <div className="space-y-2.5">
-            <div className="flex items-center gap-3 rounded-[16px] bg-white/65 px-3 py-3 ring-1 ring-[#7B6BB0]/12">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#F3EEFF]">
+            <div
+              className="flex items-center gap-3 rounded-[16px] px-3 py-3"
+              style={{
+                background: "rgba(213,177,111,0.08)",
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+              }}
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center">
                 {zodiac ? (
                   <ZodiacSignImage
                     sign={zodiac.id}
@@ -450,72 +490,108 @@ export function AccountDashboard({
                     alt={`ราศี${zodiac.thaiName}`}
                   />
                 ) : (
-                  <Sparkles className="h-5 w-5 text-[#7B5FD4]" />
+                  <Sparkles className="h-5 w-5 text-[#d5b16f]" />
                 )}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[15px] font-semibold text-[#2C2458]">
+                <p className="text-[15px] font-semibold text-[#f7f4ec]">
                   ราศี{zodiac?.thaiName ?? "—"}
                   {zodiac ? (
-                    <span className="ml-1.5 text-[12px] font-normal text-[#6B6490]">
+                    <span className="ml-1.5 text-[12px] font-normal text-[#f7f4ec]/65">
                       · ธาตุ{zodiac.element}
                     </span>
                   ) : null}
                 </p>
-                <p className="mt-0.5 text-[12px] text-[#6B6490]">
+                <p className="mt-0.5 text-[12px] text-[#f7f4ec]/55">
                   {zodiac?.dateRange}
                 </p>
               </div>
             </div>
 
             <dl className="grid grid-cols-2 gap-2">
-              <div className="rounded-[14px] bg-white/65 px-3 py-2.5 ring-1 ring-[#7B6BB0]/12">
-                <dt className="text-[11px] text-[#8A82B0]">ชื่อเล่น</dt>
-                <dd className="mt-0.5 truncate text-[14px] font-medium text-[#2C2458]">
+              <div
+                className="rounded-[14px] px-3 py-2.5"
+                style={{
+                  background: "rgba(213,177,111,0.08)",
+                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                }}
+              >
+                <dt className="text-[11px] text-[#e8d19a]/75">ชื่อเล่น</dt>
+                <dd className="mt-0.5 truncate text-[14px] font-medium text-[#f7f4ec]">
                   {profile.nickname}
                 </dd>
               </div>
-              <div className="rounded-[14px] bg-white/65 px-3 py-2.5 ring-1 ring-[#7B6BB0]/12">
-                <dt className="text-[11px] text-[#8A82B0]">เพศ</dt>
-                <dd className="mt-0.5 text-[14px] font-medium text-[#2C2458]">
+              <div
+                className="rounded-[14px] px-3 py-2.5"
+                style={{
+                  background: "rgba(213,177,111,0.08)",
+                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                }}
+              >
+                <dt className="text-[11px] text-[#e8d19a]/75">เพศ</dt>
+                <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
                   {genderLabel(profile.gender)}
                 </dd>
               </div>
-              <div className="col-span-2 rounded-[14px] bg-white/65 px-3 py-2.5 ring-1 ring-[#7B6BB0]/12">
-                <dt className="flex items-center gap-1 text-[11px] text-[#8A82B0]">
+              <div
+                className="col-span-2 rounded-[14px] px-3 py-2.5"
+                style={{
+                  background: "rgba(213,177,111,0.08)",
+                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                }}
+              >
+                <dt className="flex items-center gap-1 text-[11px] text-[#e8d19a]/75">
                   <CalendarDays className="h-3 w-3" strokeWidth={1.9} />
                   วันเกิด
                 </dt>
-                <dd className="mt-0.5 text-[14px] font-medium text-[#2C2458]">
+                <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
                   {formatBirthThai(profile.birthDate)}
                 </dd>
               </div>
               {profile.birthTime ? (
-                <div className="rounded-[14px] bg-white/65 px-3 py-2.5 ring-1 ring-[#7B6BB0]/12">
-                  <dt className="flex items-center gap-1 text-[11px] text-[#8A82B0]">
+                <div
+                  className="rounded-[14px] px-3 py-2.5"
+                  style={{
+                    background: "rgba(213,177,111,0.08)",
+                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                  }}
+                >
+                  <dt className="flex items-center gap-1 text-[11px] text-[#e8d19a]/75">
                     <Clock className="h-3 w-3" strokeWidth={1.9} />
                     เวลาเกิด
                   </dt>
-                  <dd className="mt-0.5 text-[14px] font-medium text-[#2C2458]">
+                  <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
                     {profile.birthTime}
                   </dd>
                 </div>
               ) : null}
               {profile.birthPlace ? (
-                <div className="rounded-[14px] bg-white/65 px-3 py-2.5 ring-1 ring-[#7B6BB0]/12">
-                  <dt className="flex items-center gap-1 text-[11px] text-[#8A82B0]">
+                <div
+                  className="rounded-[14px] px-3 py-2.5"
+                  style={{
+                    background: "rgba(213,177,111,0.08)",
+                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                  }}
+                >
+                  <dt className="flex items-center gap-1 text-[11px] text-[#e8d19a]/75">
                     <MapPin className="h-3 w-3" strokeWidth={1.9} />
                     สถานที่เกิด
                   </dt>
-                  <dd className="mt-0.5 truncate text-[14px] font-medium text-[#2C2458]">
+                  <dd className="mt-0.5 truncate text-[14px] font-medium text-[#f7f4ec]">
                     {profile.birthPlace}
                   </dd>
                 </div>
               ) : null}
               {profile.realName ? (
-                <div className="col-span-2 rounded-[14px] bg-white/65 px-3 py-2.5 ring-1 ring-[#7B6BB0]/12">
-                  <dt className="text-[11px] text-[#8A82B0]">ชื่อจริง</dt>
-                  <dd className="mt-0.5 text-[14px] font-medium text-[#2C2458]">
+                <div
+                  className="col-span-2 rounded-[14px] px-3 py-2.5"
+                  style={{
+                    background: "rgba(213,177,111,0.08)",
+                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                  }}
+                >
+                  <dt className="text-[11px] text-[#e8d19a]/75">ชื่อจริง</dt>
+                  <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
                     {profile.realName}
                   </dd>
                 </div>
@@ -524,21 +600,21 @@ export function AccountDashboard({
 
             <Link
               href="/reading"
-              className="mt-1 flex w-full items-center justify-between rounded-[14px] bg-[#6A48C8] px-3.5 py-3 text-left outline-none transition active:scale-[0.99]"
+              className="mae-gold-cta mt-1 flex w-full items-center justify-between rounded-[14px] px-3.5 py-3 text-left outline-none transition active:scale-[0.99]"
             >
               <span>
-                <span className="block text-[14px] font-semibold text-white">
+                <span className="block text-[14px] font-semibold">
                   เปิดดวงวันนี้
                 </span>
-                <span className="text-[11px] text-white/75">
+                <span className="text-[11px] opacity-75">
                   ใช้โปรไฟล์นี้ดูต่อ
                 </span>
               </span>
-              <ChevronRight className="h-4 w-4 text-white" strokeWidth={2.2} />
+              <ChevronRight className="h-4 w-4" strokeWidth={2.2} />
             </Link>
           </div>
         ) : (
-          <p className="py-4 text-center text-[13px] text-[#6B6490]">
+          <p className="py-4 text-center text-[13px] text-[#f7f4ec]/65">
             ยังไม่มีโปรไฟล์ดวง — กรอกข้อมูลด้านบนเพื่อเริ่มต้น
           </p>
         )}
@@ -546,7 +622,7 @@ export function AccountDashboard({
 
       {/* Quick links */}
       <section className="space-y-2.5">
-        <h2 className="px-0.5 text-[17px] font-semibold text-[#2C2458]">
+        <h2 className="mae-gold-text px-0.5 text-[17px] font-semibold">
           ทางลัด
         </h2>
         <div className="grid grid-cols-2 gap-2">
@@ -554,34 +630,40 @@ export function AccountDashboard({
             <Link
               key={href}
               href={href}
-              className="fortune-glass flex flex-col gap-2 rounded-[18px] px-3 py-3 outline-none transition active:scale-[0.98]"
+              className="mae-aspect-card flex flex-col gap-2 rounded-[18px] px-3 py-3 outline-none transition active:scale-[0.98]"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EDE6FF]">
-                <Icon className="h-4 w-4 text-[#6A48C8]" strokeWidth={1.8} />
+              <span
+                className="flex h-9 w-9 items-center justify-center rounded-full"
+                style={{ background: "rgba(213,177,111,0.12)" }}
+              >
+                <Icon className="h-4 w-4 text-[#d5b16f]" strokeWidth={1.8} />
               </span>
               <span>
-                <span className="block text-[14px] font-semibold text-[#2C2458]">
+                <span className="block text-[14px] font-semibold text-[#f7f4ec]">
                   {title}
                 </span>
-                <span className="text-[11px] text-[#6B6490]">{sub}</span>
+                <span className="text-[11px] text-[#f7f4ec]/55">{sub}</span>
               </span>
             </Link>
           ))}
         </div>
         <Link
           href="/reading/palm"
-          className="fortune-glass flex items-center gap-3 rounded-[16px] px-3.5 py-3 outline-none transition active:scale-[0.99]"
+          className="mae-aspect-card flex items-center gap-3 rounded-[16px] px-3.5 py-3 outline-none transition active:scale-[0.99]"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EDE6FF]">
-            <Hand className="h-4 w-4 text-[#6A48C8]" strokeWidth={1.8} />
+          <span
+            className="flex h-9 w-9 items-center justify-center rounded-full"
+            style={{ background: "rgba(213,177,111,0.12)" }}
+          >
+            <Hand className="h-4 w-4 text-[#d5b16f]" strokeWidth={1.8} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[14px] font-semibold text-[#2C2458]">
+            <span className="block text-[14px] font-semibold text-[#f7f4ec]">
               ดูลายมือ
             </span>
-            <span className="text-[11px] text-[#6B6490]">อ่านเส้นมือจากภาพ</span>
+            <span className="text-[11px] text-[#f7f4ec]/55">อ่านเส้นมือจากภาพ</span>
           </span>
-          <ChevronRight className="h-4 w-4 text-[#7B5FD4]" strokeWidth={2.2} />
+          <ChevronRight className="h-4 w-4 text-[#d5b16f]" strokeWidth={2.2} />
         </Link>
       </section>
 
@@ -589,7 +671,10 @@ export function AccountDashboard({
         type="button"
         onClick={handleSignOut}
         disabled={signingOut}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-white/70 py-3.5 text-[14px] font-medium text-[#5E5688] ring-1 ring-[#7B6BB0]/18 outline-none transition active:scale-[0.99] disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[14px] font-medium text-[#f7f4ec]/65 outline-none transition active:scale-[0.99] disabled:opacity-60"
+        style={{
+          boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+        }}
       >
         <LogOut className="h-4 w-4" strokeWidth={1.9} />
         {signingOut ? "กำลังออก…" : "ออกจากระบบ"}

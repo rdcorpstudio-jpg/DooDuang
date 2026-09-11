@@ -2,13 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { BookOpen, ChevronDown } from "lucide-react";
-import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import { analyzeFortune } from "@/lib/fortune/analyze";
 import { pickZodiacDeep } from "@/lib/fortune/content/zodiac-deep";
 import { cn } from "@/lib/utils";
 
-/** Self snapshot from zodiac deep bank */
+/** Self snapshot from zodiac deep bank — dark navy + gold rim */
 export function FortuneFreeSelfIntro({
   nickname,
   birthDate = "2000-01-01",
@@ -59,20 +58,16 @@ export function FortuneFreeSelfIntro({
   const name = nickname.replace(/^คุณ\s*/, "").trim();
 
   return (
-    <section
-      className={cn(
-        "fortune-glass rounded-[18px] px-3.5 py-3.5",
-        className
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <FortuneIcon name="sparkle" size={28} />
-        <h2 className="dd-section-title text-[17px] font-semibold">
-          {premium ? "เข้าใจตัวเองเชิงลึก" : "รู้จักตัวเองเบื้องต้น"}
-        </h2>
-      </div>
-      <p className="mt-2.5 text-[15px] leading-[1.75] text-[#4A4278]">
-        {name ? `คุณ${name} — ` : "คุณ — "}
+    <section className={cn("mae-aspect-card px-3.5 py-3.5", className)}>
+      <h2 className="mae-aspect-title text-[15px] font-semibold tracking-wide">
+        {premium ? "เข้าใจตัวเองเชิงลึก" : "รู้จักตัวเองเบื้องต้น"}
+      </h2>
+      <p className="mt-2.5 text-[14px] leading-[1.7] text-[#f7f4ec]/80">
+        {name ? (
+          <span className="font-semibold text-[#f7f4ec]">คุณ{name} — </span>
+        ) : (
+          <span className="font-semibold text-[#f7f4ec]">คุณ — </span>
+        )}
         {expanded ? copy.full : copy.teaser}
       </p>
       {!expanded ? (
@@ -80,7 +75,11 @@ export function FortuneFreeSelfIntro({
           {copy.strengths.map((s) => (
             <span
               key={s}
-              className="rounded-full border border-[#B9A4F0]/35 bg-[#B9A4F0]/18 px-2.5 py-1 text-[13px] font-medium text-[#5B45B8]"
+              className="rounded-full px-2.5 py-1 text-[12px] font-medium text-[#e8d19a]"
+              style={{
+                background: "rgba(213,177,111,0.1)",
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+              }}
             >
               {s}
             </span>
@@ -92,17 +91,21 @@ export function FortuneFreeSelfIntro({
         type="button"
         aria-expanded={expanded}
         onClick={() => setExpanded((v) => !v)}
-        className="dd-gold-glass-btn mt-3 flex w-full items-center gap-2.5 rounded-[14px] px-3 py-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/4"
+        className="mt-3 flex w-full items-center gap-2.5 rounded-[14px] px-3 py-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
+        style={{
+          background: "rgba(255,255,255,0.04)",
+          boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.22)",
+        }}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-white/45">
-          <BookOpen className="h-4 w-4 text-[#8A6A12]" strokeWidth={2.1} />
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.12)]">
+          <BookOpen className="h-4 w-4 text-[#d5b16f]" strokeWidth={2.1} />
         </span>
-        <span className="min-w-0 flex-1 text-[14px] font-semibold text-[#5C4810]">
+        <span className="min-w-0 flex-1 text-[13.5px] font-semibold text-[#f7f4ec]">
           {expanded ? "ย่อข้อความ" : "อ่านเพิ่มเติม"}
         </span>
         <ChevronDown
           className={cn(
-            "h-4 w-4 shrink-0 text-[#8A6A12] transition-transform",
+            "h-4 w-4 shrink-0 text-[#d5b16f]/80 transition-transform",
             expanded && "rotate-180"
           )}
           strokeWidth={2.2}

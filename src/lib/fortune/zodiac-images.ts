@@ -2,7 +2,7 @@ import type { ZodiacSign } from "@/lib/fortune/zodiac";
 
 export type ZodiacImageVariant = "orb" | "star";
 
-/** Glass gold-rim medallions from pack `medallions/` (left badge) */
+/** Glass gold-rim medallions — Mae gold metallic glyphs (`gold-zodiac-12`) */
 const ORB_EXT: Record<ZodiacSign, "png"> = {
   aries: "png",
   taurus: "png",
@@ -42,7 +42,8 @@ export function getZodiacImageSrc(
   if (variant === "star") {
     return `/images/zodiac/star/${sign}.${STAR_EXT[sign]}`;
   }
-  return `/images/zodiac/orb/${sign}.${ORB_EXT[sign]}`;
+  // Mae gold metallic glyphs (pack gold-zodiac-12)
+  return `/images/zodiac/orb/${sign}.${ORB_EXT[sign]}?v=gold12`;
 }
 
 /**

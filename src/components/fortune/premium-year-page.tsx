@@ -14,7 +14,7 @@ import {
   yearDetailForCe,
 } from "@/lib/fortune/year-rhythm";
 
-/** Full-page year reading (replaces YearDetailPopup) */
+/** Full-page year reading — Mae navy–gold */
 export function PremiumYearPage() {
   const search = useSearchParams();
   const { ready, profile } = usePremiumProfileGate();
@@ -39,7 +39,7 @@ export function PremiumYearPage() {
 
   if (!ready || !data) {
     return (
-      <div className="px-4 py-10 text-center text-[14px] text-[#8A82B0]">
+      <div className="px-4 py-10 text-center text-[14px] text-[#f7f4ec]/55">
         กำลังเปิด…
       </div>
     );
@@ -49,18 +49,18 @@ export function PremiumYearPage() {
 
   return (
     <PremiumDetailShell title="จังหวะปีนี้" backHref="/premium">
-      <p className="mt-1 text-[13px] text-[#6B6490]">
+      <p className="mt-1 text-[13px] text-[#f7f4ec]/65">
         {when} · พ.ศ. {be} · {band.label} · {score}/12
       </p>
 
-      <section className="fortune-glass mt-4 rounded-[20px] px-4 py-4">
-        <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
+      <section className="mae-aspect-card mt-4 rounded-[20px] px-4 py-4">
+        <p className="text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
           ภาพรวม
         </p>
-        <p className="mt-2 text-[15px] font-medium leading-[1.7] text-[#241C4F]">
+        <p className="mt-2 text-[15px] font-medium leading-[1.7] text-[#f7f4ec]">
           {detail.overview}
         </p>
-        <p className="mt-2 text-[13px] leading-[1.7] text-[#5E5688]">
+        <p className="mt-2 text-[13px] leading-[1.7] text-[#f7f4ec]/65">
           {band.meaning}
         </p>
       </section>

@@ -65,20 +65,22 @@ export function PremiumDetailShell({
         >
           <Link
             href={backHref}
-            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#f7f4ec]/75 outline-none transition active:opacity-60"
           >
             <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
             กลับ
           </Link>
           <div className="flex flex-col items-center justify-self-center">
             <FortuneIcon name="moon" size={16} className="dd-icon-float -mb-0.5" />
-            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">{APP_BRAND_MARK}</p>
+            <p className="mae-gold-text text-[12px] font-bold tracking-[0.26em]">
+              {APP_BRAND_MARK}
+            </p>
           </div>
           <span aria-hidden className="justify-self-end" />
         </div>
         {title ? (
           <h1
-            className="fortune-reveal mt-5 text-[1.45rem] font-bold tracking-tight text-[#241C4F]"
+            className="mae-gold-text fortune-reveal mt-5 text-[1.45rem] font-bold tracking-tight"
             style={{ "--fortune-delay": "90ms" } as CSSProperties}
           >
             {title}
@@ -100,21 +102,21 @@ export function DetailSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="fortune-glass mt-3 rounded-[20px] px-4 py-4">
+    <section className="mae-aspect-card mt-3 rounded-[20px] px-4 py-4">
       {eyebrow ? (
-        <p className="text-[11px] font-semibold tracking-[0.14em] text-[#7B5FD4]">
+        <p className="mae-gold-text text-[11px] font-semibold tracking-[0.14em]">
           {eyebrow}
         </p>
       ) : null}
       <h2
         className={cn(
-          "text-[15px] font-semibold text-[#241C4F]",
+          "text-[15px] font-semibold text-[#f7f4ec]",
           eyebrow ? "mt-1" : undefined
         )}
       >
         {title}
       </h2>
-      <div className="mt-2 text-[13px] leading-[1.75] text-[#4A4278]">
+      <div className="mt-2 text-[13px] leading-[1.75] text-[#f7f4ec]/75">
         {children}
       </div>
     </section>

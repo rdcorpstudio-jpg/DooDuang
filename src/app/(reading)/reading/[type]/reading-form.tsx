@@ -1,20 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { BirthDatePicker } from "@/components/fortune/birth-date-picker";
 import { FortuneLoading } from "@/components/fortune/fortune-loading";
 import { FortuneResultView } from "@/components/fortune/fortune-result-view";
+import { ZodiacWheelBg } from "@/components/layout/zodiac-wheel-bg";
 import { READING_OPTIONS } from "@/lib/fortune/zodiac";
 import type { ExtendedFortuneResult } from "@/lib/fortune/extended";
-import { ChevronLeft, Sparkles } from "lucide-react";
-import { SacredButton } from "@/components/ui/sacred-button";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import {
-  SacredField,
-  SacredGenderPicker,
-  sacredInputClassName,
+  GENDER_OPTIONS,
   type Gender,
 } from "@/components/ui/sacred-form";
-import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils";
 
 type FortuneApiResult = ExtendedFortuneResult & { shareToken?: string | null };
@@ -32,8 +31,38 @@ interface ProfileForm {
 
 const MIN_LOADING_MS = 4800;
 
+const MAE = {
+  gold: "#d5b16f",
+} as const;
+
+const GENDER_ICONS: Record<
+  Gender,
+  { src: string; alt: string; sizeClass: string }
+> = {
+  female: {
+    src: "/images/icons/gender-female.png?v=gold3d4",
+    alt: "หญิง",
+    sizeClass: "h-9 w-9",
+  },
+  male: {
+    src: "/images/icons/gender-male.png?v=gold3d4",
+    alt: "ชาย",
+    sizeClass: "h-9 w-9",
+  },
+  other: {
+    src: "/images/icons/gender-other.png?v=gold3d4",
+    alt: "อื่นๆ",
+    sizeClass: "h-9 w-9",
+  },
+};
+
 function wait(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function todayIso() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export function ReadingForm({ type }: ReadingFormProps) {
@@ -41,7 +70,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
   const [profile, setProfile] = useState<ProfileForm>({
     realName: "",
     nickname: "",
-    birthDate: "",
+    birthDate: todayIso(),
     gender: "",
   });
   const [result, setResult] = useState<FortuneApiResult | null>(null);
@@ -99,7 +128,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
       <div className="relative flex h-full items-center justify-center px-6">
         <div className="text-center">
           <p className="text-white/60">ไม่พบประเภทดูดวงนี้</p>
-          <Link href="/reading" className="mt-4 inline-block text-sm text-[#c084fc]">
+          <Link href="/reading" className="mt-4 inline-block text-sm text-[#d5b16f]">
             กลับ
           </Link>
         </div>
@@ -108,147 +137,259 @@ export function ReadingForm({ type }: ReadingFormProps) {
   }
 
   return (
-    <div className="relative h-full overflow-y-auto">
-      <div className="relative min-h-full">
-        {loading && !result && (
-          <FortuneLoading nickname={profile.nickname} categoryTitle={readingOption.title} />
-        )}
+    <div
+      className={cn(
+        "mae-wizard relative h-full overflow-x-hidden overflow-y-auto overscroll-contain text-white",
+        mounted ? "opacity-100" : "opacity-0",
+      )}
+    >
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div
+          className="absolute inset-0 bg-cover bg-no-repeat"
+          style={{
+            backgroundImage: "url(/images/bg/mae-app-bg.jpg?v=gate4)",
+            backgroundPosition: "50% 30%",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(180deg,
+                rgba(10,14,24,0.12) 0%,
+                rgba(10,14,24,0.22) 40%,
+                rgba(10,14,24,0.45) 70%,
+                rgba(10,14,24,0.62) 100%)
+            `,
+          }}
+        />
+      </div>
 
-        <div className="relative z-10 min-h-full px-5 pb-10 pt-4">
-          {!result ? (
-            <Reveal visible={mounted} delay={0}>
-              <Link
-                href="/reading"
-                className="inline-flex items-center gap-0.5 text-[15px] font-medium text-[#c9a8ff] transition-opacity active:opacity-60"
-              >
-                <ChevronLeft className="h-5 w-5" strokeWidth={2} />
-                กลับ
-              </Link>
-            </Reveal>
-          ) : null}
+      {loading && !result ? (
+        <div className="relative z-10 h-full">
+          <FortuneLoading
+            nickname={profile.nickname}
+            categoryTitle={readingOption.title}
+          />
+        </div>
+      ) : null}
 
-          {!result ? (
-            <div className="mx-auto mt-3 max-w-[340px]">
-              <Reveal
-                visible={mounted}
-                delay={80}
-                variant="glow"
-                className="relative mb-5 overflow-hidden pt-1 text-center"
-              >
+      <div className="relative z-10 min-h-full px-5 pb-10 pt-4">
+        {!result && !loading ? (
+          <>
+            <Link
+              href="/reading"
+              className="inline-flex items-center gap-0.5 text-[14px] font-medium text-white/85 transition-opacity active:opacity-60"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+              กลับ
+            </Link>
+
+            <div className="mx-auto mt-4 max-w-[340px]">
+              <div className="wizard-step-header relative mb-5 text-center">
                 <div
-                  className="pointer-events-none absolute left-1/2 top-[42%] h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(169,103,245,0.32)_0%,transparent_70%)] blur-2xl"
+                  className="wizard-step-zodiac pointer-events-none absolute left-1/2 z-0 -translate-x-1/2 -translate-y-1/2"
                   aria-hidden
-                />
+                >
+                  <div className="wizard-step-zodiac-spin h-full w-full">
+                    <ZodiacWheelBg className="h-full w-full" />
+                  </div>
+                </div>
+                <p
+                  className="relative z-10 mb-2 text-[12px] font-semibold tracking-[0.14em]"
+                  style={{ color: MAE.gold }}
+                >
+                  {readingOption.title}
+                </p>
+                <h1 className="wizard-step-title relative z-10 font-sans text-[1.9rem] font-bold leading-[1.25] tracking-tight">
+                  กรอกข้อมูลของคุณ
+                </h1>
+                <p className="wizard-step-subtitle relative z-10 mx-auto mt-2.5 max-w-[18rem] text-[13.5px] leading-relaxed">
+                  ใช้สำหรับคำนวณผลทำนายเท่านั้น
+                </p>
+              </div>
 
-                <div className="relative z-[1]">
-                  <div className="mb-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#a967f5]/12 px-3.5 py-1.5 ring-1 ring-[#c9a8ff]/25">
-                    <Sparkles className="h-3 w-3 text-[#c9a8ff]" strokeWidth={1.8} />
-                    <span className="text-[12px] font-medium tracking-[0.14em] text-[#c9a8ff]">
-                      {readingOption.title}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div
+                  className="rounded-[22px] p-5"
+                  style={{
+                    background: "rgba(16,24,39,0.48)",
+                    boxShadow:
+                      "inset 0 0 0 1px rgba(213,177,111,0.28), 0 10px 32px rgba(0,0,0,0.22)",
+                    backdropFilter: "blur(14px)",
+                    WebkitBackdropFilter: "blur(14px)",
+                  }}
+                >
+                  <label className="mb-4 block">
+                    <span
+                      className="mb-2 block text-[13px] font-medium tracking-wide"
+                      style={{ color: "rgba(236,214,168,0.88)" }}
+                    >
+                      ชื่อจริง
                     </span>
+                    <input
+                      id="realName"
+                      type="text"
+                      value={profile.realName}
+                      onChange={(e) =>
+                        setProfile((p) => ({ ...p, realName: e.target.value }))
+                      }
+                      placeholder="ชื่อจริงของคุณ"
+                      className="name-step-input mae-wizard-input"
+                      autoComplete="name"
+                    />
+                  </label>
+
+                  <label className="mb-4 block">
+                    <span
+                      className="mb-2 block text-[13px] font-medium tracking-wide"
+                      style={{ color: "rgba(236,214,168,0.88)" }}
+                    >
+                      ชื่อเล่น
+                    </span>
+                    <input
+                      id="nickname"
+                      type="text"
+                      value={profile.nickname}
+                      onChange={(e) =>
+                        setProfile((p) => ({ ...p, nickname: e.target.value }))
+                      }
+                      placeholder="ชื่อที่อยากให้เรียก"
+                      className="name-step-input mae-wizard-input"
+                      autoComplete="nickname"
+                    />
+                  </label>
+
+                  <div className="mb-4">
+                    <span
+                      className="mb-2 block text-[13px] font-medium tracking-wide"
+                      style={{ color: "rgba(236,214,168,0.88)" }}
+                    >
+                      เพศ
+                    </span>
+                    <div className="flex flex-col gap-2.5">
+                      {GENDER_OPTIONS.map((option) => {
+                        const meta = GENDER_ICONS[option.id];
+                        const selected = profile.gender === option.id;
+                        return (
+                          <button
+                            key={option.id}
+                            type="button"
+                            onClick={() =>
+                              setProfile((p) => ({ ...p, gender: option.id }))
+                            }
+                            className={cn(
+                              "flex w-full items-center gap-3 rounded-[18px] px-3.5 py-3 text-left outline-none transition duration-200",
+                              "active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
+                              selected
+                                ? "bg-[rgba(16,24,39,0.55)] shadow-[0_0_0_1.5px_rgba(213,177,111,0.75)]"
+                                : "bg-[rgba(16,24,39,0.28)] shadow-[inset_0_0_0_1px_rgba(213,177,111,0.22)]"
+                            )}
+                          >
+                            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgba(213,177,111,0.1)] shadow-[inset_0_0_0_1px_rgba(213,177,111,0.28)]">
+                              <Image
+                                src={meta.src}
+                                alt={meta.alt}
+                                width={32}
+                                height={32}
+                                unoptimized
+                                className={cn(
+                                  "object-contain object-center",
+                                  meta.sizeClass
+                                )}
+                              />
+                            </span>
+                            <span className="min-w-0 flex-1 text-[15px] font-semibold tracking-wide text-white">
+                              {option.label}
+                            </span>
+                            <span
+                              className={cn(
+                                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+                                selected
+                                  ? "bg-[#d5b16f] text-[#101827]"
+                                  : "shadow-[inset_0_0_0_1.5px_rgba(213,177,111,0.35)]"
+                              )}
+                              aria-hidden
+                            >
+                              {selected ? (
+                                <Check className="h-3.5 w-3.5" strokeWidth={2.6} />
+                              ) : null}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <h1 className="font-sacred text-[1.7rem] leading-[1.3] tracking-wide text-white sm:text-[1.85rem]">
-                    กรอกข้อมูลของคุณ
-                  </h1>
+                  <div>
+                    <span
+                      className="mb-2 block text-[13px] font-medium tracking-wide"
+                      style={{ color: "rgba(236,214,168,0.88)" }}
+                    >
+                      วันเดือนปีเกิด
+                    </span>
+                    <BirthDatePicker
+                      tone="mae"
+                      value={profile.birthDate}
+                      onChange={(birthDate) =>
+                        setProfile((p) => ({ ...p, birthDate }))
+                      }
+                    />
+                  </div>
 
-                  <div className="mx-auto mt-2.5 h-px w-16 bg-gradient-to-r from-transparent via-[#c9a8ff]/50 to-transparent" />
-
-                  <p className="mt-2.5 text-[13px] leading-relaxed text-white/50">
-                    ใช้สำหรับคำนวณผลทำนายเท่านั้น
-                  </p>
-                </div>
-              </Reveal>
-
-              <Reveal visible={mounted} delay={200} variant="scale">
-                <div className="glass-frame relative overflow-hidden rounded-[22px] p-5 sm:p-6">
-                  <div
-                    className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(ellipse_at_top,rgba(169,103,245,0.18)_0%,transparent_70%)]"
-                    aria-hidden
-                  />
-                  <form onSubmit={handleSubmit} className="relative z-[1] space-y-4">
-                    <SacredField label="ชื่อจริง" htmlFor="realName">
-                      <input
-                        id="realName"
-                        type="text"
-                        value={profile.realName}
-                        onChange={(e) => setProfile((p) => ({ ...p, realName: e.target.value }))}
-                        placeholder="ชื่อจริงของคุณ"
-                        className={sacredInputClassName}
-                        autoComplete="name"
-                      />
-                    </SacredField>
-
-                    <SacredField label="ชื่อเล่น" htmlFor="nickname">
-                      <input
-                        id="nickname"
-                        type="text"
-                        value={profile.nickname}
-                        onChange={(e) => setProfile((p) => ({ ...p, nickname: e.target.value }))}
-                        placeholder="ชื่อที่อยากให้เรียก"
-                        className={sacredInputClassName}
-                        autoComplete="nickname"
-                      />
-                    </SacredField>
-
-                    <SacredField label="เพศ">
-                      <SacredGenderPicker
-                        value={profile.gender}
-                        onChange={(gender) => setProfile((p) => ({ ...p, gender }))}
-                      />
-                    </SacredField>
-
-                    <SacredField label="วันเดือนปีเกิด" htmlFor="birthDate">
-                      <input
-                        id="birthDate"
-                        type="date"
-                        value={profile.birthDate}
-                        onChange={(e) => setProfile((p) => ({ ...p, birthDate: e.target.value }))}
-                        className={cn(sacredInputClassName, "[color-scheme:dark]")}
-                        max={new Date().toISOString().slice(0, 10)}
-                      />
-                    </SacredField>
-
-                    {error && (
-                      <div className="rounded-xl border border-rose-400/25 bg-rose-500/12 px-4 py-3.5 text-[14px] text-rose-200">
-                        {error}
-                      </div>
-                    )}
-
-                    <div className="pt-2">
-                      <SacredButton type="submit" disabled={!canSubmit || loading}>
-                        เปิดดูดวง
-                      </SacredButton>
+                  {error ? (
+                    <div className="mt-4 rounded-xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 text-[14px] text-rose-200">
+                      {error}
                     </div>
-                  </form>
+                  ) : null}
                 </div>
-              </Reveal>
 
-              <Reveal visible={mounted} delay={340}>
-                <p className="mt-5 text-center text-[12px] tracking-wide text-white/30">
-                  ข้อมูลของคุณใช้เพื่อคำทำนายเท่านั้น
+                <button
+                  type="submit"
+                  disabled={!canSubmit || loading}
+                  className="mae-gold-cta group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3.5 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-45"
+                >
+                  <span className="text-[16px] font-bold tracking-wide">
+                    เปิดดูดวง
+                  </span>
+                  <ChevronRight
+                    className="h-[18px] w-[18px] transition-transform duration-200 group-hover:translate-x-0.5"
+                    strokeWidth={2.4}
+                  />
+                </button>
+
+                <p
+                  className="mt-4 flex items-center justify-center gap-1.5 text-[12px]"
+                  style={{ color: "rgba(154,163,178,0.9)" }}
+                >
+                  <span style={{ color: MAE.gold }} aria-hidden>
+                    ✦
+                  </span>
+                  ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
                 </p>
-              </Reveal>
+              </form>
             </div>
-          ) : (
-            <FortuneResultView
-              result={result}
-              profile={{
-                realName: profile.realName,
-                nickname: profile.nickname,
-                birthDate: profile.birthDate,
-                gender: profile.gender,
-              }}
-              readingOption={readingOption}
-              type={type}
-              shareToken={result.shareToken}
-              onRetry={() => {
-                setResult(null);
-                setError(null);
-              }}
-            />
-          )}
-        </div>
+          </>
+        ) : null}
+
+        {result ? (
+          <FortuneResultView
+            result={result}
+            profile={{
+              realName: profile.realName,
+              nickname: profile.nickname,
+              birthDate: profile.birthDate,
+              gender: profile.gender,
+            }}
+            readingOption={readingOption}
+            type={type}
+            shareToken={result.shareToken}
+            onRetry={() => {
+              setResult(null);
+              setError(null);
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );

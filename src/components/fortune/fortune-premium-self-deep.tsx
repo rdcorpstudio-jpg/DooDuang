@@ -9,8 +9,16 @@ import {
   type PointerEvent,
 } from "react";
 import { Sparkles } from "lucide-react";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { analyzeFortune, type FortuneFocus } from "@/lib/fortune/analyze";
 import { cn } from "@/lib/utils";
+
+/** Mae navy–gold detail card — real border (not box-shadow; survives overflow clip) */
+const MAE_DETAIL_CARD = {
+  background: "#101827",
+  border: "1px solid rgba(213,177,111,0.6)",
+  boxShadow: "none",
+} as const;
 
 function hashSeed(input: string) {
   let h = 2166136261;
@@ -337,8 +345,8 @@ function RadarChart({
     <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto w-full max-w-[320px]">
       <defs>
         <linearGradient id={`radar-fill-${gid}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="rgba(155,127,232,0.35)" />
-          <stop offset="100%" stopColor="rgba(123,95,212,0.16)" />
+          <stop offset="0%" stopColor="rgba(213,177,111,0.42)" />
+          <stop offset="100%" stopColor="rgba(184,146,63,0.14)" />
         </linearGradient>
       </defs>
 
@@ -350,7 +358,7 @@ function RadarChart({
             return `${p.x},${p.y}`;
           }).join(" ")}
           fill="none"
-          stroke="rgba(90,70,150,0.18)"
+          stroke="rgba(213,177,111,0.22)"
           strokeWidth={1}
         />
       ))}
@@ -366,8 +374,8 @@ function RadarChart({
             y2={p.y}
             stroke={
               i === selectedIndex
-                ? "rgba(123,95,212,0.5)"
-                : "rgba(90,70,150,0.16)"
+                ? "rgba(213,177,111,0.55)"
+                : "rgba(213,177,111,0.16)"
             }
             strokeWidth={i === selectedIndex ? 1.5 : 1}
           />
@@ -377,7 +385,7 @@ function RadarChart({
       <polygon
         points={poly}
         fill={`url(#radar-fill-${gid})`}
-        stroke="#7B5FD4"
+        stroke="#d5b16f"
         strokeWidth={2}
         strokeLinejoin="round"
       />
@@ -402,8 +410,8 @@ function RadarChart({
               cx={p.x}
               cy={p.y}
               r={selected ? 6 : 4}
-              fill="#7B5FD4"
-              stroke={selected ? "#fff" : "none"}
+              fill="#d5b16f"
+              stroke={selected ? "#f7f4ec" : "none"}
               strokeWidth={selected ? 2.5 : 0}
             />
             <text
@@ -411,7 +419,7 @@ function RadarChart({
               y={tip.y}
               textAnchor="middle"
               dominantBaseline="middle"
-              fill={selected ? "#241C4F" : "#3A3270"}
+              fill={selected ? "#f7f4ec" : "rgba(247,244,236,0.72)"}
               fontSize={11}
               fontWeight={selected ? 700 : 600}
             >
@@ -421,7 +429,7 @@ function RadarChart({
               x={tip.x}
               y={tip.y + 14}
               textAnchor="middle"
-              fill={selected ? "#5B45B8" : "#6B6490"}
+              fill={selected ? "#d5b16f" : "rgba(232,209,154,0.75)"}
               fontSize={12}
               fontWeight={700}
             >
@@ -505,17 +513,17 @@ function AxisSwipeReader({
   return (
     <div className="mt-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[13px] font-semibold tracking-[0.08em] text-[#5B45B8]">
-          อ่านแกน · กดเรดาร์หรือปัด
+        <p className="text-[13px] font-semibold tracking-[0.08em] text-[#d5b16f]">
+          อ่านตัวตนทีละด้าน
         </p>
-        <p className="text-[13px] font-semibold tabular-nums text-[#6B6490]">
-          {index + 1}/{axes.length}
+        <p className="text-[13px] font-semibold tabular-nums text-[#e8d19a]/80">
+          {String(index + 1).padStart(2, "0")} / {String(axes.length).padStart(2, "0")}
         </p>
       </div>
 
       <div
         ref={viewportRef}
-        className="relative mt-2 touch-pan-y overflow-hidden select-none"
+        className="relative mt-2 touch-pan-y overflow-hidden select-none py-0.5"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -533,28 +541,52 @@ function AxisSwipeReader({
           {axes.map((a) => (
             <article
               key={a.key}
-              className="w-full min-w-full shrink-0 basis-full px-0.5"
+              className="w-full min-w-full shrink-0 basis-full px-1"
             >
               <div
-                className="rounded-[14px] px-3.5 py-3.5"
-                style={{
-                  background: "rgba(255,255,255,0.42)",
-                  border: "1px solid rgba(255,255,255,0.7)",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                }}
+                className="rounded-[18px] px-3.5 pb-4 pt-3.5"
+                style={MAE_DETAIL_CARD}
               >
-                <p className="text-[16px] font-semibold text-[#241C4F]">
-                  {a.label} · {a.score}
-                </p>
-                <p className="mt-1 text-[13px] font-medium text-[#5B45B8]">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <FortuneIcon
+                      name="sparkle"
+                      size={16}
+                      plain
+                      className="shrink-0"
+                    />
+                    <p className="truncate text-[15px] font-semibold text-[#d5b16f]">
+                      {a.label}
+                    </p>
+                  </div>
+                  <span
+                    className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold tabular-nums text-[#101827]"
+                    style={{ background: "#d5b16f" }}
+                  >
+                    {a.score} / 100
+                  </span>
+                </div>
+                <span
+                  className="mt-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium text-[#e8d19a]"
+                  style={{
+                    background: "rgba(213,177,111,0.12)",
+                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.32)",
+                  }}
+                >
                   {axisLevel(a.score)}
-                </p>
-                <p className="mt-2.5 text-[14px] leading-[1.7] text-[#3A3270]">
+                </span>
+                <p className="mt-2.5 text-[14px] leading-[1.7] text-[#f7f4ec]/88">
                   {axisReading(a)}
                 </p>
-                <p className="mt-2 text-[13px] leading-snug text-[#5E5688]">
-                  แนวทาง: {a.tip}
+                <div
+                  className="my-2.5 h-px w-full"
+                  style={{ background: "rgba(213,177,111,0.28)" }}
+                  aria-hidden
+                />
+                <p className="text-[13px] leading-snug text-[#f7f4ec]/72">
+                  <span className="font-semibold text-[#d5b16f]">แนวทาง</span>
+                  {" · "}
+                  {a.tip}
                 </p>
               </div>
             </article>
@@ -562,20 +594,20 @@ function AxisSwipeReader({
         </div>
       </div>
 
-      <div className="mt-2.5 flex flex-wrap items-center justify-center gap-1.5">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
         {axes.map((a, i) => (
           <button
             key={a.key}
             type="button"
             onClick={() => goTo(i)}
             className={cn(
-              "rounded-full px-2.5 py-1 text-[12px] font-semibold outline-none transition",
+              "flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-semibold outline-none transition",
               i === index
-                ? "bg-[#9B7FE8]/22 text-[#5B45B8] ring-1 ring-[#9B7FE8]/45"
-                : "bg-[#7B6BB0]/10 text-[#5E5688]"
+                ? "bg-[#d5b16f] text-[#101827]"
+                : "text-[#e8d19a]/80 shadow-[0_0_0_1px_rgba(213,177,111,0.4)]"
             )}
           >
-            {a.score}
+            {i + 1}
           </button>
         ))}
       </div>
@@ -612,25 +644,24 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
             className={cn(
               "w-full space-y-1.5 rounded-[12px] px-1.5 py-1.5 text-left outline-none transition",
               selected
-                ? "bg-[#7B6BB0]/10 ring-1 ring-[#7B6BB0]/22"
-                : "hover:bg-[#7B6BB0]/06"
+                ? "bg-[rgba(213,177,111,0.12)] ring-1 ring-[rgba(213,177,111,0.35)]"
+                : "hover:bg-[rgba(213,177,111,0.06)]"
             )}
           >
             <div className="flex items-center justify-between text-[13px]">
-              <span className="font-semibold text-[#241C4F]">
+              <span className="font-semibold text-[#f7f4ec]">
                 {item.left} {item.leftPct}%
               </span>
-              <span className="font-semibold text-[#5E5688]">
+              <span className="font-semibold text-[#f7f4ec]/65">
                 {item.right} {r}%
               </span>
             </div>
-            <div className="dd-glass-tube relative h-3.5 rounded-full">
+            <div className="dd-glass-tube relative w-full">
               <div
-                className="dd-glass-tube-fill absolute inset-y-[2px] left-[2px] rounded-full"
+                className="dd-glass-tube-fill absolute"
                 style={{
-                  width: `calc(${item.leftPct}% - 4px)`,
-                  background:
-                    "linear-gradient(90deg, rgba(155,127,232,0.55) 0%, rgba(196,176,245,0.72) 55%, rgba(232,201,106,0.55) 100%)",
+                  width: `${item.leftPct}%`,
+                  background: "#d5b16f",
                 }}
               />
             </div>
@@ -640,17 +671,17 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
 
       <div>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[13px] font-semibold tracking-[0.08em] text-[#5B45B8]">
+          <p className="text-[13px] font-semibold tracking-[0.08em] text-[#d5b16f]">
             อ่านสเปกตรัม · กดหรือปัด
           </p>
-          <p className="text-[13px] font-semibold tabular-nums text-[#6B6490]">
+          <p className="text-[13px] font-semibold tabular-nums text-[#e8d19a]/80">
             {index + 1}/{items.length}
           </p>
         </div>
 
         <div
           ref={viewportRef}
-          className="relative mt-2 touch-pan-y overflow-hidden select-none"
+          className="relative mt-2 touch-pan-y overflow-hidden select-none py-0.5"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -671,28 +702,30 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
               return (
                 <article
                   key={item.key}
-                  className="w-full min-w-full shrink-0 basis-full px-0.5"
+                  className="w-full min-w-full shrink-0 basis-full px-1"
                 >
                   <div
-                    className="rounded-[14px] px-3.5 py-3.5"
-                    style={{
-                      background: "rgba(255,255,255,0.42)",
-                      border: "1px solid rgba(255,255,255,0.7)",
-                      backdropFilter: "blur(12px)",
-                      WebkitBackdropFilter: "blur(12px)",
-                    }}
+                    className="rounded-[18px] px-3.5 pb-4 pt-3.5"
+                    style={MAE_DETAIL_CARD}
                   >
-                    <p className="text-[16px] font-semibold text-[#241C4F]">
+                    <p className="text-[15px] font-semibold text-[#d5b16f]">
                       {item.left} {item.leftPct}% · {item.right} {rp}%
                     </p>
-                    <p className="mt-1 text-[13px] font-medium text-[#5B45B8]">
+                    <p className="mt-1 text-[13px] font-medium text-[#e8d19a]/85">
                       เอียงไปทาง{leftSide ? item.left : item.right}
                     </p>
-                    <p className="mt-2.5 text-[14px] leading-[1.7] text-[#3A3270]">
+                    <p className="mt-2.5 text-[14px] leading-[1.7] text-[#f7f4ec]/88">
                       {leftSide ? item.leftHigh : item.rightHigh}
                     </p>
-                    <p className="mt-2 text-[13px] leading-snug text-[#5E5688]">
-                      แนวทาง: {item.tip}
+                    <div
+                      className="my-2.5 h-px w-full"
+                      style={{ background: "rgba(213,177,111,0.28)" }}
+                      aria-hidden
+                    />
+                    <p className="text-[13px] leading-snug text-[#f7f4ec]/72">
+                      <span className="font-semibold text-[#d5b16f]">แนวทาง</span>
+                      {" · "}
+                      {item.tip}
                     </p>
                   </div>
                 </article>
@@ -701,7 +734,7 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
           </div>
         </div>
 
-        <div className="mt-2.5 flex items-center justify-center gap-1.5">
+        <div className="mt-4 flex items-center justify-center gap-2">
           {items.map((item, i) => (
             <button
               key={item.key}
@@ -712,7 +745,7 @@ function SpectrumSwipeReader({ items }: { items: SpectrumRowData[] }) {
               style={{
                 width: i === index ? 18 : 8,
                 background:
-                  i === index ? "#9B7FE8" : "rgba(123,107,176,0.28)",
+                  i === index ? "#d5b16f" : "rgba(213,177,111,0.28)",
               }}
             />
           ))}
@@ -817,8 +850,8 @@ function ElementSwipeReader({
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-[12px] px-1.5 py-1.5 text-left outline-none transition",
                 selected
-                  ? "bg-[#7B6BB0]/10 ring-1 ring-[#7B6BB0]/22"
-                  : "hover:bg-[#7B6BB0]/06"
+                  ? "bg-[rgba(213,177,111,0.12)] ring-1 ring-[rgba(213,177,111,0.35)]"
+                  : "hover:bg-[rgba(213,177,111,0.06)]"
               )}
             >
               <span
@@ -827,17 +860,17 @@ function ElementSwipeReader({
               >
                 {el.label}
               </span>
-              <div className="dd-glass-tube relative h-3.5 min-w-0 flex-1 rounded-full">
+              <div className="dd-glass-tube relative min-w-0 flex-1">
                 <div
-                  className="dd-glass-tube-fill absolute inset-y-[2px] left-[2px] rounded-full transition-[width]"
+                  className="dd-glass-tube-fill absolute transition-[width]"
                   style={{
-                    width: `calc(${Math.max(el.pct, 2)}% - 4px)`,
-                    background: `linear-gradient(90deg, ${el.color}99 0%, ${el.color}cc 55%, ${el.color}88 100%)`,
-                    minWidth: el.pct > 0 ? 8 : 0,
+                    width: `${Math.max(el.pct, 2)}%`,
+                    background: el.color,
+                    minWidth: el.pct > 0 ? 6 : 0,
                   }}
                 />
               </div>
-              <span className="w-11 shrink-0 text-right text-[13px] font-semibold tabular-nums text-[#3A3270]">
+              <span className="w-11 shrink-0 text-right text-[13px] font-semibold tabular-nums text-[#f7f4ec]/80">
                 {el.pct}%
               </span>
             </button>
@@ -847,17 +880,17 @@ function ElementSwipeReader({
 
       <div className="mt-3.5">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[13px] font-semibold tracking-[0.08em] text-[#5B45B8]">
+          <p className="text-[13px] font-semibold tracking-[0.08em] text-[#d5b16f]">
             อ่านธาตุ · กดหรือปัด
           </p>
-          <p className="text-[12px] font-semibold tabular-nums text-[#6B6490]">
+          <p className="text-[12px] font-semibold tabular-nums text-[#e8d19a]/80">
             {index + 1}/{elements.length}
           </p>
         </div>
 
         <div
           ref={viewportRef}
-          className="relative mt-2 touch-pan-y overflow-hidden select-none"
+          className="relative mt-2 touch-pan-y overflow-hidden select-none py-0.5"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -875,38 +908,40 @@ function ElementSwipeReader({
             {elements.map((el) => (
               <article
                 key={el.key}
-                className="w-full min-w-full shrink-0 basis-full px-0.5"
+                className="w-full min-w-full shrink-0 basis-full px-1"
               >
                 <div
-                  className="rounded-[14px] px-3.5 py-3"
-                  style={{
-                    background: "rgba(255,255,255,0.42)",
-                    border: "1px solid rgba(255,255,255,0.7)",
-                    backdropFilter: "blur(12px)",
-                    WebkitBackdropFilter: "blur(12px)",
-                  }}
+                  className="rounded-[18px] px-3.5 pb-3.5 pt-3"
+                  style={MAE_DETAIL_CARD}
                 >
                   <div className="flex items-center gap-2">
                     <span
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-bold text-white"
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-bold text-[#101827]"
                       style={{ background: el.color }}
                     >
                       {el.label}
                     </span>
                     <div className="min-w-0">
-                      <p className="text-[14px] font-semibold text-[#241C4F]">
+                      <p className="text-[14px] font-semibold text-[#d5b16f]">
                         ธาตุ{el.label} · {el.pct}%
                       </p>
-                      <p className="text-[11px] font-medium" style={{ color: el.color }}>
+                      <p className="text-[11px] font-medium text-[#e8d19a]/85">
                         {levelLabel(el.pct)}
                       </p>
                     </div>
                   </div>
-                  <p className="mt-2.5 text-[13px] leading-[1.7] text-[#3A3270]">
+                  <p className="mt-2.5 text-[13px] leading-[1.7] text-[#f7f4ec]/88">
                     {readingFor(el)}
                   </p>
-                  <p className="mt-2 text-[12px] leading-snug text-[#5E5688]">
-                    แนวทาง: {el.tip}
+                  <div
+                    className="my-2.5 h-px w-full"
+                    style={{ background: "rgba(213,177,111,0.28)" }}
+                    aria-hidden
+                  />
+                  <p className="text-[12px] leading-snug text-[#f7f4ec]/72">
+                    <span className="font-semibold text-[#d5b16f]">แนวทาง</span>
+                    {" · "}
+                    {el.tip}
                   </p>
                 </div>
               </article>
@@ -914,7 +949,7 @@ function ElementSwipeReader({
           </div>
         </div>
 
-        <div className="mt-2.5 flex items-center justify-center gap-1.5">
+        <div className="mt-4 flex items-center justify-center gap-2">
           {elements.map((el, i) => (
             <button
               key={el.key}
@@ -924,7 +959,7 @@ function ElementSwipeReader({
               className="h-2 rounded-full outline-none transition-all"
               style={{
                 width: i === index ? 18 : 8,
-                background: i === index ? active.color : "rgba(123,107,176,0.28)",
+                background: i === index ? active.color : "rgba(213,177,111,0.28)",
               }}
             />
           ))}
@@ -1046,12 +1081,15 @@ export function FortunePremiumSelfDeep({
     <div className={cn("space-y-3", className)}>
       <section className="fortune-glass rounded-[20px] px-4 py-4">
         <div className="text-center">
-          <p className="text-[12px] font-semibold tracking-[0.14em] text-[#5B45B8]">
+          <p className="text-[12px] font-semibold tracking-[0.14em] text-[#d5b16f]">
             PREMIUM · SELF MAP
           </p>
-          <h2 className="font-sacred mt-1.5 text-[1.45rem] leading-snug text-[#241C4F]">
-            คุณ{name}เป็นคนแบบไหนกันนะ
+          <h2 className="mt-1.5 text-[1.35rem] font-semibold leading-snug text-[#d5b16f]">
+            ตัวตนของคุณ ใน 6 มุม
           </h2>
+          <p className="mt-1 text-[13px] text-[#e8d19a]/85">
+            คุณ{name} · แผนที่นิสัยเฉพาะตัว
+          </p>
         </div>
 
         <div className="mt-4">
@@ -1060,8 +1098,8 @@ export function FortunePremiumSelfDeep({
             selectedIndex={axisIndex}
             onSelect={setAxisIndex}
           />
-          <p className="mt-2 px-2 text-center text-[13px] leading-relaxed text-[#5E5688]">
-            6 แกนอุปนิสัย · กดจุดบนเรดาร์หรือปัดอ่านทีละแกน
+          <p className="mt-2 px-2 text-center text-[12px] leading-relaxed text-[#f7f4ec]/65">
+            แตะจุดบนกราฟ เพื่ออ่านแต่ละมุมของคุณ
           </p>
           <AxisSwipeReader
             axes={data.axes}
@@ -1072,17 +1110,17 @@ export function FortunePremiumSelfDeep({
       </section>
 
       <section className="fortune-glass rounded-[20px] px-4 py-4">
-        <p className="text-[13px] font-semibold tracking-[0.1em] text-[#5B45B8]">
+        <p className="text-[13px] font-semibold tracking-[0.1em] text-[#d5b16f]">
           สเปกตรัมอุปนิสัย
         </p>
         <SpectrumSwipeReader items={data.spectra} />
       </section>
 
       <section className="fortune-glass rounded-[20px] px-4 py-4">
-        <p className="text-[13px] font-semibold tracking-[0.1em] text-[#5B45B8]">
+        <p className="text-[13px] font-semibold tracking-[0.1em] text-[#d5b16f]">
           ห้าธาตุในตัวคุณ
         </p>
-        <h3 className="mt-1 text-[16px] font-semibold text-[#241C4F]">
+        <h3 className="mt-1 text-[16px] font-semibold text-[#f7f4ec]">
           การกระจายห้าธาตุ
         </h3>
 
@@ -1091,8 +1129,8 @@ export function FortunePremiumSelfDeep({
           initialKey={data.strongest.key}
         />
 
-        <div className="mt-4 flex items-center justify-center gap-1.5 border-t border-[#7B6BB0]/14 pt-3 text-[12px] text-[#6B6490]">
-          <Sparkles className="h-3.5 w-3.5 text-[#7B5FD4]" strokeWidth={1.8} />
+        <div className="mt-4 flex items-center justify-center gap-1.5 border-t border-[rgba(213,177,111,0.22)] pt-3 text-[12px] text-[#f7f4ec]/55">
+          <Sparkles className="h-3.5 w-3.5 text-[#d5b16f]" strokeWidth={1.8} />
           ส่วนพรีเมียมท้ายรายงาน · วิเคราะห์เฉพาะคุณ
         </div>
       </section>

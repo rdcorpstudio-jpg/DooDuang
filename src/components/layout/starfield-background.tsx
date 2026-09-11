@@ -1,10 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { isMaeCelestialPath } from "@/lib/mae-shell";
 
 /**
  * App sky — crisp on top, light clear blur down the page (no white wash).
- * Free reading + premium share celestial city; home keeps video; else Guanyin sky.
+ * Mae routes share celestial city; home keeps video; else Guanyin sky.
  */
 
 const GUANYIN_SKY = {
@@ -15,22 +16,11 @@ const GUANYIN_SKY = {
 };
 
 const CELESTIAL_SKY = {
-  backgroundImage: "url(/images/bg/celestial-city.jpg?v=2)",
+  backgroundImage: "url(/images/bg/mae-app-bg.jpg?v=gate4)",
   backgroundSize: "cover" as const,
-  backgroundPosition: "50% 18%",
+  backgroundPosition: "50% 30%",
   backgroundRepeat: "no-repeat" as const,
 };
-
-/** Free result (/reading, /r/…) + premium use the same celestial art. */
-function useCelestialSky(pathname: string) {
-  return (
-    pathname.startsWith("/premium") ||
-    pathname.startsWith("/reading") ||
-    pathname.startsWith("/r/") ||
-    pathname.startsWith("/preview/result") ||
-    pathname.startsWith("/preview/premium")
-  );
-}
 
 export function StarfieldBackground() {
   const pathname = usePathname() || "/";
@@ -38,7 +28,7 @@ export function StarfieldBackground() {
   if (pathname === "/mae" || pathname.startsWith("/mae/")) {
     return null;
   }
-  const celestial = useCelestialSky(pathname);
+  const celestial = isMaeCelestialPath(pathname);
   const sky = celestial ? CELESTIAL_SKY : GUANYIN_SKY;
 
   return (

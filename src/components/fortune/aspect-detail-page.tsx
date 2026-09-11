@@ -157,12 +157,12 @@ export function AspectDetailPage({
         <header className="mt-4 flex items-center gap-3">
           <FortuneIcon name={active.icon} size={48} plain className="dd-icon-float" />
           <div className="min-w-0">
-            <h1 className="text-[1.35rem] font-bold tracking-tight text-[#241C4F]">
+            <h1 className="text-[1.35rem] font-bold tracking-tight text-[#d5b16f]">
               {active.name}ของ{address}
             </h1>
-            <p className="mt-0.5 text-[13px] text-[#6B6490]">{active.title}</p>
+            <p className="mt-0.5 text-[13px] text-[#f7f4ec]/65">{active.title}</p>
             {!unlocked ? (
-              <p className="mt-1 text-[11px] text-[#8A82B0]">
+              <p className="mt-1 text-[11px] text-[#f7f4ec]/45">
                 ดูเบื้องต้นฟรี · รายละเอียดล็อกไว้
               </p>
             ) : null}
@@ -180,8 +180,8 @@ export function AspectDetailPage({
               className={cn(
                 "shrink-0 rounded-full px-3 py-1.5 text-[12px] font-medium outline-none transition",
                 d.domainId === active.domainId
-                  ? "bg-[#6A48C8] text-white"
-                  : "bg-white/80 text-[#5E5688] ring-1 ring-[#7B6BB0]/15"
+                  ? "bg-[#d5b16f] text-[#101827]"
+                  : "text-[#e8d19a]/80 shadow-[inset_0_0_0_1px_rgba(213,177,111,0.35)]"
               )}
             >
               {d.name}
@@ -189,8 +189,8 @@ export function AspectDetailPage({
           ))}
         </div>
 
-        <section className="fortune-glass mt-4 rounded-[20px] px-4 py-4">
-          <p className="text-[15px] leading-[1.8] text-[#3A3270]">
+        <section className="mae-aspect-card mt-4 rounded-[20px] px-4 py-4">
+          <p className="text-[15px] leading-[1.8] text-[#f7f4ec]/85">
             {active.body}
           </p>
           {unlocked ? (
@@ -198,7 +198,7 @@ export function AspectDetailPage({
               {active.highlights.map((h) => (
                 <li
                   key={h}
-                  className="flex items-start gap-2 text-[14px] leading-snug text-[#4A4278]"
+                  className="flex items-start gap-2 text-[14px] leading-snug text-[#f7f4ec]/75"
                 >
                   <FortuneIcon name="check" size={22} className="mt-0.5 shrink-0" />
                   <span>{h}</span>
@@ -211,15 +211,15 @@ export function AspectDetailPage({
         {/* Free: open 2 blocks (preview + highlights). Premium: full detail. */}
         {!unlocked ? (
           <div className="mt-3 grid grid-cols-1 gap-2.5">
-            <section className="fortune-glass rounded-[18px] px-3.5 py-3.5">
-              <p className="text-[12px] font-semibold tracking-[0.04em] text-[#C9A227]">
+            <section className="mae-aspect-card rounded-[18px] px-3.5 py-3.5">
+              <p className="text-[12px] font-semibold tracking-[0.04em] text-[#d5b16f]">
                 ★ จุดเด่นวันนี้
               </p>
               <ul className="mt-2.5 space-y-2">
                 {active.highlights.slice(0, 3).map((h) => (
                   <li
                     key={h}
-                    className="flex items-start gap-2 text-[13px] leading-snug text-[#4A4278]"
+                    className="flex items-start gap-2 text-[13px] leading-snug text-[#f7f4ec]/75"
                   >
                     <FortuneIcon name="check" size={20} className="mt-0.5 shrink-0" />
                     <span>{h}</span>

@@ -18,7 +18,7 @@ const DOMAIN_META = [
   { aspectId: "health" as const, domainId: "health" as const, icon: "health" as FortuneIconName },
 ] as const;
 
-/** 2×2 daily aspect cards — free blurb teaser; detail page soft-locks deep copy */
+/** 2×2 daily aspect cards — dark navy + gold rim */
 export function FortuneTopicGrid({
   birthDate = "2000-01-01",
   nickname = "",
@@ -27,7 +27,7 @@ export function FortuneTopicGrid({
   gender,
   className,
   from = "reading",
-  unlocked = true,
+  unlocked: _unlocked = true,
 }: {
   birthDate?: string;
   nickname?: string;
@@ -35,11 +35,8 @@ export function FortuneTopicGrid({
   focus?: FortuneFocus;
   gender?: string;
   className?: string;
-  /** Where “กลับ” on aspect page should go */
   from?: "reading" | "premium";
-  /** When false, blur longer blurbs like daily tarot soft-lock */
   unlocked?: boolean;
-  /** @deprecated kept for call-site compat */
   seed?: string;
   realName?: string;
 }) {
@@ -69,38 +66,55 @@ export function FortuneTopicGrid({
 
   return (
     <section className={cn("space-y-3", className)}>
-      <div className="flex items-center justify-between gap-3 px-0.5">
-        <h2 className="dd-section-title text-[17px] font-semibold tracking-wide">
-          ดวงรายวัน 4 ด้าน
-        </h2>
+      <div className="flex items-end justify-between gap-3 px-0.5">
+        <div>
+          <h2 className="text-[15px] font-semibold tracking-wide text-[#d5b16f]">
+            ดวงรายวัน 4 ด้าน
+          </h2>
+          <div
+            className="mt-1.5 h-px w-8 rounded-full"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(213,177,111,0.9), transparent)",
+            }}
+            aria-hidden
+          />
+        </div>
         <Link
           href={aspectHref("career")}
-          className="inline-flex items-center gap-0.5 text-[13px] text-[#6B6490] outline-none transition active:opacity-70 focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35"
+          className="mb-0.5 inline-flex items-center gap-0.5 text-[12px] font-medium text-[#d5b16f] outline-none transition hover:text-[#e8d19a] active:opacity-70 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
         >
           ดูทั้งหมด
-          <FortuneIcon name="arrow-right" size={22} />
+          <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-3">
         {domains.map((d) => (
           <Link
             key={d.domainId}
             href={aspectHref(d.domainId)}
-            className="fortune-glass relative flex min-h-[100px] items-center gap-2.5 rounded-[18px] px-3 py-3.5 text-left outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4"
+            className="mae-aspect-card group relative flex min-h-[100px] items-center gap-2.5 px-3 py-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
             aria-label={`อ่านดวง${d.name}`}
           >
-            <span className="relative flex h-14 w-14 shrink-0 items-center justify-center">
-              <FortuneIcon name={d.icon} size={52} />
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center">
+              <FortuneIcon
+                name={d.icon}
+                size={48}
+                plain
+                className="relative drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+              />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[15px] font-semibold text-[#2C2458]">{d.name}</p>
-              <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-[#5E5688]">
+              <p className="mae-aspect-title text-[14px] font-semibold tracking-tight">
+                {d.name}
+              </p>
+              <p className="mae-aspect-body mt-1 line-clamp-2 text-[11.5px] leading-[1.45]">
                 {d.blurb}
               </p>
             </div>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/70 ring-1 ring-[#7B6BB0]/18">
-              <ChevronRight className="h-5 w-5 text-[#7B5FD4]" strokeWidth={2.4} />
+            <span className="mae-aspect-chevron">
+              <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
             </span>
           </Link>
         ))}

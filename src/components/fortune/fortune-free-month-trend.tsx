@@ -33,28 +33,18 @@ function LockMark({ x, y }: { x: number; y: number }) {
   );
 }
 
-function scoreColor(score: number) {
-  if (score >= 10) return "#15803d";
-  if (score >= 8) return "#3f6212";
-  if (score >= 6) return "#a16207";
-  if (score >= 4) return "#c2410c";
-  return "#be123c";
-}
-
 function scoreDotColor(score: number) {
-  if (score >= 10) return "#22c55e";
-  if (score >= 8) return "#65a30d";
-  if (score >= 6) return "#eab308";
-  if (score >= 4) return "#f97316";
-  return "#f43f5e";
+  if (score >= 10) return "#e8d19a";
+  if (score >= 8) return "#d5b16f";
+  if (score >= 6) return "#c4a86a";
+  if (score >= 4) return "#b8923f";
+  return "#9a7a2e";
 }
 
 function scoreBadgeBg(score: number) {
-  if (score >= 10) return "rgba(21, 128, 61, 0.18)";
-  if (score >= 8) return "rgba(63, 98, 18, 0.18)";
-  if (score >= 6) return "rgba(161, 98, 7, 0.18)";
-  if (score >= 4) return "rgba(194, 65, 12, 0.18)";
-  return "rgba(190, 18, 60, 0.18)";
+  if (score >= 8) return "rgba(213, 177, 111, 0.18)";
+  if (score >= 6) return "rgba(213, 177, 111, 0.12)";
+  return "rgba(213, 177, 111, 0.08)";
 }
 
 type YearPoint = {
@@ -111,11 +101,11 @@ function StockStylePanChart({
     x: number;
     y: number;
   } | null>(null);
-  const H = 248;
+  const H = 260;
   const padL = 34;
   const padR = 24;
   const padT = 34;
-  const padB = 54;
+  const padB = 64;
   const step = 72;
   const n = points.length;
   const W = padL + Math.max(0, n - 1) * step + padR;
@@ -156,8 +146,6 @@ function StockStylePanChart({
       : "";
   const clearAreaD =
     lastClear >= 0 ? closeArea(pathThrough(0, lastClear), 0, lastClear) : "";
-  const blurAreaD =
-    blurFrom >= 0 ? closeArea(pathThrough(blurFrom, n - 1), blurFrom, n - 1) : "";
   const areaD =
     firstLocked >= 0
       ? clearAreaD
@@ -204,7 +192,7 @@ function StockStylePanChart({
 
   return (
     <div className="relative">
-      <p className="mb-2.5 px-0.5 text-[15px] leading-snug text-[#5E5688]">
+      <p className="mb-2.5 px-0.5 text-[13px] leading-snug text-[#f7f4ec]/65">
         ปัดซ้าย–ขวาเพื่อเลื่อนดู · แตะจุดเพื่อเลือก
       </p>
       <div
@@ -222,9 +210,8 @@ function StockStylePanChart({
         >
           <defs>
             <linearGradient id={`stk-fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(155,127,232,0.4)" />
-              <stop offset="75%" stopColor="rgba(155,127,232,0.08)" />
-              <stop offset="100%" stopColor="rgba(155,127,232,0)" />
+              <stop offset="0%" stopColor="rgba(213,177,111,0.22)" />
+              <stop offset="100%" stopColor="rgba(213,177,111,0)" />
             </linearGradient>
           </defs>
 
@@ -237,11 +224,10 @@ function StockStylePanChart({
                   y1={y}
                   x2={W}
                   y2={y}
-                  stroke="rgba(120,110,160,0.2)"
+                  stroke="rgba(213,177,111,0.14)"
                   strokeWidth={1}
-                  strokeDasharray="3 4"
                 />
-                <text x={10} y={y + 5} fill="rgba(90,80,130,0.78)" fontSize={13}>
+                <text x={10} y={y + 4} fill="rgba(247,244,236,0.45)" fontSize={11}>
                   {t}
                 </text>
               </g>
@@ -253,20 +239,12 @@ function StockStylePanChart({
               {areaD ? (
                 <path d={areaD} fill={`url(#stk-fill-${gid})`} />
               ) : null}
-              {blurAreaD ? (
-                <path
-                  d={blurAreaD}
-                  fill={`url(#stk-fill-${gid})`}
-                  opacity={0.38}
-                  style={{ filter: "blur(3.5px)" }}
-                />
-              ) : null}
               {clearLine ? (
                 <path
                   d={clearLine}
                   fill="none"
-                  stroke="#7B5FD4"
-                  strokeWidth={2.2}
+                  stroke="#d5b16f"
+                  strokeWidth={2}
                   strokeLinejoin="round"
                   strokeLinecap="round"
                 />
@@ -275,12 +253,11 @@ function StockStylePanChart({
                 <path
                   d={blurLine}
                   fill="none"
-                  stroke="#7B5FD4"
-                  strokeWidth={2.4}
+                  stroke="rgba(213,177,111,0.35)"
+                  strokeWidth={2}
                   strokeLinejoin="round"
                   strokeLinecap="round"
-                  opacity={0.34}
-                  style={{ filter: "blur(3.8px)" }}
+                  strokeDasharray="4 5"
                 />
               ) : null}
             </g>
@@ -300,19 +277,19 @@ function StockStylePanChart({
                     y1={padT}
                     x2={x}
                     y2={padT + plotH}
-                    stroke="rgba(123,95,212,0.35)"
-                    strokeWidth={1.2}
-                    strokeDasharray="3 3"
+                    stroke="rgba(213,177,111,0.35)"
+                    strokeWidth={1}
+                    strokeDasharray="3 4"
                     className="pointer-events-none"
                   />
                 ) : null}
                 {selected ? (
                   <text
                     x={x}
-                    y={yy - 16}
+                    y={yy - 14}
                     textAnchor="middle"
-                    fill="#5B45B8"
-                    fontSize={17}
+                    fill="#d5b16f"
+                    fontSize={15}
                     fontWeight={700}
                     className="pointer-events-none"
                   >
@@ -321,24 +298,19 @@ function StockStylePanChart({
                 ) : null}
                 {locked ? (
                   <>
-                    {/* Blurred soft ghost under lock — lock icon stays sharp */}
-                    <g
-                      className="pointer-events-none"
-                      opacity={0.4}
-                      style={{ filter: "blur(3.2px)" }}
-                    >
+                    <g className="pointer-events-none" opacity={0.45}>
                       <circle
                         cx={x}
                         cy={yy}
-                        r={9}
-                        fill="rgba(123,95,212,0.35)"
+                        r={5}
+                        fill="rgba(213,177,111,0.25)"
                       />
                       <text
                         x={x}
                         y={H - 26}
                         textAnchor="middle"
-                        fill="rgba(154,144,192,0.95)"
-                        fontSize={14}
+                        fill="rgba(247,244,236,0.4)"
+                        fontSize={13}
                         fontWeight={600}
                       >
                         {p.label}
@@ -348,8 +320,8 @@ function StockStylePanChart({
                           x={x}
                           y={H - 8}
                           textAnchor="middle"
-                          fill="rgba(154,144,192,0.9)"
-                          fontSize={13}
+                          fill="rgba(247,244,236,0.35)"
+                          fontSize={12}
                           fontWeight={500}
                         >
                           {p.subLabel}
@@ -363,10 +335,10 @@ function StockStylePanChart({
                     <circle
                       cx={x}
                       cy={yy}
-                      r={selected ? 8 : 5}
-                      fill={selected ? color : "rgba(255,255,255,0.95)"}
-                      stroke={selected ? "#fff" : "rgba(90,70,150,0.4)"}
-                      strokeWidth={selected ? 2.2 : 1.5}
+                      r={selected ? 7 : 4.5}
+                      fill={selected ? color : "#101827"}
+                      stroke={selected ? "#f7f4ec" : "#d5b16f"}
+                      strokeWidth={selected ? 2 : 1.5}
                       className="pointer-events-none"
                     />
                     <text
@@ -375,10 +347,10 @@ function StockStylePanChart({
                       textAnchor="middle"
                       fill={
                         selected || p.isNow
-                          ? "rgba(36,28,79,0.98)"
-                          : "rgba(58,50,112,0.72)"
+                          ? "rgba(247,244,236,0.95)"
+                          : "rgba(247,244,236,0.72)"
                       }
-                      fontSize={selected ? 15 : 14}
+                      fontSize={selected ? 14 : 13}
                       fontWeight={selected || p.isNow ? 700 : 600}
                       className="pointer-events-none"
                     >
@@ -391,15 +363,26 @@ function StockStylePanChart({
                         textAnchor="middle"
                         fill={
                           p.isNow
-                            ? "rgba(91,69,184,0.98)"
-                            : "rgba(58,50,112,0.62)"
+                            ? "#d5b16f"
+                            : "rgba(247,244,236,0.45)"
                         }
-                        fontSize={13}
+                        fontSize={12}
                         fontWeight={p.isNow ? 700 : 500}
                         className="pointer-events-none"
                       >
                         {p.isNow ? "ตอนนี้" : p.subLabel}
                       </text>
+                    ) : null}
+                    {p.isNow && !selected ? (
+                      <rect
+                        x={x - 14}
+                        y={H - 4}
+                        width={28}
+                        height={2}
+                        rx={1}
+                        fill="#d5b16f"
+                        className="pointer-events-none"
+                      />
                     ) : null}
                   </>
                 )}
@@ -539,15 +522,21 @@ function UnlockedTwelveYearTrend({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <FortuneIcon name="compass" size={22} className="shrink-0" />
-            <h2 className="text-[19px] font-semibold tracking-wide text-[#241C4F]">
+            <h2 className="text-[19px] font-semibold tracking-wide text-[#d5b16f]">
               จังหวะชีวิต
             </h2>
           </div>
-          <p className="mt-1.5 text-[14px] leading-snug text-[#5E5688]">
+          <p className="mt-1.5 text-[14px] leading-snug text-[#f7f4ec]/65">
             เลื่อนดูเส้นเวลา · สลับรายเดือน / รายปี
           </p>
         </div>
-        <div className="inline-flex shrink-0 rounded-full bg-white/70 p-0.5 ring-1 ring-[#9B7FE8]/22">
+        <div
+          className="inline-flex shrink-0 rounded-full p-0.5"
+          style={{
+            background: "rgba(16,24,39,0.6)",
+            boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+          }}
+        >
           {(
             [
               { id: "month" as const, label: "รายเดือน" },
@@ -561,8 +550,8 @@ function UnlockedTwelveYearTrend({
               className={cn(
                 "rounded-full px-3.5 py-1.5 text-[14px] font-semibold outline-none transition",
                 mode === tab.id
-                  ? "bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8] text-white"
-                  : "text-[#6B6490]"
+                  ? "bg-[#d5b16f] text-[#101827]"
+                  : "text-[#e8d19a]/75"
               )}
             >
               {tab.label}
@@ -573,7 +562,7 @@ function UnlockedTwelveYearTrend({
 
       {mode === "month" ? (
         <>
-          <div className="fortune-glass rounded-[18px] px-2.5 py-3">
+          <div className="mae-aspect-card rounded-[18px] px-2.5 py-3">
             <StockStylePanChart
               points={monthChart}
               selectedIndex={monthIndexSel}
@@ -581,30 +570,30 @@ function UnlockedTwelveYearTrend({
               ariaLabel="กราฟจังหวะชีวิตรายเดือน ปัดเลื่อนดูได้"
             />
           </div>
-          <div className="fortune-glass rounded-[18px] px-3.5 py-3.5">
+          <div className="mae-aspect-card rounded-[18px] px-3.5 py-3.5">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-[14px] font-medium text-[#6B6490]">
+                <p className="text-[13px] font-medium text-[#d5b16f]">
                   {activeMonth.isNow ? "เดือนนี้" : "เดือนที่เลือก"}
                 </p>
-                <p className="mt-0.5 text-[17px] font-semibold text-[#241C4F]">
+                <p className="mt-0.5 text-[17px] font-semibold text-[#f7f4ec]">
                   {activeMonth.fullLabel}
                 </p>
               </div>
               <span
-                className="no-sky-lift rounded-full px-3 py-1.5 text-[14px] font-semibold tabular-nums"
+                className="no-sky-lift rounded-full px-3 py-1.5 text-[13px] font-semibold tabular-nums text-[#e8d19a]"
                 style={{
-                  color: scoreColor(activeMonth.score),
                   background: scoreBadgeBg(activeMonth.score),
+                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.4)",
                 }}
               >
                 {activeMonth.score}/12 · {monthBand.label}
               </span>
             </div>
-            <p className="mt-2 text-[15px] leading-relaxed text-[#5E5688]">
+            <p className="mt-2 text-[15px] leading-relaxed text-[#f7f4ec]/80">
               {monthBand.meaning}
             </p>
-            <p className="mt-2 text-[13px] leading-relaxed text-[#6B6490]">
+            <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/70">
               {activeMonth.isNow
                 ? "แตะจุดเดือนอื่นบนกราฟเพื่อเทียบจังหวะก่อน–หลัง"
                 : `เทียบกับเดือนนี้ · คะแนน ${months[monthNowIdx >= 0 ? monthNowIdx : monthIndexSel]?.score ?? "—"}/12`}
@@ -613,7 +602,7 @@ function UnlockedTwelveYearTrend({
         </>
       ) : (
         <>
-          <div className="fortune-glass rounded-[18px] px-2.5 py-3">
+          <div className="mae-aspect-card rounded-[18px] px-2.5 py-3">
             <StockStylePanChart
               points={yearChart}
               selectedIndex={yearIndex}
@@ -621,31 +610,34 @@ function UnlockedTwelveYearTrend({
               ariaLabel="กราฟจังหวะชีวิตรายปี ปัดเลื่อนดูได้"
             />
           </div>
-          <div className="fortune-glass relative space-y-2 rounded-[18px] px-3.5 py-3">
-            <p className="absolute right-3.5 top-3 text-[13px] font-semibold tabular-nums text-[#5B45B8]">
+          <div className="mae-aspect-card relative space-y-2 rounded-[18px] px-3.5 py-3">
+            <p className="absolute right-3.5 top-3 text-[13px] font-semibold tabular-nums text-[#d5b16f]">
               {yearIndex + 1}/{years.length}
             </p>
             <div className="pr-10">
-              <p className="text-[13px] font-medium text-[#6B6490]">
+              <p className="text-[13px] font-medium text-[#d5b16f]">
                 {activeYear.ce === nowCe
                   ? "ปีนี้"
                   : activeYear.ce < nowCe
                     ? "ปีที่ผ่านมา"
                     : "ปีข้างหน้า"}
               </p>
-              <p className="mt-1 text-[16px] font-semibold text-[#241C4F]">
+              <p className="mt-1 text-[16px] font-semibold text-[#f7f4ec]">
                 พ.ศ. {activeYear.be} · {yearBand.label}
               </p>
             </div>
-            <p className="text-[14px] font-medium leading-snug text-[#3A3270]">
+            <p className="text-[14px] font-medium leading-snug text-[#f7f4ec]/80">
               {activeYear.overview}
             </p>
-            <p className="line-clamp-2 text-[13px] leading-[1.65] text-[#5E5688]">
+            <p className="line-clamp-2 text-[13px] leading-[1.65] text-[#f7f4ec]/65">
               {yearBand.meaning}
             </p>
             <Link
               href={`/premium/year?ce=${activeYear.ce}`}
-              className="no-sky-lift dd-gold-glass-btn mt-0.5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold text-[#5C4810] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/45"
+              className="no-sky-lift mt-0.5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold text-[#101827] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              style={{
+                background: "linear-gradient(90deg, #b8923f, #d5b16f, #e8d19a)",
+              }}
             >
               อ่านเพิ่มเติม
               <FortuneIcon name="arrow-right" size={18} />
@@ -839,18 +831,18 @@ function FreeMonthTrendTeaser({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <FortuneIcon name="compass" size={22} className="shrink-0" />
-            <h2 className="text-[19px] font-semibold tracking-wide text-[#241C4F]">
+            <h2 className="text-[19px] font-semibold tracking-wide text-[#d5b16f]">
               จังหวะชีวิตช่วงนี้
             </h2>
           </div>
-          <p className="mt-1.5 text-[14px] leading-snug text-[#5E5688]">
+          <p className="mt-1.5 text-[14px] leading-snug text-[#f7f4ec]/65">
             เริ่มจากเดือนนี้ · อนาคตล็อกไว้
           </p>
         </div>
       </div>
 
       {hasData ? (
-        <div className="fortune-glass rounded-[18px] px-2.5 py-3">
+        <div className="mae-aspect-card rounded-[18px] px-2.5 py-3">
           <StockStylePanChart
             points={chartPoints}
             selectedIndex={currentIndex}
@@ -861,50 +853,50 @@ function FreeMonthTrendTeaser({
           />
         </div>
       ) : (
-        <div className="fortune-glass rounded-[18px] border border-dashed border-[#7B6BB0]/25 px-3 py-5 text-center">
-          <p className="text-[14px] font-medium text-[#2C2458]">
+        <div className="mae-aspect-card rounded-[18px] border border-dashed border-[rgba(213,177,111,0.35)] px-3 py-5 text-center">
+          <p className="text-[14px] font-medium text-[#f7f4ec]/70">
             ยังไม่มีข้อมูลจังหวะรายเดือน
         </p>
       </div>
       )}
 
       {hasData ? (
-        <div className="fortune-glass rounded-[18px] px-3.5 py-3.5">
+        <div className="mae-aspect-card rounded-[18px] px-3.5 py-3.5">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-[14px] font-medium text-[#6B6490]">เดือนนี้</p>
-              <p className="mt-0.5 text-[17px] font-semibold text-[#241C4F]">
+              <p className="text-[13px] font-medium text-[#d5b16f]">เดือนนี้</p>
+              <p className="mt-0.5 text-[17px] font-semibold text-[#f7f4ec]">
                 {active.fullLabel}
             </p>
           </div>
             <span
-              className="no-sky-lift rounded-full px-3 py-1.5 text-[14px] font-semibold tabular-nums"
+              className="no-sky-lift rounded-full px-3 py-1.5 text-[13px] font-semibold tabular-nums text-[#e8d19a]"
               style={{
-                color: scoreColor(active.score),
                 background: scoreBadgeBg(active.score),
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.4)",
               }}
             >
               {active.score}/12 · {band.label}
             </span>
           </div>
-          <p className="mt-2 text-[15px] leading-relaxed text-[#5E5688]">
+          <p className="mt-2 text-[15px] leading-relaxed text-[#f7f4ec]/80">
             {band.meaning}
           </p>
-          <p className="mt-2 text-[13px] leading-relaxed text-[#6B6490]">
-            <span className="font-semibold text-[#2C2458]">ใช้ยังไง · </span>
+          <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/55">
+            <span className="font-semibold text-[#d5b16f]">ใช้ยังไง · </span>
             {band.use}
                   </p>
                 </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[12px] text-[#6B6490]">
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[12px] text-[#f7f4ec]/55">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#3DCF7A]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#d5b16f]" />
           เดือนปัจจุบัน · ดูได้ฟรี
               </span>
         <span className="inline-flex items-center gap-1.5">
           <FortuneIcon name="lock-gold" size={22} plain />
-          อนาคต · ล็อกและเบลอไว้
+          อนาคต · ล็อกไว้
                 </span>
       </div>
 

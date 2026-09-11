@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useInView } from "@/hooks/use-in-view";
 
 /** Colors from https://mae-mangmee.tawin-ton.chatgpt.site/ — fixed */
 const C = {
@@ -20,10 +21,66 @@ const C = {
 } as const;
 
 const TOPICS = [
-  { id: "life", label: "ภาพรวมชีวิต", hint: "มองภาพกว้าง ก่อนเลือกทาง" },
-  { id: "work", label: "งานและการเงิน", hint: "ทบทวนความพร้อมและโอกาส" },
-  { id: "fortune", label: "โชคลาภและจังหวะ", hint: "เปิดรับโอกาสอย่างมีสติ" },
-  { id: "family", label: "ความรักและครอบครัว", hint: "เข้าใจตัวเองและคนที่ห่วงใย" },
+  {
+    id: "life",
+    label: "ภาพรวมชีวิต",
+    hint: "มองภาพกว้าง ก่อนเลือกทาง",
+    icon: "✧",
+    panelTitle: "มองชีวิตเป็นภาพกว้าง\nแล้วค่อยเลือกก้าวถัดไป",
+    panelBody:
+      "ชวนมองพื้นดวงตามศาสตร์ที่ใช้ ร่วมกับคำถามและบริบทชีวิตของคุณ เพื่อแยกให้ออกว่าเรื่องไหนควรเตรียมตัว เรื่องไหนควรทบทวน และเรื่องไหนลงมือได้เลย",
+    bullets: [
+      "จุดเด่นและลักษณะนิสัยตามคำพยากรณ์",
+      "ประเด็นชีวิตที่อยากให้ความสำคัญในช่วงนี้",
+      "คำถามชวนคิดและแนวทางนำไปปรับใช้",
+    ],
+    question: "ถ้าเริ่มเปลี่ยนได้หนึ่งเรื่อง\nวันนี้ฉันอยากเริ่มตรงไหน?",
+  },
+  {
+    id: "work",
+    label: "งานและการเงิน",
+    hint: "ทบทวนความพร้อมและโอกาส",
+    icon: "◈",
+    panelTitle: "ให้ความตั้งใจมีทิศทาง\nให้การตัดสินใจมีข้อมูล",
+    panelBody:
+      "ใช้คำพยากรณ์เป็นมุมมองประกอบการสำรวจจุดแข็ง ความคาดหวัง และข้อกังวลเรื่องงาน แล้วกลับมาประเมินโอกาส รายรับรายจ่าย และความเสี่ยงจากข้อมูลจริง",
+    bullets: [
+      "จุดแข็งด้านการทำงานตามมุมมองของศาสตร์",
+      "เรื่องที่ควรทบทวนก่อนเปลี่ยนงานหรือเริ่มสิ่งใหม่",
+      "คำถามเพื่อวางแผนเงินและเตรียมความพร้อม",
+    ],
+    question: "โอกาสที่อยากคว้า\nฉันเตรียมตัวพร้อมแค่ไหนแล้ว?",
+  },
+  {
+    id: "fortune",
+    label: "โชคลาภและจังหวะ",
+    hint: "เปิดรับโอกาสอย่างมีสติ",
+    icon: "✦",
+    panelTitle: "เปิดใจให้โอกาส\nพร้อมดูแลสิ่งที่มีอยู่",
+    panelBody:
+      "สำรวจเรื่องจังหวะและโอกาสในมุมของความเชื่อ พร้อมชวนคิดถึงสิ่งที่เตรียมได้ด้วยตัวเอง การอ่านดวงไม่สามารถรับรองลาภลอย เลขรางวัล หรือผลกำไรได้",
+    bullets: [
+      "แนวโน้มเรื่องโอกาสตามคำพยากรณ์",
+      "สิ่งที่ควรเตรียมเพื่อเปิดรับโอกาสจริง",
+      "ข้อควรระวังในการตัดสินใจจากความคาดหวัง",
+    ],
+    question: "หากโอกาสมาถึง\nฉันพร้อมรับโดยไม่เสี่ยงเกินตัวไหม?",
+  },
+  {
+    id: "family",
+    label: "ความรักและครอบครัว",
+    hint: "เข้าใจตัวเองและคนที่ห่วงใย",
+    icon: "♡",
+    panelTitle: "เข้าใจใจเรา\nเพื่อดูแลความสัมพันธ์",
+    panelBody:
+      "ชวนทบทวนความต้องการ วิธีสื่อสาร และสิ่งที่กังวลในความสัมพันธ์ ใช้คำพยากรณ์เป็นเพียงมุมมองหนึ่ง โดยฟังความรู้สึกและข้อเท็จจริงจากคนที่เกี่ยวข้องด้วย",
+    bullets: [
+      "มุมมองเรื่องนิสัยและความสัมพันธ์ตามศาสตร์",
+      "ประเด็นที่อาจนำไปพูดคุยอย่างอ่อนโยน",
+      "แนวทางดูแลใจตนเองและขอบเขตความสัมพันธ์",
+    ],
+    question: "มีเรื่องไหนที่เราจะลอง\nฟังกันให้มากขึ้นได้บ้าง?",
+  },
 ] as const;
 
 const REFLECTIONS = [
@@ -40,7 +97,7 @@ const REFLECTIONS = [
   {
     n: "03",
     title: "ห่วงคนในบ้าน จนลืมฟังใจตัวเอง",
-    body: "ให้พื้นที่กับความรู้สึก มองความสัมพันธ์อย่างอ่อนโยน และหาเรื่องเล็ก ๆ ที่เริ่มพูดง่ายขึ้นได้",
+    body: "ให้พื้นที่กับความรู้สึก มองความสัมพันธ์อย่างอ่อนโยน และหาเรื่องเล็ก ๆ ที่เริ่มพูดคุยกันได้",
   },
   {
     n: "04",
@@ -63,7 +120,7 @@ const PROMISES = [
   {
     n: "๓",
     title: "เคารพการเลือกของคุณ",
-    body: "ไม่รับรองว่าจะเปลี่ยนชะตาหรือร่ำรวยทันที ทุกทางเลือกควรพิจารณาควบคู่กับความเป็นจริง",
+    body: "ไม่รับรองว่าจะเปลี่ยนชะตาหรือร่ำรวยทันที ทุกทางเลือกควรพิจารณาร่วมกับความเป็นจริง",
   },
 ] as const;
 
@@ -74,15 +131,19 @@ const FAQS = [
   },
   {
     q: "“30 ลิขิตฟ้า 70 มานะตน” หมายถึงอะไร?",
-    a: "เราใช้เป็นคติเปรียบเปรยว่า ชีวิตมีทั้งสิ่งที่ควบคุมไม่ได้ และสิ่งที่เราลงมือได้ ตัวเลขนี้ไม่ใช่ผลวิจัย แต่ชวนให้เห็นความสำคัญของความเพียรและการเตรียมพร้อม",
+    a: "เราใช้เป็นคติเปรียบเปรยว่า ชีวิตมีทั้งสิ่งที่ควบคุมไม่ได้และสิ่งที่เราลงมือได้ ตัวเลขนี้ไม่ใช่ผลวิจัยหรือสัดส่วนที่พิสูจน์แล้ว แต่ชวนให้เห็นความสำคัญของความเพียรและการเตรียมพร้อม",
   },
   {
     q: "ไม่รู้เวลาเกิด ยังอ่านดวงได้หรือไม่?",
-    a: "ขึ้นอยู่กับศาสตร์และวิธีพยากรณ์ที่เลือก บางวิธีใช้เพียงวันเดือนปีเกิด หากไม่ทราบ ควรแจ้งตามจริง เพื่อให้ทราบข้อจำกัดก่อนเริ่ม",
+    a: "ขึ้นอยู่กับศาสตร์และวิธีพยากรณ์ที่เลือก บางวิธีใช้เพียงวันเดือนปีเกิด ขณะที่การผูกดวงบางแบบต้องใช้เวลาและสถานที่เกิด หากไม่ทราบ ควรแจ้งตามจริง เพื่อให้ผู้ให้บริการอธิบายข้อจำกัดก่อนเริ่ม",
   },
   {
     q: "ถ้าอ่านดวงแล้วเจอช่วงที่ไม่ดี ควรทำอย่างไร?",
-    a: "ไม่จำเป็นต้องตื่นตระหนก ให้มองเป็นคำถามสำหรับเตรียมตัว ตรวจสอบว่ามีปัญหาจริงอะไรที่ต้องดูแล และเริ่มจากสิ่งที่ทำได้",
+    a: "ไม่จำเป็นต้องตื่นตระหนกหรือรีบซื้อพิธีแก้ดวง ให้มองเป็นคำถามสำหรับเตรียมตัว ตรวจสอบว่ามีปัญหาจริงอะไรที่ต้องดูแล และเริ่มจากสิ่งที่ทำได้ เช่น วางแผน พูดคุย หรือขอคำปรึกษาที่ตรงกับเรื่องนั้น",
+  },
+  {
+    q: "ใช้ดวงตัดสินใจเรื่องสำคัญได้แค่ไหน?",
+    a: "ใช้เป็นมุมมองประกอบได้ตามความเชื่อ แต่เรื่องสุขภาพ การลงทุน กฎหมาย และความปลอดภัย ควรอาศัยข้อเท็จจริงและผู้เชี่ยวชาญที่เกี่ยวข้องเป็นหลัก คำพยากรณ์ไม่สามารถแทนคำแนะนำเฉพาะด้านได้",
   },
 ] as const;
 
@@ -91,23 +152,56 @@ function Reveal({
   delay,
   children,
   className,
+  style,
+  variant = "up",
 }: {
   visible: boolean;
   delay: number;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
+  style?: CSSProperties;
+  variant?: "up" | "scale" | "glow";
 }) {
   return (
     <div
       className={cn(
-        "translate-y-3 opacity-0 transition-[opacity,transform] duration-700 ease-out",
-        visible && "translate-y-0 opacity-100",
+        "mae-reveal",
+        variant === "scale" && "mae-reveal--scale",
+        variant === "glow" && "mae-reveal--glow",
+        visible && "is-visible",
         className
       )}
-      style={{ transitionDelay: `${delay}ms` }}
+      style={{ ["--mae-delay" as string]: `${delay}ms`, ...style }}
     >
       {children}
     </div>
+  );
+}
+
+function MaeSection({
+  id,
+  className,
+  style,
+  children,
+  delay = 0,
+}: {
+  id?: string;
+  className?: string;
+  style?: CSSProperties;
+  children: ReactNode;
+  delay?: number;
+}) {
+  const { ref, inView } = useInView<HTMLElement>({ threshold: 0.12 });
+
+  return (
+    <section
+      ref={ref}
+      id={id}
+      className={cn("mae-section-reveal", inView && "is-visible", className)}
+      style={{ ["--mae-delay" as string]: `${delay}ms`, ...style }}
+    >
+      {children}
+    </section>
   );
 }
 
@@ -153,93 +247,83 @@ export function MaeLanding() {
           />
         </div>
 
-        <Reveal
-          visible={mounted}
-          delay={0}
-          className="absolute left-3 top-2.5 z-10 sm:left-3.5 sm:top-3"
+        {/* Brand mark — clear of hero copy below */}
+        <div
+          className="pointer-events-none absolute left-1/2 z-10 w-[min(78%,15.5rem)] -translate-x-1/2 -translate-y-1/2 sm:w-[16.5rem]"
+          style={{ top: "40%" }}
         >
-          <Image
-            src="/images/brand/mae-wordmark-sm.png?v=gold2"
-            alt="แม่มั่งมี พามู"
-            width={400}
-            height={200}
-            priority
-            unoptimized
-            className="h-auto w-[5rem] object-contain object-left-top sm:w-[5.35rem]"
-          />
-        </Reveal>
+          <Reveal visible={mounted} delay={60} variant="glow">
+            <Image
+              src="/images/brand/mae-wordmark-sm.png?v=gold2"
+              alt="แม่มั่งมี พามู"
+              width={400}
+              height={200}
+              priority
+              unoptimized
+              className="mae-logo-breathe h-auto w-full object-contain"
+            />
+          </Reveal>
+        </div>
 
-        <Reveal
-          visible={mounted}
-          delay={80}
-          className="mae-hero-copy relative z-10 mt-auto mb-[10%] text-center pb-1"
+        <div
+          className={cn(
+            "mae-hero-copy mae-hero-stagger relative z-10 mt-auto mb-14 flex w-full flex-col items-center pt-20 text-center sm:mb-16 sm:pt-24",
+            mounted && "is-visible"
+          )}
         >
-          <p
-            className="mb-3 flex items-center justify-center gap-2 text-[13px] font-medium"
-            style={{ color: C.gold }}
-          >
-            <span aria-hidden>✦</span>
-            ความเชื่อที่เป็นเคียงคู่ความเพียร
-          </p>
-          <h1 className="font-sacred text-[2.35rem] font-normal leading-[1.25] tracking-tight text-white sm:text-[2.55rem]">
-            เข้าใจจังหวะชีวิต
-            <br />
-            <span style={{ color: C.gold }}>ก้าวต่ออย่างอุ่นใจ</span>
+          <h1 className="mt-0 flex flex-col items-center gap-2 overflow-visible font-sans text-white">
+            <span className="text-[2.15rem] font-bold leading-[1.3] tracking-tight sm:text-[2.35rem]">
+              เข้าใจจังหวะชีวิต
+            </span>
+            <span className="mae-hero-gold-line pb-1 text-[1.7rem] font-bold leading-[1.35] tracking-tight sm:text-[1.85rem]">
+              ก้าวต่ออย่างอุ่นใจ
+            </span>
           </h1>
-          <p className="mx-auto mt-3.5 max-w-[21rem] text-[14px] leading-relaxed text-[#c5cdd9]">
+
+          <p className="mx-auto mt-5 max-w-[20rem] text-[13.5px] leading-[1.85] text-white/90">
             บางช่วง… เราตั้งใจเต็มที่
             <br />
             แต่หลายอย่างกลับไม่เป็นอย่างหวัง
+            <br />
+            ลองให้การอ่านดวง เป็นอีกมุมในการทบทวนตัวเอง
           </p>
 
           <Link
             href="/reading"
-            className="mae-gold-cta group relative mx-auto mt-5 flex w-full max-w-[280px] items-center justify-center gap-2 overflow-hidden rounded-full px-7 py-3.5 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+            className="mae-gold-cta group relative mx-auto mt-7 flex w-full max-w-[280px] items-center justify-center gap-2.5 overflow-hidden rounded-full px-8 py-4 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           >
-            <span className="text-[15px] font-semibold tracking-wide">
+            <span className="text-[15.5px] font-bold tracking-wide">
               เลือกเรื่องที่อยากรู้
             </span>
             <ArrowRight
-              className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-              strokeWidth={2.2}
+              className="h-[1.05rem] w-[1.05rem] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+              strokeWidth={2.4}
             />
           </Link>
+
           <a
             href="#belief"
-            className="mae-concept-link mt-3.5 inline-flex items-center gap-1.5 text-[13px] text-white/90 transition hover:text-white"
+            className="mae-concept-link mt-4 inline-flex items-center gap-1.5 text-[15px] text-white/90 transition hover:text-white"
           >
-            <span className="underline decoration-white/55 underline-offset-[5px]">
-              แนวคิดของแม่มั่งมี
+            <span className="underline decoration-white/55 underline-offset-[6px]">
+              อ่านแนวคิดแม่มั่งมี
             </span>
             <span className="mae-concept-arrow" aria-hidden>
               ↓
             </span>
           </a>
-          <p className="mt-3 flex items-center justify-center gap-2 text-[11px] text-[#b2bdcd]">
+
+          <p className="mt-4 flex items-center justify-center gap-2 text-[13px] leading-snug text-[#c5cdd9]">
             <span style={{ color: C.gold }} aria-hidden>
               ✦
             </span>
             อ่านดวงอย่างมีสติ · ทุกการตัดสินใจยังเป็นของคุณ
           </p>
-        </Reveal>
-
-        <Reveal visible={mounted} delay={240} className="relative z-10 pt-4">
-          <div
-            className="flex items-center justify-between gap-3 border-t pt-3 text-[11px]"
-            style={{ borderColor: "rgba(255,255,255,0.1)" }}
-          >
-            <span className="tracking-wide" style={{ color: "#b9a077" }}>
-              อ่านดวง · อ่านใจ · อ่านทาง
-            </span>
-            <a href="#belief" style={{ color: C.gold }}>
-              เลื่อนเพื่ออ่านต่อ ↓
-            </a>
-          </div>
-        </Reveal>
+        </div>
       </section>
 
       {/* BELIEF — cultural history (restored) + 30/70 */}
-      <section
+      <MaeSection
         id="belief"
         className="mae-belief-plate relative overflow-hidden px-5 pb-11 pt-11"
         style={{ color: C.ink }}
@@ -275,6 +359,15 @@ export function MaeLanding() {
             <br />
             สู่คำถามของชีวิตวันนี้
           </h2>
+
+          <p
+            className="mt-4 font-sacred text-[14px] leading-relaxed"
+            style={{ color: "#9b7a43" }}
+          >
+            ศาสตร์แห่งความเชื่อ
+            <br />
+            <span style={{ color: "#192438" }}>ศิลป์แห่งการเข้าใจชีวิต</span>
+          </p>
 
           <div
             className="mt-4 space-y-3.5 text-[13px] leading-[1.85]"
@@ -317,120 +410,110 @@ export function MaeLanding() {
           </p>
         </div>
 
-        <div className="mae-liquid-glass-light relative mt-8 rounded-[20px] px-4 pb-5 pt-6">
+        <div
+          className="relative mt-10 rounded-[4px] px-1 py-10 text-center"
+          style={{ background: "#f7f6f2" }}
+        >
+          <p
+            className="text-[12px] font-medium tracking-wide"
+            style={{ color: "#9a8055" }}
+          >
+            แนวคิดที่แม่มั่งมีอยากชวนคุณเก็บไว้
+          </p>
           <h3
-            className="text-center font-sacred text-[1.28rem] leading-snug"
-            style={{ color: "#0c2a57" }}
+            className="mt-3 font-sacred text-[1.55rem] leading-[1.35] tracking-tight"
+            style={{ color: "#1a2433" }}
           >
             เชื่อในจังหวะฟ้า
             <br />
             และเชื่อในมือตัวเอง
           </h3>
-          <div
-            className="mx-auto mt-3.5 h-px w-12"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, rgba(155,122,67,0.65), transparent)",
-            }}
-            aria-hidden
-          />
 
-          <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-start gap-1.5">
+          <div className="mt-9 grid grid-cols-[1fr_auto_1fr] items-start gap-2 px-1">
             <div className="text-center">
-              <span
-                className="mx-auto mb-2 block text-[15px]"
-                style={{ color: "#b8975a" }}
-                aria-hidden
-              >
-                ✦
-              </span>
               <p
-                className="font-sacred text-[3rem] leading-none tracking-tight"
-                style={{ color: "#b8975a" }}
+                className="font-sacred text-[3.6rem] leading-none tracking-tight"
+                style={{ color: "#9a8055" }}
               >
                 30
               </p>
               <p
-                className="mt-2 font-sacred text-[1rem]"
-                style={{ color: "#9b7a43" }}
+                className="mt-2.5 font-sacred text-[1.05rem]"
+                style={{ color: "#1a2433" }}
               >
                 ลิขิตฟ้า
               </p>
               <p
-                className="mt-1 text-[11px] leading-relaxed"
-                style={{ color: "#596374" }}
+                className="mt-1.5 text-[11px] leading-relaxed"
+                style={{ color: "#666666" }}
               >
-                ยอมรับสิ่งที่
+                ยอมรับสิ่งที่ควบคุมไม่ได้
                 <br />
-                ควบคุมไม่ได้
+                เปิดใจมองจังหวะและความเปลี่ยนแปลง
               </p>
             </div>
 
             <span
-              className="pt-9 font-sacred text-[1.4rem]"
-              style={{ color: "#b5a389" }}
+              className="pt-4 text-[1.35rem] font-light"
+              style={{ color: "#a8a8a8" }}
               aria-hidden
             >
               +
             </span>
 
             <div className="text-center">
-              <span
-                className="mx-auto mb-2 block text-[14px]"
-                style={{ color: "#9b7a43" }}
-                aria-hidden
-              >
-                ✿
-              </span>
               <p
-                className="font-sacred text-[3rem] leading-none tracking-tight"
-                style={{ color: "#0c2a57" }}
+                className="font-sacred text-[3.6rem] leading-none tracking-tight"
+                style={{ color: "#1a2433" }}
               >
                 70
               </p>
               <p
-                className="mt-2 font-sacred text-[1rem]"
-                style={{ color: "#0c2a57" }}
+                className="mt-2.5 font-sacred text-[1.05rem]"
+                style={{ color: "#1a2433" }}
               >
                 มานะตน
               </p>
               <p
-                className="mt-1 text-[11px] leading-relaxed"
-                style={{ color: "#596374" }}
+                className="mt-1.5 text-[11px] leading-relaxed"
+                style={{ color: "#666666" }}
               >
-                เตรียมพร้อม
+                เตรียมพร้อม เลือกอย่างมีสติ
                 <br />
-                เลือกอย่างมีสติ
+                และลงมือสร้างทางของตัวเอง
               </p>
             </div>
           </div>
 
-          <div className="mae-liquid-glass-chip mt-6 rounded-[14px] px-3.5 py-3.5 text-center">
-            <p
-              className="text-[12px] leading-relaxed"
-              style={{ color: "#0c2a57" }}
-            >
-              การอ่านดวงอาจช่วยตั้งคำถามให้ชัดขึ้น
-            </p>
-            <p
-              className="mt-0.5 text-[12px] font-medium leading-relaxed"
-              style={{ color: "#9b7a43" }}
-            >
-              ส่วนคำตอบของชีวิต สร้างด้วยการกระทำ
-            </p>
-          </div>
-        </div>
+          <div
+            className="mx-auto mt-9 h-px w-[88%]"
+            style={{ background: "#e0ddd6" }}
+            aria-hidden
+          />
 
-        <p
-          className="relative mt-5 text-center text-[11px] leading-relaxed"
-          style={{ color: "#8a94a3" }}
-        >
-          30 / 70 เป็นแนวคิดเปรียบเปรย ไม่ใช่สัดส่วนทางวิทยาศาสตร์
-        </p>
-      </section>
+          <p
+            className="mt-6 text-[13px] leading-relaxed"
+            style={{ color: "#4a5564" }}
+          >
+            การอ่านดวงอาจช่วยตั้งคำถามให้ชัดขึ้น
+            <br />
+            <span className="font-medium" style={{ color: "#1a2433" }}>
+              ส่วนคำตอบของชีวิต ยังต้องค่อย ๆ สร้างด้วยการกระทำ
+            </span>
+          </p>
+          <p
+            className="mt-4 text-[11px] leading-relaxed"
+            style={{ color: "#8a8a8a" }}
+          >
+            “30 ลิขิตฟ้า 70 มานะตน” เป็นคติเปรียบเปรยเรื่องความเชื่อและความเพียร
+            <br />
+            ไม่ใช่สัดส่วนทางวิทยาศาสตร์หรือสูตรคำนวณความสำเร็จ
+          </p>
+        </div>
+      </MaeSection>
 
       {/* REFLECTIONS */}
-      <section className="px-5 py-11" style={{ background: C.paper, color: C.ink }}>
+      <MaeSection className="px-5 py-11" style={{ background: C.paper, color: C.ink }}>
         <p
           className="mb-3 flex items-center gap-2.5 text-[12px] font-medium"
           style={{ color: C.goldDark }}
@@ -445,8 +528,16 @@ export function MaeLanding() {
           ยังไม่เข้าข้าง?
         </h2>
         <p className="mt-3 text-[13px] leading-relaxed" style={{ color: C.muted }}>
-          บางที สิ่งแรกที่เราต้องการ อาจเป็นเวลาทบทวนอย่างใจเย็น
+          บางที สิ่งแรกที่เราต้องการ
+          <br />
+          อาจเป็นเวลาทบทวนอย่างใจเย็น
+          <br />
           ว่าอะไรติดขัด และอะไรพอเริ่มแก้ได้
+        </p>
+        <p className="mt-4 text-[13px] leading-relaxed" style={{ color: C.ink }}>
+          เรื่องที่ไม่เป็นใจ ไม่ได้แปลว่า
+          <br />
+          <span className="font-medium">คุณจะไม่มีทางไปต่อ</span>
         </p>
         <div className="mt-6">
           {REFLECTIONS.map((item, i) => (
@@ -473,10 +564,10 @@ export function MaeLanding() {
             </article>
           ))}
         </div>
-      </section>
+      </MaeSection>
 
       {/* TOPICS */}
-      <section id="reading" className="px-5 py-11" style={{ background: C.navy }}>
+      <MaeSection id="reading" className="px-5 py-11" style={{ background: C.navy }}>
         <p
           className="mb-3 flex items-center gap-2.5 text-[12px] font-medium"
           style={{ color: C.gold }}
@@ -500,7 +591,7 @@ export function MaeLanding() {
                 key={t.id}
                 type="button"
                 onClick={() => setTopic(t.id)}
-                className="rounded-[12px] px-3 py-3.5 text-left transition"
+                className="mae-topic-chip rounded-[12px] px-3 py-3.5 text-left"
                 style={
                   on
                     ? { background: C.gold, color: C.navy }
@@ -526,7 +617,8 @@ export function MaeLanding() {
         </div>
 
         <div
-          className="mt-4 rounded-[16px] px-4 py-5"
+          key={topic}
+          className="mae-topic-panel mt-4 rounded-[16px] px-4 py-5"
           style={{
             background: "rgba(255,255,255,0.04)",
             boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.2)",
@@ -535,12 +627,35 @@ export function MaeLanding() {
           <p className="text-[12px] font-medium" style={{ color: C.gold }}>
             แนวทางการอ่านดวง · {active.label}
           </p>
-          <p className="mt-2 font-sacred text-[1.15rem] leading-snug text-[#f7f3ea]">
-            {active.hint}
+          <p className="mt-2 whitespace-pre-line font-sacred text-[1.15rem] leading-snug text-[#f7f3ea]">
+            {active.panelTitle}
           </p>
           <p className="mt-2 text-[12px] leading-relaxed text-[#a8b0bf]">
-            ชวนแยกให้ออกว่าเรื่องไหนควรเตรียมตัว เรื่องไหนทบทวน
-            และเรื่องไหนลงมือได้เลย
+            {active.panelBody}
+          </p>
+          <ul className="mt-3 space-y-1.5 text-[12px] leading-relaxed text-[#c5cdd9]">
+            {active.bullets.map((b) => (
+              <li key={b} className="flex gap-2">
+                <span style={{ color: C.gold }} aria-hidden>
+                  ·
+                </span>
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+          <div
+            className="mt-4 rounded-[12px] px-3.5 py-3"
+            style={{ background: "rgba(213,177,111,0.1)" }}
+          >
+            <p className="text-[11px] font-medium" style={{ color: C.gold }}>
+              คำถามที่น่าลองถามตัวเอง
+            </p>
+            <p className="mt-1.5 whitespace-pre-line text-[12px] leading-relaxed text-[#e8e2d4]">
+              “{active.question}”
+            </p>
+          </div>
+          <p className="mt-3 text-[10px] leading-relaxed text-[#8a94a3]">
+            ตัวอย่างขอบเขตเนื้อหา ไม่ใช่คำพยากรณ์เฉพาะบุคคล
           </p>
           <Link
             href="/reading"
@@ -555,10 +670,10 @@ export function MaeLanding() {
             />
           </Link>
         </div>
-      </section>
+      </MaeSection>
 
       {/* PROMISE */}
-      <section className="px-5 py-11" style={{ background: C.paper, color: C.ink }}>
+      <MaeSection className="px-5 py-11" style={{ background: C.paper, color: C.ink }}>
         <p className="mb-2 text-[12px] font-medium" style={{ color: C.goldDark }}>
           ความอุ่นใจเริ่มจากความชัดเจน
         </p>
@@ -593,10 +708,10 @@ export function MaeLanding() {
             </article>
           ))}
         </div>
-      </section>
+      </MaeSection>
 
       {/* FAQ */}
-      <section
+      <MaeSection
         id="faq"
         className="border-t px-5 py-11"
         style={{ background: C.soft, borderColor: "#e7e3dc", color: C.ink }}
@@ -620,26 +735,30 @@ export function MaeLanding() {
               <summary className="flex cursor-pointer list-none items-start justify-between gap-3 py-4 text-[13px] font-medium leading-snug marker:content-none [&::-webkit-details-marker]:hidden">
                 <span>{item.q}</span>
                 <span
-                  className="shrink-0 text-[16px] transition group-open:rotate-45"
+                  className="shrink-0 text-[16px] transition duration-300 group-open:rotate-45"
                   style={{ color: C.goldDark }}
                   aria-hidden
                 >
                   +
                 </span>
               </summary>
-              <p
-                className="pb-4 text-[12px] leading-relaxed"
-                style={{ color: C.muted }}
-              >
-                {item.a}
-              </p>
+              <div className="mae-faq-body">
+                <div>
+                  <p
+                    className="pb-4 text-[12px] leading-relaxed"
+                    style={{ color: C.muted }}
+                  >
+                    {item.a}
+                  </p>
+                </div>
+              </div>
             </details>
           ))}
         </div>
-      </section>
+      </MaeSection>
 
       {/* CLOSING */}
-      <section className="px-5 py-12 text-center" style={{ background: C.navy }}>
+      <MaeSection className="px-5 py-12 text-center" style={{ background: C.navy }}>
         <span className="text-[1.6rem]" style={{ color: C.gold }} aria-hidden>
           ✦
         </span>
@@ -670,10 +789,15 @@ export function MaeLanding() {
           />
         </Link>
         <p className="mt-6 text-[11px] leading-relaxed text-[#8a94a3]">
+          ความเชื่ออย่างมีสติ · ความเพียรอย่างมีทิศทาง
+        </p>
+        <p className="mt-3 text-[11px] leading-relaxed text-[#8a94a3]">
           โหราศาสตร์เป็นความเชื่อส่วนบุคคล คำพยากรณ์ไม่รับรองเหตุการณ์ในอนาคต
+          <br />
+          หน้าแนะนำบริการนี้ยังไม่รับข้อมูลเกิดหรือชำระเงิน
           <br />© 2026 Mae Mangmee
         </p>
-      </section>
+      </MaeSection>
     </div>
   );
 }

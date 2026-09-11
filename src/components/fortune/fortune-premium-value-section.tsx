@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 
 const STATUS_DOT: Record<WeekStatus, string> = {
   good: "bg-[#5B8C5A]",
-  steady: "bg-[#9B7FE8]",
-  rest: "bg-[#C9A227]/70",
+  steady: "bg-[#d5b16f]",
+  rest: "bg-[#e8d19a]/70",
 };
 
 const STATUS_LABEL: Record<WeekStatus, string> = {
@@ -23,12 +23,12 @@ const STATUS_LABEL: Record<WeekStatus, string> = {
 };
 
 const TONE_RING: Record<string, string> = {
-  high: "from-[#7B5FD4] to-[#9B7FE8]",
-  mid: "from-[#8B7CC8] to-[#B8A9E8]",
-  low: "from-[#A89878] to-[#C9B896]",
+  high: "from-[#8a6a28] to-[#d5b16f]",
+  mid: "from-[#6a5840] to-[#c4a86a]",
+  low: "from-[#5a5040] to-[#a89870]",
 };
 
-/** Compact premium value cards — long copy lives on detail routes */
+/** Compact premium value cards — dark navy + gold */
 export function FortunePremiumValueSection({
   birthDate,
   nickname,
@@ -62,32 +62,33 @@ export function FortunePremiumValueSection({
   return (
     <section className={cn("space-y-3", className)}>
       <div className="px-0.5">
-        <h2 className="dd-section-title text-[17px] font-semibold">
+        <h2 className="text-[15px] font-semibold tracking-wide text-[#d5b16f]">
           สำหรับคุณโดยเฉพาะ
         </h2>
       </div>
 
-      {/* Today + this week — compact side-by-side */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         <Link
           href="/premium/outlook"
-          className="fortune-glass rounded-[16px] px-3 py-3 outline-none transition active:scale-[0.99]"
+          className="mae-aspect-card px-3 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
         >
           <div className="flex items-center justify-between gap-1">
-            <p className="text-[15px] font-semibold text-[#2C2458]">วันนี้</p>
-            <ChevronRight className="h-4 w-4 shrink-0 text-[#7B5FD4]" strokeWidth={2.2} />
+            <p className="mae-aspect-title text-[15px] font-semibold">วันนี้</p>
+            <span className="mae-aspect-chevron !h-7 !w-7">
+              <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.4} />
+            </span>
           </div>
           <div className="mt-2.5 flex items-center gap-2.5">
             <span
               className={cn(
-                "flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-full bg-gradient-to-br leading-none text-white",
+                "flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-full bg-gradient-to-br leading-none text-white shadow-[0_4px_12px_rgba(0,0,0,0.3)]",
                 TONE_RING[today.tone]
               )}
             >
               <span className="text-[15px] font-bold">{today.score}</span>
               <span className="text-[9px] font-semibold opacity-85">/12</span>
             </span>
-            <p className="min-w-0 line-clamp-2 text-[14px] leading-snug text-[#6B6490]">
+            <p className="mae-aspect-body min-w-0 line-clamp-2 text-[13px] leading-snug">
               {today.copy.doHint}
             </p>
           </div>
@@ -95,11 +96,13 @@ export function FortunePremiumValueSection({
 
         <Link
           href="/premium/week"
-          className="fortune-glass rounded-[16px] px-3 py-3 outline-none transition active:scale-[0.99]"
+          className="mae-aspect-card px-3 py-3 outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
         >
           <div className="flex items-center justify-between gap-1">
-            <p className="text-[15px] font-semibold text-[#2C2458]">สัปดาห์นี้</p>
-            <ChevronRight className="h-4 w-4 shrink-0 text-[#7B5FD4]" strokeWidth={2.2} />
+            <p className="mae-aspect-title text-[15px] font-semibold">สัปดาห์นี้</p>
+            <span className="mae-aspect-chevron !h-7 !w-7">
+              <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.4} />
+            </span>
           </div>
           <div className="mt-2.5 flex items-center gap-1.5">
             <span
@@ -108,11 +111,11 @@ export function FortunePremiumValueSection({
                 STATUS_DOT[weekToday.status]
               )}
             />
-            <span className="text-[14px] font-semibold text-[#241C4F]">
+            <span className="text-[13.5px] font-semibold text-[#f7f4ec]">
               {weekToday.weekdayShort} · {STATUS_LABEL[weekToday.status]}
             </span>
           </div>
-          <p className="mt-1.5 line-clamp-2 text-[14px] leading-snug text-[#6B6490]">
+          <p className="mae-aspect-body mt-1.5 line-clamp-2 text-[13px] leading-snug">
             {weekToday.copy.tip}
           </p>
         </Link>

@@ -1,14 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
-import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { Clover } from "lucide-react";
 import {
   buildDailyReadingPack,
 } from "@/lib/fortune/build-daily-pack";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import { cn } from "@/lib/utils";
 
-/** Lucky colors + numbers — from day tone analysis */
+/** Lucky colors + numbers — dark navy + gold rim */
 export function FortuneLuckyStrip({
   birthDate = "2000-01-01",
   nickname = "",
@@ -24,7 +24,6 @@ export function FortuneLuckyStrip({
   focus?: FortuneFocus;
   gender?: string;
   className?: string;
-  /** @deprecated */
   seed?: string;
 }) {
   const lucky = useMemo(() => {
@@ -43,21 +42,27 @@ export function FortuneLuckyStrip({
   return (
     <section
       className={cn(
-        "fortune-glass grid grid-cols-2 items-center rounded-[18px] px-2 py-3.5",
+        "mae-aspect-card grid w-full grid-cols-2 items-center px-2.5 py-4",
         className
       )}
     >
-      <div className="flex flex-col items-center justify-center px-2 text-center">
-        <p className="text-[13px] font-semibold text-[#5E5688]">สีมงคลวันนี้</p>
-        <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5">
+      <div className="flex min-w-0 flex-col items-center justify-center px-2 text-center">
+        <p className="mae-aspect-title text-[11px] font-medium tracking-wide">
+          สีมงคลวันนี้
+        </p>
+        <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1.5">
           {[c0, c1].map((c) => (
             <span key={c!.name} className="inline-flex items-center gap-1.5">
               <span
-                className="h-6 w-6 shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgba(123,107,176,0.28)]"
-                style={{ background: c!.hex }}
+                className="h-[18px] w-[18px] shrink-0 rounded-full"
+                style={{
+                  background: c!.hex,
+                  boxShadow:
+                    "inset 0 1px 0 rgba(255,255,255,0.35), 0 0 0 1px rgba(213,177,111,0.35)",
+                }}
                 aria-hidden
               />
-              <span className="text-[15px] font-semibold text-[#2C2458]">
+              <span className="text-[13.5px] font-semibold tracking-tight text-[#f7f4ec]">
                 {c!.name}
               </span>
             </span>
@@ -65,12 +70,12 @@ export function FortuneLuckyStrip({
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center border-l border-[#7B6BB0]/22 px-2 text-center">
-        <p className="inline-flex items-center justify-center gap-1 text-[13px] font-semibold text-[#5E5688]">
-          <FortuneIcon name="clover" size={20} />
+      <div className="flex min-w-0 flex-col items-center justify-center border-l border-[rgba(213,177,111,0.28)] px-2 text-center">
+        <p className="mae-aspect-title inline-flex items-center justify-center gap-1 text-[11px] font-medium tracking-wide">
+          <Clover className="h-3.5 w-3.5 text-[#d5b16f]" strokeWidth={2} />
           เลขนำโชค
         </p>
-        <p className="mt-1.5 text-[1.4rem] font-bold tracking-[0.08em] text-[#2C2458]">
+        <p className="mt-2 text-[1.35rem] font-semibold tracking-[0.14em] text-[#f7f4ec]">
           {lucky.numbers.join(" · ")}
         </p>
       </div>

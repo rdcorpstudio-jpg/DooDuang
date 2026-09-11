@@ -75,6 +75,256 @@
 
 .phone-frame--mae {
   background: #101827;
+  /* Soft gold rim — visible, not busy */
+  box-shadow: inset 0 0 0 1px rgba(213, 177, 111, 0.2);
+}
+
+/* Mae routes: solid brand navy #101827 + gold rim (no fade / no glass wash) */
+.phone-frame--mae .fortune-glass {
+  border: 1px solid rgba(213, 177, 111, 0.6) !important;
+  background: #101827 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.phone-frame--mae .fortune-glass-inset {
+  border-color: rgba(213, 177, 111, 0.28) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.phone-frame--mae .fortune-surface {
+  border-color: rgba(213, 177, 111, 0.35) !important;
+  background: #101827 !important;
+}
+
+.phone-frame--mae .glass-frame,
+.phone-frame--mae .glass-frame-soft {
+  border: 1px solid rgba(213, 177, 111, 0.6) !important;
+  background: #101827 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.phone-frame--mae .fortune-glass h1,
+.phone-frame--mae .fortune-glass h2,
+.phone-frame--mae .fortune-glass h3,
+.phone-frame--mae .glass-frame h1,
+.phone-frame--mae .glass-frame h2,
+.phone-frame--mae .glass-frame h3 {
+  background-image: linear-gradient(
+    165deg,
+    #fff8e4 0%,
+    #f3e2b8 22%,
+    #e2c787 48%,
+    #d5b16f 72%,
+    #b8924f 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Soften hard-coded lilac titles on Mae celestial pages */
+.phone-frame--mae .text-\[\#241C4F\],
+.phone-frame--mae .text-\[\#3A3270\],
+.phone-frame--mae .text-\[\#3A2F6B\],
+.phone-frame--mae .text-\[\#2C2458\] {
+  color: #f7f4ec !important;
+}
+
+.phone-frame--mae .text-\[\#5E5688\],
+.phone-frame--mae .text-\[\#6B6490\],
+.phone-frame--mae .text-\[\#7A72A0\],
+.phone-frame--mae .text-\[\#8A82B0\],
+.phone-frame--mae .text-\[\#9A90C0\],
+.phone-frame--mae .text-\[\#9A90B8\] {
+  color: rgba(247, 244, 236, 0.65) !important;
+}
+
+/* After global remaps: gold titles / cream body stay on dark glass cards */
+.phone-frame--mae .fortune-glass .text-\[\#241C4F\],
+.phone-frame--mae .fortune-glass .text-\[\#3A3270\],
+.phone-frame--mae .fortune-glass .text-\[\#3A2F6B\],
+.phone-frame--mae .fortune-glass .text-\[\#2C2458\],
+.phone-frame--mae .fortune-glass .text-\[\#1E1744\],
+.phone-frame--mae .glass-frame .text-\[\#241C4F\],
+.phone-frame--mae .glass-frame .text-\[\#3A3270\],
+.phone-frame--mae .glass-frame .text-\[\#3A2F6B\],
+.phone-frame--mae .glass-frame .text-\[\#2C2458\],
+.phone-frame--mae .glass-frame .text-\[\#1E1744\] {
+  background-image: linear-gradient(
+    165deg,
+    #fff8e4 0%,
+    #f3e2b8 22%,
+    #e2c787 48%,
+    #d5b16f 72%,
+    #b8924f 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.phone-frame--mae .fortune-glass .text-\[\#5E5688\],
+.phone-frame--mae .fortune-glass .text-\[\#6B6490\],
+.phone-frame--mae .fortune-glass .text-\[\#7A72A0\],
+.phone-frame--mae .fortune-glass .text-\[\#8A82B0\],
+.phone-frame--mae .glass-frame .text-\[\#5E5688\],
+.phone-frame--mae .glass-frame .text-\[\#6B6490\],
+.phone-frame--mae .glass-frame .text-\[\#7A72A0\],
+.phone-frame--mae .glass-frame .text-\[\#8A82B0\] {
+  color: rgba(247, 244, 236, 0.72) !important;
+}
+
+/* Kill leftover lilac frosted chips on Mae premium/detail pages */
+.phone-frame--mae .bg-white\/50,
+.phone-frame--mae .bg-white\/55,
+.phone-frame--mae .bg-white\/60,
+.phone-frame--mae .bg-white\/70,
+.phone-frame--mae .bg-white\/80,
+.phone-frame--mae .bg-white\/85 {
+  background-color: rgba(16, 24, 39, 0.92) !important;
+}
+
+.phone-frame--mae .ring-\[\#9B7FE8\]\/12,
+.phone-frame--mae .ring-\[\#9B7FE8\]\/15,
+.phone-frame--mae .ring-\[\#9B7FE8\]\/2,
+.phone-frame--mae .ring-\[\#9B7FE8\]\/20,
+.phone-frame--mae .ring-\[\#9B7FE8\]\/30 {
+  --tw-ring-color: rgba(213, 177, 111, 0.35) !important;
+}
+
+.phone-frame--mae .bg-\[\#9B7FE8\]\/14,
+.phone-frame--mae .bg-\[\#9B7FE8\]\/15,
+.phone-frame--mae .bg-\[\#9B7FE8\]\/16,
+.phone-frame--mae .bg-\[\#9B7FE8\]\/12,
+.phone-frame--mae .bg-\[\#9B7FE8\]\/22 {
+  background-color: rgba(213, 177, 111, 0.14) !important;
+}
+
+.phone-frame--mae .text-\[\#7B5FD4\],
+.phone-frame--mae .text-\[\#9B7FE8\],
+.phone-frame--mae .text-\[\#c9a8ff\],
+.phone-frame--mae .text-\[\#C9A8FF\] {
+  color: #d5b16f !important;
+}
+
+/* Gold headings → champagne foil (not chips / icons / pill labels) */
+.phone-frame--mae :is(h1, h2, h3, h4).text-\[\#d5b16f\],
+.phone-frame--mae :is(h1, h2, h3, h4).text-\[\#e8d19a\],
+.phone-frame--mae .mae-gold-text {
+  background-image: linear-gradient(
+    165deg,
+    #fff8e4 0%,
+    #f3e2b8 22%,
+    #e2c787 48%,
+    #d5b16f 72%,
+    #b8924f 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Free daily result — Mae tokens (was lilac-on-light) */
+.phone-frame--mae .fortune-free-page {
+  --dd-text: #f7f4ec;
+  --dd-muted: rgba(247, 244, 236, 0.65);
+  --dd-gold: #d5b16f;
+  --dd-cyan: #d5b16f;
+  --dd-frame: rgba(213, 177, 111, 0.26);
+  color: var(--dd-text);
+}
+
+.phone-frame--mae .dd-section-title {
+  background-image: linear-gradient(
+    165deg,
+    #fff8e4 0%,
+    #f3e2b8 22%,
+    #e2c787 48%,
+    #d5b16f 72%,
+    #b8924f 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.phone-frame--mae .fortune-free-page .text-\[\#2C2458\],
+.phone-frame--mae .fortune-free-page .text-\[\#241C4F\],
+.phone-frame--mae .fortune-free-page .text-\[\#1E1744\],
+.phone-frame--mae .fortune-free-page .text-\[\#3A3270\],
+.phone-frame--mae .fortune-free-page .text-\[\#3F3768\],
+.phone-frame--mae .fortune-free-page .text-\[\#4A4278\],
+.phone-frame--mae .fortune-free-page .text-\[\#4A3A8A\] {
+  color: #f7f4ec !important;
+}
+
+.phone-frame--mae .fortune-free-page .text-\[\#5E5688\],
+.phone-frame--mae .fortune-free-page .text-\[\#5B45B8\],
+.phone-frame--mae .fortune-free-page .text-\[\#6B6490\],
+.phone-frame--mae .fortune-free-page .text-\[\#7A72A0\],
+.phone-frame--mae .fortune-free-page .text-\[\#8A82B0\] {
+  color: rgba(247, 244, 236, 0.65) !important;
+}
+
+.phone-frame--mae .fortune-free-page .text-\[\#7B5FD4\],
+.phone-frame--mae .fortune-free-page .text-\[\#9B7FE8\] {
+  color: #d5b16f !important;
+}
+
+.phone-frame--mae .fortune-free-page .bg-white\/70,
+.phone-frame--mae .fortune-free-page .bg-white\/45 {
+  background-color: rgba(16, 24, 39, 0.55) !important;
+}
+
+.phone-frame--mae .fortune-free-page .ring-\[\#7B6BB0\]\/15,
+.phone-frame--mae .fortune-free-page .ring-\[\#7B6BB0\]\/18 {
+  --tw-ring-color: rgba(213, 177, 111, 0.28) !important;
+}
+
+.phone-frame--mae .fortune-free-page .border-\[\#7B6BB0\]\/22,
+.phone-frame--mae .fortune-free-page .border-\[\#B9A4F0\]\/35 {
+  border-color: rgba(213, 177, 111, 0.22) !important;
+}
+
+.phone-frame--mae .fortune-free-page .bg-\[\#B9A4F0\]\/18 {
+  background-color: rgba(213, 177, 111, 0.14) !important;
+}
+
+/* Kill fuzzy glow on free daily — production readability */
+.phone-frame--mae .fortune-free-page,
+.phone-frame--mae .fortune-free-page *,
+.phone-frame--mae .sky-copy,
+.phone-frame--mae .sky-copy *,
+.phone-frame--mae .dd-page-live,
+.phone-frame--mae .dd-page-live *,
+.phone-frame--mae .mae-aspect-card,
+.phone-frame--mae .mae-aspect-card *,
+.phone-frame--mae .fortune-glass,
+.phone-frame--mae .fortune-glass *,
+.phone-frame--mae h1,
+.phone-frame--mae h2,
+.phone-frame--mae h3,
+.phone-frame--mae h4,
+.phone-frame--mae p,
+.phone-frame--mae span,
+.phone-frame--mae a,
+.phone-frame--mae button,
+.phone-frame--mae li,
+.phone-frame--mae label,
+.phone-frame--mae small {
+  text-shadow: none !important;
+}
+
+.phone-frame--mae .dd-page-live .fortune-glass:not(.dd-feature-pop) {
+  animation: none !important;
 }
 
 /* Mae nav — no lilac white-glow lift; calm gold on navy */
@@ -107,23 +357,36 @@
   animation: mae-halo-breathe 4.8s ease-in-out infinite;
 }
 
-/* Mae CTA — metallic gold pill, text + arrow centered */
+/* Mae CTA — clean champagne gold pill */
 .mae-gold-cta {
-  border: 1px solid rgba(236, 214, 158, 0.65);
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(236, 214, 158, 0.55);
   background: linear-gradient(
     180deg,
-    #f0dfb4 0%,
-    #e2c787 28%,
-    #d5b16f 62%,
-    #c4a05e 100%
+    #efe0b8 0%,
+    #e2c787 45%,
+    #d5b16f 100%
   );
   color: #101827;
   text-shadow: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65),
-    inset 0 -1px 0 rgba(128, 96, 49, 0.18),
-    0 0 0 0 rgba(213, 177, 111, 0);
-  animation: mae-cta-glow 2.8s ease-in-out infinite;
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 8px 20px rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.mae-gold-cta::before {
+  display: none;
+}
+
+.mae-gold-cta > * {
+  position: relative;
+  z-index: 1;
 }
 
 .mae-gold-cta,
@@ -131,24 +394,18 @@
   text-shadow: none !important;
 }
 
-@keyframes mae-cta-glow {
-  0%,
-  100% {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.65),
-      inset 0 -1px 0 rgba(128, 96, 49, 0.18),
-      0 0 18px rgba(213, 177, 111, 0.22),
-      0 8px 22px rgba(0, 0, 0, 0.18);
-    transform: translateY(0);
-  }
-  50% {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.72),
-      inset 0 -1px 0 rgba(128, 96, 49, 0.18),
-      0 0 28px rgba(213, 177, 111, 0.42),
-      0 10px 28px rgba(0, 0, 0, 0.22);
-    transform: translateY(-1px);
-  }
+.mae-gold-cta:hover {
+  filter: brightness(1.05);
+  border-color: rgba(245, 230, 180, 0.75);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 10px 24px rgba(0, 0, 0, 0.26),
+    0 0 18px rgba(213, 177, 111, 0.22);
+}
+
+.mae-gold-cta:active {
+  transform: scale(0.98);
+  filter: brightness(0.98);
 }
 
 @keyframes mae-concept-bob {
@@ -164,8 +421,7 @@
 }
 
 .mae-concept-link {
-  animation: mae-fade-up 0.7s ease-out both;
-  animation-delay: 0.35s;
+  /* entrance handled by .mae-hero-stagger */
 }
 
 .mae-concept-link .mae-concept-arrow {
@@ -195,9 +451,193 @@
 
   .mae-gold-cta,
   .mae-concept-link,
-  .mae-concept-link .mae-concept-arrow {
-    animation: none;
+  .mae-concept-link .mae-concept-arrow,
+  .mae-logo-breathe {
+    animation: none !important;
   }
+
+  .mae-reveal,
+  .mae-section-reveal,
+  .mae-hero-stagger > *,
+  .mae-topic-panel {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.mae-landing {
+  scroll-behavior: smooth;
+}
+
+/* Reading wizard — Mae navy/gold tone */
+.mae-wizard .mae-wizard-input,
+.mae-wizard .name-step-input {
+  color: #f4f1ea !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: inset 0 0 0 1px rgba(213, 177, 111, 0.28) !important;
+}
+
+.mae-wizard .mae-wizard-input::placeholder,
+.mae-wizard .name-step-input::placeholder {
+  color: rgba(197, 205, 217, 0.55) !important;
+}
+
+.mae-wizard .mae-wizard-input:focus,
+.mae-wizard .name-step-input:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 0 0 1.5px rgba(213, 177, 111, 0.55) !important;
+}
+
+.mae-wizard .birth-wheel-col,
+.mae-wizard [data-birth-wheel] {
+  color: #c5cdd9;
+}
+
+.mae-wizard .birth-wheel-item-active,
+.mae-wizard .birth-date-active {
+  color: #d5b16f !important;
+}
+
+@keyframes mae-logo-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 0 rgba(16, 24, 39, 0.9))
+      drop-shadow(0 6px 16px rgba(16, 24, 39, 0.8))
+      drop-shadow(0 0 20px rgba(20, 48, 96, 0.55));
+  }
+  50% {
+    transform: scale(1.012);
+    filter: drop-shadow(0 2px 0 rgba(16, 24, 39, 0.9))
+      drop-shadow(0 8px 20px rgba(16, 24, 39, 0.85))
+      drop-shadow(0 0 24px rgba(213, 177, 111, 0.28));
+  }
+}
+
+.mae-logo-breathe {
+  animation: mae-logo-breathe 4.8s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+.mae-reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--mae-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.mae-reveal--scale {
+  transform: translate3d(0, 10px, 0) scale(0.92);
+}
+
+.mae-reveal--glow {
+  transform: translate3d(0, 14px, 0) scale(0.94);
+  filter: blur(4px);
+}
+
+.mae-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.mae-hero-stagger > * {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+}
+
+.mae-hero-stagger.is-visible > * {
+  animation: mae-fade-rise 0.78s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.mae-hero-stagger.is-visible > *:nth-child(1) {
+  animation-delay: 80ms;
+}
+.mae-hero-stagger.is-visible > *:nth-child(2) {
+  animation-delay: 180ms;
+}
+.mae-hero-stagger.is-visible > *:nth-child(3) {
+  animation-delay: 280ms;
+}
+.mae-hero-stagger.is-visible > *:nth-child(4) {
+  animation-delay: 380ms;
+}
+.mae-hero-stagger.is-visible > *:nth-child(5) {
+  animation-delay: 480ms;
+}
+
+@keyframes mae-fade-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mae-section-reveal {
+  opacity: 0;
+  transform: translate3d(0, 32px, 0);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--mae-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.mae-section-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes mae-topic-swap {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mae-topic-panel {
+  animation: mae-topic-swap 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.mae-topic-chip {
+  transition:
+    background-color 0.28s ease,
+    color 0.28s ease,
+    box-shadow 0.28s ease,
+    transform 0.28s ease;
+}
+
+.mae-topic-chip:active {
+  transform: scale(0.98);
+}
+
+.mae-faq-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mae-faq-body > div {
+  overflow: hidden;
+}
+
+details[open] > .mae-faq-body {
+  grid-template-rows: 1fr;
 }
 
 /* Hero copy lift over busy video clouds */
@@ -209,10 +649,42 @@
 }
 
 .mae-hero-copy h1 {
+  text-shadow: none;
+}
+
+.mae-hero-copy h1 > span:first-child {
   text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.65),
-    0 3px 12px rgba(0, 0, 0, 0.5),
-    0 8px 28px rgba(0, 0, 0, 0.4);
+    0 1px 2px rgba(0, 0, 0, 0.55),
+    0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.mae-hero-copy h1 > span:last-child {
+  text-shadow: none;
+}
+
+/* Champagne gold foil — use on titles / gold copy (not icons) */
+.mae-gold-text,
+.mae-hero-gold-line {
+  display: inline-block;
+  overflow: visible;
+  padding-bottom: 0.05em;
+  background-image: linear-gradient(
+    165deg,
+    #fff8e4 0%,
+    #f3e2b8 22%,
+    #e2c787 48%,
+    #d5b16f 72%,
+    #b8924f 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.mae-hero-gold-line {
+  padding-bottom: 0.2em;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
 }
 
 /* Mae liquid glass panels */
@@ -283,17 +755,19 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border: 1px solid rgba(213, 177, 111, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   background:
     linear-gradient(
-      155deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.04) 45%,
-      rgba(213, 177, 111, 0.06) 100%
+      160deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.05) 38%,
+      rgba(16, 24, 39, 0.35) 100%
     );
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 12px 32px rgba(0, 0, 0, 0.12);
 }
 
 .mae-liquid-glass-dark::before {
@@ -304,14 +778,116 @@
   pointer-events: none;
   background: linear-gradient(
     125deg,
-    rgba(255, 255, 255, 0.16) 0%,
-    transparent 36%
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.04) 28%,
+    transparent 55%
   );
 }
 
 .mae-liquid-glass-dark > * {
   position: relative;
   z-index: 1;
+}
+
+/* Solid Mae navy #101827 + gold rim / gold titles (no glass fade) */
+.mae-aspect-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  opacity: 1;
+  border-radius: 20px;
+  border: 1px solid rgba(213, 177, 111, 0.6);
+  background: #101827;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  transition:
+    border-color 180ms ease,
+    transform 160ms ease;
+}
+
+.mae-aspect-card::before {
+  content: none;
+}
+
+.mae-aspect-card::after {
+  content: none;
+}
+
+.mae-aspect-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mae-aspect-card .mae-aspect-title {
+  background-image: linear-gradient(
+    165deg,
+    #fff8e4 0%,
+    #f3e2b8 22%,
+    #e2c787 48%,
+    #d5b16f 72%,
+    #b8924f 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.mae-aspect-card .mae-aspect-body {
+  color: rgba(247, 244, 236, 0.72);
+}
+
+.mae-aspect-card .mae-aspect-chevron {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(213, 177, 111, 0.12);
+  color: #d5b16f;
+  box-shadow: inset 0 0 0 1px rgba(213, 177, 111, 0.4);
+}
+
+a.mae-aspect-card:hover,
+button.mae-aspect-card:hover {
+  border-color: rgba(213, 177, 111, 0.85);
+}
+
+a.mae-aspect-card:hover .mae-aspect-chevron,
+button.mae-aspect-card:hover .mae-aspect-chevron {
+  background: rgba(213, 177, 111, 0.2);
+  color: #e8d19a;
+}
+
+a.mae-aspect-card:active,
+button.mae-aspect-card:active {
+  transform: scale(0.985);
+}
+
+.phone-frame--mae .mae-aspect-card {
+  opacity: 1 !important;
+}
+
+.phone-frame--mae .mae-aspect-card .mae-aspect-title {
+  background-image: linear-gradient(
+    165deg,
+    #fff8e4 0%,
+    #f3e2b8 22%,
+    #e2c787 48%,
+    #d5b16f 72%,
+    #b8924f 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.phone-frame--mae .mae-aspect-card .mae-aspect-body {
+  color: rgba(247, 244, 236, 0.72) !important;
 }
 
 .mae-liquid-glass-light {
@@ -395,8 +971,8 @@
 }
 
 .phone-frame *::-webkit-scrollbar:horizontal {
-  height: 0;
-  display: none;
+  height: 0 !important;
+  display: none !important;
 }
 
 .phone-frame *::-webkit-scrollbar-track {
@@ -416,6 +992,57 @@
   display: none;
   width: 0;
   height: 0;
+}
+
+/* Clip sideways overflow so decorative rings never spawn a bottom scrollbar.
+   Do NOT put overflow-x on .wizard-step-header — it clips the zodiac ring. */
+.phone-frame,
+.phone-frame .phone-comfort,
+.mae-wizard,
+.mae-wizard[data-wizard-scroll] {
+  overflow-x: hidden;
+}
+
+/* Wizard: keep vertical scroll, hide the gold scrollbar chrome */
+.mae-wizard,
+.mae-wizard[data-wizard-scroll] {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.mae-wizard::-webkit-scrollbar,
+.mae-wizard[data-wizard-scroll]::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+/* Birth date wheels — never show scrollbar chrome */
+.phone-frame .date-wheel-col,
+.mae-wizard .date-wheel-col,
+.date-wheel-col {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.phone-frame .date-wheel-col::-webkit-scrollbar,
+.mae-wizard .date-wheel-col::-webkit-scrollbar,
+.date-wheel-col::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+.phone-frame .date-wheel-col::-webkit-scrollbar-thumb,
+.mae-wizard .date-wheel-col::-webkit-scrollbar-thumb,
+.date-wheel-col::-webkit-scrollbar-thumb,
+.phone-frame .date-wheel-col::-webkit-scrollbar-button,
+.mae-wizard .date-wheel-col::-webkit-scrollbar-button,
+.date-wheel-col::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .phone-frame *::-webkit-scrollbar-corner {
@@ -559,8 +1186,7 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   }
 
   /*
-   * Soft white drop-shadow for dark text on Guanyin sky / video.
-   * Put `sky-copy` on page roots; also auto on free result + bottom nav.
+   * sky-copy — no white halo (was causing fuzzy glow on all pages).
    */
   .sky-copy h1,
   .sky-copy h2,
@@ -586,11 +1212,16 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   .fortune-free-page small,
   .bottom-nav a,
   .bottom-nav span {
-    text-shadow:
-      0 1px 0 #fff,
-      0 0 8px rgba(255, 255, 255, 1),
-      0 0 16px rgba(255, 255, 255, 0.95),
-      0 2px 10px rgba(255, 255, 255, 0.85);
+    text-shadow: none !important;
+  }
+
+  .sky-copy,
+  .sky-copy *,
+  .fortune-free-page,
+  .fortune-free-page *,
+  .dd-page-live,
+  .dd-page-live * {
+    text-shadow: none !important;
   }
 
   .sky-copy .text-white,
@@ -610,25 +1241,19 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
     text-shadow: none !important;
   }
 
-  /* Result hero card — kill white fade / white drop-shadow halo */
+  /* Result hero — sharp text; keep Mae gold rim */
   .dd-result-hero,
   .dd-result-hero * {
     text-shadow: none !important;
   }
   .dd-result-hero {
-    box-shadow: none !important;
     filter: none !important;
     outline: none !important;
-    background: transparent !important;
   }
 
-  /* Result hero left copy — strong lift over busy sky */
+  /* Hero copy — sharp, no halo */
   .result-hero-copy {
-    text-shadow:
-      0 1px 0 #fff,
-      0 0 10px #fff,
-      0 0 20px rgba(255, 255, 255, 0.95),
-      0 3px 12px rgba(255, 255, 255, 0.9);
+    text-shadow: none !important;
   }
 
   .sacred-surface {
@@ -1267,6 +1892,88 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   .wizard-form-wheel-light {
     top: 38%;
     opacity: 0.22;
+  }
+
+  /* Wizard step title — champagne gold like mae hero */
+  .wizard-step-title {
+    background: linear-gradient(
+      180deg,
+      #fff8e8 0%,
+      #f3e2b8 22%,
+      #e4c787 48%,
+      #d5b16f 72%,
+      #b8924f 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.4))
+      drop-shadow(0 0 14px rgba(213, 177, 111, 0.32));
+  }
+
+  .wizard-step-subtitle {
+    color: rgba(236, 214, 168, 0.92);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Gold zodiac ring behind wizard step title */
+  .wizard-step-header {
+    overflow: visible;
+  }
+
+  .wizard-step-zodiac {
+    top: 6.75rem;
+    width: min(124%, 28.5rem);
+    aspect-ratio: 1;
+    height: auto;
+    opacity: 0.68;
+    filter: drop-shadow(0 0 14px rgba(213, 177, 111, 0.26));
+    mask-image:
+      radial-gradient(
+        circle at center,
+        transparent 32%,
+        black 46%,
+        black 84%,
+        transparent 98%
+      ),
+      linear-gradient(
+        to bottom,
+        #000 0%,
+        #000 48%,
+        rgba(0, 0, 0, 0.65) 68%,
+        transparent 92%
+      );
+    mask-composite: intersect;
+    -webkit-mask-image:
+      radial-gradient(
+        circle at center,
+        transparent 32%,
+        black 46%,
+        black 84%,
+        transparent 98%
+      ),
+      linear-gradient(
+        to bottom,
+        #000 0%,
+        #000 48%,
+        rgba(0, 0, 0, 0.65) 68%,
+        transparent 92%
+      );
+    -webkit-mask-composite: source-in;
+  }
+
+  .wizard-step-zodiac-spin {
+    width: 100%;
+    height: 100%;
+    transform-origin: 50% 50%;
+    animation: mystic-orb-spin 88s linear infinite;
+    will-change: transform;
+  }
+
+  html[data-keyboard-open="true"] .wizard-step-zodiac {
+    opacity: 0.28;
+    transform: translate(-50%, -50%) scale(0.88);
   }
 
   .astro-hero-watermark {
@@ -2007,13 +2714,9 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
     @apply bg-gradient-to-r from-brand-purple-light to-brand-purple bg-clip-text text-transparent;
   }
 
-  /* White glow lift — use on any copy that sinks into bright sky */
+  /* text-lift disabled — sharp copy, no halo */
   .text-lift {
-    text-shadow:
-      0 1px 0 #fff,
-      0 0 10px #fff,
-      0 0 18px rgba(255, 255, 255, 0.95),
-      0 3px 12px rgba(255, 255, 255, 0.85) !important;
+    text-shadow: none !important;
   }
 
   .font-sacred {
@@ -2357,29 +3060,25 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
     inset 0 -1px 0 rgba(160, 126, 26, 0.16);
 }
 
-/* Clear glass progress tubes */
+/* Flat modern progress bars — Mae navy track + clean fill */
 .dd-glass-tube {
   position: relative;
   overflow: hidden;
-  border: 1.5px solid rgba(255, 255, 255, 0.72);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(235, 228, 255, 0.28) 48%,
-    rgba(255, 255, 255, 0.4) 100%
-  );
-  backdrop-filter: blur(10px) saturate(1.15);
-  -webkit-backdrop-filter: blur(10px) saturate(1.15);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -1px 0 rgba(90, 70, 150, 0.08);
+  height: 8px;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(247, 244, 236, 0.12);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(213, 177, 111, 0.22);
 }
 
 .dd-glass-tube-fill {
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
   border-radius: 9999px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: none;
 }
 
 /* Frosted gold card frame */
@@ -3395,26 +4094,26 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.22em;
-  color: #4a4278;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 4px 14px rgba(80, 60, 140, 0.1);
-  backdrop-filter: blur(10px);
+  color: #e8d19a;
+  background: rgba(16, 24, 39, 0.72);
+  border: 1px solid rgba(213, 177, 111, 0.4);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .fortune-loading-pill-status {
   letter-spacing: 0.04em;
   font-size: 11px;
   font-weight: 500;
-  color: #4a4278;
+  color: #e8d19a;
 }
 
 .fortune-loading-pulse-dot {
   width: 7px;
   height: 7px;
   border-radius: 9999px;
-  background: #8b6cf0;
-  box-shadow: 0 0 10px rgba(139, 108, 240, 0.7);
+  background: #d5b16f;
+  box-shadow: 0 0 8px rgba(213, 177, 111, 0.55);
   animation: mystic-orb-pulse 1.6s ease-in-out infinite;
 }
 
@@ -3426,13 +4125,48 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   max-width: 220px;
 }
 
+/* Kill white haze / bloom on loading wheel */
+.fortune-loading-chart .astro-hero-bloom-gold,
+.fortune-loading-chart .astro-hero-bloom-violet,
+.fortune-loading-chart .astro-hero-rays,
+.fortune-loading-chart .astro-hero-glow,
+.fortune-loading-chart .astro-hero-floor,
+.fortune-loading-chart .astro-hero-floor-result {
+  display: none !important;
+  opacity: 0 !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+.fortune-loading-chart .astro-hero-spark {
+  opacity: 0.35;
+  filter: none !important;
+}
+
+.fortune-loading-chart .astro-hero-wheel,
+.fortune-loading-chart .astro-hero-planets,
+.fortune-loading-chart .astro-hero-core,
+.fortune-loading-chart .astro-hero-ray-lines {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+.fortune-loading-chart .astro-hero svg,
+.fortune-loading-chart .astro-hero svg * {
+  filter: none !important;
+}
+
+.fortune-loading-chart .astro-hero {
+  filter: none !important;
+}
+
 .fortune-loading-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.65rem 0.75rem;
-  color: #9a92b8;
+  color: #d5b16f;
   border-radius: 12px;
   transition: color 0.25s ease, background 0.25s ease;
 }
@@ -3442,12 +4176,12 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
 }
 
 .fortune-loading-row.is-done {
-  color: #3d3568;
+  color: #e8d19a;
 }
 
 .fortune-loading-row.is-active {
-  color: #2c2458;
-  background: rgba(155, 127, 232, 0.16);
+  color: #d5b16f;
+  background: rgba(213, 177, 111, 0.12);
 }
 
 .fortune-loading-status {
@@ -3475,7 +4209,7 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   width: 1rem;
   height: 1rem;
   border-radius: 9999px;
-  border: 1.5px solid rgba(154, 146, 184, 0.55);
+  border: 1.5px solid rgba(213, 177, 111, 0.4);
 }
 
 .fortune-loading-dots {
@@ -3489,7 +4223,7 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   width: 4px;
   height: 4px;
   border-radius: 9999px;
-  background: #8b6cf0;
+  background: #d5b16f;
   animation: loading-dot 1.1s ease-in-out infinite;
 }
 
@@ -3502,8 +4236,8 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
 }
 
 .fortune-loading-fill {
-  background: linear-gradient(90deg, #7c5ce0 0%, #9b7fe8 55%, #c4b0f5 100%);
-  box-shadow: 0 0 10px rgba(155, 127, 232, 0.35);
+  background: linear-gradient(90deg, #b8923f 0%, #d5b16f 55%, #e8d19a 100%);
+  box-shadow: none;
   transition: width 0.2s ease-out;
 }
 
@@ -3514,7 +4248,7 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: #6b4ec8;
+  color: #d5b16f;
   transition: left 0.2s ease-out;
   white-space: nowrap;
 }
@@ -3601,6 +4335,7 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   .intro-title-accent,
   .wizard-form-bloom,
   .wizard-step-pill-dot,
+  .wizard-step-zodiac-spin,
   .astro-hero-watermark .astro-hero-wheel,
   .astro-hero-watermark .astro-hero-planets,
   .astro-hero-watermark .astro-hero-core,

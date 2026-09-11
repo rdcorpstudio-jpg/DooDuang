@@ -113,11 +113,11 @@ function FortuneResultViewInner({
         </div>
 
         <div className="no-print flex items-center justify-center gap-3 text-[14px]">
-          <Link href="/reading" className="text-[#c084fc]">
+          <Link href="/reading" className="text-[#d5b16f]">
             ดูดวงอีกครั้ง
           </Link>
           <span className="text-white/25">·</span>
-          <Link href="/" className="text-[#c084fc]">
+          <Link href="/" className="text-[#d5b16f]">
             กลับหน้าแรก
           </Link>
         </div>

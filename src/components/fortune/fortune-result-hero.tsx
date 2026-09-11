@@ -15,7 +15,7 @@ function formatHeroDate(date = new Date()) {
   }).format(date);
 }
 
-/** Hero banner — left editorial copy, deity art by gender flush right */
+/** Hero banner — full-bleed Mae art, gold headline, sharp copy */
 export function FortuneResultHero({
   realName,
   nickname,
@@ -37,43 +37,35 @@ export function FortuneResultHero({
   tip?: string;
   className?: string;
 }) {
-  // Prefer nickname so profile edits show on the card immediately
   const displayName =
     (nickname || "").trim() || (realName || "").trim() || "สมาชิก";
   const dateLabel = formatHeroDate();
   const support =
-    (quote || "").trim() ||
-    "ค่อย ๆ ก้าว ในจังหวะที่ใช่สำหรับคุณ";
+    (quote || "").trim() || "ค่อย ๆ ก้าว ในจังหวะที่ใช่สำหรับคุณ";
   const footerTip =
     (tip || "").trim() ||
     (subline || "").trim() ||
     "วันนี้ ให้เวลากับตัวเองอีกนิด";
 
   const isMale = (gender || "").toLowerCase() === "male";
-  // New filenames force a hard cache miss (browser + Next)
   const heroSrc = isMale
     ? "/images/bg/hero-male-sage-0909b.jpg"
-    : "/images/bg/hero-female-guanyin-0909.jpg";
-  // New male sage matches female layout — figure right, bright copy left
-  const objectPosition = isMale ? "70% 32%" : "70% 28%";
-
-  // Same type scale for both genders (new male art has open left like woman)
-  const headlineClass =
-    "mt-3 max-w-[56%] text-[1.55rem] font-bold leading-[1.3] tracking-tight text-[#1E1744]";
-  const supportClass =
-    "mt-2.5 max-w-[54%] text-[13px] font-medium leading-relaxed text-[#3F3768]";
-  const footerClass = "text-[12px] font-semibold leading-snug text-[#3F3768]";
+    : "/images/bg/hero-mae-elder.png";
+  const objectPosition = isMale ? "68% 30%" : "78% 38%";
 
   return (
     <section
       className={cn(
-        "dd-result-hero no-sky-lift relative mx-3 mt-3 min-h-[272px] w-[calc(100%-1.5rem)] overflow-hidden rounded-[22px]",
+        "dd-result-hero no-sky-lift relative mx-3 mt-3 min-h-[268px] w-[calc(100%-1.5rem)] overflow-hidden rounded-[22px]",
         className
       )}
+      style={{
+        background: "#101827",
+        boxShadow:
+          "inset 0 0 0 1px rgba(213,177,111,0.48), 0 14px 36px rgba(0,0,0,0.32)",
+      }}
     >
-      {/* Deity art — male sage / Guanyin for female & other */}
       <div className="pointer-events-none absolute inset-0">
-        {/* native img avoids Next image optimizer cache */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           key={heroSrc}
@@ -85,43 +77,63 @@ export function FortuneResultHero({
         />
       </div>
 
-      <div className="relative z-10 flex min-h-[272px] flex-col px-3.5 pb-4 pt-2.5">
-        {/* Top row */}
+      <div className="relative z-10 flex min-h-[268px] flex-col px-4 pb-4 pt-3">
         <div className="flex items-start justify-between gap-3">
           <Link
             href="/reading"
-            className="inline-flex items-center gap-1 outline-none transition active:opacity-60 focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35"
+            className="inline-flex items-center gap-1 outline-none transition active:opacity-60 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4"
             aria-label="กลับ"
           >
-            <ChevronLeft className="h-5 w-5 text-[#2C2458]" strokeWidth={2.3} />
-            <span className="text-[12px] font-bold tracking-[0.22em] text-[#C9A227]">{APP_BRAND_MARK}</span>
+            <ChevronLeft className="h-5 w-5 text-[#f7f4ec]/85" strokeWidth={2.3} />
+            <span className="text-[12px] font-bold tracking-[0.2em] text-[#d5b16f]">
+              {APP_BRAND_MARK}
+            </span>
           </Link>
-          <p className="pt-0.5 text-[12px] font-semibold text-[#3A3270]">
+          <p className="pt-0.5 text-[12px] font-medium text-[#f7f4ec]/70">
             สวัสดี คุณ{displayName}
           </p>
         </div>
 
-        {/* Tag + date */}
-        <div className="mt-6 flex max-w-[58%] flex-wrap items-center gap-2">
-          <span className="dd-pill-breathe dd-lilac-glass-pill rounded-full px-2.5 py-1 text-[11px] font-semibold text-[#4A3A8A]">
+        <div className="mt-6 flex max-w-[62%] flex-wrap items-center gap-2">
+          <span
+            className="rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide text-[#e8d19a]"
+            style={{
+              background: "rgba(16,24,39,0.55)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
+            }}
+          >
             ดวงประจำวัน
           </span>
-          <span className="h-3 w-px shrink-0 bg-[#9B90C8]" aria-hidden />
-          <span className="text-[12px] font-semibold text-[#4A4278]">
+          <span
+            className="h-3 w-px shrink-0 bg-[rgba(213,177,111,0.4)]"
+            aria-hidden
+          />
+          <span className="text-[12px] font-medium text-[#f7f4ec]/70">
             {dateLabel}
           </span>
         </div>
 
-        {/* Headline block */}
-        <h2 className={headlineClass}>{headline}</h2>
+        <h2 className="mae-gold-text mt-3.5 max-w-[64%] font-sans text-[1.5rem] font-bold leading-[1.28] tracking-tight">
+          {headline}
+        </h2>
         <div
-          className="mt-2 h-[2px] w-9 rounded-full bg-[#C9A227] dd-gold-pulse"
+          className="mt-2.5 h-[3px] w-11 rounded-full"
+          style={{
+            background:
+              "linear-gradient(90deg, #d5b16f 0%, rgba(213,177,111,0.25) 100%)",
+          }}
           aria-hidden
         />
-        <p className={supportClass}>{support}</p>
+        <p className="mt-3 max-w-[58%] text-[13.5px] font-medium leading-relaxed text-[#f7f4ec]/88">
+          {support}
+        </p>
 
-        {/* Tip row */}
-        <div className="mt-auto max-w-[58%] border-t border-[#9B90C8]/55 pt-3">
+        <div
+          className="mt-auto max-w-[62%] pt-3.5"
+          style={{
+            borderTop: "1px solid rgba(213,177,111,0.28)",
+          }}
+        >
           <div className="flex items-center gap-2">
             <FortuneIcon
               name="sparkle"
@@ -130,10 +142,12 @@ export function FortuneResultHero({
               className="fortune-spark shrink-0"
             />
             <span
-              className="h-3 w-px shrink-0 bg-[#C9A227]/55"
+              className="h-3 w-px shrink-0 bg-[rgba(213,177,111,0.45)]"
               aria-hidden
             />
-            <p className={footerClass}>{footerTip}</p>
+            <p className="text-[12px] font-semibold leading-snug text-[#e8d19a]">
+              {footerTip}
+            </p>
           </div>
         </div>
       </div>

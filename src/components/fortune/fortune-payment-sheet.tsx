@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { Check, ChevronLeft, Loader2, Lock, X } from "lucide-react";
@@ -21,10 +21,10 @@ type SessionUser = {
 };
 
 const PERKS = [
-  `ใช้งานพรีเมียม ${FORTUNE_PACKAGE_MONTHS} เดือน`,
-  "ปฏิทินฤกษ์ 12 ปี · จังหวะชีวิตรายเดือน/รายปี",
-  "แผนที่ตัวตน · ราศีเชิงลึก · งานเงินรักฉบับเต็ม",
-  "โหงวเฮ้ง · ลายมือ · ดวงคู่ · วอลเปเปอร์มงคล",
+  `สิทธิ์พรีเมียมครบ ${FORTUNE_PACKAGE_MONTHS} เดือน`,
+  "ปฏิทินฤกษ์ 12 ปี",
+  "แผนที่ตัวตน · ราศีเชิงลึก",
+  "โหงวเฮ้ง · ลายมือ · ดวงคู่",
 ] as const;
 
 const IS_LOCAL_DEV =
@@ -32,6 +32,40 @@ const IS_LOCAL_DEV =
   process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
 
 const LOGIN_THEN_CHECKOUT = "/premium?checkout=1";
+
+const MAE_PANEL: CSSProperties = {
+  background: "#101827",
+  boxShadow:
+    "inset 0 0 0 1px rgba(213,177,111,0.42), 0 24px 56px rgba(0,0,0,0.4)",
+};
+
+function GoldRule({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn("mx-auto flex h-[1px] w-full max-w-[11rem] items-center", className)}
+      aria-hidden
+    >
+      <span
+        className="h-px flex-1"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(213,177,111,0.55))",
+        }}
+      />
+      <span
+        className="mx-2 h-1 w-1 rotate-45"
+        style={{ background: "#d5b16f" }}
+      />
+      <span
+        className="h-px flex-1"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(213,177,111,0.55), transparent)",
+        }}
+      />
+    </div>
+  );
+}
 
 /** Stripe checkout — sheet modal, full page, or inline card on free result */
 export function FortunePaymentSheet({
@@ -200,103 +234,110 @@ export function FortunePaymentSheet({
       ? Math.round(FORTUNE_UNLOCK_PRICE / FORTUNE_PACKAGE_MONTHS)
       : null;
 
+  const saveBaht = PREMIUM_LIST_PRICE - FORTUNE_UNLOCK_PRICE;
   const body = (
     <div
       className={cn(
-        "relative z-[1] text-center",
-        isPage || isInline ? "px-1 pb-2 pt-2" : "px-5 pb-5 pt-7"
+        "relative z-[1] mx-auto w-full",
+        isPage || isInline ? "px-6 pb-6 pt-6" : "px-6 pb-6 pt-8"
       )}
     >
-      <div className="relative mx-auto flex h-14 w-14 items-center justify-center">
+      <div className="flex flex-col items-center text-center">
         <span
-          className="pointer-events-none absolute inset-[-6px] rounded-full"
+          className="flex h-12 w-12 items-center justify-center rounded-full"
           style={{
-            background:
-              "radial-gradient(circle, rgba(244,188,82,0.28) 0%, transparent 68%)",
+            background: "rgba(213,177,111,0.08)",
+            boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
           }}
-          aria-hidden
-        />
-        <FortuneIcon name="sparkle" size={48} />
-      </div>
-
-      <p className="mt-3 font-sacred text-[11px] tracking-[0.2em] text-[#C9A227]">
-        {`${APP_BRAND_MARK} · PREMIUM`}
-      </p>
-      <h2
-        id={titleId}
-        className="mt-2 text-[1.55rem] font-bold leading-tight tracking-tight text-[#241C4F]"
-      >
-        ปลดล็อกดวงพรีเมียม
-      </h2>
-      <p className="mx-auto mt-1.5 max-w-[17rem] text-[13px] leading-snug text-[#5E5688]">
-        แพ็ก {PREMIUM_UNLOCK.months} เดือน · เปิดเนื้อหาเต็มแบบพรีเมียม
-      </p>
-
-      <PremiumOfferCountdown compact className="mt-3" />
-
-      <div className="mt-3 flex items-center justify-center gap-2">
-        <span className="text-[14px] text-[#9A90C0] line-through">
-          {PREMIUM_LIST_PRICE} บาท
+        >
+          <FortuneIcon name="sparkle" size={22} plain />
         </span>
-        <p className="text-[2.1rem] font-bold leading-none tabular-nums tracking-tight text-[#241C4F]">
-          {FORTUNE_UNLOCK_PRICE}{" "}
-          <span className="text-[1.05rem] font-semibold">บาท</span>
+
+        <p className="mae-gold-text mt-4 text-[10px] font-semibold tracking-[0.28em]">
+          {APP_BRAND_MARK}
+        </p>
+        <p className="mt-1 text-[10px] font-medium tracking-[0.32em] text-[#e8d19a]/70">
+          PREMIUM
+        </p>
+
+        <h2
+          id={titleId}
+          className="mae-gold-text mt-3 max-w-[14rem] font-sans text-[1.45rem] font-bold leading-[1.25] tracking-tight"
+        >
+          ปลดล็อกดวงพรีเมียม
+        </h2>
+        <p className="mt-2 text-[12px] leading-relaxed text-[#9aa3b2]">
+          แพ็ก {PREMIUM_UNLOCK.months} เดือน · เนื้อหาเต็มทุกบท
         </p>
       </div>
-      <p className="mt-1.5 text-[12px] text-[#7A72A0]">
-        {monthly !== null
-          ? `เฉลี่ย ${monthly} บาท/เดือน`
-          : `ใช้งานได้ ${FORTUNE_PACKAGE_MONTHS} เดือน`}
-      </p>
 
-      <div className="mx-auto mt-4 max-w-[19rem] border-y border-[#7B6BB0]/14 py-3.5">
-        <ul className="space-y-2.5 text-left">
-          {PERKS.map((line) => (
-            <li key={line} className="flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#F6E2A6] ring-1 ring-[#E0B84A]/4">
-                <Check className="h-3 w-3 text-[#8F6F14]" strokeWidth={2.6} />
-              </span>
-              <span className="text-[13px] leading-snug text-[#3A3270]">
-                {line}
-              </span>
-            </li>
-          ))}
-        </ul>
+      <GoldRule className="mt-5" />
+
+      <div className="mt-5 text-center">
+        <p className="text-[11px] tracking-[0.08em] text-[#9aa3b2]">
+          <span className="line-through">{PREMIUM_LIST_PRICE} บาท</span>
+          <span className="mx-2 text-[#d5b16f]/55">·</span>
+          <span className="mae-gold-text font-semibold">
+            ประหยัด {saveBaht}
+          </span>
+        </p>
+        <p className="mt-2 text-[2.35rem] font-bold leading-none tracking-tight text-[#f7f4ec]">
+          {FORTUNE_UNLOCK_PRICE}
+          <span className="mae-gold-text ml-1.5 align-baseline text-[1rem] font-semibold tracking-normal">
+            บาท
+          </span>
+        </p>
+        <p className="mt-2 text-[11px] text-[#9aa3b2]">
+          {monthly !== null
+            ? `เฉลี่ย ${monthly} บาท/เดือน`
+            : `ใช้งานได้ ${FORTUNE_PACKAGE_MONTHS} เดือน`}
+        </p>
+        <PremiumOfferCountdown compact className="mt-3.5" />
       </div>
 
-      <div className="mt-4">
+      <GoldRule className="mt-5" />
+
+      <ul className="mx-auto mt-5 w-full max-w-[17rem] space-y-2.5">
+        {PERKS.map((line) => (
+          <li key={line} className="flex items-center gap-2.5">
+            <span
+              className="flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full"
+              style={{
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.55)",
+              }}
+            >
+              <Check className="h-2 w-2 text-[#d5b16f]" strokeWidth={3} />
+            </span>
+            <span className="text-[12.5px] leading-snug text-[#e8ecf2]">
+              {line}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-6 space-y-3">
         {IS_LOCAL_DEV ? (
-          <div className="mb-3 space-y-2">
+          <div className="space-y-2">
             <button
               type="button"
               onClick={() => onPaid()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[15px] font-bold text-white outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45"
-              style={{
-                background:
-                  "linear-gradient(90deg, #6A48C8 0%, #8B6AD8 52%, #B29AEF 100%)",
-                boxShadow:
-                  "0 12px 28px rgba(106,72,200,0.36), inset 0 1px 0 rgba(255,255,255,0.35)",
-              }}
+              className="mae-gold-cta flex w-full items-center justify-center rounded-full px-4 py-3.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
             >
-              จำลองชำระสำเร็จ · ดูพรีเมียม
+              ปลดล็อกพรีเมียม
             </button>
-            <p className="text-[11px] text-[#9B7FE8]">
-              โหมด local — ข้าม Google / หน้าชำระเงิน
+            <p className="text-center text-[10px] tracking-wide text-[#6b7380]">
+              โหมดทดลอง · จำลองชำระสำเร็จ
             </p>
           </div>
-        ) : null}
-
-        {loadingSession ? (
-          <div className="flex items-center justify-center gap-2 py-3 text-[13px] text-[#6B6490]">
+        ) : loadingSession ? (
+          <div className="flex items-center justify-center gap-2 py-2 text-[12px] text-[#9aa3b2]">
             <Loader2 className="h-4 w-4 animate-spin" />
-            กำลังตรวจสอบสถานะเข้าสู่ระบบ…
+            กำลังตรวจสอบสถานะ…
           </div>
         ) : !user ? (
           <div className="space-y-3">
-            <p className="text-[12px] leading-relaxed text-[#5E5688]">
-              เข้าสู่ระบบด้วย Google ก่อนชำระ
-              <br />
-              เพื่อยืนยันสิทธิ์พรีเมียมของคุณ
+            <p className="mx-auto max-w-[16rem] text-center text-[11px] leading-relaxed text-[#9aa3b2]">
+              เข้าสู่ระบบเพื่อยืนยันสิทธิ์พรีเมียมหลังชำระ
             </p>
             <GoogleSignInButton
               label="เข้าสู่ระบบด้วย Google"
@@ -304,34 +345,21 @@ export function FortunePaymentSheet({
               className="space-y-2"
               variant="outline"
               coloredIcon
-              buttonClassName="h-12 rounded-full border-[#C8B8F0]/55 bg-white text-[15px] font-semibold text-[#241C4F] shadow-[0_8px_22px_rgba(110,79,201,0.14)] hover:bg-[#FBF8FF] hover:border-[#9B7FE8]/45 hover:text-[#241C4F]"
+              buttonClassName="h-11 rounded-full border-[rgba(213,177,111,0.4)] bg-transparent text-[14px] font-semibold text-[#f4f1ea] hover:bg-white/[0.04] hover:border-[rgba(213,177,111,0.55)] hover:text-[#f4f1ea]"
             />
           </div>
         ) : (
-          <div className="space-y-3">
-            <p className="text-[12px] text-[#5E5688]">
-              พร้อมชำระ
-              {user.email ? (
-                <>
-                  {" "}
-                  ·{" "}
-                  <span className="font-medium text-[#3A3270]">
-                    {user.email}
-                  </span>
-                </>
-              ) : null}
-            </p>
+          <div className="space-y-2">
+            {user.email ? (
+              <p className="text-center text-[11px] text-[#9aa3b2]">
+                {user.email}
+              </p>
+            ) : null}
             <button
               type="button"
               onClick={() => void startCheckout()}
               disabled={step === "redirecting"}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[15px] font-bold text-white outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45 disabled:opacity-60"
-              style={{
-                background:
-                  "linear-gradient(90deg, #6A48C8 0%, #8B6AD8 52%, #B29AEF 100%)",
-                boxShadow:
-                  "0 12px 28px rgba(106,72,200,0.36), inset 0 1px 0 rgba(255,255,255,0.35)",
-              }}
+              className="mae-gold-cta flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
             >
               {step === "redirecting" ? (
                 <>
@@ -346,12 +374,12 @@ export function FortunePaymentSheet({
         )}
 
         {error ? (
-          <p className="mt-3 text-[12px] text-rose-500">{error}</p>
+          <p className="text-center text-[12px] text-rose-300">{error}</p>
         ) : null}
 
-        <p className="mt-3.5 flex items-center justify-center gap-1.5 text-[11px] leading-snug text-[#7A72A0]">
-          <Lock className="h-3 w-3 shrink-0" strokeWidth={2.2} />
-          หลังชำระสำเร็จ ระบบจะปลดล็อกพรีเมียมให้อัตโนมัติ
+        <p className="flex items-center justify-center gap-1.5 pt-0.5 text-[10px] text-[#6b7380]">
+          <Lock className="h-3 w-3 shrink-0 text-[#d5b16f]/80" strokeWidth={2.2} />
+          ชำระแล้วปลดล็อกอัตโนมัติ
         </p>
       </div>
     </div>
@@ -360,13 +388,10 @@ export function FortunePaymentSheet({
   if (isInline) {
     return (
       <div
-        className="no-sky-lift fortune-glass relative overflow-hidden rounded-[28px] px-3.5 py-4"
+        className="no-sky-lift relative overflow-hidden rounded-[24px]"
         role="region"
         aria-labelledby={titleId}
-        style={{
-          background:
-            "linear-gradient(165deg, rgba(255,255,255,0.92) 0%, rgba(248,244,255,0.9) 45%, rgba(242,236,255,0.88) 100%)",
-        }}
+        style={MAE_PANEL}
       >
         {body}
       </div>
@@ -376,7 +401,7 @@ export function FortunePaymentSheet({
   if (isPage) {
     return (
       <div
-        className="sky-copy mx-auto flex w-full max-w-[480px] flex-col px-3 pb-6 pt-2"
+        className="mx-auto flex min-h-full w-full max-w-[400px] flex-col justify-center px-4 py-6"
         role="main"
         aria-labelledby={titleId}
       >
@@ -385,9 +410,9 @@ export function FortunePaymentSheet({
             type="button"
             onClick={step === "redirecting" ? undefined : onClose}
             disabled={step === "redirecting"}
-            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60 disabled:opacity-40"
+            className="inline-flex items-center gap-0.5 justify-self-start text-[13px] font-medium text-white/80 outline-none transition active:opacity-60 disabled:opacity-40"
           >
-            <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+            <ChevronLeft className="h-4 w-4" strokeWidth={2.2} />
             กลับ
           </button>
           <span className="justify-self-center" aria-hidden />
@@ -395,11 +420,8 @@ export function FortunePaymentSheet({
         </div>
 
         <div
-          className="fortune-glass relative overflow-hidden rounded-[28px] px-3.5 py-4"
-          style={{
-            background:
-              "linear-gradient(165deg, rgba(255,255,255,0.92) 0%, rgba(248,244,255,0.9) 45%, rgba(242,236,255,0.88) 100%)",
-          }}
+          className="relative mx-auto w-full max-w-[340px] overflow-hidden rounded-[22px]"
+          style={MAE_PANEL}
         >
           {body}
         </div>
@@ -418,43 +440,20 @@ export function FortunePaymentSheet({
     >
       <button
         type="button"
-        className="dd-sheet-backdrop absolute inset-0 bg-[#3A2F6B]/28 backdrop-blur-[6px]"
+        className="dd-sheet-backdrop absolute inset-0 bg-black/50 backdrop-blur-[4px]"
         aria-label="ปิด"
         onClick={step === "redirecting" ? undefined : onClose}
       />
 
       <div
-        className="dd-sheet-panel relative z-[1] w-full max-w-[360px] overflow-hidden rounded-[28px]"
-        style={{
-          background:
-            "linear-gradient(165deg, rgba(255,255,255,0.92) 0%, rgba(248,244,255,0.9) 45%, rgba(242,236,255,0.88) 100%)",
-          border: "1px solid rgba(255,255,255,0.95)",
-          boxShadow: [
-            "0 24px 60px rgba(80,55,150,0.22)",
-            "0 0 0 1px rgba(155,127,232,0.18)",
-            "inset 0 1px 0 rgba(255,255,255,0.95)",
-          ].join(", "),
-          backdropFilter: "blur(22px) saturate(1.2)",
-          WebkitBackdropFilter: "blur(22px) saturate(1.2)",
-        }}
+        className="dd-sheet-panel relative z-[1] w-full max-w-[340px] overflow-hidden rounded-[22px]"
+        style={MAE_PANEL}
       >
-        <div
-          className="pointer-events-none absolute inset-0"
-          aria-hidden
-          style={{
-            background: [
-              "radial-gradient(ellipse 90% 55% at 50% -5%, rgba(255,255,255,0.95), transparent 60%)",
-              "radial-gradient(circle at 85% 12%, rgba(196,176,245,0.28), transparent 42%)",
-              "radial-gradient(circle at 15% 88%, rgba(244,188,82,0.1), transparent 40%)",
-            ].join(", "),
-          }}
-        />
-
         <button
           type="button"
           onClick={onClose}
           disabled={step === "redirecting"}
-          className="absolute right-3 top-3 z-[2] flex h-8 w-8 items-center justify-center rounded-full text-[#7A72A0] outline-none transition hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4 disabled:opacity-40"
+          className="absolute right-3 top-3 z-[2] flex h-8 w-8 items-center justify-center rounded-full text-[#9aa3b2] outline-none transition hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4 disabled:opacity-40"
           aria-label="ปิด"
         >
           <X className="h-4 w-4" strokeWidth={2} />

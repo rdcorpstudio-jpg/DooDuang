@@ -20,28 +20,28 @@ const READINGS: ReadingItem[] = [
     title: "ไพ่รายวัน",
     badge: "ดูฟรี",
     locked: false,
-    icon: "/images/extra/tarot.png",
+    icon: "/images/extra/tarot.png?v=gold1",
   },
   {
     id: "face",
     title: "ดูโหงวเฮ้ง",
     badge: "พรีเมียม",
     locked: true,
-    icon: "/images/extra/face.png",
+    icon: "/images/extra/face.png?v=gold1",
   },
   {
     id: "palm",
     title: "ดูลายมือ",
     badge: "พรีเมียม",
     locked: true,
-    icon: "/images/extra/palm.png",
+    icon: "/images/extra/palm.png?v=gold1",
   },
   {
     id: "wallpaper",
     title: "วอลเปเปอร์มงคล",
     badge: "พรีเมียม",
     locked: true,
-    icon: "/images/extra/wallpaper.png",
+    icon: "/images/extra/wallpaper.png?v=gold1",
   },
   {
     id: "couple",
@@ -193,10 +193,10 @@ export function FortuneExtraReadings({
   return (
     <section className={cn("min-w-0 space-y-3.5", className)}>
       <div className="px-3">
-        <h2 className="dd-section-title text-[1.5rem] font-bold tracking-tight">
+        <h2 className="text-[15px] font-semibold tracking-wide text-[#d5b16f]">
           ฟีเจอร์ยอดนิยม
         </h2>
-        <p className="mt-1.5 text-[14px] leading-relaxed text-[#5E5688]">
+        <p className="mt-1 text-[12px] leading-relaxed text-[#f7f4ec]/65">
           เลือกวิธีดูดวงที่เหมาะกับคุณ
         </p>
       </div>
@@ -209,7 +209,7 @@ export function FortuneExtraReadings({
           touchAction: "pan-x",
         }}
       >
-        <div className="flex w-max items-stretch gap-1.5 px-3 pb-0.5">
+        <div className="flex w-max items-stretch gap-2 px-3 pb-0.5">
           {READINGS.map((item, index) => {
             const isLocked = item.locked && !unlocked;
 
@@ -219,8 +219,8 @@ export function FortuneExtraReadings({
                 type="button"
                 onClick={() => openItem(item, isLocked)}
                 className={cn(
-                  "fortune-glass dd-feature-pop relative box-border flex h-[10.5rem] w-[7.25rem] shrink-0 flex-col items-center overflow-hidden rounded-[16px] px-2 pb-2.5 pt-2.5 text-center outline-none transition",
-                  "select-none touch-manipulation active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4"
+                  "mae-aspect-card dd-feature-pop relative box-border flex h-[10.5rem] w-[7.25rem] shrink-0 flex-col items-center overflow-hidden px-2 pb-2.5 pt-2.5 text-center outline-none transition",
+                  "select-none touch-manipulation active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#e0cc9f]/35"
                 )}
                 style={
                   {
@@ -246,19 +246,25 @@ export function FortuneExtraReadings({
                     height={104}
                     unoptimized
                     draggable={false}
-                    className="pointer-events-none h-full w-full object-contain drop-shadow-[0_5px_10px_rgba(80,60,140,0.16)]"
+                    className="pointer-events-none h-full w-full object-contain"
                   />
                   {isLocked ? (
                     <span className="pointer-events-none absolute -right-0.5 top-0.5 z-[1]">
-                      <FortuneIcon name="lock" size={18} />
+                      <FortuneIcon name="lock-gold" size={18} plain />
                     </span>
                   ) : null}
                 </span>
 
-                <p className="mt-1 flex h-[2.6rem] w-full shrink-0 items-center justify-center px-0.5 text-[11.5px] font-semibold leading-tight text-[#2C2458]">
+                <p className="mae-aspect-title mt-1 flex h-[2.6rem] w-full shrink-0 items-center justify-center px-0.5 text-[11.5px] font-semibold leading-tight">
                   <span className="line-clamp-2">{item.title}</span>
                 </p>
-                <span className="mt-auto shrink-0 rounded-full bg-[#B9A4F0]/28 px-2 py-0.5 text-[10px] font-semibold leading-none text-[#5B45B8]">
+                <span
+                  className="mt-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold leading-none text-[#e8d19a]"
+                  style={{
+                    background: "rgba(213,177,111,0.14)",
+                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+                  }}
+                >
                   {isLocked ? "พรีเมียม" : item.badge}
                 </span>
               </button>

@@ -72,15 +72,22 @@ export function AuthCompleteClient({
   }, [callbackUrl]);
 
   return (
-    <div className="flex min-h-full flex-col items-center justify-center bg-[#F7F3FF] px-6 py-10 text-center">
+    <div className="flex min-h-full flex-col items-center justify-center px-6 py-10 text-center">
       {!error ? (
-        <p className="text-[13px] text-[#8A82B0]">…</p>
+        <p className="text-[13px] text-[#9aa3b2]">กำลังเข้าสู่ระบบ…</p>
       ) : (
-        <div className="fortune-glass w-full max-w-sm rounded-[24px] px-5 py-7">
-          <p className="text-[15px] font-semibold text-[#241C4F]">
+        <div
+          className="w-full max-w-sm rounded-[22px] px-5 py-7"
+          style={{
+            background: "#141c2b",
+            boxShadow:
+              "inset 0 0 0 1px rgba(213,177,111,0.28), 0 16px 40px rgba(0,0,0,0.28)",
+          }}
+        >
+          <p className="text-[15px] font-semibold text-[#f7f4ec]">
             เข้าสู่ระบบไม่สำเร็จ
           </p>
-          <p className="mt-2 text-[13px] leading-relaxed text-[#5E5688]">
+          <p className="mt-2 text-[13px] leading-relaxed text-[#9aa3b2]">
             {error}
           </p>
           <GoogleSignInButton
@@ -90,11 +97,11 @@ export function AuthCompleteClient({
             showIconDivider
             variant="outline"
             className="mt-5 space-y-2"
-            buttonClassName="h-12 gap-2.5 rounded-full border-0 bg-white text-[15px] font-semibold text-[#3A2F6B]"
+            buttonClassName="h-12 gap-2.5 rounded-full border-[rgba(213,177,111,0.3)] bg-transparent text-[15px] font-semibold text-[#f4f1ea] hover:bg-white/[0.04]"
           />
           <Link
             href={`/login?callbackUrl=${encodeURIComponent(next)}`}
-            className="mt-3 inline-flex h-10 w-full items-center justify-center text-[13px] font-medium text-[#5E5688]"
+            className="mt-3 inline-flex h-10 w-full items-center justify-center text-[13px] font-medium text-[#9aa3b2]"
           >
             กลับหน้าเข้าสู่ระบบ
           </Link>

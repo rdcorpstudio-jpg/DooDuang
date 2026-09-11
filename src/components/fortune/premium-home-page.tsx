@@ -187,12 +187,12 @@ export function PremiumHomePage({
             setProfile(next);
             setShowDeepen(true);
           }}
-          className="fortune-glass mx-3 mb-3 w-[calc(100%-1.5rem)] rounded-[16px] px-3.5 py-3 text-left outline-none transition active:scale-[0.99]"
+          className="mae-aspect-card mx-3 mb-3 w-[calc(100%-1.5rem)] rounded-[16px] px-3.5 py-3 text-left outline-none transition active:scale-[0.99]"
         >
-          <p className="text-[13px] font-semibold text-[#6A48C8]">
+          <p className="text-[13px] font-semibold text-[#d5b16f]">
             กรอกเวลาเกิดและสถานที่เกิด
           </p>
-          <p className="mt-0.5 text-[12px] leading-snug text-[#5E5688]">
+          <p className="mt-0.5 text-[12px] leading-snug text-[#f7f4ec]/65">
             ตอนนี้ดูแบบประมาณอยู่ — แตะเพื่อวิเคราะห์เชิงลึกให้แม่นขึ้น
           </p>
         </button>

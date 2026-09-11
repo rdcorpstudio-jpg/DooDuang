@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AccountDashboard } from "@/components/account/account-dashboard";
 import { DEFAULT_LOGIN_CALLBACK } from "@/components/auth/google-sign-in-button";
+import {
+  readFortuneProfile,
+  writeFortuneProfile,
+} from "@/lib/fortune/profile-storage";
 
 type SessionUser = {
   id: string;
@@ -13,12 +17,41 @@ type SessionUser = {
   credits?: number;
 };
 
-/** Client account page — avoids slow server DB wait on "กำลังเปิดบัญชี" */
-export default function DashboardPage() {
+const PREVIEW_USER: SessionUser = {
+  id: "preview-user",
+  name: "แม่มั่งมี",
+  email: "preview@maemangmee.local",
+  image: null,
+  credits: 0,
+};
+
+function seedPreviewProfile() {
+  const existing = readFortuneProfile();
+  if (!existing?.birthDate) {
+    writeFortuneProfile({
+      realName: "แม่มั่งมี",
+      nickname: "แม่มั่งมี",
+      birthDate: "1995-09-07",
+      gender: "female",
+      birthTime: "09:30",
+      birthPlace: "กรุงเทพฯ",
+    });
+  }
+}
+
+function DashboardInner() {
   const router = useRouter();
-  const [user, setUser] = useState<SessionUser | null>(null);
+  const search = useSearchParams();
+  const preview = search.get("preview") === "1";
+  const [user, setUser] = useState<SessionUser | null>(preview ? PREVIEW_USER : null);
 
   useEffect(() => {
+    if (preview) {
+      seedPreviewProfile();
+      setUser(PREVIEW_USER);
+      return;
+    }
+
     let cancelled = false;
     void (async () => {
       try {
@@ -49,25 +82,55 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, preview]);
 
   if (!user) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center px-4 text-[13px] text-[#8A82B0]">
+      <div className="flex min-h-[40vh] items-center justify-center px-4 text-[13px] text-[#f7f4ec]/55">
         กำลังเปิด…
       </div>
     );
   }
 
   return (
-    <AccountDashboard
-      user={{
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        image: user.image,
-        credits: user.credits ?? 0,
-      }}
-    />
+    <>
+      {preview ? (
+        <div className="mx-auto max-w-[480px] px-4 pt-3">
+          <p
+            className="rounded-full px-3 py-1.5 text-center text-[11px] font-medium text-[#e8d19a]"
+            style={{
+              background: "rgba(213,177,111,0.12)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+            }}
+          >
+            โหมดตัวอย่าง · ยังไม่ได้ล็อกอินจริง
+          </p>
+        </div>
+      ) : null}
+      <AccountDashboard
+        user={{
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          credits: user.credits ?? 0,
+        }}
+      />
+    </>
+  );
+}
+
+/** Client account page — use ?preview=1 to mock logged-in without Google */
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center px-4 text-[13px] text-[#f7f4ec]/55">
+          กำลังเปิด…
+        </div>
+      }
+    >
+      <DashboardInner />
+    </Suspense>
   );
 }

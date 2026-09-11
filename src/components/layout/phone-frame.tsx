@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { isMaeShellPath } from "@/lib/mae-shell";
 import { StarfieldBackground } from "@/components/layout/starfield-background";
 import { BottomNav } from "@/components/layout/bottom-nav";
 
@@ -15,6 +16,7 @@ interface PhoneFrameProps {
 export function PhoneFrame({ children, className }: PhoneFrameProps) {
   const pathname = usePathname() || "/";
   const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const maeShell = isMaeShellPath(pathname);
   const hideNav =
     pathname.startsWith("/auth") ||
     pathname.startsWith("/login") ||
@@ -65,7 +67,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
         className={cn(
           "phone-frame",
           keyboardOpen && "phone-frame--keyboard",
-          pathname.startsWith("/mae") && "phone-frame--mae",
+          maeShell && "phone-frame--mae",
           className
         )}
       >

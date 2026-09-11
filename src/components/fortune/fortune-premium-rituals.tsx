@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type CSSProperties } from "react";
 import Image from "next/image";
-import { Moon, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import {
   answerAuspicious,
@@ -12,13 +12,19 @@ import type { AuspiciousActivityId } from "@/lib/fortune/content/premium-rituals
 import { cn } from "@/lib/utils";
 
 const ACT_ICONS: Record<AuspiciousActivityId, string> = {
-  talk: "/images/rituals/talk.png",
-  money: "/images/rituals/money.png",
-  start: "/images/rituals/start.png",
-  travel: "/images/rituals/travel.png",
-  forgive: "/images/rituals/forgive.png",
-  rest: "/images/rituals/rest.png",
+  talk: "/images/rituals/talk.png?v=mae-transparent2",
+  money: "/images/rituals/money.png?v=mae-transparent2",
+  start: "/images/rituals/start.png?v=mae-transparent2",
+  travel: "/images/rituals/travel.png?v=mae-transparent2",
+  forgive: "/images/rituals/forgive.png?v=mae-transparent2",
+  rest: "/images/rituals/rest.png?v=mae-transparent2",
 };
+
+const NIGHT_ICONS = {
+  moon: "/images/night/moon.png?v=1",
+  stones: "/images/night/stones.png?v=1",
+  sprout: "/images/night/sprout.png?v=1",
+} as const;
 
 type Props = {
   birthDate: string;
@@ -29,7 +35,7 @@ type Props = {
   className?: string;
 };
 
-/** New premium rituals — appended below existing premium blocks */
+/** Premium rituals — Mae navy–gold */
 export function FortunePremiumRituals({
   birthDate,
   nickname,
@@ -50,16 +56,16 @@ export function FortunePremiumRituals({
   return (
     <section className={cn("space-y-3.5", className)}>
       <header className="px-0.5">
-        <p className="font-sacred text-[12px] tracking-[0.22em] text-[#C9A227]">
+        <p className="text-[12px] font-semibold tracking-[0.22em] text-[#d5b16f]">
           RITUALS
         </p>
-        <h2 className="dd-section-title mt-1 text-[1.35rem] font-bold tracking-tight">
+        <h2 className="mae-gold-text mt-1 text-[1.35rem] font-bold tracking-tight">
           พิธีเล็ก ๆ สำหรับคุณ
         </h2>
       </header>
 
-      <div className="fortune-glass rounded-[22px] px-3.5 py-4">
-        <p className="text-[14px] font-semibold text-[#241C4F]">
+      <div className="mae-aspect-card rounded-[22px] px-3.5 py-4">
+        <p className="mae-aspect-title text-[14px] font-semibold">
           ฤกษ์ทำอะไรดีวันนี้
         </p>
         <div className="mt-3 grid grid-cols-3 gap-2">
@@ -73,8 +79,8 @@ export function FortunePremiumRituals({
                 className={cn(
                   "flex flex-col items-center gap-2 rounded-[16px] px-1.5 py-3 text-center outline-none transition active:scale-[0.97]",
                   on
-                    ? "bg-white/85 ring-2 ring-[#9B7FE8]/55"
-                    : "bg-white/50 ring-1 ring-[#9B7FE8]/12"
+                    ? "bg-[rgba(213,177,111,0.18)] shadow-[inset_0_0_0_1.5px_rgba(213,177,111,0.55)]"
+                    : "bg-[rgba(255,255,255,0.04)] shadow-[inset_0_0_0_1px_rgba(213,177,111,0.22)]"
                 )}
               >
                 <span className="relative flex h-14 w-14 items-center justify-center">
@@ -84,7 +90,7 @@ export function FortunePremiumRituals({
                     width={52}
                     height={52}
                     unoptimized
-                    className="dd-icon-float h-12 w-12 object-contain drop-shadow-[0_4px_8px_rgba(80,60,140,0.18)]"
+                    className="dd-icon-float h-12 w-12 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
                     style={
                       {
                         "--dd-float-delay": `${
@@ -96,7 +102,7 @@ export function FortunePremiumRituals({
                     }
                   />
                 </span>
-                <span className="px-0.5 text-[11px] font-medium leading-snug text-[#3A3270]">
+                <span className="px-0.5 text-[11px] font-medium leading-snug text-[#f7f4ec]/80">
                   {a.label}
                 </span>
               </button>
@@ -108,38 +114,33 @@ export function FortunePremiumRituals({
           <div
             className="mt-3.5 rounded-[16px] px-3.5 py-3"
             style={{
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.88), rgba(236,228,255,0.75))",
-              border: "1px solid rgba(155,127,232,0.28)",
+              background: "rgba(213,177,111,0.1)",
+              border: "1px solid rgba(213,177,111,0.35)",
             }}
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="text-[15px] font-bold text-[#241C4F]">
+              <p className="text-[15px] font-bold text-[#f7f4ec]">
                 {auspicious.verdict}
               </p>
-              <span className="rounded-full bg-[#9B7FE8]/15 px-2 py-0.5 text-[11px] font-semibold text-[#5B45B8]">
+              <span
+                className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-[#101827]"
+                style={{ background: "#d5b16f" }}
+              >
                 {auspicious.score}/12
               </span>
             </div>
-            <p className="mt-1 text-[12px] leading-relaxed text-[#5E5688]">
+            <p className="mt-1 text-[12px] leading-relaxed text-[#f7f4ec]/70">
               {auspicious.tip}
             </p>
           </div>
         ) : (
-          <p className="mt-3 text-center text-[11px] text-[#8A82B0]">
+          <p className="mt-3 text-center text-[11px] text-[#f7f4ec]/45">
             เลือกกิจกรรมด้านบน
           </p>
         )}
       </div>
 
-      <div
-        className="relative overflow-hidden rounded-[18px] px-3.5 py-3.5"
-        style={{
-          background:
-            "linear-gradient(145deg, rgba(255,252,245,0.98) 0%, rgba(248,244,255,0.96) 55%, rgba(255,248,235,0.94) 100%)",
-          border: "1px solid rgba(201,162,39,0.32)",
-        }}
-      >
+      <div className="mae-aspect-card relative overflow-hidden rounded-[18px] px-3.5 py-3.5">
         <div
           className="pointer-events-none absolute inset-y-3 left-0 w-[3px] rounded-full"
           style={{
@@ -151,33 +152,48 @@ export function FortunePremiumRituals({
         <div className="pl-2.5">
           <div className="flex items-center gap-1.5">
             <Sparkles
-              className="h-3.5 w-3.5 shrink-0 text-[#C9A227]"
+              className="h-3.5 w-3.5 shrink-0 text-[#d5b16f]"
               strokeWidth={2}
             />
-            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#A07E1A]">
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
               คำอธิษฐานวันนี้
             </p>
           </div>
-          <p className="mt-2 text-[14px] font-medium leading-[1.55] text-[#2C2458]">
+          <p className="mt-2 text-[14px] font-medium leading-[1.55] text-[#f7f4ec]">
             “{pack.blessing}”
           </p>
         </div>
       </div>
 
-      <div className="fortune-glass rounded-[22px] px-4 py-4">
+      <div className="mae-aspect-card rounded-[22px] px-4 py-4">
         <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center text-[#7B5FD4]">
-            <Moon className="h-4 w-4" strokeWidth={1.9} />
+          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center">
+            <Image
+              src={NIGHT_ICONS.moon}
+              alt=""
+              width={36}
+              height={36}
+              unoptimized
+              className="h-9 w-9 object-contain"
+            />
           </span>
-          <p className="text-[14px] font-semibold text-[#241C4F]">
+          <p className="mae-gold-text text-[14px] font-semibold">
             โหมดก่อนนอน
           </p>
         </div>
         <div className="mt-3 space-y-2">
-          <NightLine label="วางคืนนี้" text={pack.night.release} />
-          <NightLine label="พรุ่งนี้" text={pack.night.tomorrow} />
+          <NightLine
+            icon={NIGHT_ICONS.stones}
+            label="วางคืนนี้"
+            text={pack.night.release}
+          />
+          <NightLine
+            icon={NIGHT_ICONS.sprout}
+            label="พรุ่งนี้"
+            text={pack.night.tomorrow}
+          />
         </div>
-        <p className="mt-3 text-center text-[13px] font-medium leading-relaxed text-[#5B45B8]">
+        <p className="mae-gold-text mt-3 text-center text-[13px] font-medium leading-relaxed">
           {pack.night.close}
         </p>
       </div>
@@ -185,13 +201,37 @@ export function FortunePremiumRituals({
   );
 }
 
-function NightLine({ label, text }: { label: string; text: string }) {
+function NightLine({
+  icon,
+  label,
+  text,
+}: {
+  icon: string;
+  label: string;
+  text: string;
+}) {
   return (
-    <div className="rounded-[14px] bg-white/55 px-3 py-2.5 ring-1 ring-[#9B7FE8]/14">
-      <p className="text-[11px] font-semibold tracking-[0.12em] text-[#7B5FD4]">
-        {label}
-      </p>
-      <p className="mt-0.5 text-[12px] leading-snug text-[#4A4278]">{text}</p>
+    <div
+      className="flex items-start gap-2.5 rounded-[14px] px-3 py-2.5"
+      style={{
+        background: "rgba(213,177,111,0.08)",
+        boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+      }}
+    >
+      <Image
+        src={icon}
+        alt=""
+        width={28}
+        height={28}
+        unoptimized
+        className="mt-0.5 h-7 w-7 shrink-0 object-contain"
+      />
+      <div className="min-w-0 flex-1">
+        <p className="mae-gold-text text-[11px] font-semibold tracking-[0.12em]">
+          {label}
+        </p>
+        <p className="mt-0.5 text-[12px] leading-snug text-[#f7f4ec]/70">{text}</p>
+      </div>
     </div>
   );
 }

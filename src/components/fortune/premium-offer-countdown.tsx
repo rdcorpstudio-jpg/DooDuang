@@ -36,81 +36,71 @@ export function PremiumOfferCountdown({
           { label: "วินาที", value: pad2(offer.seconds) },
         ];
 
+  if (compact) {
+    return (
+      <div className={cn("text-center", className)}>
+        <p className="text-[10px] font-medium tracking-[0.14em] text-[#9aa3b2]">
+          ข้อเสนอเหลือเวลา
+        </p>
+        <div className="mt-1.5 flex items-center justify-center gap-1 tabular-nums">
+          {units.map((unit, i) => (
+            <div key={unit.label} className="flex items-center gap-1">
+              <span className="min-w-[2.6rem] rounded-md px-1.5 py-1 text-[12px] font-semibold text-[#f4f1ea]"
+                style={{
+                  background: "rgba(16,24,39,0.85)",
+                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.32)",
+                }}
+              >
+                {unit.value}
+                <span className="ml-0.5 text-[9px] font-medium text-[#9aa3b2]">
+                  {unit.label}
+                </span>
+              </span>
+              {i < units.length - 1 ? (
+                <span className="text-[11px] text-[#806031]" aria-hidden>
+                  :
+                </span>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
-      className={cn(
-        "relative overflow-hidden rounded-[18px] px-3.5",
-        compact ? "py-2.5" : "py-3",
-        compact
-          ? "bg-gradient-to-b from-[#FFF8E8]/90 to-[#F8F0FF]/85 ring-1 ring-[#E8C86A]/45"
-          : "fortune-glass",
-        className
-      )}
+      className={cn("relative overflow-hidden rounded-2xl px-4 py-3.5", className)}
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.22)",
+      }}
     >
-      {/* soft gold wash */}
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_50%_0%,rgba(244,188,82,0.18),transparent_70%)]"
-        aria-hidden
-      />
-
       <div className="relative">
         <div className="flex items-center justify-center gap-1.5">
-          <FortuneIcon name="sparkle" size={compact ? 13 : 15} />
-          <p
-            className={cn(
-              "font-semibold tracking-wide text-[#8A6A12]",
-              compact ? "text-[11px]" : "text-[12.5px]"
-            )}
-          >
+          <FortuneIcon name="sparkle" size={14} />
+          <p className="text-[12.5px] font-medium tracking-wide text-[#e8d19a]">
             ลดราคาเฉพาะคุณ · ประหยัด {saveBaht} บาท
           </p>
         </div>
 
-        <p
-          className={cn(
-            "mt-1 text-center font-medium text-[#7A7198]",
-            compact ? "text-[10px]" : "text-[11px]"
-          )}
-        >
+        <p className="mt-1 text-center text-[11px] text-[#9aa3b2]">
           เหลือเวลาสำหรับข้อเสนอนี้
         </p>
 
-        <div
-          className={cn(
-            "flex items-center justify-center",
-            compact ? "mt-1.5 gap-1.5" : "mt-2.5 gap-2"
-          )}
-        >
+        <div className="mt-2.5 flex items-center justify-center gap-2">
           {units.map((unit, i) => (
-            <div key={unit.label} className="flex items-center gap-1.5">
+            <div key={unit.label} className="flex items-center gap-2">
               <div className="flex min-w-0 flex-col items-center">
-                <div
-                  className={cn(
-                    "flex items-center justify-center rounded-[12px] bg-white/80 tabular-nums font-bold text-[#241C4F] shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-[#E8C86A]/50",
-                    compact
-                      ? "h-9 min-w-[2.55rem] px-1.5 text-[1.05rem] leading-none"
-                      : "h-11 min-w-[3.1rem] px-2 text-[1.3rem] leading-none"
-                  )}
-                >
+                <div className="flex h-11 min-w-[3rem] items-center justify-center rounded-xl bg-[#101827] px-2 text-[1.25rem] font-semibold tabular-nums leading-none text-[#f4f1ea] shadow-[inset_0_0_0_1px_rgba(213,177,111,0.28)]">
                   {unit.value}
                 </div>
-                <p
-                  className={cn(
-                    "mt-1 font-medium tracking-wide text-[#9A90B8]",
-                    compact ? "text-[8.5px]" : "text-[9.5px]"
-                  )}
-                >
+                <p className="mt-1 text-[9.5px] font-medium tracking-wide text-[#9aa3b2]">
                   {unit.label}
                 </p>
               </div>
               {i < units.length - 1 ? (
-                <span
-                  className={cn(
-                    "-mt-4 font-semibold text-[#C4A84A]/90",
-                    compact ? "text-[1rem]" : "text-[1.15rem]"
-                  )}
-                  aria-hidden
-                >
+                <span className="-mt-4 text-[1.1rem] font-semibold text-[#806031]" aria-hidden>
                   :
                 </span>
               ) : null}
@@ -119,15 +109,15 @@ export function PremiumOfferCountdown({
         </div>
 
         {showPrice ? (
-          <div className="mt-3 flex items-baseline justify-center gap-2 border-t border-[#E8C86A]/35 pt-2.5">
-            <span className="text-[13px] text-[#A89BC8] line-through">
+          <div className="mt-3 flex items-baseline justify-center gap-2 border-t border-[rgba(213,177,111,0.2)] pt-2.5">
+            <span className="text-[13px] text-[#9aa3b2] line-through">
               {PREMIUM_LIST_PRICE} บาท
             </span>
-            <span className="text-[1.55rem] font-bold tabular-nums leading-none text-[#241C4F]">
+            <span className="text-[1.5rem] font-bold tabular-nums leading-none text-[#f4f1ea]">
               {FORTUNE_UNLOCK_PRICE}
               <span className="ml-1 text-[0.95rem] font-semibold">บาท</span>
             </span>
-            <span className="rounded-full bg-[#F4BC52]/28 px-2 py-0.5 text-[10.5px] font-semibold text-[#8A6A12]">
+            <span className="rounded-full bg-[rgba(213,177,111,0.16)] px-2 py-0.5 text-[10.5px] font-semibold text-[#d5b16f]">
               -{pctOff}%
             </span>
           </div>

@@ -24,7 +24,7 @@ export const FORTUNE_ICONS = {
   clover: "/images/icons/clover.png",
   career: "/images/icons/career.png",
   "crystal-ball": "/images/icons/crystal-ball.png",
-  health: "/images/icons/health.png",
+  health: "/images/icons/health.png?v=gold2",
 } as const;
 
 export type FortuneIconName = keyof typeof FORTUNE_ICONS;
@@ -53,7 +53,7 @@ export function FortuneIcon({
       unoptimized
       className={cn(
         "object-contain",
-        !plain && "drop-shadow-[0_2px_6px_rgba(80,60,140,0.18)]",
+        !plain && "drop-shadow-[0_2px_8px_rgba(213,177,111,0.28)]",
         className
       )}
       style={{ width: size, height: size }}

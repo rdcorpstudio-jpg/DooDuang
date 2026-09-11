@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** Shared page title block — modern mystic look */
+/** Shared page title block — Mae navy–gold */
 export function PageHero({
   title,
   accent,
@@ -17,18 +17,21 @@ export function PageHero({
   return (
     <div
       className={cn(
-        "page-hero relative mb-6",
+        "page-hero relative mb-5",
         align === "center" && "text-center",
         className
       )}
     >
-      <div className="page-hero-glow" aria-hidden />
-      <h1 className="font-sacred relative text-[1.65rem] leading-tight tracking-wide text-white sm:text-[1.75rem]">
+      <h1 className="relative font-sans text-[1.55rem] font-bold leading-tight tracking-tight text-[#f7f4ec] sm:text-[1.65rem]">
         {title}
-        {accent ? <span className="intro-title-accent">{accent}</span> : null}
+        {accent ? (
+          <span className="ml-1.5 font-semibold text-[#d5b16f]">{accent}</span>
+        ) : null}
       </h1>
       {subtitle ? (
-        <p className="relative mt-2 text-[13px] leading-relaxed text-white/45">{subtitle}</p>
+        <p className="relative mt-2 text-[13px] leading-relaxed text-[#9aa3b2]">
+          {subtitle}
+        </p>
       ) : null}
     </div>
   );

@@ -21,6 +21,8 @@ const THAI_MONTHS = [
   "ธ.ค.",
 ] as const;
 
+type PickerTone = "lilac" | "mae";
+
 function daysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
 }
@@ -52,16 +54,19 @@ function WheelColumn({
   value,
   onChange,
   ariaLabel,
+  tone = "lilac",
 }: {
   items: { value: number; label: string }[];
   value: number;
   onChange: (value: number) => void;
   ariaLabel: string;
+  tone?: PickerTone;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const lock = useRef(false);
   const endTimer = useRef<number | null>(null);
   const index = Math.max(0, items.findIndex((item) => item.value === value));
+  const mae = tone === "mae";
 
   useEffect(() => {
     const el = ref.current;
@@ -94,7 +99,7 @@ function WheelColumn({
           if (endTimer.current) window.clearTimeout(endTimer.current);
           endTimer.current = window.setTimeout(settle, 100);
         }}
-        className="date-wheel-col h-full overflow-y-auto overscroll-contain"
+        className="date-wheel-col h-full overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         style={{
           scrollSnapType: "y mandatory",
           paddingTop: PAD * ITEM_H,
@@ -108,8 +113,12 @@ function WheelColumn({
             className={cn(
               "flex w-full shrink-0 items-center justify-center text-[17px]",
               item.value === value
-                ? "font-bold text-[#241C4F]"
-                : "font-medium text-[#6B6490]/70"
+                ? mae
+                  ? "font-bold text-[#d5b16f]"
+                  : "font-bold text-[#241C4F]"
+                : mae
+                  ? "font-medium text-white/40"
+                  : "font-medium text-[#6B6490]/70"
             )}
             style={{ height: ITEM_H, scrollSnapAlign: "center" }}
             onClick={() => onChange(item.value)}
@@ -126,10 +135,12 @@ export function BirthDatePicker({
   value,
   onChange,
   className,
+  tone = "lilac",
 }: {
   value: string;
   onChange: (isoDate: string) => void;
   className?: string;
+  tone?: PickerTone;
 }) {
   const now = new Date();
   const maxYear = now.getFullYear();
@@ -138,6 +149,7 @@ export function BirthDatePicker({
   const [year, setYear] = useState(initial.year);
   const [month, setMonth] = useState(initial.month);
   const [day, setDay] = useState(initial.day);
+  const mae = tone === "mae";
 
   // Commit visible wheel value when parent has no ISO yet (enables Save)
   useEffect(() => {
@@ -180,27 +192,49 @@ export function BirthDatePicker({
 
   return (
     <div className={cn("relative", className)}>
-      <div className="mb-2.5 grid grid-cols-3 text-center text-[11px] font-semibold tracking-[0.12em] text-[#6B6490]">
+      <div
+        className={cn(
+          "mb-2.5 grid grid-cols-3 text-center text-[11px] font-semibold tracking-[0.12em]",
+          mae ? "text-[#b9a077]" : "text-[#6B6490]"
+        )}
+      >
         <span>วัน</span>
         <span>เดือน</span>
         <span>ปี พ.ศ.</span>
       </div>
-      <div className="relative flex overflow-hidden rounded-[18px] bg-white/45 ring-1 ring-inset ring-[#7B6BB0]/18">
-        <div className="pointer-events-none absolute inset-x-2.5 top-1/2 z-[1] h-10 -translate-y-1/2 rounded-xl border border-[#9B7FE8]/35 bg-[#EDE6FF]/55" />
+      <div
+        className={cn(
+          "relative flex overflow-hidden rounded-[18px] ring-1 ring-inset",
+          mae
+            ? "bg-[rgba(16,24,39,0.35)] ring-[rgba(213,177,111,0.28)]"
+            : "bg-white/45 ring-[#7B6BB0]/18"
+        )}
+      >
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-x-2.5 top-1/2 z-[1] h-10 -translate-y-1/2 rounded-xl border",
+            mae
+              ? "border-[rgba(213,177,111,0.4)] bg-[rgba(213,177,111,0.12)]"
+              : "border-[#9B7FE8]/35 bg-[#EDE6FF]/55"
+          )}
+        />
         <WheelColumn
           ariaLabel="วัน"
+          tone={tone}
           items={days}
           value={Math.min(day, maxDay)}
           onChange={(d) => commit(year, month, d)}
         />
         <WheelColumn
           ariaLabel="เดือน"
+          tone={tone}
           items={months}
           value={month}
           onChange={(m) => commit(year, m, day)}
         />
         <WheelColumn
           ariaLabel="ปี"
+          tone={tone}
           items={years}
           value={year}
           onChange={(y) => commit(y, month, day)}

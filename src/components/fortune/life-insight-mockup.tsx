@@ -173,37 +173,26 @@ export function LifeInsightMockup({
         >
           <Link
             href="/premium"
-            className="group relative flex items-center gap-3 overflow-hidden rounded-[20px] px-3.5 py-3.5 outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#C9A227]/45"
+            className="group flex items-center gap-3 rounded-[18px] px-3.5 py-3.5 outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
             style={{
-              background:
-                "linear-gradient(125deg, rgba(255,255,255,0.88) 0%, rgba(248,244,255,0.9) 42%, rgba(255,248,230,0.82) 100%)",
-              border: "1px solid rgba(201,162,39,0.4)",
+              background: "#141c2b",
               boxShadow:
-                "0 12px 28px rgba(110,79,201,0.12), inset 0 1px 0 rgba(255,255,255,0.95)",
+                "inset 0 0 0 1px rgba(213,177,111,0.28), 0 10px 28px rgba(0,0,0,0.22)",
             }}
           >
-            <span
-              className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full opacity-70"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(244,188,82,0.28), transparent 68%)",
-              }}
-              aria-hidden
-            />
-            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center">
-              <FortuneIcon name="warning-gold" size={48} />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.12)]">
+              <FortuneIcon name="sparkle" size={22} />
             </span>
-            <span className="relative min-w-0 flex-1">
-              <span className="flex items-center gap-1.5 text-[15px] font-bold text-[#241C4F]">
-                <FortuneIcon name="sparkle" size={16} />
+            <span className="min-w-0 flex-1">
+              <span className="block text-[14px] font-semibold text-[#f7f4ec]">
                 เปิดหน้าพรีเมียม
               </span>
-              <span className="mt-1 block text-[12px] leading-snug text-[#5E5688]">
+              <span className="mt-0.5 block text-[12px] leading-snug text-[#f7f4ec]/65">
                 ปฏิทินเต็ม · จังหวะเดือน · เนื้อหาปลดล็อก
               </span>
             </span>
-            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center transition group-active:scale-95">
-              <FortuneIcon name="lock-gold" size={48} />
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.12)] transition group-active:scale-95">
+              <FortuneIcon name="arrow-right" size={18} />
             </span>
           </Link>
         </div>

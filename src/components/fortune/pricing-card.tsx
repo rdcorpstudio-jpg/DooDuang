@@ -45,7 +45,13 @@ export function PricingCard({
       <form action="/api/stripe/checkout" method="POST" className="mt-auto">
         <input type="hidden" name="packageId" value={packageId} />
         <input type="hidden" name="returnPath" value="/premium" />
-        <Button type="submit" variant={popular ? "primary" : "secondary"} className="w-full">
+        <Button
+          type="submit"
+          className={cn(
+            "mae-gold-cta w-full border-0 text-[#101827] shadow-none hover:brightness-105",
+            !popular && "opacity-95"
+          )}
+        >
           ปลดล็อกพรีเมียม
         </Button>
       </form>

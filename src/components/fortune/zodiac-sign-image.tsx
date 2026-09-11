@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Zodiac art by sign id.
- * - `orb`  = medallions/ (round glass badge — left of name)
+ * - `orb`  = gold metallic glyphs (Mae pack)
  * - `star` = constellations/ (glyph watermark — right accent)
  */
 export function ZodiacSignImage({
