@@ -18,6 +18,8 @@ export const users = pgTable("users", {
   emailVerified: timestamp("email_verified", { mode: "date" }),
   /** E.164, e.g. +66812345678 */
   phone: text("phone").unique(),
+  /** LINE Login userId — unique per LINE Login channel */
+  lineUserId: text("line_user_id").unique(),
   image: text("image"),
   credits: integer("credits").default(0).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
