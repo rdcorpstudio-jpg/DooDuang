@@ -333,21 +333,35 @@ function RadarChart({
     return { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r };
   };
 
+  /** Match life-trend bands — high green / mid gold / low coral */
+  const scoreColor = (score: number) => {
+    if (score >= 75) return "#5ee9a8";
+    if (score >= 55) return "#FFE14A";
+    return "#FF6B8A";
+  };
+  const scoreGlow = (score: number) => {
+    if (score >= 75) return "rgba(94,233,168,0.45)";
+    if (score >= 55) return "rgba(255,225,74,0.4)";
+    return "rgba(255,107,138,0.45)";
+  };
+
   const rings = [0.25, 0.5, 0.75, 1];
-  const poly = values
-    .map((v, i) => {
-      const p = point(i, (v.score / 100) * maxR);
-      return `${p.x},${p.y}`;
-    })
-    .join(" ");
+  const pts = values.map((v, i) => ({
+    ...point(i, (v.score / 100) * maxR),
+    color: scoreColor(v.score),
+    score: v.score,
+    label: v.label,
+  }));
+  const poly = pts.map((p) => `${p.x},${p.y}`).join(" ");
 
   return (
     <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto w-full max-w-[320px]">
       <defs>
-        <linearGradient id={`radar-fill-${gid}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="rgba(213,177,111,0.42)" />
-          <stop offset="100%" stopColor="rgba(184,146,63,0.14)" />
-        </linearGradient>
+        <radialGradient id={`radar-fill-${gid}`} cx="50%" cy="50%" r="65%">
+          <stop offset="0%" stopColor="rgba(94,233,168,0.38)" />
+          <stop offset="45%" stopColor="rgba(255,225,74,0.22)" />
+          <stop offset="100%" stopColor="rgba(255,107,138,0.1)" />
+        </radialGradient>
       </defs>
 
       {rings.map((r) => (
@@ -358,13 +372,14 @@ function RadarChart({
             return `${p.x},${p.y}`;
           }).join(" ")}
           fill="none"
-          stroke="rgba(213,177,111,0.22)"
+          stroke="rgba(247,244,236,0.1)"
           strokeWidth={1}
         />
       ))}
 
       {values.map((_, i) => {
         const p = point(i, maxR);
+        const selected = i === selectedIndex;
         return (
           <line
             key={i}
@@ -373,11 +388,12 @@ function RadarChart({
             x2={p.x}
             y2={p.y}
             stroke={
-              i === selectedIndex
-                ? "rgba(213,177,111,0.55)"
-                : "rgba(213,177,111,0.16)"
+              selected
+                ? scoreColor(values[i]!.score)
+                : "rgba(247,244,236,0.12)"
             }
-            strokeWidth={i === selectedIndex ? 1.5 : 1}
+            strokeWidth={selected ? 1.5 : 1}
+            opacity={selected ? 0.55 : 1}
           />
         );
       })}
@@ -385,18 +401,33 @@ function RadarChart({
       <polygon
         points={poly}
         fill={`url(#radar-fill-${gid})`}
-        stroke="#d5b16f"
-        strokeWidth={2}
-        strokeLinejoin="round"
+        stroke="none"
       />
 
-      {values.map((v, i) => {
-        const p = point(i, (v.score / 100) * maxR);
+      {/* Colored edge segments between vertices */}
+      {pts.map((p, i) => {
+        const next = pts[(i + 1) % n]!;
+        return (
+          <line
+            key={`e-${i}`}
+            x1={p.x}
+            y1={p.y}
+            x2={next.x}
+            y2={next.y}
+            stroke={p.color}
+            strokeWidth={2.2}
+            strokeLinecap="round"
+            opacity={0.9}
+          />
+        );
+      })}
+
+      {pts.map((p, i) => {
         const tip = point(i, maxR + 28);
         const selected = i === selectedIndex;
         return (
           <g
-            key={v.label}
+            key={p.label}
             className={onSelect ? "cursor-pointer" : undefined}
             onClick={() => onSelect?.(i)}
           >
@@ -406,13 +437,21 @@ function RadarChart({
               r={26}
               fill="transparent"
             />
+            {selected ? (
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={11}
+                fill={scoreGlow(p.score)}
+              />
+            ) : null}
             <circle
               cx={p.x}
               cy={p.y}
-              r={selected ? 6 : 4}
-              fill="#d5b16f"
-              stroke={selected ? "#f7f4ec" : "none"}
-              strokeWidth={selected ? 2.5 : 0}
+              r={selected ? 6.5 : 4.5}
+              fill="#101827"
+              stroke={p.color}
+              strokeWidth={selected ? 2.6 : 2}
             />
             <text
               x={tip.x}
@@ -423,17 +462,17 @@ function RadarChart({
               fontSize={11}
               fontWeight={selected ? 700 : 600}
             >
-              {v.label}
+              {p.label}
             </text>
             <text
               x={tip.x}
               y={tip.y + 14}
               textAnchor="middle"
-              fill={selected ? "#d5b16f" : "rgba(232,209,154,0.75)"}
+              fill={p.color}
               fontSize={12}
               fontWeight={700}
             >
-              {v.score}
+              {p.score}
             </text>
           </g>
         );
@@ -592,24 +631,6 @@ function AxisSwipeReader({
             </article>
           ))}
         </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-        {axes.map((a, i) => (
-          <button
-            key={a.key}
-            type="button"
-            onClick={() => goTo(i)}
-            className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-semibold outline-none transition",
-              i === index
-                ? "bg-[#d5b16f] text-[#101827]"
-                : "text-[#e8d19a]/80 shadow-[0_0_0_1px_rgba(213,177,111,0.4)]"
-            )}
-          >
-            {i + 1}
-          </button>
-        ))}
       </div>
     </div>
   );

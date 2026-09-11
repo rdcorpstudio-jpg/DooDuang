@@ -1,33 +1,72 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Lock, UserRound } from "lucide-react";
+import { ArrowRight, ChevronLeft, Lock } from "lucide-react";
 import {
   GoogleSignInButton,
   startGoogleRedirect,
 } from "@/components/auth/google-sign-in-button";
+import { LineSignInButton } from "@/components/auth/line-sign-in-button";
+import { PhoneLoginForm } from "@/components/auth/phone-login-form";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { isFirebaseClientConfigured } from "@/lib/firebase/client";
+
+function AuthDivider({ label = "หรือ" }: { label?: string }) {
+  return (
+    <div className="my-2.5 flex items-center gap-2.5">
+      <span
+        className="h-px flex-1"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(213,177,111,0.4), transparent)",
+        }}
+      />
+      <span className="text-[11px] font-medium tracking-wide text-[#d5b16f]/75">
+        {label}
+      </span>
+      <span
+        className="h-px flex-1"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(213,177,111,0.4), transparent)",
+        }}
+      />
+    </div>
+  );
+}
 
 export function LoginScreen({
   callbackUrl = "/premium?checkout=1",
   autoStartGoogle = false,
+  lineError,
 }: {
   callbackUrl?: string;
   /** From LINE/Safari handoff — open Google immediately, no middle page */
   autoStartGoogle?: boolean;
+  /** From `/api/auth/line/callback` when OAuth fails */
+  lineError?: string;
 }) {
   const router = useRouter();
   const started = useRef(false);
+
+  const lineErrorMessage =
+    lineError === "denied"
+      ? "ยกเลิกการเข้าสู่ระบบด้วย LINE"
+      : lineError === "state" || lineError === "missing"
+        ? "เซสชัน LINE หมดอายุ กรุณาลองใหม่"
+        : lineError === "failed"
+          ? "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่"
+          : lineError
+            ? "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ"
+            : null;
 
   useEffect(() => {
     if (!autoStartGoogle || started.current) return;
     if (!isFirebaseClientConfigured()) return;
     started.current = true;
-    // Strip autologin so refresh won't loop
     try {
       const url = new URL(window.location.href);
       if (url.searchParams.has("autologin")) {
@@ -41,7 +80,7 @@ export function LoginScreen({
   }, [autoStartGoogle, callbackUrl]);
 
   return (
-    <AnimatedPage className="relative flex min-h-full flex-col px-4 pb-8 pt-3">
+    <AnimatedPage className="relative flex min-h-full flex-col overflow-y-auto px-4 pb-6 pt-3">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
         <button
           type="button"
@@ -51,89 +90,95 @@ export function LoginScreen({
           <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
           กลับ
         </button>
-        <div className="flex flex-col items-center justify-self-center">
-          <Image
-            src="/images/brand/mae-wordmark-header.png?v=header1"
-            alt="แม่มั่งมี พามู"
-            width={140}
-            height={80}
-            unoptimized
-            priority
-            className="h-8 w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
-          />
-        </div>
+        <span aria-hidden className="justify-self-center" />
         <span aria-hidden className="justify-self-end" />
       </div>
 
-      <div className="flex flex-1 flex-col justify-center py-6">
-        <div
-          className="mx-auto w-full max-w-[400px] rounded-[22px] px-5 py-6 text-center sm:px-6"
-          style={{
-            background: "#141c2b",
-            boxShadow:
-              "inset 0 0 0 1px rgba(213,177,111,0.28), 0 16px 40px rgba(0,0,0,0.28)",
-          }}
-        >
+      <div className="flex flex-1 flex-col justify-center py-3">
+        <div className="mae-aspect-card mx-auto w-full max-w-[340px] px-4 py-4 text-center">
           <div
-            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full"
+            className="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
             style={{
-              background: "rgba(213,177,111,0.12)",
-              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+              background:
+                "radial-gradient(circle at 35% 30%, rgba(255,248,228,0.18), rgba(213,177,111,0.08) 55%, transparent)",
+              boxShadow:
+                "inset 0 0 0 1px rgba(213,177,111,0.45), 0 6px 16px rgba(0,0,0,0.22)",
             }}
           >
-            <UserRound className="h-7 w-7 text-[#d5b16f]" strokeWidth={1.7} />
+            <FortuneIcon name="profile" size={22} plain />
           </div>
 
-          <h1 className="mt-4 font-sans text-[1.4rem] font-bold tracking-tight text-[#f7f4ec]">
+          <p className="mae-gold-text mt-2.5 text-[10px] font-semibold tracking-[0.2em]">
+            แม่มั่งมี
+          </p>
+          <h1 className="mt-0.5 font-sans text-[1.2rem] font-bold leading-snug tracking-[0.03em] text-[#f7f4ec]">
             เข้าสู่ระบบ
           </h1>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-[#9aa3b2]">
+          <p className="mx-auto mt-1 max-w-[16rem] text-[12px] leading-snug text-[#c5cdd9]/70">
             {autoStartGoogle
               ? "กำลังเปิด Google…"
-              : "ปลดล็อกสิทธิ์พรีเมียมและบันทึกโปรไฟล์"}
+              : "LINE · เบอร์ · หรือ Google"}
           </p>
 
-          <GoogleSignInButton
-            callbackUrl={callbackUrl}
-            coloredIcon
-            showIconDivider
-            variant="outline"
-            className="mt-5 space-y-2"
-            buttonClassName="h-12 gap-2.5 rounded-full border-[rgba(213,177,111,0.3)] bg-transparent text-[15px] font-semibold text-[#f4f1ea] outline-none hover:bg-white/[0.04] hover:border-[rgba(213,177,111,0.45)] hover:text-[#f4f1ea] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35 active:scale-[0.99]"
-          />
+          {lineErrorMessage ? (
+            <p className="mt-2.5 text-[12px] leading-snug text-[#ff8fa3]">
+              {lineErrorMessage}
+            </p>
+          ) : null}
 
-          <p className="mt-3 text-[12px] text-[#6b7380]">
-            เข้าสู่ระบบเพื่อใช้งานบัญชีของคุณ
-          </p>
+          <div className="mt-3.5 space-y-2">
+            <LineSignInButton
+              callbackUrl={callbackUrl}
+              buttonClassName="h-10 text-[13.5px]"
+            />
 
-          <div className="my-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-[rgba(213,177,111,0.22)]" />
-            <span className="text-[12px] font-medium text-[#9aa3b2]">หรือ</span>
-            <span className="h-px flex-1 bg-[rgba(213,177,111,0.22)]" />
+            <div
+              className="rounded-full p-px"
+              style={{
+                background:
+                  "linear-gradient(145deg, #fff8e4 0%, #e2c787 45%, #d5b16f 70%, #b8924f 100%)",
+              }}
+            >
+              <GoogleSignInButton
+                callbackUrl={callbackUrl}
+                coloredIcon
+                showIconDivider
+                variant="outline"
+                className="space-y-1.5"
+                buttonClassName="h-10 w-full gap-2 rounded-full border-0 bg-[#101827] text-[13.5px] font-semibold text-[#f7f4ec] outline-none transition hover:bg-[#162033] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35 active:scale-[0.99]"
+              />
+            </div>
           </div>
 
-          <p className="text-[13px] text-[#9aa3b2]">
+          <AuthDivider label="หรือใช้เบอร์" />
+
+          <PhoneLoginForm callbackUrl={callbackUrl} compact />
+
+          <AuthDivider />
+
+          <p className="text-[12px] leading-snug text-[#c5cdd9]/65">
             ดูดวงได้โดยไม่ต้องเข้าสู่ระบบ
           </p>
           <Link
             href="/reading"
-            className="mae-gold-cta mt-3 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-semibold outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+            className="mae-gold-cta group mt-2 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full text-[13.5px] font-semibold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           >
-            ไปดูดวงฟรี →
+            ไปดูดวงฟรี
+            <ArrowRight
+              className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+              strokeWidth={2.4}
+            />
           </Link>
 
           <Link
             href="/dashboard?preview=1"
-            className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full text-[13px] font-medium text-[#e8d19a] outline-none transition active:opacity-70"
-            style={{
-              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
-            }}
+            className="mt-2.5 inline-flex text-[12px] font-medium tracking-wide text-[#e8d19a]/85 underline decoration-[#d5b16f]/35 underline-offset-[4px] outline-none transition hover:text-[#f7f4ec]"
           >
             ดูตัวอย่างหน้าหลังล็อกอิน
           </Link>
 
-          <p className="mt-5 inline-flex items-center justify-center gap-1.5 text-[11px] text-[#6b7380]">
-            <Lock className="h-3 w-3 shrink-0 text-[#d5b16f]" strokeWidth={2} />
+          <p className="mt-3 inline-flex items-center justify-center gap-1 text-[10.5px] tracking-wide text-[#9aa3b2]">
+            <Lock className="h-2.5 w-2.5 shrink-0 text-[#d5b16f]" strokeWidth={2} />
             ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
           </p>
         </div>

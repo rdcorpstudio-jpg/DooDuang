@@ -89,23 +89,28 @@ export function FortuneTopicGrid({
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         {domains.map((d) => (
           <Link
             key={d.domainId}
             href={aspectHref(d.domainId)}
-            className="mae-aspect-card group relative flex min-h-[100px] items-center gap-2.5 px-3 py-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
+            className="mae-aspect-card group relative flex min-h-[108px] flex-col gap-2 px-3 pb-3 pt-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
             aria-label={`อ่านดวง${d.name}`}
           >
-            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center">
-              <FortuneIcon
-                name={d.icon}
-                size={48}
-                plain
-                className="relative drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
-              />
+            <span className="flex items-start justify-between gap-2">
+              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center">
+                <FortuneIcon
+                  name={d.icon}
+                  size={44}
+                  plain
+                  className="relative"
+                />
+              </span>
+              <span className="mae-aspect-chevron !h-7 !w-7">
+                <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.4} />
+              </span>
             </span>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 w-full">
               <p className="mae-aspect-title text-[14px] font-semibold tracking-tight">
                 {d.name}
               </p>
@@ -113,9 +118,6 @@ export function FortuneTopicGrid({
                 {d.blurb}
               </p>
             </div>
-            <span className="mae-aspect-chevron">
-              <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
-            </span>
           </Link>
         ))}
       </div>

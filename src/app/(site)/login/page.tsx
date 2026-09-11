@@ -3,7 +3,11 @@ import { LoginScreen } from "@/components/auth/login-screen";
 import { auth } from "@/lib/auth";
 
 interface LoginPageProps {
-  searchParams: Promise<{ callbackUrl?: string; autologin?: string }>;
+  searchParams: Promise<{
+    callbackUrl?: string;
+    autologin?: string;
+    lineError?: string;
+  }>;
 }
 
 function safeCallback(callbackUrl?: string) {
@@ -20,7 +24,7 @@ function safeCallback(callbackUrl?: string) {
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { callbackUrl, autologin } = await searchParams;
+  const { callbackUrl, autologin, lineError } = await searchParams;
   const next = safeCallback(callbackUrl);
 
   const session = await auth().catch(() => null);
@@ -30,6 +34,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <LoginScreen callbackUrl={next} autoStartGoogle={autologin === "1"} />
+    <LoginScreen
+      callbackUrl={next}
+      autoStartGoogle={autologin === "1"}
+      lineError={lineError}
+    />
   );
 }

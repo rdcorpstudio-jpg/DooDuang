@@ -205,7 +205,7 @@ function MaeSection({
   );
 }
 
-/** Alternate home `/mae` — 9:16 sacred navy/gold, content from reference site */
+/** Main home `/` — 9:16 sacred navy/gold Mae landing */
 export function MaeLanding() {
   const [mounted, setMounted] = useState(false);
   const [topic, setTopic] = useState<(typeof TOPICS)[number]["id"]>("life");
@@ -247,14 +247,14 @@ export function MaeLanding() {
           />
         </div>
 
-        {/* Brand mark — clear of hero copy below */}
+        {/* Brand mark — slightly below hands, mid frame */}
         <div
-          className="pointer-events-none absolute left-1/2 z-10 w-[min(78%,15.5rem)] -translate-x-1/2 -translate-y-1/2 sm:w-[16.5rem]"
-          style={{ top: "40%" }}
+          className="pointer-events-none absolute left-1/2 z-10 w-[min(68%,13.5rem)] -translate-x-1/2 -translate-y-1/2 sm:w-[14.5rem]"
+          style={{ top: "45%" }}
         >
           <Reveal visible={mounted} delay={60} variant="glow">
             <Image
-              src="/images/brand/mae-wordmark-sm.png?v=gold2"
+              src="/images/brand/mae-wordmark-sm.png?v=clear1"
               alt="แม่มั่งมี พามู"
               width={400}
               height={200}
@@ -265,22 +265,25 @@ export function MaeLanding() {
           </Reveal>
         </div>
 
+        {/* Spacer — keeps headline/copy mid-lower, tight under wordmark */}
+        <div className="relative z-0 min-h-[52%] w-full shrink-0" aria-hidden />
+
         <div
           className={cn(
-            "mae-hero-copy mae-hero-stagger relative z-10 mt-auto mb-14 flex w-full flex-col items-center pt-20 text-center sm:mb-16 sm:pt-24",
+            "mae-hero-copy mae-hero-stagger relative z-10 mb-6 flex w-full flex-col items-center pt-1 text-center sm:mb-8",
             mounted && "is-visible"
           )}
         >
-          <h1 className="mt-0 flex flex-col items-center gap-2 overflow-visible font-sans text-white">
-            <span className="text-[2.15rem] font-bold leading-[1.3] tracking-tight sm:text-[2.35rem]">
+          <h1 className="mt-0 flex flex-col items-center gap-0 overflow-visible font-sans text-white">
+            <span className="text-[1.55rem] font-bold leading-[1.3] tracking-[0.03em] sm:text-[1.65rem]">
               เข้าใจจังหวะชีวิต
             </span>
-            <span className="mae-hero-gold-line pb-1 text-[1.7rem] font-bold leading-[1.35] tracking-tight sm:text-[1.85rem]">
+            <span className="mae-hero-gold-line text-[1.55rem] font-bold leading-[1.3] tracking-[0.03em] sm:text-[1.65rem]">
               ก้าวต่ออย่างอุ่นใจ
             </span>
           </h1>
 
-          <p className="mx-auto mt-5 max-w-[20rem] text-[13.5px] leading-[1.85] text-white/90">
+          <p className="mx-auto mt-2.5 max-w-[18.5rem] text-[12.5px] leading-[1.6] tracking-[0.01em] text-white/85">
             บางช่วง… เราตั้งใจเต็มที่
             <br />
             แต่หลายอย่างกลับไม่เป็นอย่างหวัง
@@ -290,22 +293,22 @@ export function MaeLanding() {
 
           <Link
             href="/reading"
-            className="mae-gold-cta group relative mx-auto mt-7 flex w-full max-w-[280px] items-center justify-center gap-2.5 overflow-hidden rounded-full px-8 py-4 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+            className="mae-gold-cta group relative mx-auto mt-5 flex h-11 w-full max-w-[240px] items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           >
-            <span className="text-[15.5px] font-bold tracking-wide">
+            <span className="text-[14px] font-bold tracking-wide">
               เลือกเรื่องที่อยากรู้
             </span>
             <ArrowRight
-              className="h-[1.05rem] w-[1.05rem] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+              className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
               strokeWidth={2.4}
             />
           </Link>
 
           <a
             href="#belief"
-            className="mae-concept-link mt-4 inline-flex items-center gap-1.5 text-[15px] text-white/90 transition hover:text-white"
+            className="mae-concept-link mt-3 inline-flex items-center gap-1.5 text-[13px] text-white/85 transition hover:text-white"
           >
-            <span className="underline decoration-white/55 underline-offset-[6px]">
+            <span className="underline decoration-white/50 underline-offset-[5px]">
               อ่านแนวคิดแม่มั่งมี
             </span>
             <span className="mae-concept-arrow" aria-hidden>
@@ -313,7 +316,7 @@ export function MaeLanding() {
             </span>
           </a>
 
-          <p className="mt-4 flex items-center justify-center gap-2 text-[13px] leading-snug text-[#c5cdd9]">
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-[11.5px] leading-snug text-[#c5cdd9]/85">
             <span style={{ color: C.gold }} aria-hidden>
               ✦
             </span>

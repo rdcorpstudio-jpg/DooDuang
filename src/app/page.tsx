@@ -1,6 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { APP_NAME } from "@/lib/site";
-import { HomeScroll } from "@/components/home/home-scroll";
+import { MaeLanding } from "@/components/home/mae-landing";
+
+export const metadata: Metadata = {
+  title: "แม่มั่งมี — อ่านดวงอุ่นใจ",
+  description:
+    "เข้าใจจังหวะชีวิต ก้าวต่ออย่างอุ่นใจ — อ่านดวงอย่างมีสติ ผ่านแนวคิด 30 ลิขิตฟ้า 70 มานะตน",
+};
 
 export default function HomePage() {
   return (
@@ -15,7 +22,7 @@ export default function HomePage() {
         <Link href="/privacy">นโยบายความเป็นส่วนตัว</Link>
         <Link href="/terms">ข้อกำหนดการใช้งาน</Link>
       </section>
-      <HomeScroll />
+      <MaeLanding />
     </>
   );
 }

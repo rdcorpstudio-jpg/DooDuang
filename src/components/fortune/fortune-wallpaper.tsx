@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Download, Lock, Sparkles, Star } from "lucide-react";
+import { ChevronLeft, Download, Lock } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
@@ -16,7 +16,7 @@ import {
   isPremiumUnlocked,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
-import { FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK } from "@/lib/site";
+import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const LOAD_MS = 3200;
@@ -104,28 +104,30 @@ export function FortuneWallpaper({ className }: { className?: string }) {
   }
 
   return (
-    <div className={cn("sky-copy relative h-full overflow-hidden", className)}>
+    <div className={cn("no-sky-lift relative h-full overflow-hidden", className)}>
       <div className="relative mx-auto flex h-full w-full max-w-[480px] flex-col px-4 pb-3 pt-2.5">
         <div className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2">
           <button
             type="button"
             onClick={() => router.back()}
-            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#f7f4ec]/85 outline-none transition active:opacity-60"
           >
             <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
             กลับ
           </button>
-          <div className="flex flex-col items-center justify-self-center">
-            <FortuneIcon name="moon" size={14} className="-mb-0.5" />
-            <p className="font-sacred text-[11px] tracking-[0.26em] text-[#C9A227]">{APP_BRAND_MARK}</p>
-          </div>
+          <div className="flex flex-col items-center justify-self-center" aria-hidden />
+
           <span
             className={cn(
               "justify-self-end rounded-full px-2.5 py-1 text-[10px] font-semibold",
-              unlocked
-                ? "bg-[#F4BC52]/22 text-[#8A6A12]"
-                : "bg-[#B9A4F0]/28 text-[#5B45B8]"
+              unlocked ? "text-[#e8d19a]" : "text-[#f7f4ec]/70"
             )}
+            style={{
+              background: unlocked
+                ? "rgba(213,177,111,0.16)"
+                : "rgba(213,177,111,0.08)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+            }}
           >
             {unlocked ? "พรีเมียม" : "ล็อกอยู่"}
           </span>
@@ -173,45 +175,39 @@ function PrayStep({ onPray }: { onPray: () => void }) {
           className="relative flex h-[78px] w-[78px] items-center justify-center rounded-full"
           style={{
             background:
-              "radial-gradient(circle at 35% 28%, rgba(255,255,255,0.98), rgba(210,198,250,0.72) 55%, rgba(155,127,232,0.45))",
+              "radial-gradient(circle at 35% 28%, #fff8e4 0%, #e8d19a 42%, #d5b16f 78%, #b8924f 100%)",
             boxShadow:
-              "0 14px 32px rgba(110,79,201,0.24), inset 0 1px 0 rgba(255,255,255,0.9)",
+              "inset 0 1px 0 rgba(255,255,255,0.45), 0 10px 28px rgba(0,0,0,0.28)",
           }}
         >
-          <Sparkles className="h-9 w-9 text-[#7B5FD4]" strokeWidth={1.35} />
+          <FortuneIcon name="sparkle" size={34} plain />
         </span>
       </div>
 
-      <p className="mt-5 text-[11px] font-semibold tracking-[0.18em] text-[#A07E1A]">
+      <p className="mae-gold-text mt-5 text-[11px] font-semibold tracking-[0.18em]">
         ของขวัญพรีเมียม
       </p>
-      <h1 className="mt-1.5 text-[1.55rem] font-bold tracking-tight text-[#241C4F]">
+      <h1 className="mae-gold-text mt-1.5 text-[1.55rem] font-bold tracking-tight">
         หลับตาอธิษฐาน
       </h1>
-      <p className="mx-auto mt-2 max-w-[18rem] text-[14px] leading-relaxed text-[#5E5688]">
+      <p className="mx-auto mt-2 max-w-[18rem] text-[14px] leading-relaxed text-[#f7f4ec]/70">
         สมัครพรีเมียม 1 ครั้ง ได้วอลเปเปอร์มงคลสุ่ม 1 รูป
         โหลดคุณภาพเต็มไฟล์ได้เฉพาะคุณ
       </p>
 
-      <div className="mt-4 flex items-center gap-2 text-[12px] text-[#8A82B0]">
-        <span className="tarot-prayer-dot h-1.5 w-1.5 rounded-full bg-[#9B7FE8]" />
+      <div className="mt-4 flex items-center gap-2 text-[12px] text-[#f7f4ec]/55">
+        <span className="tarot-prayer-dot h-1.5 w-1.5 rounded-full bg-[#d5b16f]" />
         หายใจเข้าลึก ๆ
-        <span className="text-[#C8B8F0]">·</span>
+        <span className="text-[#d5b16f]/50">·</span>
         หายใจออกช้า ๆ
       </div>
 
       <button
         type="button"
         onClick={onPray}
-        className="no-sky-lift mt-7 inline-flex h-[3.35rem] w-full max-w-[320px] items-center justify-center gap-2 rounded-full text-[17px] font-bold text-white outline-none transition active:scale-[0.99]"
-        style={{
-          background:
-            "linear-gradient(90deg, #6A48C8 0%, #8B6AD8 50%, #B29AEF 100%)",
-          boxShadow:
-            "0 14px 32px rgba(106,72,200,0.36), inset 0 1px 0 rgba(255,255,255,0.35)",
-        }}
+        className="mae-gold-cta mt-7 inline-flex h-[3.35rem] w-full max-w-[320px] items-center justify-center gap-2 rounded-full text-[17px] font-bold outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
       >
-        <Sparkles className="h-5 w-5" strokeWidth={2} />
+        <FortuneIcon name="sparkle" size={20} plain />
         กดอธิษฐาน
       </button>
     </div>
@@ -222,28 +218,24 @@ function LoadingStep({ line }: { line: string }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-2 text-center">
       <div className="relative flex h-36 w-36 items-center justify-center">
-        <span className="wallpaper-load-spin absolute inset-0 rounded-full border-2 border-[#C8B8F0]/35 border-t-[#7B5FD4]" />
-        <span className="wallpaper-load-spin-rev absolute inset-3 rounded-full border border-dashed border-[#C9A227]/55" />
+        <span className="wallpaper-load-spin absolute inset-0 rounded-full border-2 border-[rgba(213,177,111,0.28)] border-t-[#d5b16f]" />
+        <span className="wallpaper-load-spin-rev absolute inset-3 rounded-full border border-dashed border-[rgba(232,209,154,0.45)]" />
         <span
           className="wallpaper-pray-breathe relative flex h-20 w-20 items-center justify-center rounded-full"
           style={{
             background:
-              "radial-gradient(circle at 40% 30%, #FFF8E8, #EDE4FF 60%, #D4C4F5)",
-            boxShadow: "0 12px 28px rgba(110,79,201,0.22)",
+              "radial-gradient(circle at 40% 30%, #fff8e4, #e8d19a 55%, #d5b16f)",
+            boxShadow: "0 12px 28px rgba(0,0,0,0.28)",
           }}
         >
-          <Star
-            className="h-8 w-8 text-[#C9A227]"
-            strokeWidth={1.4}
-            fill="rgba(201,162,39,0.35)"
-          />
+          <FortuneIcon name="sparkle" size={32} plain />
         </span>
         <span
-          className="wallpaper-load-spark pointer-events-none absolute left-2 top-6 h-1.5 w-1.5 rounded-full bg-[#F4BC52]"
+          className="wallpaper-load-spark pointer-events-none absolute left-2 top-6 h-1.5 w-1.5 rounded-full bg-[#e8d19a]"
           aria-hidden
         />
         <span
-          className="wallpaper-load-spark pointer-events-none absolute bottom-8 right-3 h-1 w-1 rounded-full bg-[#9B7FE8]"
+          className="wallpaper-load-spark pointer-events-none absolute bottom-8 right-3 h-1 w-1 rounded-full bg-[#d5b16f]"
           style={{ animationDelay: "0.7s" }}
           aria-hidden
         />
@@ -251,14 +243,23 @@ function LoadingStep({ line }: { line: string }) {
 
       <p
         key={line}
-        className="wallpaper-load-text mt-6 text-[17px] font-semibold text-[#241C4F]"
+        className="wallpaper-load-text mae-gold-text mt-6 text-[17px] font-semibold"
       >
         {line}
       </p>
-      <p className="mt-2 text-[13px] text-[#8A82B0]">โปรดรอสักครู่…</p>
+      <p className="mt-2 text-[13px] text-[#f7f4ec]/55">โปรดรอสักครู่…</p>
 
-      <div className="mt-5 h-1.5 w-48 overflow-hidden rounded-full bg-[#9B7FE8]/20">
-        <div className="wallpaper-load-bar h-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#C9A227]" />
+      <div
+        className="mt-5 h-1.5 w-48 overflow-hidden rounded-full"
+        style={{ background: "rgba(213,177,111,0.18)" }}
+      >
+        <div
+          className="wallpaper-load-bar h-full rounded-full"
+          style={{
+            background:
+              "linear-gradient(90deg, #b8924f 0%, #d5b16f 55%, #e8d19a 100%)",
+          }}
+        />
       </div>
     </div>
   );
@@ -280,13 +281,13 @@ function RevealStep({
   return (
     <div className="wallpaper-reveal flex min-h-0 flex-1 flex-col">
       <header className="mt-2 shrink-0 text-center">
-        <p className="text-[10px] font-semibold tracking-[0.16em] text-[#A07E1A]">
+        <p className="mae-gold-text text-[10px] font-semibold tracking-[0.16em]">
           PREMIUM · 1 รูป / การสมัคร
         </p>
-        <h1 className="mt-0.5 text-[1.35rem] font-bold tracking-tight text-[#241C4F]">
+        <h1 className="mae-gold-text mt-0.5 text-[1.35rem] font-bold tracking-tight">
           วอลเปเปอร์มงคลของคุณ
         </h1>
-        <p className="mx-auto mt-1 max-w-[22rem] text-[12px] leading-snug text-[#5E5688]">
+        <p className="mx-auto mt-1 max-w-[22rem] text-[12px] leading-snug text-[#f7f4ec]/65">
           สุ่มมอบให้เฉพาะบัญชีพรีเมียม · โหลดไฟล์ต้นฉบับคุณภาพเต็ม
         </p>
       </header>
@@ -300,7 +301,13 @@ function RevealStep({
             maxWidth: "min(100%, 230px)",
           }}
         >
-          <div className="relative h-full w-full overflow-hidden rounded-[22px] border-[3px] border-[#C9A227]/85 bg-[#2C2458] shadow-[0_14px_36px_rgba(80,60,140,0.26)]">
+          <div
+            className="relative h-full w-full overflow-hidden rounded-[22px] bg-[#101827]"
+            style={{
+              boxShadow:
+                "inset 0 0 0 2px rgba(213,177,111,0.55), 0 14px 36px rgba(0,0,0,0.32)",
+            }}
+          >
             <Image
               src={wallpaper.src}
               alt={wallpaper.title}
@@ -314,8 +321,14 @@ function RevealStep({
               priority
             />
             {!unlocked ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#241C4F]/28">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-[12px] font-semibold text-[#5C4810]">
+              <div className="absolute inset-0 flex items-center justify-center bg-[#101827]/45">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold text-[#101827]"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, #efe0b8 0%, #d5b16f 100%)",
+                  }}
+                >
                   <Lock className="h-3.5 w-3.5" strokeWidth={2.2} />
                   พรีเมียมเท่านั้น
                 </span>
@@ -335,31 +348,28 @@ function RevealStep({
             className="absolute -bottom-1 -right-2 z-[2] flex h-14 w-14 items-center justify-center rounded-full outline-none transition active:scale-[0.96] disabled:opacity-70"
             style={{
               background:
-                "radial-gradient(circle at 35% 28%, #F8F4FF 0%, #E8DEFF 55%, #D4C4F5 100%)",
-              boxShadow: [
-                "0 0 0 3px rgba(201,162,39,0.92)",
-                "0 10px 22px rgba(106,72,200,0.28)",
-                "inset 0 1px 0 rgba(255,255,255,0.85)",
-              ].join(", "),
+                "radial-gradient(circle at 35% 28%, #fff8e4 0%, #e8d19a 55%, #d5b16f 100%)",
+              boxShadow:
+                "0 0 0 2px rgba(213,177,111,0.85), 0 10px 22px rgba(0,0,0,0.3)",
             }}
           >
             {unlocked ? (
-              <Download className="h-6 w-6 text-[#3A2F6B]" strokeWidth={2.2} />
+              <Download className="h-6 w-6 text-[#101827]" strokeWidth={2.2} />
             ) : (
-              <Lock className="h-6 w-6 text-[#3A2F6B]" strokeWidth={2.2} />
+              <Lock className="h-6 w-6 text-[#101827]" strokeWidth={2.2} />
             )}
           </button>
         </div>
       </div>
 
-      <div className="fortune-glass mt-2.5 w-full shrink-0 rounded-[18px] px-3.5 py-3 text-center">
-        <div className="flex items-center justify-center gap-1.5 text-[#A07E1A]">
-          <Sparkles className="h-3.5 w-3.5" strokeWidth={1.8} />
-          <p className="text-[12px] font-semibold tracking-[0.12em]">
+      <div className="mae-aspect-card mt-2.5 w-full shrink-0 rounded-[18px] px-3.5 py-3 text-center">
+        <div className="flex items-center justify-center gap-1.5">
+          <FortuneIcon name="sparkle" size={14} plain />
+          <p className="mae-gold-text text-[12px] font-semibold tracking-[0.12em]">
             {unlocked ? wallpaper.title : "วอลเปเปอร์มงคล · พรีเมียม"}
           </p>
         </div>
-        <p className="mt-1 text-[12px] leading-snug text-[#5E5688]">
+        <p className="mt-1 text-[12px] leading-snug text-[#f7f4ec]/65">
           {unlocked
             ? wallpaper.subtitle
             : "ปลดล็อกแล้วระบบจะสุ่มมอบ 1 รูปให้คุณโหลดคุณภาพเต็ม"}
@@ -369,13 +379,7 @@ function RevealStep({
           <button
             type="button"
             onClick={onUnlock}
-            className="no-sky-lift mt-2.5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full px-3 text-[14px] font-semibold text-white outline-none transition active:scale-[0.99]"
-            style={{
-              background:
-                "linear-gradient(90deg, #6A48C8 0%, #8B6AD8 52%, #B29AEF 100%)",
-              boxShadow:
-                "0 10px 22px rgba(106,72,200,0.3), inset 0 1px 0 rgba(255,255,255,0.35)",
-            }}
+            className="mae-gold-cta mt-2.5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full px-3 text-[14px] font-semibold outline-none transition active:scale-[0.99]"
           >
             <Lock className="h-4 w-4 shrink-0" strokeWidth={2} />
             ปลดล็อก · รับวอลเปเปอร์ · {FORTUNE_UNLOCK_PRICE} บาท
@@ -385,7 +389,10 @@ function RevealStep({
             type="button"
             onClick={onDownload}
             disabled={downloading}
-            className="no-sky-lift mt-2.5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white px-3 text-[14px] font-semibold text-[#3A2F6B] shadow-[0_8px_18px_rgba(110,79,201,0.14)] outline-none transition active:scale-[0.99] disabled:opacity-70"
+            className="mt-2.5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full px-3 text-[14px] font-semibold text-[#f7f4ec] outline-none transition active:scale-[0.99] disabled:opacity-70"
+            style={{
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.4)",
+            }}
           >
             <Download className="h-4 w-4 shrink-0" strokeWidth={2} />
             {downloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดคุณภาพเต็ม"}

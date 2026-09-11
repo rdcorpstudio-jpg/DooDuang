@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Clover } from "lucide-react";
+import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import {
   buildDailyReadingPack,
 } from "@/lib/fortune/build-daily-pack";
@@ -71,10 +71,12 @@ export function FortuneLuckyStrip({
       </div>
 
       <div className="flex min-w-0 flex-col items-center justify-center border-l border-[rgba(213,177,111,0.28)] px-2 text-center">
-        <p className="mae-aspect-title inline-flex items-center justify-center gap-1 text-[11px] font-medium tracking-wide">
-          <Clover className="h-3.5 w-3.5 text-[#d5b16f]" strokeWidth={2} />
-          เลขนำโชค
-        </p>
+        <div className="flex flex-col items-center gap-1">
+          <FortuneIcon name="clover" size={18} plain className="shrink-0" />
+          <p className="mae-aspect-title text-[11px] font-medium tracking-wide">
+            เลขนำโชค
+          </p>
+        </div>
         <p className="mt-2 text-[1.35rem] font-semibold tracking-[0.14em] text-[#f7f4ec]">
           {lucky.numbers.join(" · ")}
         </p>

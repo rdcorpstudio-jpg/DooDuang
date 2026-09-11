@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BookOpen, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import { analyzeFortune } from "@/lib/fortune/analyze";
 import { pickZodiacDeep } from "@/lib/fortune/content/zodiac-deep";
@@ -91,24 +91,17 @@ export function FortuneFreeSelfIntro({
         type="button"
         aria-expanded={expanded}
         onClick={() => setExpanded((v) => !v)}
-        className="mt-3 flex w-full items-center gap-2.5 rounded-[14px] px-3 py-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
-        style={{
-          background: "rgba(255,255,255,0.04)",
-          boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.22)",
-        }}
+        className="mt-3.5 inline-flex w-full items-center justify-center gap-1.5 py-2 text-[13px] font-medium tracking-wide text-[#e8d19a] outline-none transition hover:text-[#f7f4ec] active:opacity-80 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.12)]">
-          <BookOpen className="h-4 w-4 text-[#d5b16f]" strokeWidth={2.1} />
-        </span>
-        <span className="min-w-0 flex-1 text-[13.5px] font-semibold text-[#f7f4ec]">
+        <span className="underline decoration-[#d5b16f]/45 underline-offset-[5px]">
           {expanded ? "ย่อข้อความ" : "อ่านเพิ่มเติม"}
         </span>
         <ChevronDown
           className={cn(
-            "h-4 w-4 shrink-0 text-[#d5b16f]/80 transition-transform",
+            "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
             expanded && "rotate-180"
           )}
-          strokeWidth={2.2}
+          strokeWidth={2.4}
         />
       </button>
     </section>

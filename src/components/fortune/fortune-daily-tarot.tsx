@@ -1,14 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Lock, Sparkles, Star } from "lucide-react";
+import { ChevronLeft, Lock, Star } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { TarotPrayerSheet } from "@/components/fortune/tarot-prayer-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
-import { drawTarotCard, TAROT_DECK_COUNT } from "@/lib/fortune/tarot-deck";
-import { FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK } from "@/lib/site";
+import {
+  drawTarotCard,
+  tarotCardImageSrc,
+  TAROT_DECK_COUNT,
+} from "@/lib/fortune/tarot-deck";
+import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 function todayKey() {
@@ -26,10 +31,7 @@ function formatThaiDate(d = new Date()) {
 const HOLD_MS = 650;
 const UNLOCK_KEY = "dooduang-tarot-unlocked";
 
-const cardShell =
-  "relative flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-[22px] px-4 py-5";
-
-/** Daily tarot — light lilac Guanyin UI */
+/** Daily tarot — Mae navy–gold */
 export function FortuneDailyTarot({
   seed,
   className,
@@ -129,31 +131,37 @@ export function FortuneDailyTarot({
           <button
             type="button"
             onClick={() => router.back()}
-            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#f7f4ec]/85 outline-none transition active:opacity-60"
           >
             <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
             กลับ
           </button>
-          <div className="flex flex-col items-center justify-self-center">
-            <FortuneIcon name="moon" size={16} className="-mb-0.5" />
-            <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">{APP_BRAND_MARK}</p>
-          </div>
-          <p className="justify-self-end text-right text-[11px] text-[#8A82B0]">
+          <div className="flex flex-col items-center justify-self-center" aria-hidden />
+
+          <p className="justify-self-end text-right text-[11px] tracking-wide text-[#e8d19a]/75">
             1 ใบ / วัน
           </p>
         </div>
 
-        <header className="mt-5 text-center">
-          <h1 className="text-[1.85rem] font-bold tracking-tight text-[#241C4F]">
+        <header className="mt-6 text-center">
+          <h1
+            className="mae-gold-text font-sans text-[1.85rem] font-bold tracking-[0.04em]"
+            style={{
+              filter:
+                "drop-shadow(0 1px 1px rgba(0,0,0,0.85)) drop-shadow(0 2px 8px rgba(0,0,0,0.4))",
+            }}
+          >
             ไพ่รายวัน
           </h1>
-          <p className="mt-1 text-[14px] text-[#5E5688]">{formatThaiDate()}</p>
-          <p className="mx-auto mt-2 max-w-[20rem] text-[12px] leading-relaxed text-[#6B6490]">
+          <p className="mt-1.5 text-[14px] tracking-wide text-[#e8d19a]/90">
+            {formatThaiDate()}
+          </p>
+          <p className="mx-auto mt-2 max-w-[20rem] text-[12.5px] leading-relaxed text-[#c5cdd9]/70">
             สำรับทาโรต์ {TAROT_DECK_COUNT} ใบ · สุ่ม 1 ใบต่อวัน
           </p>
         </header>
 
-        <div className="mt-6 flex flex-1 flex-col items-center">
+        <div className="mt-7 flex flex-1 flex-col items-center">
           {!opened ? (
             <button
               type="button"
@@ -168,106 +176,103 @@ export function FortuneDailyTarot({
               onPointerCancel={clearHold}
               onContextMenu={(e) => e.preventDefault()}
               className={cn(
-                "relative mx-auto w-[min(70vw,240px)] select-none outline-none",
+                "relative mx-auto w-[min(72vw,248px)] select-none outline-none transition",
+                holding && "scale-[0.985]",
                 !readyToDraw && "pointer-events-none opacity-55"
               )}
-              style={{ aspectRatio: "2 / 3.2", touchAction: "none" }}
+              style={{ aspectRatio: "840 / 1440", touchAction: "none" }}
             >
               <span
-                className={cn(
-                  cardShell,
-                  "fortune-glass border border-white/80 transition",
-                  holding && "scale-[0.98]"
-                )}
+                className="relative block h-full w-full overflow-hidden rounded-[16px] p-[3px] shadow-[0_14px_36px_rgba(0,0,0,0.5)]"
+                style={{
+                  background:
+                    "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)",
+                }}
               >
-                <span className="text-center">
-                  <span className="block text-[15px] font-semibold text-[#241C4F]">
-                    {readyToDraw ? "แตะค้างไว้" : "รอตั้งจิตก่อน"}
-                  </span>
-                  <span className="mt-1 block text-[12px] text-[#6B6490]">
-                    {readyToDraw
-                      ? "เพื่อเปิดไพ่รายวันของคุณ"
-                      : "หลับตาอธิษฐานสักครู่"}
-                  </span>
-                </span>
-
-                <span className="relative flex h-28 w-28 items-center justify-center">
-                  <span className="absolute inset-0 rounded-full border border-[#9B7FE8]/35" />
-                  <span className="absolute inset-3 rounded-full border border-dashed border-[#9B7FE8]/28" />
-                  <Sparkles
-                    className="h-10 w-10 text-[#7B5FD4]"
-                    strokeWidth={1.4}
+                <span className="relative block h-full w-full overflow-hidden rounded-[13px] bg-[#101827]">
+                  <Image
+                    src="/images/tarot/card-back.jpg?v=1"
+                    alt="หลังไพ่ทาโรต์"
+                    fill
+                    sizes="248px"
+                    priority
+                    unoptimized
+                    className="object-contain"
                   />
-                </span>
 
-                <span className="flex w-full items-center justify-center gap-2">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <span
-                      key={i}
-                      className="h-1.5 w-1.5 rounded-full bg-[#9B7FE8]"
-                      style={{ opacity: 0.35 + i * 0.12 }}
-                    />
-                  ))}
-                </span>
-
-                {holding ? (
                   <span
-                    className="pointer-events-none absolute inset-x-4 bottom-3 h-1 overflow-hidden rounded-full bg-[#9B7FE8]/2"
-                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#101827]/90 via-[#101827]/45 to-transparent px-4 pb-4 pt-10 text-center"
+                    aria-hidden={!readyToDraw}
                   >
-                    <span
-                      className="block h-full rounded-full bg-[#7B5FD4]"
-                      style={{ width: `${holdProgress * 100}%` }}
-                    />
+                    <span className="mae-gold-text block text-[13px] font-semibold tracking-wide">
+                      {readyToDraw
+                        ? holding
+                          ? "กำลังเปิด…"
+                          : "แตะค้างไว้เพื่อเปิด"
+                        : "รอตั้งจิตก่อน"}
+                    </span>
                   </span>
-                ) : null}
+
+                  {holding ? (
+                    <span
+                      className="pointer-events-none absolute inset-x-5 bottom-3.5 h-1.5 overflow-hidden rounded-full"
+                      style={{ background: "rgba(16,24,39,0.55)" }}
+                      aria-hidden
+                    >
+                      <span
+                        className="block h-full rounded-full"
+                        style={{
+                          width: `${holdProgress * 100}%`,
+                          background:
+                            "linear-gradient(90deg, #b8924f, #d5b16f, #e8d19a)",
+                        }}
+                      />
+                    </span>
+                  ) : null}
+                </span>
               </span>
             </button>
           ) : (
             <div className="flex w-full flex-col items-center pb-4">
               <div
-                className="relative mx-auto w-[min(70vw,240px)] overflow-hidden rounded-[22px] border border-white/80 bg-[#2C2458]"
-                style={{ aspectRatio: "2 / 3.2" }}
+                className="relative mx-auto w-[min(72vw,248px)] overflow-hidden rounded-[16px] p-[3px] shadow-[0_14px_36px_rgba(0,0,0,0.5)]"
+                style={{
+                  aspectRatio: "840 / 1440",
+                  background:
+                    "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)",
+                }}
                 data-slot="tarot-card-art"
               >
-                <div className="flex h-full flex-col items-center justify-between px-4 py-5 text-center">
-                  <p className="text-[11px] tracking-[0.2em] text-white/55">
-                    {card.label}
-                  </p>
-                  <div className="flex flex-1 flex-col items-center justify-center gap-3">
-                    <span
-                      className="flex h-24 w-24 items-center justify-center rounded-full bg-[#F4BC52]/15"
-                      style={{
-                        transform: upright ? undefined : "rotate(180deg)",
-                      }}
-                    >
-                      <Star
-                        className="h-12 w-12 text-[#F4BC52]"
-                        strokeWidth={1.4}
-                        fill="rgba(244,188,82,0.25)"
-                      />
-                    </span>
-                    <p className="text-[13px] font-semibold tracking-wide text-white">
-                      {card.nameEn}
-                    </p>
-                    <p className="text-[10px] tracking-wide text-white/45">
-                      {card.arcana === "minor" && card.suit
-                        ? "Minor Arcana"
-                        : "Major Arcana"}
-                    </p>
-                  </div>
-                  <p className="text-[11px] text-white/50">{card.nameTh}</p>
+                <div className="relative h-full w-full overflow-hidden rounded-[13px] bg-[#101827]">
+                  <Image
+                    src={tarotCardImageSrc(card)}
+                    alt={`${card.nameEn} — ${card.nameTh}`}
+                    fill
+                    sizes="248px"
+                    priority
+                    unoptimized
+                    className="object-contain"
+                    style={{
+                      transform: upright ? undefined : "rotate(180deg)",
+                    }}
+                  />
                 </div>
               </div>
 
               <div className="mt-5 text-center">
-                <h2 className="text-[1.4rem] font-bold text-[#241C4F]">
+                <h2
+                  className="mae-gold-text text-[1.4rem] font-bold tracking-wide"
+                  style={{
+                    filter:
+                      "drop-shadow(0 1px 1px rgba(0,0,0,0.85)) drop-shadow(0 2px 8px rgba(0,0,0,0.4))",
+                  }}
+                >
                   {card.nameTh}
                 </h2>
-                <p className="mt-1 text-[13px] text-[#6B6490]">
+                <p className="mt-1 text-[13px] text-[#e8d19a]/85">
                   {upright ? "ปกติ (Upright)" : "กลับหัว (Reversed)"}
                 </p>
-                <p className="mx-auto mt-3 max-w-[22rem] text-[14px] leading-[1.7] text-[#3A3270]">
+                <p className="mx-auto mt-3 max-w-[22rem] text-[14px] leading-[1.7] text-[#c5cdd9]/80">
                   {brief}
                 </p>
               </div>
@@ -287,13 +292,13 @@ export function FortuneDailyTarot({
                 />
               </div>
 
-              <div className="fortune-glass mt-3 w-full overflow-hidden rounded-[18px]">
+              <div className="mae-aspect-card mt-3 w-full overflow-hidden rounded-[18px]">
                 {unlocked ? (
                   <div className="px-3.5 py-3.5">
-                    <p className="text-[12px] font-semibold text-[#5B45B8]">
+                    <p className="mae-aspect-title text-[12px] font-semibold">
                       ความหมายเชิงลึก
                     </p>
-                    <p className="mt-2 text-[13px] leading-[1.7] text-[#3A3270]">
+                    <p className="mt-2 text-[13px] leading-[1.7] text-[#c5cdd9]/80">
                       {upright ? card.deep : `${card.reversed} — ${card.deep}`}
                     </p>
                   </div>
@@ -303,17 +308,23 @@ export function FortuneDailyTarot({
                     onClick={() => setPayOpen(true)}
                     className="no-sky-lift flex w-full items-center gap-3 px-3.5 py-3.5 text-left outline-none transition active:opacity-80"
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F4BC52]/2 ring-1 ring-[#F4BC52]/4">
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                      style={{
+                        background: "rgba(213,177,111,0.14)",
+                        boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.4)",
+                      }}
+                    >
                       <Lock
-                        className="h-4 w-4 text-[#B8921F]"
+                        className="h-4 w-4 text-[#d5b16f]"
                         strokeWidth={1.9}
                       />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[13px] font-semibold text-[#241C4F]">
+                      <span className="block text-[13px] font-semibold text-[#f7f4ec]">
                         ปลดล็อกดูรายละเอียดเต็ม
                       </span>
-                      <span className="mt-0.5 block text-[11.5px] leading-snug text-[#6B6490]">
+                      <span className="mt-0.5 block text-[11.5px] leading-snug text-[#c5cdd9]/65">
                         ความหมายเชิงลึก คำยืนยัน และการสะท้อน ·{" "}
                         {FORTUNE_UNLOCK_PRICE} บาท
                       </span>
@@ -361,20 +372,22 @@ function LockedTile({
       onClick={() => {
         if (!unlocked) onUnlock?.();
       }}
-      className="fortune-glass relative overflow-hidden rounded-[16px] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35"
+      className="mae-aspect-card relative overflow-hidden rounded-[16px] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
     >
-      <p className="flex items-center gap-1 text-[12px] font-semibold text-[#B8921F]">
-        <Star className="h-3 w-3" strokeWidth={2} fill="currentColor" />
+      <p className="mae-aspect-title flex items-center gap-1 text-[12px] font-semibold">
+        <Star className="h-3 w-3 text-[#d5b16f]" strokeWidth={2} fill="currentColor" />
         {title}
       </p>
       {unlocked ? (
-        <p className="mt-2 text-[12px] leading-snug text-[#3A3270]">{preview}</p>
+        <p className="mt-2 text-[12px] leading-snug text-[#c5cdd9]/80">
+          {preview}
+        </p>
       ) : (
         <>
-          <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-[#9A90C0] blur-[2px]">
+          <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-[#c5cdd9]/45 blur-[2px]">
             {preview}
           </p>
-          <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-[#B8921F]">
+          <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-[#d5b16f]">
             <Lock className="h-3 w-3" strokeWidth={2} />
             พรีเมียม
           </span>

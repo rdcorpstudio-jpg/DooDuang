@@ -15,11 +15,11 @@ function formatHeroDate(date = new Date()) {
   }).format(date);
 }
 
-/** Hero banner — full-bleed Mae art, gold headline, sharp copy */
+/** Hero banner — wide landscape tarot plate */
 export function FortuneResultHero({
   realName,
   nickname,
-  gender,
+  gender: _gender,
   headline = "อย่ารีบเกิน จังหวะตัวเอง",
   subline,
   quote,
@@ -47,22 +47,19 @@ export function FortuneResultHero({
     (subline || "").trim() ||
     "วันนี้ ให้เวลากับตัวเองอีกนิด";
 
-  const isMale = (gender || "").toLowerCase() === "male";
-  const heroSrc = isMale
-    ? "/images/bg/hero-male-sage-0909b.jpg"
-    : "/images/bg/hero-mae-elder.png";
-  const objectPosition = isMale ? "68% 30%" : "78% 38%";
+  const heroSrc = "/images/bg/hero-tarot-celestial.jpg?v=tarot1";
 
   return (
     <section
       className={cn(
-        "dd-result-hero no-sky-lift relative mx-3 mt-3 min-h-[268px] w-[calc(100%-1.5rem)] overflow-hidden rounded-[22px]",
+        "dd-result-hero no-sky-lift relative mx-3 mt-3 aspect-[2.15/1] min-h-[188px] w-[calc(100%-1.5rem)] overflow-hidden rounded-[20px]",
         className
       )}
       style={{
-        background: "#101827",
-        boxShadow:
-          "inset 0 0 0 1px rgba(213,177,111,0.48), 0 14px 36px rgba(0,0,0,0.32)",
+        border: "1.5px solid transparent",
+        background:
+          "linear-gradient(#101827, #101827) padding-box, linear-gradient(145deg, #fff8e4 0%, #e2c787 40%, #d5b16f 65%, #b8924f 100%) border-box",
+        boxShadow: "0 14px 36px rgba(0,0,0,0.32)",
       }}
     >
       <div className="pointer-events-none absolute inset-0">
@@ -72,31 +69,53 @@ export function FortuneResultHero({
           src={heroSrc}
           alt=""
           className="absolute inset-0 h-full w-full object-cover dd-hero-drift"
-          style={{ objectPosition }}
+          style={{ objectPosition: "88% 52%" }}
           draggable={false}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(90deg,
+                rgba(8,12,22,0.82) 0%,
+                rgba(10,16,28,0.58) 36%,
+                rgba(12,18,32,0.2) 60%,
+                transparent 80%
+              ),
+              linear-gradient(180deg,
+                rgba(8,12,22,0.28) 0%,
+                transparent 30%,
+                transparent 70%,
+                rgba(8,12,22,0.4) 100%
+              )
+            `,
+          }}
         />
       </div>
 
-      <div className="relative z-10 flex min-h-[268px] flex-col px-4 pb-4 pt-3">
-        <div className="flex items-start justify-between gap-3">
+      <div className="relative z-10 flex h-full min-h-[188px] flex-col px-3.5 py-2.5">
+        <div className="flex items-center justify-between gap-3">
           <Link
             href="/reading"
-            className="inline-flex items-center gap-1 outline-none transition active:opacity-60 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4"
+            className="inline-flex items-center gap-0.5 outline-none transition active:opacity-60 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4"
             aria-label="กลับ"
           >
-            <ChevronLeft className="h-5 w-5 text-[#f7f4ec]/85" strokeWidth={2.3} />
-            <span className="text-[12px] font-bold tracking-[0.2em] text-[#d5b16f]">
+            <ChevronLeft
+              className="dd-hero-shadow h-[1.15rem] w-[1.15rem] text-[#f7f4ec]/90"
+              strokeWidth={2.3}
+            />
+            <span className="mae-gold-text text-[11px] font-bold tracking-[0.18em]">
               {APP_BRAND_MARK}
             </span>
           </Link>
-          <p className="pt-0.5 text-[12px] font-medium text-[#f7f4ec]/70">
+          <p className="dd-hero-shadow text-[11px] font-medium text-[#f7f4ec]/85">
             สวัสดี คุณ{displayName}
           </p>
         </div>
 
-        <div className="mt-6 flex max-w-[62%] flex-wrap items-center gap-2">
+        <div className="mt-2.5 flex max-w-[66%] flex-wrap items-center gap-x-2 gap-y-1">
           <span
-            className="rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide text-[#e8d19a]"
+            className="rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#e8d19a]"
             style={{
               background: "rgba(16,24,39,0.55)",
               boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
@@ -105,47 +124,47 @@ export function FortuneResultHero({
             ดวงประจำวัน
           </span>
           <span
-            className="h-3 w-px shrink-0 bg-[rgba(213,177,111,0.4)]"
+            className="h-2.5 w-px shrink-0 bg-[rgba(213,177,111,0.4)]"
             aria-hidden
           />
-          <span className="text-[12px] font-medium text-[#f7f4ec]/70">
+          <span className="dd-hero-shadow text-[11px] font-medium text-[#f7f4ec]/85">
             {dateLabel}
           </span>
         </div>
 
-        <h2 className="mae-gold-text mt-3.5 max-w-[64%] font-sans text-[1.5rem] font-bold leading-[1.28] tracking-tight">
+        <h2 className="mae-gold-text mt-2 max-w-[68%] font-sans text-[1.28rem] font-bold leading-[1.25] tracking-tight">
           {headline}
         </h2>
         <div
-          className="mt-2.5 h-[3px] w-11 rounded-full"
+          className="mt-1.5 h-[2px] w-9 rounded-full"
           style={{
             background:
               "linear-gradient(90deg, #d5b16f 0%, rgba(213,177,111,0.25) 100%)",
           }}
           aria-hidden
         />
-        <p className="mt-3 max-w-[58%] text-[13.5px] font-medium leading-relaxed text-[#f7f4ec]/88">
+        <p className="dd-hero-shadow mt-1.5 max-w-[60%] text-[12.5px] font-medium leading-snug text-[#f7f4ec]">
           {support}
         </p>
 
         <div
-          className="mt-auto max-w-[62%] pt-3.5"
+          className="mt-auto max-w-[66%] pt-2"
           style={{
             borderTop: "1px solid rgba(213,177,111,0.28)",
           }}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 pt-1.5">
             <FortuneIcon
               name="sparkle"
-              size={15}
+              size={13}
               plain
               className="fortune-spark shrink-0"
             />
             <span
-              className="h-3 w-px shrink-0 bg-[rgba(213,177,111,0.45)]"
+              className="h-2.5 w-px shrink-0 bg-[rgba(213,177,111,0.45)]"
               aria-hidden
             />
-            <p className="text-[12px] font-semibold leading-snug text-[#e8d19a]">
+            <p className="dd-hero-shadow text-[11px] font-semibold leading-snug text-[#e8d19a]">
               {footerTip}
             </p>
           </div>

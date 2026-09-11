@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { MaeLanding } from "@/components/home/mae-landing";
+import { HomeScroll } from "@/components/home/home-scroll";
+import { APP_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "แม่มั่งมี — อ่านดวงอุ่นใจ",
+  title: `${APP_NAME} พามู — ดูดวงออนไลน์`,
   description:
-    "เข้าใจจังหวะชีวิต ก้าวต่ออย่างอุ่นใจ — อ่านดวงอย่างมีสติ ผ่านแนวคิด 30 ลิขิตฟ้า 70 มานะตน",
+    "พามู พามูดูดวง พามั่งมี — ค้นพบแนวทางเรื่องงาน เงิน และความรัก",
 };
 
-export default function MaeHomePage() {
-  return <MaeLanding />;
+/** Guanyin / classic landing — alternate entry at /mae */
+export default function MaeClassicHomePage() {
+  return <HomeScroll />;
 }

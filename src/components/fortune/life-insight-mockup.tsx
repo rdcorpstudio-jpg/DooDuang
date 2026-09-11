@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useMemo } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { FortuneResultHero } from "@/components/fortune/fortune-result-hero";
 import { FortuneTopicGrid } from "@/components/fortune/fortune-topic-grid";
 import { FortuneLuckyStrip } from "@/components/fortune/fortune-lucky-strip";
@@ -173,26 +174,42 @@ export function LifeInsightMockup({
         >
           <Link
             href="/premium"
-            className="group flex items-center gap-3 rounded-[18px] px-3.5 py-3.5 outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
+            className="group flex items-center gap-3 rounded-[18px] px-3.5 py-3.5 outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
             style={{
-              background: "#141c2b",
+              border: "1.5px solid transparent",
+              background:
+                "linear-gradient(165deg, #1c2738 0%, #141c2b 48%, #101827 100%) padding-box, linear-gradient(145deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 55%, #b8924f 78%, #f0dc9e 100%) border-box",
               boxShadow:
-                "inset 0 0 0 1px rgba(213,177,111,0.28), 0 10px 28px rgba(0,0,0,0.22)",
+                "0 12px 28px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,248,228,0.08)",
             }}
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.12)]">
-              <FortuneIcon name="sparkle" size={22} />
+            <span
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle at 35% 30%, rgba(255,248,228,0.22), rgba(213,177,111,0.1) 60%, transparent)",
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.5)",
+              }}
+            >
+              <FortuneIcon name="sparkle" size={22} plain />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[14px] font-semibold text-[#f7f4ec]">
+              <span className="mae-gold-text block text-[14px] font-semibold tracking-wide">
                 เปิดหน้าพรีเมียม
               </span>
-              <span className="mt-0.5 block text-[12px] leading-snug text-[#f7f4ec]/65">
+              <span className="mt-0.5 block text-[12px] leading-snug text-[#e8d19a]/75">
                 ปฏิทินเต็ม · จังหวะเดือน · เนื้อหาปลดล็อก
               </span>
             </span>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.12)] transition group-active:scale-95">
-              <FortuneIcon name="arrow-right" size={18} />
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition group-hover:brightness-110 group-active:scale-95"
+              style={{
+                background:
+                  "linear-gradient(145deg, #efe0b8 0%, #d5b16f 55%, #b8924f 100%)",
+                boxShadow: "0 4px 12px rgba(184,146,79,0.35)",
+              }}
+            >
+              <ArrowRight className="h-4 w-4 text-[#101827]" strokeWidth={2.5} />
             </span>
           </Link>
         </div>

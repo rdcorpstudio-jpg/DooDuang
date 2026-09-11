@@ -707,17 +707,7 @@ export function ReadingWizard() {
               กลับ
             </button>
           )}
-          <div className="flex flex-col items-center justify-self-center">
-            <Image
-              src="/images/brand/mae-wordmark-header.png?v=header1"
-              alt="แม่มั่งมี พามู"
-              width={160}
-              height={92}
-              unoptimized
-              priority
-              className="h-9 w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] sm:h-10"
-            />
-          </div>
+          <div className="flex flex-col items-center justify-self-center" aria-hidden />
           <div className="justify-self-end text-right">
             <p
               className="text-[12px] font-semibold tabular-nums"
@@ -746,7 +736,7 @@ export function ReadingWizard() {
           className={cn(
             "relative mx-auto flex w-full max-w-[340px] flex-1 flex-col",
             step === "name"
-              ? "wizard-name-stage justify-start pb-4 pt-[min(20vh,148px)]"
+              ? "wizard-name-stage justify-start pb-4 pt-6 sm:pt-10"
               : "justify-center py-6"
           )}
         >

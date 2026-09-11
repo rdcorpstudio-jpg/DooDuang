@@ -35,7 +35,7 @@ import {
   isPremiumUnlocked,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
-import { FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK, APP_NAME } from "@/lib/site";
+import { FORTUNE_UNLOCK_PRICE, APP_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type Step = "ready" | "analyzing" | "result";
@@ -349,10 +349,7 @@ function Header({ onBack }: { onBack: () => void }) {
         <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
         กลับ
       </button>
-      <div className="flex flex-col items-center justify-self-center">
-        <FortuneIcon name="moon" size={16} className="-mb-0.5" />
-        <p className="font-sacred text-[12px] tracking-[0.26em] text-[#C9A227]">{APP_BRAND_MARK}</p>
-      </div>
+      <span className="justify-self-center" aria-hidden />
       <span aria-hidden className="justify-self-end" />
     </div>
   );

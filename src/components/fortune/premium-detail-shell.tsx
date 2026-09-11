@@ -4,14 +4,12 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
-import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import {
   hydrateFortuneProfileFromWizard,
   readFortuneProfile,
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
-import { APP_BRAND_MARK } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export function usePremiumProfileGate() {
@@ -60,23 +58,16 @@ export function PremiumDetailShell({
     >
       <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-12 pt-3">
         <div
-          className="fortune-reveal grid grid-cols-[1fr_auto_1fr] items-center gap-2"
+          className="fortune-reveal flex items-center"
           style={{ "--fortune-delay": "30ms" } as CSSProperties}
         >
           <Link
             href={backHref}
-            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#f7f4ec]/75 outline-none transition active:opacity-60"
+            className="inline-flex items-center gap-0.5 text-[15px] font-medium text-[#f7f4ec]/75 outline-none transition active:opacity-60"
           >
             <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
             กลับ
           </Link>
-          <div className="flex flex-col items-center justify-self-center">
-            <FortuneIcon name="moon" size={16} className="dd-icon-float -mb-0.5" />
-            <p className="mae-gold-text text-[12px] font-bold tracking-[0.26em]">
-              {APP_BRAND_MARK}
-            </p>
-          </div>
-          <span aria-hidden className="justify-self-end" />
         </div>
         {title ? (
           <h1

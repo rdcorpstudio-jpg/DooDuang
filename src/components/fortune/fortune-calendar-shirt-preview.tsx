@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import { Shirt } from "lucide-react";
 import { FortuneAuspiciousCalendar } from "@/components/fortune/fortune-auspicious-calendar";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import {
@@ -81,18 +80,19 @@ export function FortuneCalendarShirtPreview({
           type="button"
           onClick={() => setOpenCalendar((v) => !v)}
           aria-expanded={openCalendar}
-          className="fortune-glass group flex h-[11.5rem] flex-col rounded-[20px] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4"
+          className="mae-aspect-card group flex h-[11.5rem] flex-col rounded-[20px] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
         >
           <span className="flex h-7 shrink-0 items-center justify-between gap-1.5">
             <span className="inline-flex min-w-0 items-center gap-2">
-              <FortuneIcon name="calendar" size={24} />
-              <span className="truncate text-[13px] font-bold text-[#2C2458]">
+              <FortuneIcon name="calendar" size={24} plain />
+              <span className="truncate text-[13px] font-bold text-[#d5b16f]">
                 ปฏิทินฤกษ์
               </span>
             </span>
             <FortuneIcon
               name="arrow-right"
               size={20}
+              plain
               className={cn(
                 "shrink-0 transition-transform",
                 openCalendar && "rotate-90"
@@ -112,24 +112,25 @@ export function FortuneCalendarShirtPreview({
                   <p
                     className={cn(
                       "text-[11px] font-semibold",
-                      selected ? "text-[#5B45B8]" : "text-[#8A82B0]"
+                      selected ? "text-[#e8d19a]" : "text-[#f7f4ec]/55"
                     )}
                   >
                     {WEEKDAY_SHORT[date.getDay()]}
                   </p>
                   <span
                     className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-full text-[15px] font-bold",
+                      "flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-bold",
                       selected
-                        ? "bg-[#9B7FE8] text-white ring-2 ring-[#9B7FE8]/35"
-                        : "text-[#2C2458]"
+                        ? "bg-[#d5b16f] text-[#101827]"
+                        : "text-[#101827]"
                     )}
                     style={
                       selected
-                        ? undefined
+                        ? {
+                            boxShadow: "0 0 0 2px rgba(213,177,111,0.35)",
+                          }
                         : {
                             background: `radial-gradient(circle at 32% 28%, ${meta.soft}, ${meta.color})`,
-                            color: "#0C1427",
                           }
                     }
                   >
@@ -140,7 +141,13 @@ export function FortuneCalendarShirtPreview({
             })}
           </div>
 
-          <span className="mt-auto inline-flex h-6 w-fit items-center rounded-full bg-[#9B7FE8]/12 px-2.5 text-[11px] font-semibold text-[#5B45B8]">
+          <span
+            className="mt-auto inline-flex h-6 w-fit items-center rounded-full px-2.5 text-[11px] font-semibold text-[#e8d19a]"
+            style={{
+              background: "rgba(213,177,111,0.12)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+            }}
+          >
             ดูฤกษ์ดีประจำวัน
           </span>
         </button>
@@ -149,18 +156,19 @@ export function FortuneCalendarShirtPreview({
           type="button"
           onClick={toggleShirts}
           aria-expanded={openShirts}
-          className="fortune-glass group flex h-[11.5rem] flex-col rounded-[20px] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4"
+          className="mae-aspect-card group flex h-[11.5rem] flex-col rounded-[20px] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
         >
           <span className="flex h-7 shrink-0 items-center justify-between gap-1.5">
             <span className="inline-flex min-w-0 items-center gap-2">
-              <Shirt className="h-5 w-5 shrink-0 text-[#2F8A9E]" strokeWidth={2.1} />
-              <span className="truncate text-[13px] font-bold text-[#2C2458]">
+              <FortuneIcon name="shirt" size={24} plain />
+              <span className="truncate text-[13px] font-bold text-[#d5b16f]">
                 สีเสื้อมงคล
               </span>
             </span>
             <FortuneIcon
               name="arrow-right"
               size={20}
+              plain
               className={cn(
                 "shrink-0 transition-transform",
                 openShirts && "rotate-90"
@@ -168,28 +176,34 @@ export function FortuneCalendarShirtPreview({
             />
           </span>
 
-          <div className="mt-2 flex min-h-0 flex-1 items-center gap-2.5">
-            <span className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+          <div className="mt-2 flex min-h-0 flex-1 items-center gap-2">
+            <span className="relative flex h-14 w-14 shrink-0 items-center justify-center">
               <Image
                 src={todayShirt.src}
                 alt={todayShirt.name}
                 width={96}
                 height={96}
                 unoptimized
-                className="h-14 w-14 object-contain drop-shadow-[0_8px_14px_rgba(80,60,140,0.2)]"
+                className="h-12 w-12 object-contain"
               />
             </span>
-            <div className="min-w-0">
-              <p className="text-[14px] font-bold leading-snug text-[#2C2458]">
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-bold leading-snug text-[#f7f4ec]">
                 วันนี้ · สี{todayShirt.name}
               </p>
-              <p className="mt-1 text-[12px] leading-snug text-[#5E5688]">
+              <p className="mt-1 text-[11.5px] leading-snug text-[#f7f4ec]/65">
                 เสริมเรื่อง{todayShirt.meaning}
               </p>
             </div>
           </div>
 
-          <span className="mt-auto inline-flex h-6 w-fit items-center rounded-full bg-[#46A8C8]/14 px-2.5 text-[11px] font-semibold text-[#2F8A9E]">
+          <span
+            className="mt-auto inline-flex h-6 w-fit items-center rounded-full px-2.5 text-[11px] font-semibold text-[#e8d19a]"
+            style={{
+              background: "rgba(213,177,111,0.12)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+            }}
+          >
             กดดูสีอื่น
           </span>
         </button>
@@ -214,7 +228,10 @@ export function FortuneCalendarShirtPreview({
               type="button"
               onClick={toggleShirts}
               aria-label="หุบสีเสื้อ"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#7B5FD4]/18 outline-none transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/4"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full outline-none transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              style={{
+                background: "rgba(213,177,111,0.18)",
+              }}
             >
               <FortuneIcon
                 name="arrow-right"

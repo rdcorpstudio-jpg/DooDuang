@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
@@ -25,35 +26,40 @@ export function FortuneUnlockBanner({
     <section className={cn("space-y-2", className)}>
       {showCountdown ? <PremiumOfferCountdown compact /> : null}
       <div
-        className="no-sky-lift flex items-center gap-2.5 rounded-[14px] px-3 py-2.5 ring-1 ring-[#E8C547]/40"
+        className="no-sky-lift flex flex-col gap-3 rounded-[16px] px-3.5 py-3.5"
         style={{
+          border: "1.5px solid transparent",
           background:
-            "linear-gradient(118deg, #3D2E0A 0%, #6B5214 38%, #A07E1A 72%, #8A6A12 100%)",
+            "linear-gradient(165deg, #1c2738 0%, #141c2b 45%, #101827 100%) padding-box, linear-gradient(145deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 55%, #b8924f 78%, #f0dc9e 100%) border-box",
           boxShadow:
-            "0 10px 22px rgba(122, 92, 18, 0.28), inset 0 1px 0 rgba(255, 236, 180, 0.35)",
+            "0 12px 28px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,248,228,0.08)",
         }}
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-          <FortuneIcon name="finance" size={40} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-semibold leading-snug text-[#FFF8E7]">
-            เห็นจังหวะชีวิตได้ไกลกว่าเดิม
-          </p>
-          <p className="mt-0.5 text-[11px] leading-snug text-[#F5E6B8]/82">
-            เจาะลึกเส้นทางชีวิต 12 ปี พร้อมคำแนะนำเฉพาะคุณ
-          </p>
+        <div className="flex items-start gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center">
+            <FortuneIcon name="finance" size={44} plain />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="mae-gold-text text-[14px] font-semibold leading-snug tracking-wide">
+              เห็นจังหวะชีวิตได้ไกลกว่าเดิม
+            </p>
+            <p className="mt-1 text-[12px] leading-snug text-[#e8d19a]/75">
+              เจาะลึกเส้นทางชีวิต 12 ปี พร้อมคำแนะนำเฉพาะคุณ
+            </p>
+          </div>
         </div>
         <button
           type="button"
           onClick={onUnlock}
           disabled={!onUnlock || unlocking}
-          className="dd-gold-glass-btn inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-2 text-[11px] font-semibold text-[#5C4810] outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/45 disabled:opacity-60"
+          className="mae-gold-cta inline-flex w-full items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-[13px] font-semibold text-[#101827] outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
         >
           {unlocking
             ? "…"
             : `ปลดล็อกพรีเมียม · ${FORTUNE_UNLOCK_PRICE} บาท`}
-          {!unlocking ? <FortuneIcon name="arrow-right" size={20} /> : null}
+          {!unlocking ? (
+            <ArrowRight className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+          ) : null}
         </button>
       </div>
     </section>

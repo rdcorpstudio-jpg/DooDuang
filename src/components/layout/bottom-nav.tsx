@@ -45,7 +45,7 @@ const TABS: Array<{
 /** Bottom nav — compact for phone screens */
 export function BottomNav() {
   const pathname = usePathname() || "/";
-  const maeNav = isMaeShellPath(pathname) && pathname !== "/";
+  const maeNav = isMaeShellPath(pathname);
 
   return (
     <nav

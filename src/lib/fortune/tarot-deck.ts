@@ -648,6 +648,77 @@ export const TAROT_DECK: TarotCardDef[] = [
 
 export const TAROT_DECK_COUNT = TAROT_DECK.length; // 78
 
+/** Rider–Waite AI pack filenames under /public/images/tarot */
+const MAJOR_IMAGE_FILES = [
+  "00_THE_FOOL.jpg",
+  "01_I_THE_MAGICIAN.jpg",
+  "02_II_THE_HIGH_PRIESTESS.jpg",
+  "03_III_THE_EMPRESS.jpg",
+  "04_IV_THE_EMPEROR.jpg",
+  "05_V_THE_HIEROPHANT.jpg",
+  "06_VI_THE_LOVERS.jpg",
+  "07_VII_THE_CHARIOT.jpg",
+  "08_VIII_STRENGTH.jpg",
+  "09_IX_THE_HERMIT.jpg",
+  "10_X_WHEEL_OF_FORTUNE.jpg",
+  "11_XI_JUSTICE.jpg",
+  "12_XII_THE_HANGED_MAN.jpg",
+  "13_XIII_DEATH.jpg",
+  "14_XIV_TEMPERANCE.jpg",
+  "15_XV_THE_DEVIL.jpg",
+  "16_XVI_THE_TOWER.jpg",
+  "17_XVII_THE_STAR.jpg",
+  "18_XVIII_THE_MOON.jpg",
+  "19_XIX_THE_SUN.jpg",
+  "20_XX_JUDGEMENT.jpg",
+  "21_XXI_THE_WORLD.jpg",
+] as const;
+
+const MINOR_RANK_FILES = [
+  "ACE",
+  "TWO",
+  "THREE",
+  "FOUR",
+  "FIVE",
+  "SIX",
+  "SEVEN",
+  "EIGHT",
+  "NINE",
+  "TEN",
+  "PAGE",
+  "KNIGHT",
+  "QUEEN",
+  "KING",
+] as const;
+
+const MINOR_SUIT_META: Record<
+  TarotSuit,
+  { start: number; file: string }
+> = {
+  wands: { start: 22, file: "WANDS" },
+  cups: { start: 36, file: "CUPS" },
+  swords: { start: 50, file: "SWORDS" },
+  pentacles: { start: 64, file: "PENTACLES" },
+};
+
+/** Public path for a deck card’s face art (78-card RWS pack). */
+export function tarotCardImageSrc(card: TarotCardDef): string {
+  let file: string;
+  if (card.arcana === "major") {
+    file = MAJOR_IMAGE_FILES[card.number] ?? MAJOR_IMAGE_FILES[0]!;
+  } else {
+    const suit = card.suit ?? "wands";
+    const meta = MINOR_SUIT_META[suit];
+    const rankIdx = Math.min(
+      MINOR_RANK_FILES.length - 1,
+      Math.max(0, card.number - 1)
+    );
+    const idx = meta.start + rankIdx;
+    file = `${String(idx).padStart(2, "0")}_${MINOR_RANK_FILES[rankIdx]}_OF_${meta.file}.jpg`;
+  }
+  return `/images/tarot/${file}?v=rws1`;
+}
+
 function hashSeed(input: string) {
   let h = 2166136261;
   for (let i = 0; i < input.length; i++) {

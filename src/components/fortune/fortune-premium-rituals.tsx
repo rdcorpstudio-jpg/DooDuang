@@ -166,18 +166,18 @@ export function FortunePremiumRituals({
       </div>
 
       <div className="mae-aspect-card rounded-[22px] px-4 py-4">
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center">
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-6 w-6 shrink-0 items-center justify-center">
             <Image
               src={NIGHT_ICONS.moon}
               alt=""
-              width={36}
-              height={36}
+              width={24}
+              height={24}
               unoptimized
-              className="h-9 w-9 object-contain"
+              className="h-6 w-6 object-contain"
             />
           </span>
-          <p className="mae-gold-text text-[14px] font-semibold">
+          <p className="mae-gold-text text-[13px] font-semibold">
             โหมดก่อนนอน
           </p>
         </div>
@@ -221,10 +221,10 @@ function NightLine({
       <Image
         src={icon}
         alt=""
-        width={28}
-        height={28}
+        width={22}
+        height={22}
         unoptimized
-        className="mt-0.5 h-7 w-7 shrink-0 object-contain"
+        className="mt-0.5 h-[22px] w-[22px] shrink-0 object-contain"
       />
       <div className="min-w-0 flex-1">
         <p className="mae-gold-text text-[11px] font-semibold tracking-[0.12em]">

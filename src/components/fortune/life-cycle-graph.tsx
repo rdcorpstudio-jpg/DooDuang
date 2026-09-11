@@ -525,8 +525,8 @@ export function LifeCycleGraph({
           className={cn(
             "pb-1",
             blurFuture
-              ? "overflow-x-hidden touch-none"
-              : "overflow-x-auto overscroll-x-contain touch-pan-x [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              ? "overflow-x-hidden"
+              : "overflow-x-auto overscroll-x-contain touch-pan-x touch-pan-y [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           )}
         >
           <div className="relative" style={{ width: chartW }}>
