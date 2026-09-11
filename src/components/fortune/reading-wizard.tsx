@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, type FocusEvent } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Check,
@@ -614,7 +613,6 @@ export function ReadingWizard() {
   }
 
   const stepNumber = step === "gender" ? 1 : step === "birth" ? 2 : 3;
-  const backHref = step === "gender" ? "/" : undefined;
 
   if (!ready) {
     return <div className="relative h-full" aria-hidden />;
@@ -689,14 +687,8 @@ export function ReadingWizard() {
 
       <div className="wizard-keyboard-compact relative z-10 flex min-h-full flex-col px-5 pb-5 pt-3">
         <div className="relative z-20 mb-2 grid grid-cols-[minmax(4.5rem,1fr)_auto_minmax(4.5rem,1fr)] items-center gap-2">
-          {backHref ? (
-            <Link
-              href={backHref}
-              className="inline-flex items-center gap-0.5 justify-self-start text-[14px] font-medium text-white/85 transition-opacity active:opacity-60"
-            >
-              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-              กลับ
-            </Link>
+          {step === "gender" ? (
+            <span aria-hidden className="justify-self-start" />
           ) : (
             <button
               type="button"

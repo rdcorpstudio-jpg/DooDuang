@@ -419,9 +419,14 @@ export function GoogleSignInButton({
           </svg>
         )}
         {showIconDivider ? (
-          <span className="h-4 w-px shrink-0 bg-[#D4CEE8]" aria-hidden />
+          <span
+            className="h-4 w-px shrink-0 bg-[rgba(213,177,111,0.35)]"
+            aria-hidden
+          />
         ) : null}
-        {loading ? "กำลังเข้าสู่ระบบ..." : label}
+        <span className="min-w-0 flex-1 truncate text-left sm:text-center">
+          {loading ? "กำลังเข้าสู่ระบบ..." : label}
+        </span>
       </Button>
       {error && <p className="text-center text-xs text-red-500/80">{error}</p>}
     </div>

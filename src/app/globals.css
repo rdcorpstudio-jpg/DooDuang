@@ -16,11 +16,17 @@
 @layer base {
   html {
     @apply scroll-smooth;
+    background: #101827;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   body {
     @apply antialiased overflow-hidden;
-    background: #ffffff;
+    background: #101827;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
     font-weight: 500;
     line-height: 1.6;
     letter-spacing: 0.015em;
@@ -37,14 +43,18 @@
   }
 }
 
-/* 9:16 phone frame — outer = white, inner = app content */
+/* App shell — always full-bleed on touch phones (never tie width to dvh).
+   Old min(100vw, 100dvh*9/16) left white side gutters when browser chrome
+   or the keyboard shrank the visual height. */
 .phone-shell {
   min-height: 100dvh;
+  min-height: 100svh;
   width: 100%;
+  max-width: 100%;
   display: flex;
   justify-content: center;
   align-items: stretch;
-  background: #ffffff;
+  background: #101827;
   overflow-x: hidden;
 }
 
@@ -55,14 +65,16 @@
 }
 
 .phone-frame {
-  width: min(100vw, calc(100dvh * 9 / 16));
-  max-width: 100vw;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 100dvh;
+  height: 100svh;
   overflow: hidden;
   overflow-x: hidden;
   position: relative;
-  background: #e9e2f8;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  background: #101827;
+  box-shadow: none;
   /* Elder-friendly base: larger type & touch comfort */
   --dd-comfort-zoom: 1.14;
   --dd-glass-pad-y: 1rem;
@@ -71,6 +83,21 @@
   font-size: 17px;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+/* Desktop only: optional centered phone-column mockup.
+   Require fine pointer so tablets / phones never letterbox. */
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  .phone-shell {
+    background: #070b14;
+  }
+
+  .phone-frame {
+    width: min(100vw, calc(100dvh * 9 / 16), 430px);
+    max-width: 430px;
+    height: 100dvh;
+    box-shadow: 0 0 0 1px rgba(213, 177, 111, 0.12);
+  }
 }
 
 .phone-frame--mae {
@@ -1161,9 +1188,20 @@ button.mae-aspect-card:active {
   overflow-x: hidden;
 }
 
+/* Login / keyboard: zoom breaks iOS caret + focus on tel/OTP fields */
+.phone-comfort--no-zoom,
+html[data-keyboard-open="true"] .phone-comfort {
+  zoom: 1 !important;
+}
+
 @supports not (zoom: 1) {
   .phone-comfort {
     font-size: 114%;
+  }
+
+  .phone-comfort--no-zoom,
+  html[data-keyboard-open="true"] .phone-comfort {
+    font-size: inherit;
   }
 }
 
@@ -1197,9 +1235,11 @@ button.mae-aspect-card:active {
   background: transparent;
 }
 
-/* Shrink to visible viewport while typing — avoids iOS crushing inputs.
+/* Shrink height only while typing — never width (that caused white gutters).
    Prefer height only; transform on the shell misplaces the caret on Thai IME. */
 .phone-frame--keyboard {
+  width: 100% !important;
+  max-width: 100% !important;
   height: var(--vv-height, 100dvh);
   max-height: var(--vv-height, 100dvh);
 }
@@ -1237,6 +1277,19 @@ button.mae-aspect-card:active {
 
 html[data-keyboard-open="true"] .wizard-keyboard-hide {
   display: none !important;
+}
+
+html[data-keyboard-open="true"] .login-keyboard-hide {
+  display: none !important;
+}
+
+/* Keep phone/OTP fields readable and unscaled on iOS Safari */
+.phone-login-input {
+  font-size: 16px !important;
+  line-height: 1.35 !important;
+  -webkit-text-size-adjust: 100%;
+  transform: none !important;
+  zoom: 1 !important;
 }
 
 html[data-keyboard-open="true"] .wizard-keyboard-compact {

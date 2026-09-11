@@ -17,12 +17,12 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
   const pathname = usePathname() || "/";
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const maeShell = isMaeShellPath(pathname);
+  const isAuthPath =
+    pathname.startsWith("/auth") || pathname.startsWith("/login");
   const hideNav =
-    pathname.startsWith("/auth") ||
-    pathname.startsWith("/login") ||
-    pathname === "/" ||
-    pathname === "" ||
-    keyboardOpen;
+    isAuthPath || pathname === "/" || pathname === "" || keyboardOpen;
+  /* CSS zoom on ancestors breaks iOS caret / focus for phone OTP fields */
+  const disableComfortZoom = isAuthPath || keyboardOpen;
 
   useEffect(() => {
     const root = document.documentElement;
@@ -72,8 +72,13 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
         )}
       >
         <StarfieldBackground />
-        <div className="phone-comfort relative z-[2] flex h-full min-w-0 max-w-full flex-col overflow-x-hidden">
-          <div className="min-h-0 min-w-0 max-w-full flex-1 overflow-x-hidden overflow-y-hidden">
+        <div
+          className={cn(
+            "phone-comfort relative z-[2] flex h-full min-w-0 w-full max-w-full flex-col overflow-x-hidden",
+            disableComfortZoom && "phone-comfort--no-zoom"
+          )}
+        >
+          <div className="min-h-0 min-w-0 w-full max-w-full flex-1 overflow-x-hidden overflow-y-hidden">
             {children}
           </div>
           {hideNav ? null : <BottomNav />}

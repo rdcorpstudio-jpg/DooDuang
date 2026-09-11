@@ -64,25 +64,25 @@ export function PremiumDeepenForm({
   return (
     <section
       className={cn(
-        "fortune-glass mx-auto w-full max-w-[480px] rounded-[22px] px-4 py-5 text-center",
+        "mae-aspect-card mx-auto w-full max-w-[360px] rounded-[22px] px-4 py-5 text-center",
         className
       )}
     >
-      <p className="text-[12px] font-semibold tracking-[0.14em] text-[#8B7BC8]">
+      <p className="mae-gold-text text-[11px] font-semibold tracking-[0.16em]">
         พรีเมียม · ขั้นต่อไป
       </p>
-      <h1 className="mt-1.5 text-[1.35rem] font-semibold leading-snug text-[#2C2458]">
+      <h1 className="mae-gold-text mt-1.5 text-[1.25rem] font-bold leading-snug tracking-tight">
         กรอกเพิ่มเพื่อวิเคราะห์เชิงลึก
       </h1>
-      <p className="mx-auto mt-2 max-w-[20rem] text-[14px] leading-relaxed text-[#5E5688]">
+      <p className="mx-auto mt-2 max-w-[19rem] text-[13px] leading-relaxed text-[#c5cdd9]/75">
         ดวงฟรีใช้แค่วันเกิด ส่วนพรีเมียมใช้เวลาเกิดและสถานที่เกิด
         เพื่อให้จังหวะวันและเชิงลึกแม่นขึ้น
       </p>
 
       <div className="mt-5 space-y-4 text-left">
         <label className="block">
-          <span className="mb-2 flex items-center justify-center gap-1.5 text-[13px] font-medium text-[#5E5688]">
-            <Clock className="h-4 w-4 text-[#7B5FD4]" strokeWidth={2} />
+          <span className="mb-2 flex items-center justify-center gap-1.5 text-[13px] font-medium text-[#e8d19a]/90">
+            <Clock className="h-4 w-4 text-[#d5b16f]" strokeWidth={2} />
             เวลาเกิด
           </span>
           <input
@@ -92,16 +92,21 @@ export function PremiumDeepenForm({
               setBirthTime(e.target.value);
               setError(null);
             }}
-            className="name-step-input text-center"
+            className="h-11 w-full rounded-full px-4 text-center text-[15px] text-[#f7f4ec] outline-none transition placeholder:text-[#9aa3b2]/55 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
+            style={{
+              background: "rgba(16,24,39,0.72)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+              colorScheme: "dark",
+            }}
           />
-          <span className="mt-1.5 block text-center text-[12px] text-[#9A90C0]">
+          <span className="mt-1.5 block text-center text-[12px] text-[#c5cdd9]/55">
             ไม่ทราบเวลาแน่ ๆ ลองใส่ช่วงที่ใกล้เคียงที่สุด
           </span>
         </label>
 
         <label className="block">
-          <span className="mb-2 flex items-center justify-center gap-1.5 text-[13px] font-medium text-[#5E5688]">
-            <MapPin className="h-4 w-4 text-[#7B5FD4]" strokeWidth={2} />
+          <span className="mb-2 flex items-center justify-center gap-1.5 text-[13px] font-medium text-[#e8d19a]/90">
+            <MapPin className="h-4 w-4 text-[#d5b16f]" strokeWidth={2} />
             จังหวัดหรือเมืองเกิด
           </span>
           <input
@@ -112,13 +117,17 @@ export function PremiumDeepenForm({
               setError(null);
             }}
             placeholder="เช่น กรุงเทพฯ / เชียงใหม่"
-            className="name-step-input text-center"
+            className="h-11 w-full rounded-full px-4 text-center text-[15px] text-[#f7f4ec] outline-none transition placeholder:text-[#9aa3b2]/55 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
+            style={{
+              background: "rgba(16,24,39,0.72)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+            }}
             autoComplete="address-level1"
           />
         </label>
 
         <div className="block">
-          <span className="mb-2 block text-center text-[13px] font-medium text-[#5E5688]">
+          <span className="mb-2 block text-center text-[13px] font-medium text-[#e8d19a]/90">
             ตอนนี้โฟกัสเรื่องไหน
           </span>
           <div className="flex flex-wrap justify-center gap-2">
@@ -132,9 +141,17 @@ export function PremiumDeepenForm({
                   className={cn(
                     "rounded-full px-3.5 py-2 text-[13px] font-medium outline-none transition active:scale-[0.98]",
                     selected
-                      ? "bg-[#6A48C8] text-white shadow-[0_6px_14px_rgba(106,72,200,0.28)]"
-                      : "bg-white/70 text-[#4A4278] ring-1 ring-[#7B6BB0]/18"
+                      ? "bg-[#d5b16f] text-[#101827] shadow-[0_6px_14px_rgba(213,177,111,0.28)]"
+                      : "text-[#e8d19a]/85"
                   )}
+                  style={
+                    selected
+                      ? undefined
+                      : {
+                          background: "rgba(16,24,39,0.55)",
+                          boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                        }
+                  }
                 >
                   {opt.label}
                 </button>
@@ -144,7 +161,7 @@ export function PremiumDeepenForm({
         </div>
 
         {error ? (
-          <p className="rounded-xl bg-rose-50 px-3 py-2 text-center text-[13px] text-rose-600">
+          <p className="rounded-xl bg-[rgba(255,77,122,0.12)] px-3 py-2 text-center text-[13px] text-[#ff8fa3]">
             {error}
           </p>
         ) : null}
@@ -152,7 +169,7 @@ export function PremiumDeepenForm({
         <button
           type="button"
           onClick={save}
-          className="flex w-full items-center justify-center rounded-full bg-[#6A48C8] px-4 py-3.5 text-[15px] font-semibold text-white outline-none transition active:scale-[0.99]"
+          className="mae-gold-cta flex h-11 w-full items-center justify-center rounded-full text-[14px] font-semibold tracking-wide text-[#101827] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
         >
           บันทึกแล้วดูดวงเชิงลึก
         </button>
@@ -160,7 +177,7 @@ export function PremiumDeepenForm({
         <button
           type="button"
           onClick={skip}
-          className="w-full py-2 text-center text-[13px] text-[#8B7BC8] outline-none transition active:opacity-70"
+          className="w-full py-2 text-center text-[13px] text-[#e8d19a]/80 outline-none transition hover:text-[#f7f4ec] active:opacity-70"
         >
           ข้ามไปก่อน · ดูแบบประมาณ
         </button>

@@ -80,7 +80,7 @@ export function LoginScreen({
   }, [autoStartGoogle, callbackUrl]);
 
   return (
-    <AnimatedPage className="relative flex min-h-full flex-col overflow-y-auto px-4 pb-6 pt-3">
+    <AnimatedPage className="relative flex min-h-full flex-col overflow-x-hidden overflow-y-auto px-3 pb-6 pt-3 sm:px-4">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
         <button
           type="button"
@@ -95,7 +95,7 @@ export function LoginScreen({
       </div>
 
       <div className="flex flex-1 flex-col justify-center py-3">
-        <div className="mae-aspect-card mx-auto w-full max-w-[340px] px-4 py-4 text-center">
+        <div className="mae-aspect-card mx-auto w-full max-w-[min(100%,22rem)] px-3 py-4 text-center sm:px-4">
           <div
             className="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
             style={{
@@ -114,10 +114,10 @@ export function LoginScreen({
           <h1 className="mt-0.5 font-sans text-[1.2rem] font-bold leading-snug tracking-[0.03em] text-[#f7f4ec]">
             เข้าสู่ระบบ
           </h1>
-          <p className="mx-auto mt-1 max-w-[16rem] text-[12px] leading-snug text-[#c5cdd9]/70">
+          <p className="login-keyboard-hide mx-auto mt-1 max-w-[16rem] text-[12px] leading-snug text-[#c5cdd9]/70">
             {autoStartGoogle
               ? "กำลังเปิด Google…"
-              : "LINE · เบอร์ · หรือ Google"}
+              : "Google · LINE · หรือเบอร์"}
           </p>
 
           {lineErrorMessage ? (
@@ -126,61 +126,60 @@ export function LoginScreen({
             </p>
           ) : null}
 
-          <div className="mt-3.5 space-y-2">
-            <LineSignInButton
+          <div className="login-keyboard-hide mt-3.5 space-y-2">
+            <GoogleSignInButton
               callbackUrl={callbackUrl}
-              buttonClassName="h-10 text-[13.5px]"
+              coloredIcon
+              label="เข้าสู่ระบบด้วย Google"
+              variant="outline"
+              className="w-full space-y-1.5"
+              buttonClassName="!flex h-10 w-full min-w-0 flex-row flex-nowrap items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full border border-[#dadce0] bg-white px-3 py-0 text-[13px] font-semibold leading-none text-[#3c4043] shadow-none outline-none transition hover:bg-[#f8f9fa] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.99]"
             />
 
-            <div
-              className="rounded-full p-px"
-              style={{
-                background:
-                  "linear-gradient(145deg, #fff8e4 0%, #e2c787 45%, #d5b16f 70%, #b8924f 100%)",
-              }}
-            >
-              <GoogleSignInButton
-                callbackUrl={callbackUrl}
-                coloredIcon
-                showIconDivider
-                variant="outline"
-                className="space-y-1.5"
-                buttonClassName="h-10 w-full gap-2 rounded-full border-0 bg-[#101827] text-[13.5px] font-semibold text-[#f7f4ec] outline-none transition hover:bg-[#162033] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35 active:scale-[0.99]"
-              />
-            </div>
+            <LineSignInButton
+              callbackUrl={callbackUrl}
+              buttonClassName="h-10 text-[13.5px] whitespace-nowrap"
+            />
           </div>
 
-          <AuthDivider label="หรือใช้เบอร์" />
+          <div className="login-keyboard-hide">
+            <AuthDivider label="หรือใช้เบอร์" />
+          </div>
 
           <PhoneLoginForm callbackUrl={callbackUrl} compact />
 
-          <AuthDivider />
+          <div className="login-keyboard-hide">
+            <AuthDivider />
 
-          <p className="text-[12px] leading-snug text-[#c5cdd9]/65">
-            ดูดวงได้โดยไม่ต้องเข้าสู่ระบบ
-          </p>
-          <Link
-            href="/reading"
-            className="mae-gold-cta group mt-2 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full text-[13.5px] font-semibold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
-          >
-            ไปดูดวงฟรี
-            <ArrowRight
-              className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
-              strokeWidth={2.4}
-            />
-          </Link>
+            <p className="text-[12px] leading-snug text-[#c5cdd9]/65">
+              ดูดวงได้โดยไม่ต้องเข้าสู่ระบบ
+            </p>
+            <Link
+              href="/reading"
+              className="mae-gold-cta group mt-2 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full text-[13.5px] font-semibold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+            >
+              ไปดูดวงฟรี
+              <ArrowRight
+                className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                strokeWidth={2.4}
+              />
+            </Link>
 
-          <Link
-            href="/dashboard?preview=1"
-            className="mt-2.5 inline-flex text-[12px] font-medium tracking-wide text-[#e8d19a]/85 underline decoration-[#d5b16f]/35 underline-offset-[4px] outline-none transition hover:text-[#f7f4ec]"
-          >
-            ดูตัวอย่างหน้าหลังล็อกอิน
-          </Link>
+            <Link
+              href="/dashboard?preview=1"
+              className="mt-2.5 inline-flex text-[12px] font-medium tracking-wide text-[#e8d19a]/85 underline decoration-[#d5b16f]/35 underline-offset-[4px] outline-none transition hover:text-[#f7f4ec]"
+            >
+              ดูตัวอย่างหน้าหลังล็อกอิน
+            </Link>
 
-          <p className="mt-3 inline-flex items-center justify-center gap-1 text-[10.5px] tracking-wide text-[#9aa3b2]">
-            <Lock className="h-2.5 w-2.5 shrink-0 text-[#d5b16f]" strokeWidth={2} />
-            ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
-          </p>
+            <p className="mt-3 inline-flex items-center justify-center gap-1 text-[10.5px] tracking-wide text-[#9aa3b2]">
+              <Lock
+                className="h-2.5 w-2.5 shrink-0 text-[#d5b16f]"
+                strokeWidth={2}
+              />
+              ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
+            </p>
+          </div>
         </div>
       </div>
     </AnimatedPage>

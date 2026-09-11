@@ -150,7 +150,7 @@ export function PremiumHomePage({
 
   if (showDeepen && profile) {
     return (
-      <AnimatedPage className="mx-auto flex min-h-[70dvh] w-full max-w-[480px] items-center px-3 pb-10 pt-4">
+      <AnimatedPage className="mx-auto flex min-h-full w-full max-w-[480px] flex-col items-center justify-center px-4 py-8">
         <PremiumDeepenForm
           profile={profile}
           onSaved={(next) => {

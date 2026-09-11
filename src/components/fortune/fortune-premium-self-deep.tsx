@@ -8,6 +8,7 @@ import {
   useState,
   type PointerEvent,
 } from "react";
+import Image from "next/image";
 import { Sparkles } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { analyzeFortune, type FortuneFocus } from "@/lib/fortune/analyze";
@@ -139,6 +140,7 @@ const ELEMENTS = [
     key: "wood",
     label: "ไม้",
     color: "#22A06B",
+    icon: "/images/elements/wood.png?v=wuxing1",
     high: "ธาตุไม้แรง คุณชอบเริ่มของใหม่ และดันให้มันโตต่อได้",
     mid: "ธาตุไม้พอดี พอมีเป้าชัดก็ปรับตัวและเรียนรู้ได้เรื่อย ๆ",
     low: "ธาตุไม้อ่อน เวลาต้องเริ่มใหม่มักลังเลอยู่นานกว่าจะขยับ",
@@ -148,6 +150,7 @@ const ELEMENTS = [
     key: "fire",
     label: "ไฟ",
     color: "#E87A2E",
+    icon: "/images/elements/fire.png?v=wuxing1",
     high: "ธาตุไฟเด่น มีแรงขับ กล้าตัดสินใจ และจุดใจคนรอบตัวได้เร็ว",
     mid: "ธาตุไฟพอดี ใช้ความร้อนตอนที่ต้องใช้ โดยไม่ไหม้ตัวเอง",
     low: "ธาตุไฟเบา คิดไว้เยอะแต่แรงเริ่มไม่ค่อยมา",
@@ -157,6 +160,7 @@ const ELEMENTS = [
     key: "earth",
     label: "ดิน",
     color: "#C9A227",
+    icon: "/images/elements/earth.png?v=wuxing1",
     high: "ธาตุดินแน่น อยู่กับอะไรได้นาน วางระบบและรับผิดชอบได้ยาว",
     mid: "ธาตุดินพอดี ต่อให้สถานการณ์เปลี่ยน คุณก็ยังยืนพื้นได้",
     low: "ธาตุดินบาง พอแผนพังจะรู้สึกไม่มีที่ยึด",
@@ -166,6 +170,7 @@ const ELEMENTS = [
     key: "metal",
     label: "โลหะ",
     color: "#6B7A94",
+    icon: "/images/elements/metal.png?v=wuxing1",
     high: "ธาตุโลหะคม มีมาตรฐานของตัวเอง ตัดสิ่งที่ไม่เอาได้เด็ดขาด",
     mid: "ธาตุโลหะพอใช้ ตั้งขอบเขตและคัดของออกได้เมื่อจำเป็น",
     low: "ธาตุโลหะอ่อน ปล่อยมาตรฐานหลวมและตัดใจยากกว่าคนอื่น",
@@ -175,6 +180,7 @@ const ELEMENTS = [
     key: "water",
     label: "น้ำ",
     color: "#2F8FBC",
+    icon: "/images/elements/water.png?v=wuxing1",
     high: "ธาตุน้ำลึก อ่านอารมณ์คนและบรรยากาศได้ไว ยิ่งใจนิ่งยิ่งแม่น",
     mid: "ธาตุน้ำพอดี เข้าใจความรู้สึกคนได้โดยไม่จมไปกับมัน",
     low: "ธาตุน้ำเบา มักสรุปจากเหตุผลอย่างเดียวจนข้ามความรู้สึกไป",
@@ -206,6 +212,7 @@ type ElementRow = {
   key: string;
   label: string;
   color: string;
+  icon: string;
   pct: number;
   high: string;
   mid: string;
@@ -875,8 +882,18 @@ function ElementSwipeReader({
                   : "hover:bg-[rgba(213,177,111,0.06)]"
               )}
             >
+              <span className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgba(213,177,111,0.08)]">
+                <Image
+                  src={el.icon}
+                  alt=""
+                  width={28}
+                  height={28}
+                  unoptimized
+                  className="h-6 w-6 object-contain"
+                />
+              </span>
               <span
-                className="w-11 shrink-0 text-[14px] font-semibold"
+                className="w-10 shrink-0 text-[13px] font-semibold"
                 style={{ color: el.color }}
               >
                 {el.label}
@@ -935,12 +952,16 @@ function ElementSwipeReader({
                   className="rounded-[18px] px-3.5 pb-3.5 pt-3"
                   style={MAE_DETAIL_CARD}
                 >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-bold text-[#101827]"
-                      style={{ background: el.color }}
-                    >
-                      {el.label}
+                  <div className="flex items-center gap-2.5">
+                    <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgba(213,177,111,0.08)] ring-1 ring-[rgba(213,177,111,0.28)]">
+                      <Image
+                        src={el.icon}
+                        alt={`ธาตุ${el.label}`}
+                        width={40}
+                        height={40}
+                        unoptimized
+                        className="h-9 w-9 object-contain"
+                      />
                     </span>
                     <div className="min-w-0">
                       <p className="text-[14px] font-semibold text-[#d5b16f]">

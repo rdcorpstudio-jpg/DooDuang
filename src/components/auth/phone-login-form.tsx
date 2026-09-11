@@ -186,6 +186,10 @@ export function PhoneLoginForm({
               type="tel"
               inputMode="numeric"
               autoComplete="tel"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              enterKeyHint="send"
               placeholder="08x-xxx-xxxx"
               value={phone}
               onChange={(e) => {
@@ -193,13 +197,17 @@ export function PhoneLoginForm({
                 setError(null);
               }}
               className={cn(
-                "w-full rounded-full px-3.5 text-[#f7f4ec] outline-none transition placeholder:text-[#9aa3b2]/55 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35",
-                fieldH,
-                compact ? "text-[14px]" : "text-[15px]"
+                "phone-login-input w-full rounded-full px-3.5 text-[16px] leading-normal text-[#f7f4ec] outline-none transition placeholder:text-[#9aa3b2]/55 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35",
+                fieldH
               )}
               style={{
                 background: "rgba(16,24,39,0.72)",
                 boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+                WebkitTextFillColor: "#f7f4ec",
+                color: "#f7f4ec",
+                fontSize: 16,
+                transform: "none",
+                zoom: 1,
               }}
             />
           </label>
@@ -261,6 +269,10 @@ export function PhoneLoginForm({
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              enterKeyHint="done"
               placeholder="รหัส 6 หลัก"
               value={code}
               maxLength={8}
@@ -269,13 +281,17 @@ export function PhoneLoginForm({
                 setError(null);
               }}
               className={cn(
-                "w-full rounded-full px-3.5 text-center font-semibold tracking-[0.3em] text-[#f7f4ec] outline-none transition placeholder:tracking-normal placeholder:text-[#9aa3b2]/55 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35",
-                fieldH,
-                compact ? "text-[16px]" : "text-[18px]"
+                "phone-login-input w-full rounded-full px-3.5 text-center text-[16px] font-semibold leading-normal tracking-[0.3em] text-[#f7f4ec] outline-none transition placeholder:tracking-normal placeholder:text-[#9aa3b2]/55 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35",
+                fieldH
               )}
               style={{
                 background: "rgba(16,24,39,0.72)",
                 boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+                WebkitTextFillColor: "#f7f4ec",
+                color: "#f7f4ec",
+                fontSize: 16,
+                transform: "none",
+                zoom: 1,
               }}
             />
           </label>
