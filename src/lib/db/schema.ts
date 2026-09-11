@@ -5,6 +5,7 @@ import {
   integer,
   boolean,
   primaryKey,
+  index,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -15,6 +16,8 @@ export const users = pgTable("users", {
   name: text("name"),
   email: text("email").unique(),
   emailVerified: timestamp("email_verified", { mode: "date" }),
+  /** E.164, e.g. +66812345678 */
+  phone: text("phone").unique(),
   image: text("image"),
   credits: integer("credits").default(0).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
@@ -62,6 +65,26 @@ export const verificationTokens = pgTable(
   (vt) => [primaryKey({ columns: [vt.identifier, vt.token] })]
 );
 
+export const phoneOtps = pgTable(
+  "phone_otps",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    phone: text("phone").notNull(),
+    codeHash: text("code_hash").notNull(),
+    expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+    attemptCount: integer("attempt_count").default(0).notNull(),
+    consumedAt: timestamp("consumed_at", { mode: "date" }),
+    ip: text("ip"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("phone_otps_phone_idx").on(table.phone),
+    index("phone_otps_created_at_idx").on(table.createdAt),
+  ]
+);
+
 export const readings = pgTable("readings", {
   id: text("id")
     .primaryKey()
@@ -91,5 +114,6 @@ export const payments = pgTable("payments", {
 });
 
 export type User = typeof users.$inferSelect;
+export type PhoneOtp = typeof phoneOtps.$inferSelect;
 export type Reading = typeof readings.$inferSelect;
 export type Payment = typeof payments.$inferSelect;

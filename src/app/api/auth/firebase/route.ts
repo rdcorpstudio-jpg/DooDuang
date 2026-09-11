@@ -4,7 +4,7 @@ import {
   getFirebaseProjectId,
   verifyFirebaseIdToken,
 } from "@/lib/firebase/verify-id-token";
-import { createSessionToken, SESSION_COOKIE } from "@/lib/auth";
+import { createSessionToken, sessionCookieOptions, SESSION_COOKIE } from "@/lib/auth";
 import { db, requireDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { createPremiumCheckoutUrl } from "@/lib/stripe";
@@ -164,15 +164,7 @@ export async function POST(request: Request) {
     const response = NextResponse.json(
       checkoutUrl ? { ok: true, checkoutUrl } : { ok: true }
     );
-    const secure =
-      process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
-    response.cookies.set(SESSION_COOKIE, token, {
-      httpOnly: true,
-      secure,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 30 * 24 * 60 * 60,
-    });
+    response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions());
     return response;
   } catch (err) {
     console.error("Firebase login failed:", err);

@@ -11,6 +11,7 @@ export type SessionUser = {
   id: string;
   name?: string | null;
   email?: string | null;
+  phone?: string | null;
   image?: string | null;
   credits: number;
 };
@@ -33,6 +34,18 @@ export async function createSessionToken(uid: string) {
     .setIssuedAt()
     .setExpirationTime(`${SESSION_DAYS}d`)
     .sign(secretKey());
+}
+
+export function sessionCookieOptions() {
+  const secure =
+    process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: SESSION_DAYS * 24 * 60 * 60,
+  };
 }
 
 export async function signOut() {
@@ -60,6 +73,7 @@ export async function auth(): Promise<Session | null> {
         id: users.id,
         name: users.name,
         email: users.email,
+        phone: users.phone,
         image: users.image,
         credits: users.credits,
       })
