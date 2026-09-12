@@ -110,7 +110,7 @@ export function PremiumThanksPage() {
       <div className="relative z-10 flex min-h-full flex-col px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div
           className={cn(
-            "mx-auto w-[min(58%,11.5rem)] transition duration-700",
+            "mx-auto w-[min(58%,11.5rem)] shrink-0 transition duration-700",
             mounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
           )}
         >
@@ -125,26 +125,38 @@ export function PremiumThanksPage() {
           />
         </div>
 
-        <div className="flex-1" aria-hidden />
-
+        {/* Status — mid gap between wordmark and thank-you */}
         <div
           className={cn(
-            "mx-auto flex w-full max-w-[22rem] flex-col items-center text-center transition duration-700 delay-100",
-            mounted ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+            "flex flex-1 items-center justify-center px-2 transition duration-700",
+            mounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
           )}
         >
-          <p className="text-[11px] font-semibold tracking-[0.22em] text-[#e8d19a]/9">
+          <p
+            className="mae-gold-text text-center text-[1.15rem] font-bold leading-snug tracking-[0.04em] sm:text-[1.25rem]"
+            style={{
+              textShadow:
+                "0 1px 2px rgba(16,24,39,0.85), 0 8px 24px rgba(16,24,39,0.55)",
+            }}
+          >
             {ready && !premium ? (
-              <span className="inline-flex items-center gap-1.5">
-                <Loader2 className="h-3 w-3 animate-spin" />
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin text-[#e8d19a]" />
                 {statusLine}
               </span>
             ) : (
               statusLine
             )}
           </p>
+        </div>
 
-          <h1 className="mt-2 font-sacred text-[1.85rem] font-normal leading-[1.25] tracking-[0.02em] text-white">
+        <div
+          className={cn(
+            "mx-auto flex w-full max-w-[22rem] shrink-0 flex-col items-center text-center transition duration-700 delay-100",
+            mounted ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+          )}
+        >
+          <h1 className="font-sacred text-[1.85rem] font-normal leading-[1.25] tracking-[0.02em] text-white">
             ขอบคุณที่ไว้วางใจ
             <span className="mae-hero-gold-line mt-1 block text-[1.95rem]">
               แม่มั่งมีอยู่ตรงนี้
