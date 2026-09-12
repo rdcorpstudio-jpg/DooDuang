@@ -556,12 +556,16 @@ function FaceResult({
           <p className="text-[12px] text-[#5E5688]">ความชัดของสแกน</p>
           <p className="text-[12px] font-medium text-[#5B45B8]">{clarity}%</p>
         </div>
-        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#9B7FE8]/15">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8]"
-            style={{ width: `${clarity}%` }}
-          />
-        </div>
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[rgba(213,177,111,0.16)]">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${clarity}%`,
+                background:
+                  "linear-gradient(90deg, #b8924f 0%, #d5b16f 55%, #e8d19a 100%)",
+              }}
+            />
+          </div>
       </div>
 
       <div className="fortune-glass rounded-[20px] px-4 py-4">

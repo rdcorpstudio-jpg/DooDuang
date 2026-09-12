@@ -235,8 +235,23 @@
 
 .phone-frame--mae .text-\[\#7B5FD4\],
 .phone-frame--mae .text-\[\#9B7FE8\],
+.phone-frame--mae .text-\[\#5B45B8\],
 .phone-frame--mae .text-\[\#c9a8ff\],
 .phone-frame--mae .text-\[\#C9A8FF\] {
+  color: #d5b16f !important;
+}
+
+/* Lilac progress / chips → Mae gold */
+.phone-frame--mae .from-\[\#7B5FD4\],
+.phone-frame--mae .to-\[\#9B7FE8\] {
+  --tw-gradient-from: #c49a52 !important;
+  --tw-gradient-to: #d5b16f !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.phone-frame--mae .bg-\[\#6A48C8\],
+.phone-frame--mae .bg-\[\#F3EEFF\] {
+  background-color: rgba(213, 177, 111, 0.16) !important;
   color: #d5b16f !important;
 }
 

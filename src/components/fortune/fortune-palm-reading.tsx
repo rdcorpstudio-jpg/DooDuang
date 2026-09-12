@@ -31,6 +31,8 @@ import {
   scanCooldownDaysLeft,
 } from "@/lib/fortune/scan/scan-cooldown";
 import { handElementArt } from "@/lib/fortune/scan/hand-element-art";
+import { pickPalmLineCopy } from "@/lib/fortune/content/face-palm-library";
+import type { PalmLineId } from "@/lib/fortune/scan/types";
 import {
   isPremiumUnlocked,
   setPremiumUnlocked,
@@ -39,6 +41,39 @@ import { FORTUNE_UNLOCK_PRICE, APP_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type Step = "ready" | "analyzing" | "result";
+
+function isMetaDisclaimer(value: string) {
+  const t = value.trim();
+  if (!t) return true;
+  if (t.length < 24 && t.includes("แนวทาง")) return true;
+  return (
+    /ใช้เป็นแนวทาง/.test(t) &&
+    /คำตัดสิน|ประกอบการตัดสินใจ/.test(t) &&
+    t.length < 48
+  );
+}
+
+function resolvePalmLine(
+  id: PalmLineId,
+  copy: {
+    title: string;
+    blurb: string;
+    body: string;
+    meaning: string;
+    advice: string;
+  }
+) {
+  const lib = pickPalmLineCopy(id, "mid");
+  const field = (value: string, fallback: string) =>
+    isMetaDisclaimer(value) ? fallback : value.trim() || fallback;
+  return {
+    title: field(copy.title, lib.title),
+    blurb: field(copy.blurb, lib.blurb),
+    body: field(copy.body, lib.body),
+    meaning: field(copy.meaning, lib.meaning),
+    advice: field(copy.advice, lib.advice),
+  };
+}
 
 /** ลายมือ — free teaser + soft-lock detail like daily tarot */
 export function FortunePalmReading({
@@ -195,7 +230,7 @@ export function FortunePalmReading({
             <button
               type="button"
               onClick={() => setPayOpen(true)}
-              className="no-sky-lift dd-gold-glass-btn mt-5 w-full rounded-full py-3 text-[15px] font-semibold text-[#5C4810] outline-none transition active:scale-[0.99]"
+              className="mae-gold-cta no-sky-lift mt-5 w-full rounded-full py-3 text-[15px] font-semibold outline-none transition active:scale-[0.99]"
             >
               ปลดล็อก · {FORTUNE_UNLOCK_PRICE} บาท
             </button>
@@ -241,7 +276,7 @@ export function FortunePalmReading({
               <button
                 type="button"
                 onClick={viewSaved}
-                className="no-sky-lift mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#6A48C8] py-3.5 text-[15px] font-semibold text-white outline-none transition active:scale-[0.99]"
+                className="mae-gold-cta no-sky-lift mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-[15px] font-semibold outline-none transition active:scale-[0.99]"
               >
                 ดูผลล่าสุดอีกครั้ง
               </button>
@@ -486,13 +521,17 @@ function PalmResult({
             {unlocked ? natureCopy.strength : natureCopy.personality}
           </p>
           <div className="mt-2 flex items-center justify-between gap-2">
-            <p className="text-[11px] text-[#5E5688]">ความชัดของสแกน</p>
-            <p className="text-[11px] font-medium text-[#5B45B8]">{clarity}%</p>
+            <p className="text-[11px] text-[#c5cdd9]/75">ความชัดของสแกน</p>
+            <p className="text-[11px] font-medium text-[#d5b16f]">{clarity}%</p>
           </div>
-          <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#9B7FE8]/15">
+          <div className="mt-1 h-1 overflow-hidden rounded-full bg-[rgba(213,177,111,0.16)]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-[#7B5FD4] to-[#9B7FE8]"
-              style={{ width: `${clarity}%` }}
+              className="h-full rounded-full"
+              style={{
+                width: `${clarity}%`,
+                background:
+                  "linear-gradient(90deg, #b8924f 0%, #d5b16f 55%, #e8d19a 100%)",
+              }}
             />
           </div>
         </div>
@@ -533,15 +572,18 @@ function PalmResult({
       />
 
       <div className="grid grid-cols-1 gap-2.5">
-        {lines.map((line) => (
-          <LockedPreviewTile
-            key={line.id}
-            title={line.label}
-            unlocked={unlocked}
-            preview={`${line.copy.title} — ${line.copy.body}`}
-            onUnlock={onUnlock}
-          />
-        ))}
+        {lines.map((line) => {
+          const copy = resolvePalmLine(line.id, line.copy);
+          return (
+            <LockedPreviewTile
+              key={line.id}
+              title={line.label}
+              unlocked={unlocked}
+              preview={`${copy.title} — ${copy.blurb}`}
+              onUnlock={onUnlock}
+            />
+          );
+        })}
       </div>
 
       <UnlockDetailBanner
@@ -551,43 +593,46 @@ function PalmResult({
       >
         <div className="space-y-3.5">
           {lines.map((line, i) => {
+            const copy = resolvePalmLine(line.id, line.copy);
             const titleDup =
-              line.copy.title.trim() === line.label.trim() ||
-              !line.copy.title.trim();
+              copy.title.trim() === line.label.trim() || !copy.title.trim();
             return (
-            <div
-              key={line.id}
-              className={i > 0 ? "border-t border-[#7B6BB0]/12 pt-3.5" : undefined}
-            >
-              <p className="text-[17px] font-bold tracking-tight text-[#241C4F]">
-                {line.label}
-              </p>
-              {!titleDup ? (
-                <p className="mt-1 text-[13px] font-semibold text-[#5B45B8]">
-                  {line.copy.title}
+              <div
+                key={line.id}
+                className={
+                  i > 0 ? "border-t border-[#d5b16f]/18 pt-3.5" : undefined
+                }
+              >
+                <p className="text-[17px] font-bold tracking-tight text-[#d5b16f]">
+                  {line.label}
                 </p>
-              ) : null}
-              {line.copy.blurb ? (
-                <p className="mt-1 text-[12px] text-[#7B5FD4]">
-                  {line.copy.blurb}
-                </p>
-              ) : null}
-              <ExpandableBody text={line.copy.body} className="mt-1" />
-              {line.copy.meaning ? (
-                <p className="mt-1.5 text-[12px] leading-relaxed text-[#6B6490]">
-                  <span className="font-semibold text-[#5B45B8]">ความหมาย: </span>
-                  {line.copy.meaning}
-                </p>
-              ) : null}
-              {line.copy.advice ? (
-                <p className="mt-1.5 text-[12px] leading-relaxed text-[#6B6490]">
-                  <span className="font-semibold text-[#5B45B8]">คำแนะนำ: </span>
-                  {line.copy.advice}
-                </p>
-              ) : null}
-            </div>
+                {!titleDup ? (
+                  <p className="mt-1 text-[13px] font-semibold text-[#e8d19a]">
+                    {copy.title}
+                  </p>
+                ) : null}
+                {copy.blurb ? (
+                  <p className="mt-1 text-[12px] text-[#c5cdd9]/8">{copy.blurb}</p>
+                ) : null}
+                <ExpandableBody text={copy.body} className="mt-1" />
+                {copy.meaning ? (
+                  <p className="mt-1.5 text-[12px] leading-relaxed text-[#c5cdd9]/85">
+                    <span className="font-semibold text-[#d5b16f]">ความหมาย: </span>
+                    {copy.meaning}
+                  </p>
+                ) : null}
+                {copy.advice ? (
+                  <p className="mt-1.5 text-[12px] leading-relaxed text-[#c5cdd9]/85">
+                    <span className="font-semibold text-[#d5b16f]">คำแนะนำ: </span>
+                    {copy.advice}
+                  </p>
+                ) : null}
+              </div>
             );
           })}
+          <p className="border-t border-[#d5b16f]/15 pt-3 text-[11px] leading-relaxed text-[#9aa3b2]">
+            อ่านลายมือเพื่อทบทวนจังหวะชีวิต — ใช้ประกอบการคิด ไม่ใช่คำตัดสินชี้ขาด
+          </p>
         </div>
       </UnlockDetailBanner>
 
@@ -612,7 +657,7 @@ function ExpandableBody({
 }) {
   return (
     <div className={className}>
-      <p className="mt-2 text-[13px] leading-[1.75] text-[#3A3270]">{text}</p>
+      <p className="mt-2 text-[13px] leading-[1.75] text-[#c5cdd9]/88">{text}</p>
     </div>
   );
 }

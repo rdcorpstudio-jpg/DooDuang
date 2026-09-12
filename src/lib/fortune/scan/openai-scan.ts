@@ -14,6 +14,7 @@ import type {
   PalmReadingResult,
 } from "@/lib/fortune/scan/types";
 import { SCAN_TONE_RULES, SCAN_TONE_SYSTEM } from "@/lib/fortune/tone";
+import { pickPalmLineCopy } from "@/lib/fortune/content/face-palm-library";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const TIMEOUT_MS = 25_000;
@@ -26,6 +27,20 @@ const LINES: PalmLineId[] = ["life", "heart", "head"];
 
 function asText(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+/** AI sometimes returns the disclaimer as the whole line body — reject it. */
+function isMetaDisclaimer(value: string) {
+  const t = value.trim();
+  if (!t) return true;
+  if (t.length < 24 && t.includes("แนวทาง")) return true;
+  return /ใช้เป็นแนวทาง/.test(t) && /คำตัดสิน|ประกอบการตัดสินใจ/.test(t) && t.length < 48;
+}
+
+function asLineText(value: unknown, fallback: string) {
+  const t = asText(value, "");
+  if (!t || isMetaDisclaimer(t)) return fallback;
+  return t;
 }
 
 function asTone(value: unknown, fallback: FortuneTone = "mid"): FortuneTone {
@@ -152,12 +167,13 @@ function coercePalmPack(raw: unknown): PalmReadingPack | null {
         : {};
     const labelDefault =
       id === "life" ? "เส้นชีวิต" : id === "heart" ? "เส้นหัวใจ" : "เส้นสมอง";
+    const lib = pickPalmLineCopy(id, "mid");
     const copy: PalmLineCopy = {
-      title: asText(copyRaw.title, labelDefault),
-      blurb: asText(copyRaw.blurb, "อ่านจากลายมือ"),
-      body: asText(copyRaw.body, "ใช้เป็นแนวทาง ไม่ใช่คำตัดสิน"),
-      meaning: asText(copyRaw.meaning, "บอกแนวโน้มพลังและจังหวะ"),
-      advice: asText(copyRaw.advice, "ทำทีละเรื่องให้ชัด"),
+      title: asLineText(copyRaw.title, lib.title),
+      blurb: asLineText(copyRaw.blurb, lib.blurb),
+      body: asLineText(copyRaw.body, lib.body),
+      meaning: asLineText(copyRaw.meaning, lib.meaning),
+      advice: asLineText(copyRaw.advice, lib.advice),
     };
     return {
       id,
@@ -375,6 +391,8 @@ export async function analyzePalmWithOpenAI(
         "ต้องมี lines ครบ life heart head",
         "ห้าม markdown",
         "ถ้าเห็นไม่ชัด ให้ประเมินเท่าที่มองเห็นได้",
+        "title/blurb/body/meaning/advice ต้องเป็นเนื้อหาเฉพาะเส้นนั้น ห้ามใส่ประโยค disclaimer เช่น ใช้เป็นแนวทาง ไม่ใช่คำตัดสิน",
+        "แต่ละเส้นต้องต่างกัน ห้ามคัดลอกข้อความซ้ำทุกเส้น",
         ...SCAN_TONE_RULES,
       ],
     }),

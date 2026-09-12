@@ -26,22 +26,22 @@ export function LockedPreviewTile({
         if (!unlocked) onUnlock?.();
       }}
       className={cn(
-        "fortune-glass relative overflow-hidden rounded-[16px] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/35",
+        "fortune-glass relative overflow-hidden rounded-[16px] px-3 py-3 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
         className
       )}
     >
-      <p className="flex items-center gap-1 text-[12px] font-semibold text-[#B8921F]">
+      <p className="flex items-center gap-1 text-[12px] font-semibold text-[#d5b16f]">
         <Star className="h-3 w-3" strokeWidth={2} fill="currentColor" />
         {title}
       </p>
       {unlocked ? (
-        <p className="mt-2 text-[12px] leading-snug text-[#3A3270]">{preview}</p>
+        <p className="mt-2 text-[12px] leading-snug text-[#c5cdd9]/88">{preview}</p>
       ) : (
         <>
-          <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-[#9A90C0] blur-[2px]">
+          <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-[#9aa3b2] blur-[2px]">
             {preview}
           </p>
-          <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-[#B8921F]">
+          <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-[#d5b16f]">
             <Lock className="h-3 w-3" strokeWidth={2} />
             พรีเมียม
           </span>
