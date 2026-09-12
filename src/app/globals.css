@@ -693,57 +693,124 @@
 /*
   Real mobile browsers only (viewport ≤767).
   Desktop phone-column mockup stays on the rules above.
+
+  iOS / LINE in-app: percentage min-height on flex children is unreliable when
+  the plate is height:auto — spacer collapses and copy stacks over Mae's face.
+  Lock the plate to the visible viewport and pin copy to the lower band.
 */
 @media (max-width: 767px) {
   .mae-hero-plate {
-    height: auto;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 100%;
+    height: 100svh;
+    height: 100dvh;
     min-height: 100%;
-    overflow: visible;
-    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+    min-height: 100svh;
+    min-height: 100dvh;
+    max-height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
   .mae-hero-wordmark {
-    /* Sit below Mae's hands; leave room for headline */
-    top: 50%;
-    width: min(64%, 12.75rem);
+    /* Under hands / mid torso — above the lower copy band */
+    top: 38%;
+    width: min(58%, 11.25rem);
   }
 
   .mae-hero-spacer {
-    /* Push copy below wordmark so they don't collide */
-    flex: 0 0 auto;
-    min-height: 58%;
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .mae-hero-copy {
-    margin-top: 0.35rem;
-    padding-top: 0.85rem;
-    padding-bottom: 0.25rem;
+    position: relative;
+    z-index: 10;
+    margin-top: auto !important;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    padding-top: 0.35rem;
+    padding-bottom: 0.15rem;
   }
 
   .mae-hero-copy h1 > span:first-child {
-    font-size: 1.9rem;
+    font-size: 1.72rem;
     line-height: 1.2;
   }
 
   .mae-hero-copy .mae-hero-gold-line {
-    font-size: 2rem;
+    font-size: 1.82rem;
     line-height: 1.2;
   }
 
   .mae-hero-lede {
-    margin-top: 0.65rem;
+    margin-top: 0.5rem;
+    font-size: 12px;
+    line-height: 1.65;
   }
 
   .mae-hero-copy .mae-gold-cta {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
   }
 
   .mae-hero-award {
-    margin-top: 0.9rem;
+    margin-top: 0.7rem;
   }
 
-  .mae-concept-link {
-    margin-top: 0.75rem;
+  .mae-hero-award .mae-award-glow {
+    height: 3.25rem;
+    width: 3.25rem;
+  }
+
+  .mae-hero-award .mae-award-trophy {
+    height: 3.1rem;
+    width: 3.1rem;
+  }
+
+  .mae-hero-plate > .mae-concept-link {
+    position: relative;
+    z-index: 12;
+    flex-shrink: 0;
+    margin-top: 0.55rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .mae-hero-plate > .mae-concept-link .mae-gold-text {
+    font-size: 13px;
+  }
+}
+
+/* Short phones (SE / compact) — keep copy in the lower third */
+@media (max-width: 767px) and (max-height: 720px) {
+  .mae-hero-wordmark {
+    top: 34%;
+    width: min(52%, 10rem);
+  }
+
+  .mae-hero-copy h1 > span:first-child {
+    font-size: 1.55rem;
+  }
+
+  .mae-hero-copy .mae-hero-gold-line {
+    font-size: 1.62rem;
+  }
+
+  .mae-hero-lede {
+    margin-top: 0.35rem;
+    font-size: 11.5px;
+  }
+
+  .mae-hero-copy .mae-gold-cta {
+    margin-top: 0.55rem;
+    height: 2.5rem;
+  }
+
+  .mae-hero-award {
+    margin-top: 0.5rem;
   }
 }
 

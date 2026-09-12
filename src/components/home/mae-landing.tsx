@@ -222,7 +222,7 @@ export function MaeLanding() {
       style={{ background: C.navy }}
     >
       {/* HERO — same composition + type scale on phone and desktop mockup */}
-      <section className="mae-hero-plate relative flex min-h-full flex-col overflow-hidden px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(0.5rem,env(safe-area-inset-top))]">
+      <section className="mae-hero-plate relative flex h-full min-h-full flex-col overflow-hidden px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
           <video
             className="absolute inset-0 h-full w-full object-cover"
