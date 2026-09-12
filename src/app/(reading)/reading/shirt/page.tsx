@@ -4,7 +4,6 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, Lock } from "lucide-react";
-import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import {
@@ -21,7 +20,7 @@ import {
   hydrateFortuneProfileFromWizard,
   readFortuneProfile,
 } from "@/lib/fortune/profile-storage";
-import { APP_BRAND_MARK, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 /** Free = วันนี้เท่านั้น · พรีเมียม = ดูรายละเอียดทุกสี */
@@ -91,7 +90,7 @@ function LuckyShirtPageInner() {
   return (
     <div className="relative h-full overflow-y-auto overscroll-contain">
     <div className="relative mx-auto w-full max-w-[480px] px-4 pb-16 pt-2">
-      <header className="relative flex items-center justify-between py-2">
+      <header className="relative flex items-center justify-between py-1.5">
         <Link
           href="/menu"
           className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#d5b16f] outline-none transition active:scale-95"
@@ -100,10 +99,7 @@ function LuckyShirtPageInner() {
           <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
         </Link>
         <div className="min-w-0 flex-1 px-2 text-center">
-          <p className="text-[11px] tracking-[0.18em] text-[#d5b16f]/75">
-            {APP_BRAND_MARK}
-          </p>
-          <h1 className="text-[1.2rem] font-bold tracking-wide text-[#f7f4ec]">
+          <h1 className="mae-gold-text text-[1.25rem] font-bold tracking-wide">
             สีเสื้อมงคล
           </h1>
         </div>
@@ -113,15 +109,12 @@ function LuckyShirtPageInner() {
       {!ready ? (
         <p className="mt-10 text-center text-[14px] text-[#9AB8DC]">กำลังเปิด…</p>
       ) : (
-        <div className="mt-4 space-y-3.5">
-          <section className="mae-aspect-card rounded-[22px] px-4 py-5 text-center">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center">
-              <FortuneIcon name="shirt" size={28} plain />
-            </div>
-            <p className="mt-2 text-[12px] font-semibold tracking-wide text-[#d5b16f]">
+        <div className="mt-3 space-y-3.5">
+          <section className="mae-aspect-card rounded-[22px] px-4 py-4 text-center">
+            <p className="text-[12px] font-semibold tracking-wide text-[#d5b16f]">
               {isTodayPick ? "สีแนะนำวันนี้" : "รายละเอียดสีที่เลือก"}
             </p>
-            <div className="mx-auto mt-3 flex h-28 w-28 items-center justify-center">
+            <div className="mx-auto mt-2.5 flex h-28 w-28 items-center justify-center">
               <Image
                 src={active.src}
                 alt={active.name}
@@ -131,7 +124,7 @@ function LuckyShirtPageInner() {
                 className="h-24 w-24 object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
               />
             </div>
-            <p className="mt-2 text-[1.35rem] font-bold text-[#f7f4ec]">
+            <p className="mt-1.5 text-[1.35rem] font-bold text-[#f7f4ec]">
               สี{active.name}
             </p>
             <p className="mt-1 text-[14px] font-medium text-[#e8d19a]">
