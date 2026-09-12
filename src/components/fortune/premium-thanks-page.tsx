@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Check, Loader2 } from "lucide-react";
-import { AnimatedPage } from "@/components/ui/reveal";
-import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { Loader2 } from "lucide-react";
 import {
   APP_BRAND_MARK,
   FORTUNE_PACKAGE_MONTHS,
@@ -31,11 +30,16 @@ function LineMark({ className }: { className?: string }) {
   );
 }
 
-/** Post-payment: confirm unlock vibe + add LINE OA for CRM */
+/** Post-payment thanks — Mae elder hero vibe + LINE OA CTA */
 export function PremiumThanksPage() {
   const [ready, setReady] = useState(false);
   const [premium, setPremium] = useState(false);
   const [continueHref, setContinueHref] = useState("/premium");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,89 +64,151 @@ export function PremiumThanksPage() {
     };
   }, []);
 
+  const statusLine = !ready
+    ? "กำลังยืนยันการชำระ…"
+    : premium
+      ? `พรีเมียม ${FORTUNE_PACKAGE_MONTHS} เดือนปลดล็อกแล้ว`
+      : "กำลังยืนยันสิทธิ์…";
+
   return (
-    <AnimatedPage className="mx-auto flex min-h-full w-full max-w-[480px] flex-col justify-center px-4 pb-12 pt-6">
-      <section className="mae-aspect-card relative overflow-hidden rounded-[22px] px-5 py-7 text-center">
+    <div className="relative flex h-full min-h-full flex-col overflow-hidden text-white">
+      {/* Full-bleed Mae — same spirit as landing */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <Image
+          src="/images/bg/hero-mae-elder.webp"
+          alt=""
+          fill
+          priority
+          unoptimized
+          className="object-cover"
+          style={{ objectPosition: "58% 18%" }}
+          sizes="480px"
+        />
         <div
-          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full"
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(180deg,
+                rgba(16,24,39,0.18) 0%,
+                transparent 22%,
+                transparent 42%,
+                rgba(16,24,39,0.55) 68%,
+                rgba(16,24,39,0.92) 100%)
+            `,
+          }}
+        />
+        <div
+          className="absolute inset-x-0 bottom-0 h-[55%]"
           style={{
             background:
-              "radial-gradient(circle at 35% 30%, rgba(255,248,228,0.22), rgba(213,177,111,0.1) 55%, transparent)",
-            boxShadow:
-              "inset 0 0 0 1px rgba(213,177,111,0.5), 0 8px 22px rgba(0,0,0,0.28)",
+              "radial-gradient(ellipse 90% 70% at 50% 100%, rgba(213,177,111,0.14), transparent 70%)",
           }}
-        >
-          {ready && premium ? (
-            <Check className="h-7 w-7 text-[#d5b16f]" strokeWidth={2.4} />
-          ) : ready ? (
-            <FortuneIcon name="profile" size={28} plain />
-          ) : (
-            <Loader2 className="h-6 w-6 animate-spin text-[#d5b16f]" />
+        />
+      </div>
+
+      <div className="relative z-10 flex min-h-full flex-col px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <div
+          className={cn(
+            "mx-auto w-[min(58%,11.5rem)] transition duration-700",
+            mounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
           )}
+        >
+          <Image
+            src="/images/brand/mae-wordmark-sm.webp?v=clear1"
+            alt={APP_BRAND_MARK}
+            width={400}
+            height={200}
+            priority
+            unoptimized
+            className="mae-logo-breathe h-auto w-full object-contain"
+          />
         </div>
 
-        <p className="mae-gold-text mt-4 text-[11px] font-semibold tracking-[0.22em]">
-          {APP_BRAND_MARK}
-        </p>
-        <h1 className="mae-gold-text mt-1.5 text-[1.45rem] font-bold tracking-tight">
-          {ready && premium
-            ? "ชำระสำเร็จแล้ว"
-            : ready
-              ? "กำลังยืนยันสิทธิ์…"
-              : "กำลังยืนยันการชำระ…"}
-        </h1>
-        <p className="mx-auto mt-2 max-w-[17rem] text-[13px] leading-relaxed text-[#f7f4ec]/68">
-          {premium
-            ? `พรีเมียม ${FORTUNE_PACKAGE_MONTHS} เดือนปลดล็อกแล้ว · เก็บสิทธิ์ไว้ในไลน์ต่อได้เลย`
-            : "รอสักครู่ หากชำระแล้ว สิทธิ์จะอัปเดตอัตโนมัติ"}
-        </p>
+        <div className="flex-1" aria-hidden />
 
         <div
-          className="mx-auto mt-5 h-px w-28"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent, rgba(213,177,111,0.55), transparent)",
-          }}
-          aria-hidden
-        />
-
-        <p className="mx-auto mt-5 max-w-[18rem] text-[13px] leading-snug text-[#e8d19a]/9">
-          เพิ่มเพื่อน {LINE_OA_HANDLE}
-          <br />
-          <span className="text-[12px] text-[#f7f4ec]/58">
-            รับฤกษ์อัปเดต และแจ้งเตือนก่อนหมดอายุ
-          </span>
-        </p>
-
-        <a
-          href={LINE_OA_ADD_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex h-12 w-full max-w-[20rem] items-center justify-center gap-2 rounded-full text-[15px] font-semibold text-white outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
-          style={{
-            background: "#06C755",
-            boxShadow: "0 8px 20px rgba(6,199,85,0.28)",
-          }}
+          className={cn(
+            "mx-auto flex w-full max-w-[22rem] flex-col items-center text-center transition duration-700 delay-100",
+            mounted ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+          )}
         >
-          <LineMark className="h-[18px] w-[18px] text-white" />
-          เพิ่มเพื่อนใน LINE
-        </a>
+          <p className="text-[11px] font-semibold tracking-[0.22em] text-[#e8d19a]/9">
+            {ready && !premium ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {statusLine}
+              </span>
+            ) : (
+              statusLine
+            )}
+          </p>
 
-        <div className="mt-4 flex flex-col items-center gap-2.5">
+          <h1 className="mt-2 font-sacred text-[1.85rem] font-normal leading-[1.25] tracking-[0.02em] text-white">
+            ขอบคุณที่ไว้วางใจ
+            <span className="mae-hero-gold-line mt-1 block text-[1.95rem]">
+              แม่มั่งมีอยู่ตรงนี้
+            </span>
+          </h1>
+
+          <p className="mt-3 max-w-[17.5rem] text-[13px] leading-[1.7] text-[#d8dee8]/88">
+            เก็บสิทธิ์พรีเมียมไว้ในไลน์
+            <br />
+            รับฤกษ์อัปเดต และแจ้งเตือนก่อนหมดอายุ
+            <br />
+            <span className="text-[#e8d19a]/88">{LINE_OA_HANDLE}</span>
+          </p>
+
+          <a
+            href={LINE_OA_ADD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-flex h-12 w-full max-w-[240px] items-center justify-center gap-2 rounded-full text-[15px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
+            style={{
+              background: "#06C755",
+              boxShadow:
+                "0 10px 28px rgba(6,199,85,0.32), 0 0 0 1px rgba(255,255,255,0.08)",
+            }}
+          >
+            <LineMark className="h-[18px] w-[18px] text-white" />
+            เพิ่มเพื่อนใน LINE
+          </a>
+
           <Link
             href={continueHref}
-            className="text-[13px] font-medium text-[#d5b16f] outline-none transition hover:text-[#e8d19a]"
+            className="mae-gold-cta group relative mt-3 flex h-11 w-full max-w-[240px] items-center justify-center rounded-full px-6 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           >
-            เริ่มดูดวงพรีเมียม →
+            <span className="text-[14px] font-bold tracking-wide">
+              เริ่มดูดวงพรีเมียม →
+            </span>
           </Link>
+
           <Link
             href="/dashboard"
-            className="text-[12px] text-[#f7f4ec]/45 outline-none transition hover:text-[#f7f4ec]/7"
+            className="mt-3 text-[12px] text-[#c5cdd9]/65 outline-none transition hover:text-[#e8d19a]"
           >
             ไว้ทีหลัง · ไปหน้าบัญชี
           </Link>
+
+          <div className="mt-5 flex w-fit max-w-full items-center justify-center gap-1.5 text-left">
+            <Image
+              src="/images/brand/diamond-trophy-transparent.webp"
+              alt=""
+              width={56}
+              height={56}
+              unoptimized
+              className="h-12 w-12 object-contain"
+            />
+            <div className="min-w-0 py-0.5">
+              <p className="text-[9px] font-semibold tracking-[0.16em] text-[#d5b16f]/9">
+                เกียรติยศ
+              </p>
+              <p className="mae-gold-text font-sacred text-[1rem] leading-snug">
+                รางวัลเพชรสยาม 2026
+              </p>
+            </div>
+          </div>
         </div>
-      </section>
-    </AnimatedPage>
+      </div>
+    </div>
   );
 }
