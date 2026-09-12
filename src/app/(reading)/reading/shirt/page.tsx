@@ -95,6 +95,7 @@ function LuckyShirtPageInner() {
   }
 
   return (
+    <div className="relative h-full overflow-y-auto overscroll-contain">
     <div className="relative mx-auto w-full max-w-[480px] px-4 pb-16 pt-2">
       <header className="relative flex items-center justify-between py-2">
         <Link
@@ -322,6 +323,7 @@ function LuckyShirtPageInner() {
         }}
         returnPath="/reading/shirt"
       />
+    </div>
     </div>
   );
 }
