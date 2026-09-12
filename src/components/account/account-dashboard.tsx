@@ -44,7 +44,7 @@ import {
   setPremiumUnlocked,
   syncPremiumFromServer,
 } from "@/lib/fortune/premium-unlock";
-import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE, LINE_OA_ADD_URL, LINE_OA_HANDLE } from "@/lib/site";
+import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE, LINE_OA_ADD_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { trackClientEvent } from "@/lib/analytics/client";
 
@@ -397,7 +397,7 @@ export function AccountDashboard({
               คุยกับแม่มั่งมี
             </h2>
             <p className="mt-0.5 text-[12px] leading-snug text-[#f7f4ec]/65">
-              เพิ่มเพื่อน {LINE_OA_HANDLE} รับอัปเดตและถามเรื่องแพ็กเกจได้
+              รับข่าวจากแม่ และปรึกษาได้ในไลน์
             </p>
             <a
               href={LINE_OA_ADD_URL}
