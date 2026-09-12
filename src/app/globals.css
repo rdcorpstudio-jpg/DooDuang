@@ -718,7 +718,7 @@
 
   .mae-hero-wordmark {
     /* Under hands / mid torso — above the lower copy band */
-    top: 38%;
+    top: 53%;
     width: min(58%, 11.25rem);
   }
 
@@ -787,7 +787,7 @@
 /* Short phones (SE / compact) — keep copy in the lower third */
 @media (max-width: 767px) and (max-height: 720px) {
   .mae-hero-wordmark {
-    top: 34%;
+    top: 49%;
     width: min(52%, 10rem);
   }
 
