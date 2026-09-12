@@ -612,7 +612,7 @@
   scroll-behavior: smooth;
 }
 
-/* Hero — one type scale; only spacer/logo position adapt to height */
+/* Hero — desktop phone-mockup defaults (do not shrink for real phones here) */
 .mae-hero-wordmark {
   top: 44%;
   width: min(68%, 13.5rem);
@@ -623,7 +623,7 @@
   flex: 1 1 auto;
 }
 
-@media (min-height: 780px) {
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) and (min-height: 780px) {
   .mae-hero-wordmark {
     top: 46%;
   }
@@ -633,23 +633,71 @@
   }
 }
 
-@media (max-height: 700px) {
+/* Short desktop mockup only — never apply to real phones */
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) and (max-height: 700px) {
   .mae-hero-wordmark {
-    top: 40%;
+    top: 42%;
   }
 
   .mae-hero-spacer {
-    min-height: 44%;
+    min-height: 48%;
   }
 }
 
-@media (max-height: 620px) {
+/*
+  Real mobile browsers only (viewport ≤767).
+  Desktop phone-column mockup stays on the rules above.
+*/
+@media (max-width: 767px) {
+  .mae-hero-plate {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+
   .mae-hero-wordmark {
-    top: 36%;
+    /* Sit below Mae's hands; leave room for headline */
+    top: 50%;
+    width: min(64%, 12.75rem);
   }
 
   .mae-hero-spacer {
-    min-height: 38%;
+    /* Push copy below wordmark so they don't collide */
+    flex: 0 0 auto;
+    min-height: 58%;
+  }
+
+  .mae-hero-copy {
+    margin-top: 0.35rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .mae-hero-copy h1 > span:first-child {
+    font-size: 1.9rem;
+    line-height: 1.2;
+  }
+
+  .mae-hero-copy .mae-hero-gold-line {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .mae-hero-lede {
+    margin-top: 0.65rem;
+  }
+
+  .mae-hero-copy .mae-gold-cta {
+    margin-top: 1rem;
+  }
+
+  .mae-hero-award {
+    margin-top: 0.9rem;
+  }
+
+  .mae-concept-link {
+    margin-top: 0.75rem;
   }
 }
 
