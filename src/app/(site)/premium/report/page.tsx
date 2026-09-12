@@ -1,6 +1,11 @@
-import { redirect } from "next/navigation";
+import { APP_NAME } from "@/lib/site";
+import { PremiumReportPage } from "@/components/fortune/premium-report-page";
 
-/** Old TOC report route — folded into /premium unlocked dashboard */
-export default function PremiumReportRedirect() {
-  redirect("/premium");
+export const metadata = {
+  title: `สรุปดวง — ${APP_NAME}`,
+  description: "รายงานสรุปดวงจากวันเกิดและราศีของคุณ",
+};
+
+export default function Page() {
+  return <PremiumReportPage />;
 }

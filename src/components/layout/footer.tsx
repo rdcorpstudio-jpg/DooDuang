@@ -18,9 +18,6 @@ export function Footer() {
           <Link href="/reading" className="nav-link-mystic">
             ดูดวง
           </Link>
-          <Link href="/premium" className="nav-link-mystic">
-            พรีเมียม
-          </Link>
           <Link href="/privacy" className="nav-link-mystic">
             ความเป็นส่วนตัว
           </Link>

@@ -69,6 +69,9 @@ export function setPremiumUnlocked(profile?: {
   }
   // One random HQ wallpaper per premium unlock (kept stable after first assign)
   assignPremiumWallpaperIfNeeded();
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("dooduang-premium-changed"));
+  }
 }
 
 export function isPremiumUnlocked(profile?: {
@@ -103,6 +106,18 @@ export function isPremiumUnlocked(profile?: {
     /* ignore */
   }
   return false;
+}
+
+export function clearPremiumUnlocked(): void {
+  try {
+    localStorage.removeItem(PREMIUM_UNLOCK_UNTIL_KEY);
+    sessionStorage.removeItem(PREMIUM_UNLOCK_KEY);
+  } catch {
+    /* ignore */
+  }
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("dooduang-premium-changed"));
+  }
 }
 
 export function getPremiumUnlockedUntil(): Date | null {

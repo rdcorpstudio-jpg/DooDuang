@@ -25,11 +25,11 @@ export function usePremiumProfileGate() {
       next ? { birthDate: next.birthDate, nickname: next.nickname } : null
     );
     if (!unlocked) {
-      router.replace("/premium");
+      router.replace("/menu");
       return;
     }
     if (!next?.birthDate) {
-      router.replace("/reading");
+      router.replace(`/reading?next=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
     setReady(true);
@@ -42,7 +42,7 @@ export function PremiumDetailShell({
   title,
   children,
   className,
-  backHref = "/premium",
+  backHref = "/menu",
 }: {
   title?: string;
   children: React.ReactNode;

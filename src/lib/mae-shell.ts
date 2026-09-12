@@ -9,6 +9,7 @@ export function isMaeShellPath(pathname: string) {
     pathname.startsWith("/reading") ||
     pathname.startsWith("/r/") ||
     pathname.startsWith("/premium") ||
+    pathname.startsWith("/menu") ||
     pathname.startsWith("/preview/") ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/dashboard") ||

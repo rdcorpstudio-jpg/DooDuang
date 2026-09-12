@@ -38,12 +38,15 @@ export function StarfieldBackground() {
     pathname === "/mae" || pathname.startsWith("/mae/");
   const isLoginAuth =
     pathname.startsWith("/login") || pathname.startsWith("/auth");
+  /** เมนูใช้พื้นหลังซุ้มทอง/พระจันทร์ แบบเดียวกับหน้าล็อกอิน */
+  const isMenuGate = pathname === "/menu" || pathname.startsWith("/menu/");
+  const useGateSky = isLoginAuth || isMenuGate;
 
   // Mae main landing renders its own full-bleed video
   if (isMaeHome) return null;
 
   const celestial = isMaeCelestialPath(pathname);
-  const sky = isLoginAuth
+  const sky = useGateSky
     ? WIZARD_SKY
     : celestial
       ? CELESTIAL_SKY
@@ -71,7 +74,7 @@ export function StarfieldBackground() {
         <div className="absolute inset-0" style={sky} />
       )}
 
-      {isLoginAuth ? (
+      {useGateSky ? (
         <div
           className="absolute inset-0"
           style={{

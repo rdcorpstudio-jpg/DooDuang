@@ -62,7 +62,7 @@ const QUICK_LINKS = [
   },
   {
     href: "/premium",
-    title: "หน้าพรีเมียม",
+    title: "หน้าดวง",
     sub: "ดวงแบบปลดล็อกเต็ม",
     Icon: Crown,
   },

@@ -14,6 +14,9 @@ declare global {
 /** LINE Ads Platform tag — base + page view */
 export const LINE_TAG_ID = "67b0794a-95c0-40c6-bf68-6f17e52e7fdd";
 
+/** LINE purchase / conversion tag — fire only after paid unlock */
+export const LINE_PURCHASE_TAG_ID = "16f50e85-230a-49e6-9e00-5454eb15b6c0";
+
 function LineTagRoutePv() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -80,16 +83,11 @@ export function trackLinePurchaseConversions(sessionId?: string | null) {
     }
   }
 
-  window._lt(
-    "send",
-    "cv",
-    { type: "Purchase" },
-    [LINE_TAG_ID]
-  );
-  window._lt(
-    "send",
-    "cv",
-    { type: "Conversion" },
-    [LINE_TAG_ID]
-  );
+  // Purchase-page snippet: init purchase tag, then Purchase + Conversion
+  window._lt("init", {
+    customerType: "lap",
+    tagId: LINE_PURCHASE_TAG_ID,
+  });
+  window._lt("send", "cv", { type: "Purchase" }, [LINE_PURCHASE_TAG_ID]);
+  window._lt("send", "cv", { type: "Conversion" }, [LINE_PURCHASE_TAG_ID]);
 }

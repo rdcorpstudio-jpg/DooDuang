@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { FortuneResultHero } from "@/components/fortune/fortune-result-hero";
@@ -94,6 +94,18 @@ export function LifeInsightMockup({
   const deepTime = isPremiumPage ? birthTime : undefined;
   const deepPlace = isPremiumPage ? birthPlace : undefined;
   const displayName = (nickname || "").trim() || (realName || "").trim() || "สมาชิก";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash !== "#self-intro") return;
+    const t = window.setTimeout(() => {
+      document.getElementById("self-intro")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
+    return () => window.clearTimeout(t);
+  }, [seed]);
 
   const analyzeInput = useMemo(
     () => ({
@@ -310,7 +322,8 @@ export function LifeInsightMockup({
       </div>
 
       <div
-        className="fortune-reveal px-3"
+        id="self-intro"
+        className="fortune-reveal scroll-mt-4 px-3"
         style={{ "--fortune-delay": "380ms" } as CSSProperties}
       >
         <FortuneFreeSelfIntro
@@ -321,7 +334,7 @@ export function LifeInsightMockup({
           birthPlace={deepPlace}
           focus={typedFocus}
           gender={gender}
-          premium={isPremiumPage}
+          premium={contentUnlocked}
         />
       </div>
 

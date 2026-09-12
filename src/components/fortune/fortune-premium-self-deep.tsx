@@ -1126,14 +1126,15 @@ export function FortunePremiumSelfDeep({
     <div className={cn("space-y-3", className)}>
       <section className="fortune-glass rounded-[20px] px-4 py-4">
         <div className="text-center">
-          <p className="text-[12px] font-semibold tracking-[0.14em] text-[#d5b16f]">
-            PREMIUM · SELF MAP
+          <p className="inline-flex items-center gap-1.5 text-[12px] font-semibold tracking-wide text-[#d5b16f]">
+            <Sparkles className="h-3.5 w-3.5" strokeWidth={1.8} />
+            เจาะลึกตัวตน
           </p>
           <h2 className="mt-1.5 text-[1.35rem] font-semibold leading-snug text-[#d5b16f]">
             ตัวตนของคุณ ใน 6 มุม
           </h2>
-          <p className="mt-1 text-[13px] text-[#e8d19a]/85">
-            คุณ{name} · แผนที่นิสัยเฉพาะตัว
+          <p className="mt-1 text-[13px] leading-relaxed text-[#f7f4ec]/70">
+            คุณ{name} · อ่านละเอียดกว่าเบื้องต้น กราฟและธาตุเฉพาะตัว
           </p>
         </div>
 

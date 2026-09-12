@@ -416,6 +416,11 @@ export function ReadingWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const afterPremium = searchParams.get("afterPremium") === "1";
+  const nextPath = (() => {
+    const raw = (searchParams.get("next") || "").trim();
+    if (!raw.startsWith("/") || raw.startsWith("//")) return null;
+    return raw;
+  })();
 
   const [step, setStep] = useState<Step>("gender");
   const [profile, setProfile] = useState<ProfileForm>({
@@ -440,7 +445,7 @@ export function ReadingWizard() {
       try {
         const saved = readFortuneProfile();
         if (hasBasicFortuneProfile(saved)) {
-          router.replace("/premium");
+          router.replace(nextPath || "/premium");
           return;
         }
         if (saved) {
@@ -488,6 +493,10 @@ export function ReadingWizard() {
             focus: saved.focus ?? "life",
           });
           if (hasFreeReadingBasics(saved)) {
+            if (nextPath) {
+              router.replace(nextPath);
+              return;
+            }
             // Already have gender/birth/nickname — skip re-entry, open free reading
             setStep("loading");
             setAutoStartFree(true);
@@ -572,7 +581,7 @@ export function ReadingWizard() {
     });
     clearWizardCache();
     // Basics only — deepen (time/place) + loading happens on /premium
-    router.replace("/premium");
+    router.replace(nextPath || "/premium");
   }
 
   async function runFortune() {
@@ -585,6 +594,25 @@ export function ReadingWizard() {
     if (afterPremium) {
       // Never show FortuneLoading here — only after birth time/place are filled
       finishPremiumOnboard();
+      return;
+    }
+
+    // มาจากเมนู → บันทึกแล้วไปหน้าฟีเจอร์นั้นเลย
+    if (nextPath) {
+      const existing = readFortuneProfile();
+      writeFortuneProfile({
+        realName: profile.realName,
+        nickname: profile.nickname,
+        birthDate: profile.birthDate,
+        gender: profile.gender,
+        birthTime: existing?.birthTime,
+        birthPlace: existing?.birthPlace,
+        focus: existing?.focus ?? profile.focus,
+        deepenSkipped: existing?.deepenSkipped,
+        profileLockedUntil: existing?.profileLockedUntil,
+      });
+      clearWizardCache();
+      router.replace(nextPath);
       return;
     }
 

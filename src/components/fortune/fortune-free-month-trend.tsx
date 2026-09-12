@@ -525,6 +525,8 @@ function UnlockedTwelveYearTrend({
   birthPlace,
   focus,
   gender,
+  initialMode = "month",
+  detailHrefBase = "/premium/year/detail",
   className,
 }: {
   seed: string;
@@ -534,12 +536,15 @@ function UnlockedTwelveYearTrend({
   birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
+  initialMode?: "month" | "year";
+  /** Base path for “อ่านเพิ่มเติม” — appends ?ce= */
+  detailHrefBase?: string;
   className?: string;
 }) {
   const now = new Date();
   const nowCe = now.getFullYear();
   const nowMonth = now.getMonth();
-  const [mode, setMode] = useState<"month" | "year">("month");
+  const [mode, setMode] = useState<"month" | "year">(initialMode);
 
   const years = useMemo((): YearPoint[] => {
     const input = { birthDate, nickname, birthTime, birthPlace, focus, gender };
@@ -739,7 +744,7 @@ function UnlockedTwelveYearTrend({
               {yearBand.meaning}
             </p>
             <Link
-              href={`/premium/year?ce=${activeYear.ce}`}
+              href={`${detailHrefBase}?ce=${activeYear.ce}`}
               className="mae-gold-cta group mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold tracking-wide text-[#101827] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
             >
               อ่านเพิ่มเติม
@@ -795,6 +800,8 @@ export function FortuneFreeMonthTrend({
   birthPlace,
   focus,
   gender,
+  initialMode = "month",
+  detailHrefBase,
   className,
 }: {
   points?: FreeMonthPoint[] | null;
@@ -807,6 +814,8 @@ export function FortuneFreeMonthTrend({
   birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
+  initialMode?: "month" | "year";
+  detailHrefBase?: string;
   className?: string;
 }) {
   if (unlocked) {
@@ -819,6 +828,8 @@ export function FortuneFreeMonthTrend({
         birthPlace={birthPlace}
         focus={focus}
         gender={gender}
+        initialMode={initialMode}
+        detailHrefBase={detailHrefBase}
         className={className}
       />
     );

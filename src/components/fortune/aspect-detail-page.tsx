@@ -71,8 +71,13 @@ export function AspectDetailPage({
   const search = useSearchParams();
   const router = useRouter();
   const domainId = parseDomain(search.get("id"));
-  const fromPremium = search.get("from") === "premium";
-  const backHref = fromPremium ? "/premium" : backHrefProp;
+  const from = search.get("from");
+  const backHref =
+    from === "premium"
+      ? "/premium"
+      : from === "menu"
+        ? "/menu"
+        : backHrefProp;
   const [ready, setReady] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -102,14 +107,14 @@ export function AspectDetailPage({
       gender: next.gender,
     });
     setUnlocked(
-      fromPremium ||
+      from === "premium" ||
         isPremiumUnlocked({
           birthDate: next.birthDate,
           nickname: next.nickname,
         })
     );
     setReady(true);
-  }, [router, fromPremium]);
+  }, [router, from]);
 
   function handlePaid() {
     setPremiumUnlocked({
@@ -174,7 +179,11 @@ export function AspectDetailPage({
             <Link
               key={d.domainId}
               href={`/reading/aspect?id=${d.domainId}&from=${
-                fromPremium ? "premium" : "reading"
+                from === "premium"
+                  ? "premium"
+                  : from === "menu"
+                    ? "menu"
+                    : "reading"
               }`}
               replace
               className={cn(

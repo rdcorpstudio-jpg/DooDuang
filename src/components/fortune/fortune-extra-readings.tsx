@@ -181,7 +181,7 @@ export function FortuneExtraReadings({
         onUnlock();
         return;
       }
-      router.push("/premium");
+      router.push("/menu");
       return;
     }
     if (item.id === "bazi") {

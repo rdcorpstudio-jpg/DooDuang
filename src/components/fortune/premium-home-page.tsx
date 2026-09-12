@@ -3,13 +3,18 @@
 import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatedPage } from "@/components/ui/reveal";
+import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { LifeInsightMockup } from "@/components/fortune/life-insight-mockup";
 import { PremiumDeepenForm } from "@/components/fortune/premium-deepen-form";
-import { PremiumSalesPage } from "@/components/fortune/premium-sales-page";
-import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import {
+  isPremiumUnlocked,
+  setPremiumUnlocked,
+} from "@/lib/fortune/premium-unlock";
 import {
   getPremiumOnboardPath,
   hasBasicFortuneProfile,
+  hasFreeReadingBasics,
   hydrateFortuneProfileFromWizard,
   needsPremiumDeepen,
   readFortuneProfile,
@@ -17,6 +22,33 @@ import {
   WIZARD_CACHE_KEY,
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
+
+/** โชว์ฟอร์มเวลาเกิด/สถานที่ เฉพาะรอบหลังจ่ายเงินเท่านั้น */
+const DEEPEN_AFTER_PAY_KEY = "dooduang-deepen-after-pay";
+
+function markDeepenAfterPay() {
+  try {
+    sessionStorage.setItem(DEEPEN_AFTER_PAY_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+function hasDeepenAfterPay(): boolean {
+  try {
+    return sessionStorage.getItem(DEEPEN_AFTER_PAY_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function clearDeepenAfterPay() {
+  try {
+    sessionStorage.removeItem(DEEPEN_AFTER_PAY_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 type WizardProfile = {
   realName: string;
@@ -33,7 +65,6 @@ function readWizardProfile(): WizardProfile | null {
       step?: string;
       profile?: WizardProfile;
     };
-    // Accept any cached wizard profile with identity fields (not only "result")
     if (parsed?.profile?.nickname && parsed.profile?.birthDate) {
       return parsed.profile;
     }
@@ -49,7 +80,6 @@ function mergeProfile(): FortuneUserProfile | null {
   const wizard = readWizardProfile();
   if (!stored && !wizard) return null;
   if (stored && wizard) {
-    // Prefer stored deepen fields; refresh names/date from latest wizard if present
     return writeFortuneProfile({
       ...stored,
       realName: wizard.realName || stored.realName,
@@ -69,9 +99,10 @@ function mergeProfile(): FortuneUserProfile | null {
 }
 
 /**
- * Bottom-nav พรีเมียม:
- * locked → sales
- * unlocked → deepen form (if needed) → fully unlocked daily UI
+ * หน้าดวง (/premium):
+ * ยังไม่มีข้อมูล → ไปกรอกที่ /reading
+ * ฟรี → ดวงปกติ + ทางปลดล็อก
+ * พรีเมียม → ดวงเต็ม (ฟอร์มเวลาเกิด/สถานที่ โชว์เฉพาะหลังจ่ายเงิน หรือกดแบนเนอร์เอง)
  */
 export function PremiumHomePage({
   forceUnlocked = false,
@@ -85,6 +116,30 @@ export function PremiumHomePage({
   const [unlocked, setUnlocked] = useState(forceUnlocked);
   const [profile, setProfile] = useState<FortuneUserProfile | null>(null);
   const [showDeepen, setShowDeepen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
+
+  function applyUnlock() {
+    const next = mergeProfile();
+    setProfile(next);
+    setPremiumUnlocked(
+      next ? { birthDate: next.birthDate, nickname: next.nickname } : null
+    );
+    setUnlocked(true);
+    setPayOpen(false);
+    if (!hasBasicFortuneProfile(next)) {
+      router.replace(getPremiumOnboardPath(next));
+      return;
+    }
+    // ฟอร์มเชิงลึกเฉพาะหลังสมัคร/จ่ายจริงเท่านั้น
+    if (needsPremiumDeepen(next)) {
+      markDeepenAfterPay();
+      setShowDeepen(true);
+    }
+  }
+
+  useStripePaymentReturn(() => {
+    applyUnlock();
+  });
 
   useEffect(() => {
     const next = mergeProfile();
@@ -95,12 +150,19 @@ export function PremiumHomePage({
         next ? { birthDate: next.birthDate, nickname: next.nickname } : null
       );
     setUnlocked(isUnlocked);
-    setShowDeepen(isUnlocked && needsPremiumDeepen(next));
+    // อย่าเด้งฟอร์มพรีเมียมตอนเข้าหน้าธรรมดา — เฉพาะหลังจ่าย (หรือกดแบนเนอร์เอง)
+    setShowDeepen(
+      Boolean(isUnlocked && hasDeepenAfterPay() && needsPremiumDeepen(next))
+    );
     setReady(true);
 
-    // Paid but no gender/birth/name yet → wizard starts at เลือกเพศ
     if (isUnlocked && !forceUnlocked && !hasBasicFortuneProfile(next)) {
       router.replace(getPremiumOnboardPath(next));
+      return;
+    }
+
+    if (!forceUnlocked && !hasFreeReadingBasics(next)) {
+      router.replace("/reading");
     }
   }, [forceUnlocked, router]);
 
@@ -118,22 +180,43 @@ export function PremiumHomePage({
     );
   }
 
+  // —— ยังไม่สมัครพรีเมียม: ดวงฟรีเท่านั้น ——
   if (!unlocked) {
+    if (!hasFreeReadingBasics(profile) && !forceUnlocked) {
+      return (
+        <AnimatedPage className="mx-auto w-full max-w-[480px] px-4 py-10 text-center text-[14px] text-[#9AB8DC]">
+          กำลังไปหน้ากรอกข้อมูล…
+        </AnimatedPage>
+      );
+    }
+
+    const nickname = profile?.nickname ?? "นัท";
+    const birthDate = profile?.birthDate ?? "1995-09-07";
+    const realName = profile?.realName || nickname;
+
     return (
-      <Suspense fallback={null}>
-        <PremiumSalesPage
-          onUnlocked={() => {
-            const next = mergeProfile();
-            setProfile(next);
-            setUnlocked(true);
-            if (!hasBasicFortuneProfile(next)) {
-              router.replace(getPremiumOnboardPath(next));
-              return;
-            }
-            setShowDeepen(needsPremiumDeepen(next));
-          }}
+      <AnimatedPage className="mx-auto w-full min-w-0 max-w-[480px] px-0 pb-10 pt-0">
+        <LifeInsightMockup
+          key={`free-${seed}`}
+          seed={seed}
+          birthDate={birthDate}
+          nickname={nickname}
+          realName={realName}
+          gender={profile?.gender || undefined}
+          unlocked={false}
+          onUnlock={() => setPayOpen(true)}
+          variant="free"
         />
-      </Suspense>
+
+        <Suspense fallback={null}>
+          <FortunePaymentSheet
+            open={payOpen}
+            onClose={() => setPayOpen(false)}
+            onPaid={applyUnlock}
+            returnPath="/premium"
+          />
+        </Suspense>
+      </AnimatedPage>
     );
   }
 
@@ -145,16 +228,19 @@ export function PremiumHomePage({
     );
   }
 
-  if (showDeepen && profile) {
+  // ฟอร์มเวลาเกิด/สถานที่ — เฉพาะหลังสมัครแล้ว และเลือกกรอก
+  if (showDeepen && unlocked && profile) {
     return (
       <AnimatedPage className="relative mx-auto flex min-h-full w-full max-w-[480px] flex-col items-center justify-center px-4 py-8">
         <PremiumDeepenForm
           profile={profile}
           onSaved={(next) => {
+            clearDeepenAfterPay();
             setProfile(next);
             setShowDeepen(false);
           }}
           onSkip={(next) => {
+            clearDeepenAfterPay();
             setProfile(next);
             setShowDeepen(false);
           }}
@@ -166,9 +252,7 @@ export function PremiumHomePage({
   const nickname = profile?.nickname ?? "นัท";
   const birthDate = profile?.birthDate ?? "1995-09-07";
   const realName = profile?.realName ?? nickname;
-  const deepenComplete = Boolean(
-    profile?.birthTime && profile?.birthPlace
-  );
+  const deepenComplete = Boolean(profile?.birthTime && profile?.birthPlace);
 
   return (
     <AnimatedPage className="mx-auto w-full min-w-0 max-w-[480px] px-0 pb-10 pt-0">

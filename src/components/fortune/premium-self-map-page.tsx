@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { Check, ChevronRight, Heart, Briefcase, UserRound } from "lucide-react";
+import { Check, ChevronRight, Heart, Briefcase, Quote, UserRound } from "lucide-react";
 import {
   PremiumDetailShell,
   usePremiumProfileGate,
@@ -42,6 +42,29 @@ function splitBullets(text: string, max = 3): string[] {
 }
 
 const ADVICE_STEPS = ["เลือกสิ่งสำคัญ", "ลงมือทำ", "พักให้พอ"] as const;
+
+/** Short personal quote — avoid dumping the full advice block */
+function pickPersonalQuote(advice: string): string {
+  const fallback = "ไม่ต้องสมบูรณ์แบบทุกวัน ก็ยังมีคุณค่า";
+  const trimmed = advice.trim();
+  if (!trimmed) return fallback;
+
+  const byPeriod = trimmed
+    .split(/[.。]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (byPeriod.length > 1 && byPeriod[0]!.length <= 90) return byPeriod[0]!;
+
+  // Thai copy often separates clauses with spaces
+  const clauses = trimmed
+    .split(/\s+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 12);
+  if (clauses.length >= 2) return clauses[0]!;
+
+  if (trimmed.length <= 72) return trimmed;
+  return clauses[0] ?? fallback;
+}
 
 function StyleExpandCard({
   title,
@@ -129,9 +152,7 @@ export function PremiumSelfMapPage() {
       chips: chips.slice(0, 3),
       strengths: splitBullets(deep.strength),
       shadows: splitBullets(deep.shadow),
-      quote:
-        deep.advice.split(/[.。]/)[0]?.trim() ||
-        "ไม่ต้องสมบูรณ์แบบทุกวัน ก็ยังมีคุณค่า",
+      quote: pickPersonalQuote(deep.advice),
     };
   }, [input]);
 
@@ -233,14 +254,13 @@ export function PremiumSelfMapPage() {
         />
       </div>
 
-      <section className="mae-aspect-card relative mt-3 overflow-hidden rounded-[20px] px-4 pb-4 pt-3.5">
-        <span
-          className="pointer-events-none absolute -left-1 -top-2 select-none font-sacred text-[4.5rem] leading-none text-[rgba(213,177,111,0.18)]"
+      <section className="mae-aspect-card relative mt-3 rounded-[20px] px-4 pb-4 pt-3.5">
+        <Quote
+          className="pointer-events-none absolute left-3 top-3 h-7 w-7 -scale-x-100 text-[#d5b16f]/35"
+          strokeWidth={1.6}
           aria-hidden
-        >
-          “
-        </span>
-        <p className="relative text-[11px] font-semibold tracking-[0.18em] text-[#d5b16f]">
+        />
+        <p className="relative pl-8 text-[11px] font-semibold tracking-[0.18em] text-[#d5b16f]">
           คำคมประจำตัว
         </p>
         <p className="relative mt-2 text-[15px] font-medium leading-[1.75] text-[#f7f4ec]">

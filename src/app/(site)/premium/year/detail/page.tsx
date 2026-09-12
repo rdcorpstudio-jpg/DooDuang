@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { APP_NAME } from "@/lib/site";
-import { PremiumYearPage } from "@/components/fortune/premium-year-page";
+import { PremiumYearDetailPage } from "@/components/fortune/premium-year-detail-page";
 
 export const metadata = {
-  title: `ดวงรายปี — ${APP_NAME}`,
+  title: `จังหวะปี · อ่านเพิ่ม — ${APP_NAME}`,
 };
 
 export default function Page() {
@@ -15,7 +15,7 @@ export default function Page() {
         </div>
       }
     >
-      <PremiumYearPage />
+      <PremiumYearDetailPage />
     </Suspense>
   );
 }

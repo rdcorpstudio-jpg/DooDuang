@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Sarabun, Srisakdi } from "next/font/google";
 import { LineTag } from "@/components/analytics/line-tag";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
+import { StripePurchaseReturnListener } from "@/components/analytics/stripe-purchase-return-listener";
 import { PhoneFrame } from "@/components/layout/phone-frame";
 import { APP_NAME } from "@/lib/site";
 import "./globals.css";
@@ -55,6 +56,7 @@ export default function RootLayout({
       <body className={`${sarabun.variable} ${srisakdi.variable} font-sans`}>
         <LineTag />
         <MetaPixel />
+        <StripePurchaseReturnListener />
         <PhoneFrame>{children}</PhoneFrame>
       </body>
     </html>

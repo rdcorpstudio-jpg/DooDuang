@@ -1,43 +1,22 @@
 "use client";
 
-import { useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { FortuneFreeMonthTrend } from "@/components/fortune/fortune-free-month-trend";
 import {
-  PremiumDetailShell,
-  DetailSection,
   usePremiumProfileGate,
   useAnalyzeInputFromProfile,
 } from "@/components/fortune/premium-detail-shell";
-import { yearScoreForCe } from "@/lib/fortune/build-daily-pack";
-import {
-  scoreBand,
-  yearDetailForCe,
-} from "@/lib/fortune/year-rhythm";
+import { APP_BRAND_MARK } from "@/lib/site";
 
-/** Full-page year reading — Mae navy–gold */
+/**
+ * หน้าแยกจังหวะชีวิตรายปี/รายเดือน — จากเมนู “ดวงรายปี”
+ */
 export function PremiumYearPage() {
-  const search = useSearchParams();
   const { ready, profile } = usePremiumProfileGate();
   const input = useAnalyzeInputFromProfile(profile);
 
-  const data = useMemo(() => {
-    if (!input) return null;
-    const nowCe = new Date().getFullYear();
-    const raw = Number(search.get("ce"));
-    const ce =
-      Number.isFinite(raw) && raw >= nowCe - 2 && raw <= nowCe + 9
-        ? raw
-        : nowCe;
-    const be = ce + 543;
-    const score = yearScoreForCe(input, ce);
-    const band = scoreBand(score);
-    const { detail } = yearDetailForCe(ce, nowCe);
-    const when =
-      ce === nowCe ? "ปีนี้" : ce < nowCe ? "ปีที่ผ่านมา" : "ปีข้างหน้า";
-    return { ce, be, score, band, detail, when };
-  }, [input, search]);
-
-  if (!ready || !data) {
+  if (!ready || !input) {
     return (
       <div className="px-4 py-10 text-center text-[14px] text-[#f7f4ec]/55">
         กำลังเปิด…
@@ -45,32 +24,47 @@ export function PremiumYearPage() {
     );
   }
 
-  const { be, score, band, detail, when } = data;
+  const seed = `year-rhythm-${input.birthDate}-${input.nickname}`;
 
   return (
-    <PremiumDetailShell title="จังหวะปีนี้" backHref="/premium">
-      <p className="mt-1 text-[13px] text-[#f7f4ec]/65">
-        {when} · พ.ศ. {be} · {band.label} · {score}/12
+    <div className="relative mx-auto w-full max-w-[480px] px-4 pb-16 pt-2">
+      <header className="relative flex items-center justify-between py-2">
+        <Link
+          href="/menu"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#d5b16f] outline-none transition active:scale-95"
+          aria-label="กลับ"
+        >
+          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+        </Link>
+        <div className="min-w-0 flex-1 px-2 text-center">
+          <p className="text-[11px] tracking-[0.18em] text-[#d5b16f]/75">
+            {APP_BRAND_MARK}
+          </p>
+          <h1 className="text-[1.2rem] font-bold tracking-wide text-[#f7f4ec]">
+            ดวงรายปี
+          </h1>
+        </div>
+        <span className="w-9" aria-hidden />
+      </header>
+
+      <p className="mt-1 text-center text-[12.5px] leading-relaxed text-[#c5cdd9]/75">
+        ดูจังหวะชีวิตแบบเส้นเวลา สลับรายเดือนหรือรายปีได้
       </p>
 
-      <section className="mae-aspect-card mt-4 rounded-[20px] px-4 py-4">
-        <p className="text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
-          ภาพรวม
-        </p>
-        <p className="mt-2 text-[15px] font-medium leading-[1.7] text-[#f7f4ec]">
-          {detail.overview}
-        </p>
-        <p className="mt-2 text-[13px] leading-[1.7] text-[#f7f4ec]/65">
-          {band.meaning}
-        </p>
-      </section>
-
-      <DetailSection title="จุดเปลี่ยน">{detail.turning}</DetailSection>
-      <DetailSection title="ทำไมถึงเป็นแบบนี้">{detail.reason}</DetailSection>
-      <DetailSection title="แนวทาง">{detail.guidance}</DetailSection>
-      <DetailSection title="จุดเด่น · ใช้ยังไง">
-        {band.strength} — {band.use}
-      </DetailSection>
-    </PremiumDetailShell>
+      <div className="mt-5">
+        <FortuneFreeMonthTrend
+          seed={seed}
+          birthDate={input.birthDate}
+          nickname={input.nickname}
+          birthTime={input.birthTime}
+          birthPlace={input.birthPlace}
+          focus={input.focus}
+          gender={input.gender}
+          unlocked
+          initialMode="year"
+          detailHrefBase="/premium/year/detail"
+        />
+      </div>
+    </div>
   );
 }

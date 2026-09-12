@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SaveReadingForm } from "@/components/fortune/save-reading-form";
 import { LifeInsightMockup } from "@/components/fortune/life-insight-mockup";
@@ -110,16 +109,6 @@ function FortuneResultViewInner({
       <footer className="mt-8 space-y-4 px-1 text-center">
         <div className="no-print">
           <SaveReadingForm token={shareToken ?? null} />
-        </div>
-
-        <div className="no-print flex items-center justify-center gap-3 text-[14px]">
-          <Link href="/reading" className="text-[#d5b16f]">
-            ดูดวงอีกครั้ง
-          </Link>
-          <span className="text-white/25">·</span>
-          <Link href="/" className="text-[#d5b16f]">
-            กลับหน้าแรก
-          </Link>
         </div>
       </footer>
     </div>

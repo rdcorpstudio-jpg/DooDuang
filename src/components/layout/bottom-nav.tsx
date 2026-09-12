@@ -1,51 +1,95 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isMaeShellPath } from "@/lib/mae-shell";
+import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 
-const TABS: Array<{
+type NavTab = {
   href: string;
   label: string;
   src: string;
   match: (p: string) => boolean;
-}> = [
-  {
-    href: "/",
-    label: "หน้าแรก",
-    src: "/images/icons/home.webp",
-    match: (p) => p === "/" || p === "/mae" || p.startsWith("/mae/"),
-  },
-  {
-    href: "/reading",
-    label: "ดูดวง",
-    src: "/images/icons/crystal-ball.webp",
-    match: (p) => p.startsWith("/reading") || p.startsWith("/r/"),
-  },
-  {
-    href: "/premium",
-    label: "พรีเมียม",
-    src: "/images/icons/sparkle.webp",
-    match: (p) => p.startsWith("/premium"),
-  },
-  {
-    href: "/dashboard",
-    label: "บัญชี",
-    src: "/images/icons/profile.webp",
-    match: (p) =>
-      p.startsWith("/dashboard") ||
-      p.startsWith("/login") ||
-      p.startsWith("/auth/") ||
-      p.startsWith("/pricing"),
-  },
-];
+};
 
-/** Bottom nav — compact for phone screens */
+const HOME_TAB: NavTab = {
+  href: "/",
+  label: "หน้าแรก",
+  src: "/images/icons/nav/home.webp",
+  match: (p) => p === "/" || p === "/mae" || p.startsWith("/mae/"),
+};
+
+/** หน้าดวง — ฟรีป้ายดูดวง / สมัครแล้วป้ายพรีเมียม */
+const FORTUNE_FREE_TAB: NavTab = {
+  href: "/premium",
+  label: "ดูดวง",
+  src: "/images/icons/nav/horoscope.webp",
+  match: (p) => p === "/premium",
+};
+
+const FORTUNE_PREMIUM_TAB: NavTab = {
+  ...FORTUNE_FREE_TAB,
+  label: "พรีเมียม",
+};
+
+const MENU_TAB: NavTab = {
+  href: "/menu",
+  label: "เมนู",
+  src: "/images/icons/nav/menu.webp",
+  match: (p) =>
+    p.startsWith("/menu") ||
+    p.startsWith("/reading") ||
+    p.startsWith("/r/") ||
+    p.startsWith("/preview/") ||
+    p.startsWith("/premium/couple") ||
+    p.startsWith("/premium/self-map") ||
+    p.startsWith("/premium/year") ||
+    p.startsWith("/premium/outlook") ||
+    p.startsWith("/premium/week") ||
+    p.startsWith("/premium/report"),
+};
+
+const ACCOUNT_TAB: NavTab = {
+  href: "/dashboard",
+  label: "บัญชี",
+  src: "/images/icons/nav/account.webp",
+  match: (p) =>
+    p.startsWith("/dashboard") ||
+    p.startsWith("/login") ||
+    p.startsWith("/auth/") ||
+    p.startsWith("/pricing"),
+};
+
+/** Bottom nav — หน้าแรก · ดูดวง · เมนู · บัญชี */
 export function BottomNav() {
   const pathname = usePathname() || "/";
   const maeNav = isMaeShellPath(pathname);
+  const [premium, setPremium] = useState(false);
+
+  useEffect(() => {
+    function sync() {
+      setPremium(isPremiumUnlocked());
+    }
+    sync();
+    window.addEventListener("dooduang-premium-changed", sync);
+    window.addEventListener("storage", sync);
+    window.addEventListener("focus", sync);
+    return () => {
+      window.removeEventListener("dooduang-premium-changed", sync);
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("focus", sync);
+    };
+  }, []);
+
+  const tabs: NavTab[] = [
+    HOME_TAB,
+    premium ? FORTUNE_PREMIUM_TAB : FORTUNE_FREE_TAB,
+    MENU_TAB,
+    ACCOUNT_TAB,
+  ];
 
   return (
     <nav
@@ -64,12 +108,12 @@ export function BottomNav() {
       }}
     >
       <div className="mx-auto grid max-w-[480px] grid-cols-4 gap-0 px-1 pt-1 pb-0.5">
-        {TABS.map(({ href, label, src, match }) => {
+        {tabs.map(({ href, label, src, match }) => {
           const active = match(pathname);
 
           return (
             <Link
-              key={href}
+              key={`${href}-${label}`}
               href={href}
               className={cn(
                 "fortune-tap relative flex min-h-[2.75rem] flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1 outline-none transition-all duration-200",
@@ -84,7 +128,7 @@ export function BottomNav() {
                 )}
               >
                 <Image
-                  src={`${src}?v=gold3d`}
+                  src={`${src}?v=navgold1`}
                   alt=""
                   width={active ? 28 : 24}
                   height={active ? 28 : 24}
