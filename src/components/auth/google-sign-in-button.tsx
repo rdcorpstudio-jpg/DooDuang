@@ -288,58 +288,80 @@ export function GoogleSignInButton({
   const [error, setError] = useState<string | null>(null);
   const bootstrapped = useRef(false);
 
-  async function runGoogleSignIn() {
+  // Warm Firebase Auth so the first Google tap can open the popup immediately
+  useEffect(() => {
+    if (!isFirebaseClientConfigured()) return;
+    try {
+      getFirebaseAuth();
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  function runGoogleSignIn() {
     if (!isFirebaseClientConfigured()) {
       setError("ยังไม่ได้ตั้งค่า Firebase");
+      return;
+    }
+
+    // Must start popup in the same sync turn as the click — any await before
+    // this makes Safari/Chrome treat it as blocked on the first try.
+    let popupPromise: ReturnType<typeof signInWithPopup>;
+    try {
+      popupPromise = signInWithPopup(getFirebaseAuth(), makeProvider());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "เปิดหน้าต่าง Google ไม่สำเร็จ");
       return;
     }
 
     setLoading(true);
     setError(null);
 
-    try {
-      // Prefer popup on direct tap (user gesture). Avoid redirect (Safari white screen).
-      const result = await signInWithPopup(getFirebaseAuth(), makeProvider());
-      await completeAppLogin(result.user, { callbackUrl, onSuccess });
-      setLoading(false);
-    } catch (err) {
-      const raw = err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ";
-      const code =
-        err && typeof err === "object" && "code" in err
-          ? String((err as { code?: string }).code ?? "")
-          : "";
-
-      if (
-        code === "auth/popup-blocked" ||
-        code === "auth/cancelled-popup-request" ||
-        (raw.toLowerCase().includes("popup") &&
-          code !== "auth/popup-closed-by-user")
-      ) {
-        setError("เบราว์เซอร์บล็อกป๊อปอัป — อนุญาตป๊อปอัปแล้วกดเข้าสู่ระบบอีกครั้ง");
+    void (async () => {
+      try {
+        const result = await popupPromise;
+        await completeAppLogin(result.user, { callbackUrl, onSuccess });
         setLoading(false);
-        return;
-      }
+      } catch (err) {
+        const raw = err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ";
+        const code =
+          err && typeof err === "object" && "code" in err
+            ? String((err as { code?: string }).code ?? "")
+            : "";
 
-      let message = raw;
-      if (isMissingRedirectStateError(err) || raw.includes("missing initial state")) {
-        message = "เซสชันล็อกอินหมดอายุ — กดเข้าสู่ระบบด้วย Google อีกครั้ง";
-        clearOAuthPending();
-      } else if (
-        code === "auth/invalid-credential" ||
-        raw.includes("auth/invalid-credential") ||
-        raw.includes("UNAUTHENTICATED")
-      ) {
-        message =
-          "ล็อกอิน Google ไม่สำเร็จ — ตรวจว่าเปิด Google Sign-in ใน Firebase แล้ว และเพิ่มโดเมนเว็บใน Authorized domains";
-      } else if (code === "auth/popup-closed-by-user") {
-        message = "ปิดหน้าต่างล็อกอินก่อนสำเร็จ";
-      } else if (code === "auth/unauthorized-domain") {
-        message =
-          "โดเมนนี้ยังไม่อนุญาตใน Firebase — เพิ่มโดเมนใน Authentication → Settings → Authorized domains";
+        if (
+          code === "auth/popup-blocked" ||
+          code === "auth/cancelled-popup-request"
+        ) {
+          setError("กดปุ่มอีกครั้งเพื่อเปิดหน้าต่าง Google");
+          setLoading(false);
+          return;
+        }
+
+        let message = raw;
+        if (
+          isMissingRedirectStateError(err) ||
+          raw.includes("missing initial state")
+        ) {
+          message = "เซสชันล็อกอินหมดอายุ — กดเข้าสู่ระบบด้วย Google อีกครั้ง";
+          clearOAuthPending();
+        } else if (
+          code === "auth/invalid-credential" ||
+          raw.includes("auth/invalid-credential") ||
+          raw.includes("UNAUTHENTICATED")
+        ) {
+          message =
+            "ล็อกอิน Google ไม่สำเร็จ — ตรวจว่าเปิด Google Sign-in ใน Firebase แล้ว และเพิ่มโดเมนเว็บใน Authorized domains";
+        } else if (code === "auth/popup-closed-by-user") {
+          message = "ปิดหน้าต่างล็อกอินก่อนสำเร็จ";
+        } else if (code === "auth/unauthorized-domain") {
+          message =
+            "โดเมนนี้ยังไม่อนุญาตใน Firebase — เพิ่มโดเมนใน Authentication → Settings → Authorized domains";
+        }
+        setError(message);
+        setLoading(false);
       }
-      setError(message);
-      setLoading(false);
-    }
+    })();
   }
 
   // If user lands back on a page that still has this button after redirect
@@ -380,7 +402,7 @@ export function GoogleSignInButton({
           coloredIcon && GOOGLE_WHITE_BUTTON_CLASS,
           buttonClassName
         )}
-        onClick={() => void runGoogleSignIn()}
+        onClick={runGoogleSignIn}
         disabled={loading}
       >
         {coloredIcon ? (
