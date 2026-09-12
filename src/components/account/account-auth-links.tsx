@@ -132,10 +132,10 @@ function LinkChip({
         <span className="text-[9px] font-semibold">{label}</span>
         <span
           className={cn(
-            "mt-0.5 text-[8px] font-medium",
+            "mt-0.5 text-[8px] font-semibold",
             variant === "google" && (linked ? "text-[#5f6368]" : "text-[#3c4043]/75"),
             variant === "line" && (linked ? "text-white/85" : "text-white/90"),
-            variant === "phone" && (linked ? "text-[#1a1408]/75" : "text-[#1a1408]/8")
+            variant === "phone" && "text-[#3b2a0e]"
           )}
         >
           {status}
@@ -515,7 +515,7 @@ export function AccountAuthLinks({ className }: { className?: string }) {
         </p>
       ) : null}
       {message ? (
-        <p className="max-w-[6.5rem] text-right text-[9px] leading-snug text-[#e8d19a]">
+        <p className="whitespace-nowrap text-right text-[9px] leading-none text-[#e8d19a]">
           {message}
         </p>
       ) : null}
