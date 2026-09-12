@@ -68,7 +68,8 @@ export function profileEditCooldownDaysLeft(
 }
 
 export function writeFortuneProfile(
-  input: Omit<FortuneUserProfile, "updatedAt"> & { updatedAt?: string }
+  input: Omit<FortuneUserProfile, "updatedAt"> & { updatedAt?: string },
+  opts?: { syncServer?: boolean }
 ): FortuneUserProfile {
   const existing = readFortuneProfile();
   const profile: FortuneUserProfile = {
@@ -118,7 +119,101 @@ export function writeFortuneProfile(
   } catch {
     /* ignore storage failures */
   }
+
+  if (opts?.syncServer !== false) {
+    void pushFortuneProfileToServer(profile);
+  }
   return profile;
+}
+
+/** Push local profile to DB when logged in. Silent if guest / offline. */
+export async function pushFortuneProfileToServer(
+  profile?: FortuneUserProfile | null
+): Promise<boolean> {
+  const next = profile ?? readFortuneProfile();
+  if (!next || typeof window === "undefined") return false;
+  try {
+    const res = await fetch("/api/fortune/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        realName: next.realName,
+        nickname: next.nickname,
+        birthDate: next.birthDate,
+        gender: next.gender,
+        birthTime: next.birthTime ?? null,
+        birthPlace: next.birthPlace ?? null,
+        focus: next.focus ?? null,
+        deepenSkipped: Boolean(next.deepenSkipped),
+        profileLockedUntil: next.profileLockedUntil ?? null,
+        updatedAt: next.updatedAt,
+      }),
+    });
+    if (res.status === 401) return false;
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+function profileUpdatedMs(profile: { updatedAt?: string } | null | undefined) {
+  if (!profile?.updatedAt) return 0;
+  const t = Date.parse(profile.updatedAt);
+  return Number.isNaN(t) ? 0 : t;
+}
+
+/**
+ * Merge localStorage ↔ server for logged-in users.
+ * Newer updatedAt wins; if only one side has data, copy that way.
+ */
+export async function syncFortuneProfileWithServer(): Promise<FortuneUserProfile | null> {
+  if (typeof window === "undefined") return readFortuneProfile();
+
+  hydrateFortuneProfileFromWizard();
+  const local = readFortuneProfile();
+
+  try {
+    const res = await fetch("/api/fortune/profile", { cache: "no-store" });
+    if (res.status === 401) return local;
+    if (!res.ok) return local;
+
+    const data = (await res.json()) as {
+      profile?: (Omit<FortuneUserProfile, "gender" | "focus"> & {
+        gender?: string;
+        focus?: string;
+      }) | null;
+    };
+    const server = data.profile;
+    if (!server?.nickname || !server.birthDate) {
+      if (local) await pushFortuneProfileToServer(local);
+      return local;
+    }
+
+    const serverProfile: FortuneUserProfile = {
+      realName: server.realName ?? "",
+      nickname: server.nickname,
+      birthDate: server.birthDate,
+      gender: (server.gender as FortuneUserProfile["gender"]) || "",
+      birthTime: server.birthTime,
+      birthPlace: server.birthPlace,
+      focus: server.focus as FortuneUserProfile["focus"],
+      deepenSkipped: Boolean(server.deepenSkipped),
+      profileLockedUntil: server.profileLockedUntil,
+      updatedAt: server.updatedAt,
+    };
+
+    const localMs = profileUpdatedMs(local);
+    const serverMs = profileUpdatedMs(serverProfile);
+
+    if (!local || serverMs >= localMs) {
+      return writeFortuneProfile(serverProfile, { syncServer: false });
+    }
+
+    await pushFortuneProfileToServer(local);
+    return local;
+  } catch {
+    return local;
+  }
 }
 
 /** Free tier = day of birth only. Premium deepen unlocks time/place/focus. */

@@ -35,6 +35,7 @@ import {
   profileEditCooldownDaysLeft,
   PROFILE_EDIT_COOLDOWN_MS,
   readFortuneProfile,
+  syncFortuneProfileWithServer,
   writeFortuneProfile,
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
@@ -117,28 +118,33 @@ export function AccountDashboard({
   });
 
   useEffect(() => {
-    const loaded =
-      hydrateFortuneProfileFromWizard() ?? readFortuneProfile();
-    setProfile(loaded);
     void (async () => {
-      const premiumOn = await syncPremiumFromServer(
-        loaded
-          ? { birthDate: loaded.birthDate, nickname: loaded.nickname }
-          : null
-      );
-      setPremium(premiumOn);
-      setPremiumUntil(getPremiumUnlockedUntil());
+      const synced = await syncFortuneProfileWithServer();
+      const loaded =
+        synced ??
+        hydrateFortuneProfileFromWizard() ??
+        readFortuneProfile();
+      setProfile(loaded);
+      void (async () => {
+        const premiumOn = await syncPremiumFromServer(
+          loaded
+            ? { birthDate: loaded.birthDate, nickname: loaded.nickname }
+            : null
+        );
+        setPremium(premiumOn);
+        setPremiumUntil(getPremiumUnlockedUntil());
+      })();
+      if (loaded) {
+        setDraft({
+          realName: loaded.realName,
+          nickname: loaded.nickname,
+          birthDate: loaded.birthDate,
+          gender: loaded.gender,
+        });
+      } else {
+        setEditing(true);
+      }
     })();
-    if (loaded) {
-      setDraft({
-        realName: loaded.realName,
-        nickname: loaded.nickname,
-        birthDate: loaded.birthDate,
-        gender: loaded.gender,
-      });
-    } else {
-      setEditing(true);
-    }
   }, []);
 
   function applyPremiumUnlock() {

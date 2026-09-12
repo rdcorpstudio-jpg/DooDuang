@@ -121,7 +121,26 @@ export const payments = pgTable("payments", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+/** Fortune / CRM profile — 1:1 with logged-in user */
+export const fortuneProfiles = pgTable("fortune_profiles", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  realName: text("real_name"),
+  nickname: text("nickname").notNull(),
+  birthDate: text("birth_date").notNull(),
+  gender: text("gender"),
+  birthTime: text("birth_time"),
+  birthPlace: text("birth_place"),
+  focus: text("focus"),
+  deepenSkipped: boolean("deepen_skipped").default(false).notNull(),
+  profileLockedUntil: timestamp("profile_locked_until", { mode: "date" }),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type PhoneOtp = typeof phoneOtps.$inferSelect;
 export type Reading = typeof readings.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
+export type FortuneProfile = typeof fortuneProfiles.$inferSelect;

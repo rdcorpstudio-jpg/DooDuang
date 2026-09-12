@@ -7,6 +7,7 @@ import { isMaeShellPath } from "@/lib/mae-shell";
 import { StarfieldBackground } from "@/components/layout/starfield-background";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { syncPremiumFromServer } from "@/lib/fortune/premium-unlock";
+import { syncFortuneProfileWithServer } from "@/lib/fortune/profile-storage";
 
 interface PhoneFrameProps {
   children: React.ReactNode;
@@ -29,6 +30,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
 
   useEffect(() => {
     void syncPremiumFromServer();
+    void syncFortuneProfileWithServer();
   }, [pathname]);
 
   useEffect(() => {
