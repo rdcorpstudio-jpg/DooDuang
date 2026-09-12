@@ -32,11 +32,12 @@ export function authCompletePath(callbackUrl: string) {
   return `/auth/complete?callbackUrl=${cb}`;
 }
 
-/** Open Safari/Chrome on the real login page (then auto-start Google). */
+/** Open Safari/Chrome on the real login page — user taps Google (user gesture → popup). */
 function loginHandoffUrl(callbackUrl: string) {
   if (typeof window === "undefined") return undefined;
   const cb = encodeURIComponent(safeCallback(callbackUrl));
-  return `${window.location.origin}/login?callbackUrl=${cb}&autologin=1`;
+  // Do NOT auto-start redirect — Safari loses redirect state → white error page
+  return `${window.location.origin}/login?callbackUrl=${cb}`;
 }
 
 /** After login → premium checkout (not account) */
@@ -100,12 +101,27 @@ export function wasOAuthPending() {
   }
 }
 
+function isMissingRedirectStateError(err: unknown) {
+  const raw = err instanceof Error ? err.message : String(err ?? "");
+  return (
+    raw.includes("missing initial state") ||
+    raw.includes("sessionStorage is inaccessible") ||
+    raw.includes("storage-partitioned")
+  );
+}
+
 function getRedirectResultOnce() {
   if (!redirectResultPromise) {
-    redirectResultPromise = getRedirectResult(getFirebaseAuth()).catch((err) => {
-      redirectResultPromise = null;
-      throw err;
-    });
+    redirectResultPromise = getRedirectResult(getFirebaseAuth())
+      .catch((err) => {
+        redirectResultPromise = null;
+        // Safari / ITP: redirect state gone — treat as no session, not a crash
+        if (isMissingRedirectStateError(err)) {
+          clearOAuthPending();
+          return null;
+        }
+        throw err;
+      });
   }
   return redirectResultPromise;
 }
@@ -247,9 +263,16 @@ export async function completeAppLogin(
 }
 
 export async function startGoogleRedirect(callbackUrl: string) {
+  // Kept for rare callers — prefer popup; redirect often white-screens on Safari
   rememberCallback(callbackUrl);
   markOAuthPending();
   await signInWithRedirect(getFirebaseAuth(), makeProvider());
+}
+
+export async function startGooglePopup(callbackUrl: string) {
+  rememberCallback(callbackUrl);
+  const result = await signInWithPopup(getFirebaseAuth(), makeProvider());
+  return result.user;
 }
 
 export const GOOGLE_WHITE_BUTTON_CLASS =
@@ -334,24 +357,20 @@ export function GoogleSignInButton({
       if (
         code === "auth/popup-blocked" ||
         code === "auth/cancelled-popup-request" ||
-        raw.toLowerCase().includes("popup")
+        (raw.toLowerCase().includes("popup") &&
+          code !== "auth/popup-closed-by-user")
       ) {
-        // Same page → Google (no /auth/complete middle screen)
-        try {
-          await startGoogleRedirect(callbackUrl);
-        } catch (redirectErr) {
-          setError(
-            redirectErr instanceof Error
-              ? redirectErr.message
-              : "เปิดหน้าล็อกอิน Google ไม่สำเร็จ"
-          );
-          setLoading(false);
-        }
+        // Avoid signInWithRedirect — causes Safari “missing initial state” white page
+        setError("เบราว์เซอร์บล็อกป๊อปอัป — อนุญาตป๊อปอัปแล้วกดเข้าสู่ระบบอีกครั้ง");
+        setLoading(false);
         return;
       }
 
       let message = raw;
-      if (
+      if (isMissingRedirectStateError(err) || raw.includes("missing initial state")) {
+        message = "เซสชันล็อกอินหมดอายุ — กดเข้าสู่ระบบด้วย Google อีกครั้ง";
+        clearOAuthPending();
+      } else if (
         code === "auth/invalid-credential" ||
         raw.includes("auth/invalid-credential") ||
         raw.includes("UNAUTHENTICATED")

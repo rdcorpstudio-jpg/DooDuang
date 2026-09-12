@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import {
   GoogleSignInButton,
-  startGoogleRedirect,
 } from "@/components/auth/google-sign-in-button";
 import { LineSignInButton } from "@/components/auth/line-sign-in-button";
 import { OpenInBrowserBanner } from "@/components/auth/open-in-browser-banner";
@@ -18,7 +17,6 @@ import {
   getInAppBrowserKind,
   type InAppBrowserKind,
 } from "@/lib/browser/in-app-browser";
-import { isFirebaseClientConfigured } from "@/lib/firebase/client";
 
 function AuthDivider({ label = "หรือ" }: { label?: string }) {
   return (
@@ -50,13 +48,12 @@ export function LoginScreen({
   lineError,
 }: {
   callbackUrl?: string;
-  /** From LINE/Safari handoff — open Google immediately, no middle page */
+  /** Legacy query — no longer auto-redirects (Safari white-screen). Strip from URL. */
   autoStartGoogle?: boolean;
   /** From `/api/auth/line/callback` when OAuth fails */
   lineError?: string;
 }) {
   const router = useRouter();
-  const started = useRef(false);
   const [inAppKind, setInAppKind] = useState<InAppBrowserKind>(null);
 
   useEffect(() => {
@@ -74,10 +71,9 @@ export function LoginScreen({
             ? "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ"
             : null;
 
+  // Strip legacy ?autologin=1 — never auto signInWithRedirect (missing initial state)
   useEffect(() => {
-    if (!autoStartGoogle || started.current) return;
-    if (!isFirebaseClientConfigured()) return;
-    started.current = true;
+    if (!autoStartGoogle) return;
     try {
       const url = new URL(window.location.href);
       if (url.searchParams.has("autologin")) {
@@ -87,8 +83,16 @@ export function LoginScreen({
     } catch {
       /* ignore */
     }
-    void startGoogleRedirect(callbackUrl);
-  }, [autoStartGoogle, callbackUrl]);
+  }, [autoStartGoogle]);
+
+  // Clear stale redirect flags when opening login (prevents white-screen loops)
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem("dooduang-oauth-pending");
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   return (
     <AnimatedPage className="relative flex min-h-full flex-col overflow-x-hidden overflow-y-auto px-3 pb-6 pt-3 sm:px-4">
@@ -122,9 +126,7 @@ export function LoginScreen({
             เข้าสู่ระบบ
           </h1>
           <p className="login-keyboard-hide mx-auto mt-1 max-w-[16rem] text-[12px] leading-snug text-[#c5cdd9]/70">
-            {autoStartGoogle
-              ? "กำลังเปิด Google…"
-              : "Google · LINE · หรือเบอร์"}
+            Google · LINE · หรือเบอร์
           </p>
 
           {lineErrorMessage ? (

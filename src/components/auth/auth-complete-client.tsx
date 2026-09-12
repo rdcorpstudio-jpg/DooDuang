@@ -62,7 +62,12 @@ export function AuthCompleteClient({
         if (cancelled) return;
         clearOAuthPending();
         const raw = err instanceof Error ? err.message : "เข้าสู่ระบบไม่สำเร็จ";
-        setError(raw);
+        const friendly =
+          raw.includes("missing initial state") ||
+          raw.includes("sessionStorage")
+            ? "เซสชันล็อกอินหมดอายุ — กดเข้าสู่ระบบด้วย Google อีกครั้ง"
+            : raw;
+        setError(friendly);
       }
     })();
 
