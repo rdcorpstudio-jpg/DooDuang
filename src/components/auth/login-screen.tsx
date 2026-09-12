@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronLeft, Lock } from "lucide-react";
+import { ArrowRight, ChevronLeft } from "lucide-react";
 import {
   GoogleSignInButton,
   startGoogleRedirect,
@@ -163,21 +163,6 @@ export function LoginScreen({
                 strokeWidth={2.4}
               />
             </Link>
-
-            <Link
-              href="/dashboard?preview=1"
-              className="mt-2.5 inline-flex text-[12px] font-medium tracking-wide text-[#e8d19a]/85 underline decoration-[#d5b16f]/35 underline-offset-[4px] outline-none transition hover:text-[#f7f4ec]"
-            >
-              ดูตัวอย่างหน้าหลังล็อกอิน
-            </Link>
-
-            <p className="mt-3 inline-flex items-center justify-center gap-1 text-[10.5px] tracking-wide text-[#9aa3b2]">
-              <Lock
-                className="h-2.5 w-2.5 shrink-0 text-[#d5b16f]"
-                strokeWidth={2}
-              />
-              ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
-            </p>
           </div>
         </div>
       </div>
