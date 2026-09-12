@@ -36,6 +36,38 @@ cp .env.example .env.local
 
 ### 3. Setup Database
 
+โปรเจกต์นี้ใช้ **Railway PostgreSQL** เป็นหลัก — เวลาเพิ่ม/แก้ตาราง ให้รัน SQL ใน Railway console (ไม่ใช้ `npm` ใน psql)
+
+1. Railway → Postgres service → **Query** หรือ **psql**
+2. วาง SQL จากด้านล่าง (หรือที่ AI ส่งให้ตอนมี schema ใหม่) แล้ว Run
+
+#### Product analytics (`analytics_events`)
+
+```sql
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id text PRIMARY KEY,
+  user_id text REFERENCES users(id) ON DELETE SET NULL,
+  name text NOT NULL,
+  feature text,
+  path text,
+  props text,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS analytics_events_name_created_idx
+  ON analytics_events (name, created_at);
+
+CREATE INDEX IF NOT EXISTS analytics_events_feature_created_idx
+  ON analytics_events (feature, created_at);
+
+CREATE INDEX IF NOT EXISTS analytics_events_user_created_idx
+  ON analytics_events (user_id, created_at);
+```
+
+**กฎสำหรับทีม / AI:** ทุกครั้งที่มีงานเกี่ยวกับ DB ต้องส่ง **ข้อความ SQL คัดลอกวางได้** สำหรับ Railway console — ห้ามบอกแค่ `npm run db:push` โดยไม่มี SQL
+
+ทางเลือก (เครื่อง local ที่มี `DATABASE_URL`):
+
 ```bash
 npm run db:push
 ```
@@ -61,6 +93,7 @@ npm run dev
 
 1. สร้าง PostgreSQL service ใน [Railway](https://railway.app)
 2. Copy `DATABASE_URL` ไปใส่ใน Vercel env
+3. Schema ใหม่: วาง SQL ใน Railway **Query / psql** (ดู README หัวข้อ Setup Database) — อย่ารัน `npm` ใน console
 
 ### Stripe Webhook
 

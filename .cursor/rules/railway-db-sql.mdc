@@ -1,0 +1,14 @@
+---
+description: Railway Postgres — always give copy-paste SQL for console
+alwaysApply: true
+---
+
+# Database changes → Railway psql SQL
+
+When adding/changing Postgres schema (Drizzle `schema.ts`, new tables, columns, indexes):
+
+1. **Always** give the user a ready-to-paste SQL block for **Railway Postgres Query / psql console**.
+2. Prefer `IF NOT EXISTS` / safe additive DDL so re-running is OK.
+3. Do **not** tell them only `npm run db:push` without also providing the SQL. Local `db:push` is optional; Railway console SQL is the default ops path for this project.
+4. Put lasting snippets under README **Database (Railway console)** when relevant.
+5. Never require running npm inside the Railway psql console.

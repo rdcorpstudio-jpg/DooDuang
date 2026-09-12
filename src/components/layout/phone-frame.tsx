@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { isMaeShellPath } from "@/lib/mae-shell";
+import { isAdminPath, isMaeShellPath } from "@/lib/mae-shell";
 import { StarfieldBackground } from "@/components/layout/starfield-background";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { syncPremiumFromServer } from "@/lib/fortune/premium-unlock";
@@ -18,20 +18,30 @@ interface PhoneFrameProps {
 export function PhoneFrame({ children, className }: PhoneFrameProps) {
   const pathname = usePathname() || "/";
   const [keyboardOpen, setKeyboardOpen] = useState(false);
-  const maeShell = isMaeShellPath(pathname);
+  const adminShell = isAdminPath(pathname);
+  const maeShell = !adminShell && isMaeShellPath(pathname);
   const isAuthPath =
     pathname.startsWith("/auth") || pathname.startsWith("/login");
   const hideNav =
-    isAuthPath || pathname === "/" || pathname === "" || keyboardOpen;
+    adminShell ||
+    isAuthPath ||
+    pathname === "/" ||
+    pathname === "" ||
+    keyboardOpen;
   /* CSS zoom on ancestors breaks iOS caret / focus for phone OTP fields.
      Home hero is a tight 1-screen composition — comfort zoom crushes it on real phones. */
   const disableComfortZoom =
-    isAuthPath || keyboardOpen || pathname === "/" || pathname === "";
+    adminShell ||
+    isAuthPath ||
+    keyboardOpen ||
+    pathname === "/" ||
+    pathname === "";
 
   useEffect(() => {
+    if (adminShell) return;
     void syncPremiumFromServer();
     void syncFortuneProfileWithServer();
-  }, [pathname]);
+  }, [pathname, adminShell]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -71,23 +81,29 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
   }, []);
 
   return (
-    <div className="phone-shell">
+    <div className={cn("phone-shell", adminShell && "phone-shell--admin")}>
       <div
         className={cn(
           "phone-frame",
           keyboardOpen && "phone-frame--keyboard",
           maeShell && "phone-frame--mae",
+          adminShell && "phone-frame--admin",
           className
         )}
       >
-        <StarfieldBackground />
+        {adminShell ? null : <StarfieldBackground />}
         <div
           className={cn(
             "phone-comfort relative z-[2] flex h-full min-w-0 w-full max-w-full flex-col overflow-x-hidden",
             disableComfortZoom && "phone-comfort--no-zoom"
           )}
         >
-          <div className="min-h-0 min-w-0 w-full max-w-full flex-1 overflow-x-hidden overflow-y-hidden">
+          <div
+            className={cn(
+              "min-h-0 min-w-0 w-full max-w-full flex-1 overflow-x-hidden",
+              adminShell ? "overflow-y-auto" : "overflow-y-hidden"
+            )}
+          >
             {children}
           </div>
           {hideNav ? null : <BottomNav />}

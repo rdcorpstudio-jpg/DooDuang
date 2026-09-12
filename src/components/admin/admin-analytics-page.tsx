@@ -36,6 +36,30 @@ type AnalyticsPayload = {
 
 type RangeKey = "7d" | "30d" | "90d";
 
+function StatChip({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string | number;
+  hint?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-[#e2e5ea] bg-white px-4 py-3 shadow-[0_1px_0_rgba(16,24,40,0.03)]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6b7280]">
+        {label}
+      </p>
+      <p className="mt-1 text-[1.55rem] font-semibold tabular-nums tracking-tight text-[#111827]">
+        {value}
+      </p>
+      {hint ? (
+        <p className="mt-0.5 text-[12px] text-[#6b7280]">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
 export function AdminAnalyticsPage() {
   const [range, setRange] = useState<RangeKey>("7d");
   const [data, setData] = useState<AnalyticsPayload | null>(null);
@@ -82,68 +106,91 @@ export function AdminAnalyticsPage() {
     ...(data?.features.map((f) => f.opens) || [1])
   );
 
-  return (
-    <div className="mx-auto w-full max-w-[720px] px-4 pb-16 pt-6 text-[#f7f4ec]">
-      <header className="mb-6">
-        <p className="text-[11px] font-semibold tracking-[0.18em] text-[#d5b16f]/85">
-          ADMIN
-        </p>
-        <h1 className="mt-1 text-[1.6rem] font-bold tracking-wide text-[#f7f4ec]">
-          Product analytics
-        </h1>
-        <p className="mt-1 text-[13px] text-[#9aa3b2]">
-          Funnel การแปลง + การใช้งานต่อฟีเจอร์
-        </p>
-      </header>
+  const signupStep = data?.funnel.find((s) => s.name === "signup");
+  const payStep = data?.funnel.find((s) => s.name === "payment_succeeded");
+  const openStep = data?.funnel.find((s) => s.name === "feature_open");
 
-      <div className="mb-6 flex gap-2">
-        {(["7d", "30d", "90d"] as RangeKey[]).map((key) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setRange(key)}
-            className={cn(
-              "rounded-full px-3.5 py-1.5 text-[12px] font-semibold outline-none transition",
-              range === key
-                ? "bg-[#d5b16f] text-[#101827]"
-                : "text-[#e8d19a] shadow-[inset_0_0_0_1px_rgba(213,177,111,0.35)]"
-            )}
-          >
-            {key === "7d" ? "7 วัน" : key === "30d" ? "30 วัน" : "90 วัน"}
-          </button>
-        ))}
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-[1.65rem] font-semibold tracking-tight text-[#111827]">
+            Product analytics
+          </h1>
+          <p className="mt-1 text-[13px] text-[#6b7280]">
+            Funnel การแปลงและสถิติการใช้ฟีเจอร์ · ข้อมูลจาก Postgres
+          </p>
+        </div>
+        <div className="inline-flex rounded-lg border border-[#e2e5ea] bg-white p-1 shadow-[0_1px_0_rgba(16,24,40,0.03)]">
+          {(["7d", "30d", "90d"] as RangeKey[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setRange(key)}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-[12px] font-semibold outline-none transition",
+                range === key
+                  ? "bg-[#111827] text-white"
+                  : "text-[#4b5563] hover:bg-[#f3f4f6]"
+              )}
+            >
+              {key === "7d" ? "7 วัน" : key === "30d" ? "30 วัน" : "90 วัน"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
-        <p className="text-[14px] text-[#9aa3b2]">กำลังโหลด…</p>
+        <p className="text-[14px] text-[#6b7280]">กำลังโหลด…</p>
       ) : error ? (
-        <p className="text-[14px] text-rose-300">{error}</p>
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[14px] text-rose-700">
+          {error}
+        </div>
       ) : data ? (
-        <div className="space-y-8">
-          <section>
-            <h2 className="mb-3 text-[15px] font-semibold text-[#e8d19a]">
-              Funnel
-            </h2>
-            <ul className="space-y-3">
+        <>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <StatChip
+              label="สมัครใหม่"
+              value={signupStep?.uniqueUsers ?? 0}
+              hint={`${signupStep?.events ?? 0} events`}
+            />
+            <StatChip
+              label="เปิดฟีเจอร์"
+              value={openStep?.events ?? 0}
+              hint={`${openStep?.uniqueUsers ?? 0} ผู้ใช้`}
+            />
+            <StatChip
+              label="ชำระสำเร็จ"
+              value={payStep?.uniqueUsers ?? 0}
+              hint={`${payStep?.events ?? 0} payments`}
+            />
+          </div>
+
+          <section className="rounded-2xl border border-[#e2e5ea] bg-white p-4 shadow-[0_1px_0_rgba(16,24,40,0.03)] sm:p-5">
+            <h2 className="text-[14px] font-semibold text-[#111827]">Funnel</h2>
+            <p className="mt-0.5 text-[12px] text-[#6b7280]">
+              unique users ต่อขั้น · % จากขั้นก่อนหน้า
+            </p>
+            <ul className="mt-4 space-y-3.5">
               {data.funnel.map((step) => (
                 <li key={step.name}>
-                  <div className="mb-1 flex items-baseline justify-between gap-3 text-[12px]">
-                    <span className="font-medium text-[#f7f4ec]">
+                  <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2 text-[12px]">
+                    <span className="font-medium text-[#1f2937]">
                       {step.label}
                     </span>
-                    <span className="shrink-0 text-[#9aa3b2]">
+                    <span className="tabular-nums text-[#6b7280]">
                       {step.uniqueUsers} คน · {step.events} ครั้ง
                       {step.conversionPct != null
                         ? ` · ${step.conversionPct}%`
                         : ""}
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-white/5">
+                  <div className="h-2 overflow-hidden rounded-full bg-[#eef0f3]">
                     <div
-                      className="h-full rounded-full bg-[#d5b16f]"
+                      className="h-full rounded-full bg-[#0f766e]"
                       style={{
                         width: `${Math.max(
-                          2,
+                          step.uniqueUsers > 0 ? 3 : 0,
                           (step.uniqueUsers / maxFunnelUsers) * 100
                         )}%`,
                       }}
@@ -154,33 +201,33 @@ export function AdminAnalyticsPage() {
             </ul>
           </section>
 
-          <section>
-            <h2 className="mb-3 text-[15px] font-semibold text-[#e8d19a]">
-              ฟีเจอร์
+          <section className="rounded-2xl border border-[#e2e5ea] bg-white p-4 shadow-[0_1px_0_rgba(16,24,40,0.03)] sm:p-5">
+            <h2 className="text-[14px] font-semibold text-[#111827]">
+              การใช้ฟีเจอร์
             </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[480px] border-collapse text-left text-[12px]">
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[520px] border-collapse text-left text-[12px]">
                 <thead>
-                  <tr className="border-b border-white/10 text-[#9aa3b2]">
-                    <th className="py-2 pr-3 font-medium">ฟีเจอร์</th>
-                    <th className="py-2 pr-3 font-medium">เปิด</th>
-                    <th className="py-2 pr-3 font-medium">สำเร็จ</th>
-                    <th className="py-2 font-medium">ผู้ใช้</th>
+                  <tr className="border-b border-[#e5e7eb] text-[#6b7280]">
+                    <th className="pb-2 pr-3 font-medium">ฟีเจอร์</th>
+                    <th className="pb-2 pr-3 font-medium">เปิด</th>
+                    <th className="pb-2 pr-3 font-medium">สำเร็จ</th>
+                    <th className="pb-2 font-medium">ผู้ใช้</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.features.map((f) => (
                     <tr
                       key={f.id}
-                      className="border-b border-white/5 align-middle"
+                      className="border-b border-[#f1f3f5] align-middle last:border-0"
                     >
-                      <td className="py-2.5 pr-3">
-                        <div className="font-medium text-[#f7f4ec]">
+                      <td className="py-3 pr-3">
+                        <div className="font-medium text-[#111827]">
                           {f.label}
                         </div>
-                        <div className="mt-1 h-1.5 max-w-[160px] overflow-hidden rounded-full bg-white/5">
+                        <div className="mt-1.5 h-1.5 max-w-[180px] overflow-hidden rounded-full bg-[#eef0f3]">
                           <div
-                            className="h-full rounded-full bg-[#9AB8DC]"
+                            className="h-full rounded-full bg-[#2563eb]"
                             style={{
                               width: `${Math.max(
                                 f.opens > 0 ? 4 : 0,
@@ -190,13 +237,13 @@ export function AdminAnalyticsPage() {
                           />
                         </div>
                       </td>
-                      <td className="py-2.5 pr-3 tabular-nums text-[#c5cdd9]">
+                      <td className="py-3 pr-3 tabular-nums text-[#374151]">
                         {f.opens}
                       </td>
-                      <td className="py-2.5 pr-3 tabular-nums text-[#c5cdd9]">
+                      <td className="py-3 pr-3 tabular-nums text-[#374151]">
                         {f.completes}
                       </td>
-                      <td className="py-2.5 tabular-nums text-[#c5cdd9]">
+                      <td className="py-3 tabular-nums text-[#374151]">
                         {f.uniqueUsers}
                       </td>
                     </tr>
@@ -206,21 +253,25 @@ export function AdminAnalyticsPage() {
             </div>
           </section>
 
-          <section>
-            <h2 className="mb-3 text-[15px] font-semibold text-[#e8d19a]">
+          <section className="rounded-2xl border border-[#e2e5ea] bg-white p-4 shadow-[0_1px_0_rgba(16,24,40,0.03)] sm:p-5">
+            <h2 className="text-[14px] font-semibold text-[#111827]">
               รายวัน · สมัคร / ชำระ
             </h2>
             {data.daily.length === 0 ? (
-              <p className="text-[13px] text-[#9aa3b2]">ยังไม่มีข้อมูลในช่วงนี้</p>
+              <p className="mt-3 text-[13px] text-[#6b7280]">
+                ยังไม่มีข้อมูลในช่วงนี้
+              </p>
             ) : (
-              <ul className="space-y-2 text-[12px]">
+              <ul className="mt-3 divide-y divide-[#f1f3f5]">
                 {data.daily.map((d) => (
                   <li
                     key={d.day}
-                    className="flex items-center justify-between gap-3 border-b border-white/5 py-2"
+                    className="flex items-center justify-between gap-3 py-2.5 text-[12px]"
                   >
-                    <span className="tabular-nums text-[#c5cdd9]">{d.day}</span>
-                    <span className="text-[#9aa3b2]">
+                    <span className="tabular-nums font-medium text-[#1f2937]">
+                      {d.day}
+                    </span>
+                    <span className="text-[#6b7280]">
                       สมัคร {d.signups} · ชำระ {d.payments}
                     </span>
                   </li>
@@ -228,7 +279,7 @@ export function AdminAnalyticsPage() {
               </ul>
             )}
           </section>
-        </div>
+        </>
       ) : null}
     </div>
   );

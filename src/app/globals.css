@@ -98,6 +98,25 @@
     height: 100dvh;
     box-shadow: 0 0 0 1px rgba(213, 177, 111, 0.12);
   }
+
+  .phone-shell--admin {
+    background: #f4f5f7;
+  }
+
+  .phone-frame--admin {
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none;
+  }
+}
+
+/* Admin console — full-bleed ops UI (no Mae phone chrome) */
+.phone-frame--admin {
+  width: 100%;
+  max-width: 100%;
+  background: #f4f5f7;
+  --dd-comfort-zoom: 1;
+  font-size: 15px;
 }
 
 .phone-frame--mae {
