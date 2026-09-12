@@ -225,7 +225,7 @@ export function FortuneDailyTarot({
                     "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)",
                 }}
               >
-                <span className="relative block h-full w-full overflow-hidden rounded-[13px] bg-[#101827]">
+                <span className="relative block h-full w-full overflow-hidden rounded-[13px] bg-[#0b1220]">
                   <Image
                     src="/images/tarot/card-back.webp?v=1"
                     alt="หลังไพ่ทาโรต์"
@@ -234,7 +234,7 @@ export function FortuneDailyTarot({
                     priority
                     unoptimized
                     draggable={false}
-                    className="pointer-events-none object-contain"
+                    className="pointer-events-none object-cover"
                   />
 
                   <span
@@ -280,7 +280,7 @@ export function FortuneDailyTarot({
                 }}
                 data-slot="tarot-card-art"
               >
-                <div className="relative h-full w-full overflow-hidden rounded-[13px] bg-[#101827]">
+                <div className="relative h-full w-full overflow-hidden rounded-[13px] bg-[#f7f4ec]">
                   <Image
                     src={tarotCardImageSrc(card)}
                     alt={`${card.nameEn} — ${card.nameTh}`}
@@ -288,7 +288,7 @@ export function FortuneDailyTarot({
                     sizes="248px"
                     priority
                     unoptimized
-                    className="object-contain"
+                    className="object-cover"
                     style={{
                       transform: upright ? undefined : "rotate(180deg)",
                     }}
