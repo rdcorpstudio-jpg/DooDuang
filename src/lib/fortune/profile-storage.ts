@@ -146,6 +146,7 @@ export function hasBasicFortuneProfile(
 ): boolean {
   if (!profile) return false;
   return (
+    profile.realName.trim().length > 0 &&
     profile.nickname.trim().length > 0 &&
     /^\d{4}-\d{2}-\d{2}$/.test(profile.birthDate) &&
     Boolean(profile.gender)
@@ -153,8 +154,9 @@ export function hasBasicFortuneProfile(
 }
 
 /**
- * After unlock: if gender/birth/name already exist → premium deepen only.
- * Otherwise collect basics via reading wizard first.
+ * After unlock:
+ * - basic complete → /premium (deepen time/place only, then loading)
+ * - otherwise → reading wizard for missing gender/birth/name (no loading yet)
  */
 export function getPremiumOnboardPath(
   profile: FortuneUserProfile | null | undefined = null

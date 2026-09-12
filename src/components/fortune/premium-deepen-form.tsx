@@ -90,6 +90,7 @@ export function PremiumDeepenForm({
   }
 
   function skip() {
+    // Skip deepen without analysis loading — user can fill later
     const next = writeFortuneProfile({
       ...profile,
       deepenSkipped: true,

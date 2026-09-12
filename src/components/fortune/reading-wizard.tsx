@@ -24,7 +24,6 @@ import {
   readFortuneProfile,
   hasBasicFortuneProfile,
 } from "@/lib/fortune/profile-storage";
-import { rebuildPremiumReading } from "@/lib/fortune/rebuild-premium-reading";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import { cn } from "@/lib/utils";
 
@@ -433,9 +432,9 @@ export function ReadingWizard() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Premium onboard: only collect missing basics; skip if already complete
+    // Premium onboard: collect only missing basics — never show analysis loading here.
+    // Loading happens after birth time/place on /premium deepen form.
     if (afterPremium) {
-      clearWizardCache();
       try {
         const saved = readFortuneProfile();
         if (hasBasicFortuneProfile(saved)) {
@@ -446,14 +445,14 @@ export function ReadingWizard() {
           setProfile({
             realName: saved.realName,
             nickname: saved.nickname,
-            birthDate: saved.birthDate,
+            birthDate: saved.birthDate || todayIso(),
             gender: saved.gender,
             birthTime: saved.birthTime ?? "",
             focus: saved.focus ?? "life",
           });
-          // Resume at first missing field instead of forcing gender again
           if (!saved.gender) setStep("gender");
-          else if (!saved.birthDate) setStep("birth");
+          else if (!saved.birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(saved.birthDate))
+            setStep("birth");
           else setStep("name");
         } else {
           setStep("gender");
@@ -537,7 +536,7 @@ export function ReadingWizard() {
     }
 
     const existing = readFortuneProfile();
-    const written = writeFortuneProfile({
+    writeFortuneProfile({
       realName: profile.realName,
       nickname: profile.nickname,
       birthDate: profile.birthDate,
@@ -549,10 +548,7 @@ export function ReadingWizard() {
       profileLockedUntil: existing?.profileLockedUntil,
     });
     clearWizardCache();
-    // Full premium deepen already present → rebuild packs now
-    if (written.birthTime && written.birthPlace) {
-      rebuildPremiumReading(written);
-    }
+    // Basics only — deepen (time/place) + loading happens on /premium
     router.replace("/premium");
   }
 
@@ -564,23 +560,7 @@ export function ReadingWizard() {
     }
 
     if (afterPremium) {
-      if (!profile.birthDate) {
-        setError("กรุณาเลือกวันเกิด");
-        setStep("birth");
-        return;
-      }
-      if (!profile.realName.trim() || !profile.nickname.trim()) {
-        setError("กรุณากรอกชื่อจริงและชื่อเล่น");
-        setStep("name");
-        return;
-      }
-
-      setStep("loading");
-      setError(null);
-      setProgress(0);
-      await wait(MIN_LOADING_MS);
-      setProgress(100);
-      await wait(150);
+      // Never show FortuneLoading here — only after birth time/place are filled
       finishPremiumOnboard();
       return;
     }

@@ -33,11 +33,8 @@ function readWizardProfile(): WizardProfile | null {
       step?: string;
       profile?: WizardProfile;
     };
-    if (
-      parsed?.step === "result" &&
-      parsed.profile?.nickname &&
-      parsed.profile?.birthDate
-    ) {
+    // Accept any cached wizard profile with identity fields (not only "result")
+    if (parsed?.profile?.nickname && parsed.profile?.birthDate) {
       return parsed.profile;
     }
   } catch {
