@@ -1,6 +1,7 @@
 import type { FortuneTone } from "@/lib/fortune/analyze";
 import type { ZodiacSign } from "@/lib/fortune/zodiac";
 import library from "@/lib/fortune/content/fortune-library-th.json";
+import { getLuckyShirtById } from "@/lib/fortune/content/lucky-shirts";
 
 export type ZodiacDeepCopy = {
   personality: string;
@@ -22,29 +23,24 @@ export function pickZodiacDeep(sign: ZodiacSign): ZodiacDeepCopy {
   return ZODIAC_DEEP_BANK[sign];
 }
 
-/** Shirt pick by day tone — maps to existing public shirt assets */
-export function pickShirtForTone(tone: FortuneTone) {
-  if (tone === "high") {
-    return {
-      id: "purple",
-      name: "ม่วง",
-      meaning: "โชคลาภ",
-      src: "/images/shirts/purple.webp",
-    };
-  }
-  if (tone === "mid") {
-    return {
-      id: "green",
-      name: "เขียว",
-      meaning: "การงาน",
-      src: "/images/shirts/green.webp",
-    };
-  }
+/** Shirt pick by day tone + score — same bands as lucky-shirts catalog */
+export function pickShirtForTone(tone: FortuneTone, dayScore = 6) {
+  const id =
+    tone === "high"
+      ? dayScore >= 10
+        ? "purple"
+        : "orange"
+      : tone === "mid"
+        ? dayScore >= 7
+          ? "green"
+          : "red"
+        : "black";
+  const shirt = getLuckyShirtById(id);
   return {
-    id: "black",
-    name: "ดำ",
-    meaning: "คุ้มครอง",
-    src: "/images/shirts/black.webp",
+    id: shirt.id,
+    name: shirt.name,
+    meaning: shirt.meaning,
+    src: shirt.src,
   };
 }
 

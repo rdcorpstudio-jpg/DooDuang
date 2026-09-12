@@ -29,7 +29,7 @@ export function buildDailyReadingPack(input: FortuneAnalyzeInput) {
   const zodiacDeep = pickZodiacDeep(analysis.zodiac.id);
   const colors = pickLuckyColors(analysis.dayTone);
   const numbers = pickLuckyNumbers(analysis.seed);
-  const shirt = pickShirtForTone(analysis.dayTone);
+  const shirt = pickShirtForTone(analysis.dayTone, analysis.dayScore);
 
   const aspects = analysis.aspects.map((a) => {
     const copy = pickAspectCopy(a.id, a.tone);
