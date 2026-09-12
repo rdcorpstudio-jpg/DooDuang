@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,6 +23,8 @@ import {
   type Gender,
 } from "@/components/ui/sacred-form";
 import { BirthDatePicker } from "@/components/fortune/birth-date-picker";
+import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
+import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { ZodiacSignImage } from "@/components/fortune/zodiac-sign-image";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { getZodiacByBirthDate } from "@/lib/fortune/zodiac";
@@ -35,7 +37,11 @@ import {
   writeFortuneProfile,
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
-import { getPremiumUnlockedUntil, syncPremiumFromServer } from "@/lib/fortune/premium-unlock";
+import {
+  getPremiumUnlockedUntil,
+  setPremiumUnlocked,
+  syncPremiumFromServer,
+} from "@/lib/fortune/premium-unlock";
 import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -98,6 +104,7 @@ export function AccountDashboard({
   const [profile, setProfile] = useState<FortuneUserProfile | null>(null);
   const [premium, setPremium] = useState(false);
   const [premiumUntil, setPremiumUntil] = useState<Date | null>(null);
+  const [payOpen, setPayOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -132,6 +139,19 @@ export function AccountDashboard({
       setEditing(true);
     }
   }, []);
+
+  function applyPremiumUnlock() {
+    setPremiumUnlocked(
+      profile
+        ? { birthDate: profile.birthDate, nickname: profile.nickname }
+        : null
+    );
+    setPremium(true);
+    setPremiumUntil(getPremiumUnlockedUntil());
+    setPayOpen(false);
+  }
+
+  useStripePaymentReturn(applyPremiumUnlock);
 
   const zodiac = useMemo(
     () => (profile?.birthDate ? getZodiacByBirthDate(profile.birthDate) : null),
@@ -305,22 +325,38 @@ export function AccountDashboard({
                 : `ปลดล็อก ${FORTUNE_UNLOCK_PRICE} บาท`}
             </p>
           </div>
-          <Link
-            href="/premium"
-            className="rounded-[14px] px-3 py-2.5 outline-none transition active:scale-[0.99]"
-            style={{
-              background: "rgba(213,177,111,0.08)",
-              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-            }}
-          >
-            <p className="text-[11px] text-[#e8d19a]/75">สถานะ</p>
-            <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
-              {premium ? "ใช้งานอยู่" : "สมาชิกทั่วไป"}
-            </p>
-            <p className="text-[11px] text-[#d5b16f]">
-              {premium ? "จัดการพรีเมียม →" : "ดูพรีเมียม →"}
-            </p>
-          </Link>
+          {premium ? (
+            <Link
+              href="/premium"
+              className="rounded-[14px] px-3 py-2.5 outline-none transition active:scale-[0.99]"
+              style={{
+                background: "rgba(213,177,111,0.08)",
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+              }}
+            >
+              <p className="text-[11px] text-[#e8d19a]/75">สถานะ</p>
+              <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
+                ใช้งานอยู่
+              </p>
+              <p className="text-[11px] text-[#d5b16f]">จัดการพรีเมียม →</p>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setPayOpen(true)}
+              className="rounded-[14px] px-3 py-2.5 text-left outline-none transition active:scale-[0.99]"
+              style={{
+                background: "rgba(213,177,111,0.08)",
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+              }}
+            >
+              <p className="text-[11px] text-[#e8d19a]/75">สถานะ</p>
+              <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
+                สมาชิกทั่วไป
+              </p>
+              <p className="text-[11px] text-[#d5b16f]">ดูพรีเมียม →</p>
+            </button>
+          )}
         </div>
       </section>
 
@@ -682,6 +718,15 @@ export function AccountDashboard({
         <LogOut className="h-4 w-4" strokeWidth={1.9} />
         {signingOut ? "กำลังออก…" : "ออกจากระบบ"}
       </button>
+
+      <Suspense fallback={null}>
+        <FortunePaymentSheet
+          open={payOpen}
+          onClose={() => setPayOpen(false)}
+          onPaid={applyPremiumUnlock}
+          returnPath="/dashboard"
+        />
+      </Suspense>
     </AnimatedPage>
   );
 }
