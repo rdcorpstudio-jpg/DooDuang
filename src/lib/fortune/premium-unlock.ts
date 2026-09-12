@@ -151,7 +151,38 @@ export function applyPremiumUntil(
   return true;
 }
 
-/** Pull entitlement from the logged-in account. No-op when logged out. */
+/** Require logged-in premium from server. Does not fall back to local unlock. */
+export async function requirePremiumFromServer(profile?: {
+  birthDate: string;
+  nickname: string;
+} | null): Promise<{
+  ok: boolean;
+  authenticated: boolean;
+}> {
+  try {
+    const res = await fetch("/api/premium/status", { cache: "no-store" });
+    if (!res.ok) {
+      return { ok: false, authenticated: false };
+    }
+    const data = (await res.json()) as {
+      authenticated?: boolean;
+      premium?: boolean;
+      untilMs?: number | null;
+    };
+    if (!data.authenticated) {
+      return { ok: false, authenticated: false };
+    }
+    const ok = applyPremiumUntil(
+      data.premium ? data.untilMs ?? null : null,
+      profile
+    );
+    return { ok, authenticated: true };
+  } catch {
+    return { ok: false, authenticated: false };
+  }
+}
+
+/** Pull entitlement from the logged-in account. Falls back to local when logged out. */
 export async function syncPremiumFromServer(profile?: {
   birthDate: string;
   nickname: string;

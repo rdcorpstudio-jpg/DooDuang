@@ -8,7 +8,7 @@ import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet"
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { PageBackButton } from "@/components/ui/page-back-button";
 import {
-  isPremiumUnlocked,
+  requirePremiumFromServer,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
 import {
@@ -329,27 +329,34 @@ function FeatureMenuPageInner({
   const [payOpen, setPayOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
 
-  function syncState() {
+  function syncLocalBasics() {
     hydrateFortuneProfileFromWizard();
     const profile = readFortuneProfile();
     setHasBasics(hasFreeReadingBasics(profile) || readWizardBasics());
-    setPremium(
-      isPremiumUnlocked(
-        profile
-          ? { birthDate: profile.birthDate, nickname: profile.nickname }
-          : null
-      )
+  }
+
+  async function syncPremium() {
+    syncLocalBasics();
+    const profile = readFortuneProfile();
+    const access = await requirePremiumFromServer(
+      profile
+        ? { birthDate: profile.birthDate, nickname: profile.nickname }
+        : null
     );
+    setPremium(access.ok);
     setReady(true);
   }
 
   useEffect(() => {
-    syncState();
-    window.addEventListener("dooduang-premium-changed", syncState);
-    window.addEventListener("focus", syncState);
+    void syncPremium();
+    const onChange = () => {
+      void syncPremium();
+    };
+    window.addEventListener("dooduang-premium-changed", onChange);
+    window.addEventListener("focus", onChange);
     return () => {
-      window.removeEventListener("dooduang-premium-changed", syncState);
-      window.removeEventListener("focus", syncState);
+      window.removeEventListener("dooduang-premium-changed", onChange);
+      window.removeEventListener("focus", onChange);
     };
   }, []);
 
@@ -365,7 +372,7 @@ function FeatureMenuPageInner({
     const next = pendingHref;
     setPendingHref(null);
     if (next) router.push(next);
-    else syncState();
+    else void syncPremium();
   });
 
   function applyUnlock() {

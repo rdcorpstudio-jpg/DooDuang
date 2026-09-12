@@ -32,7 +32,7 @@ import {
 } from "@/lib/fortune/scan/scan-cooldown";
 import { FaceResultIconTiles } from "@/components/fortune/face-shape-icons";
 import {
-  isPremiumUnlocked,
+  requirePremiumFromServer,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
 import { FORTUNE_UNLOCK_PRICE, APP_NAME } from "@/lib/site";
@@ -76,12 +76,20 @@ export function FortuneFaceReading({
   }
 
   useEffect(() => {
-    setUnlocked(isPremiumUnlocked());
-    const saved = readSavedFaceScan();
-    if (saved) {
-      setPack(saved.pack);
-    }
-    refreshCooldown();
+    let cancelled = false;
+    void (async () => {
+      const access = await requirePremiumFromServer();
+      if (cancelled) return;
+      setUnlocked(access.ok);
+      const saved = readSavedFaceScan();
+      if (saved) {
+        setPack(saved.pack);
+      }
+      refreshCooldown();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function handlePaid() {

@@ -8,9 +8,8 @@ import { LifeInsightMockup } from "@/components/fortune/life-insight-mockup";
 import { PremiumDeepenForm } from "@/components/fortune/premium-deepen-form";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import {
-  isPremiumUnlocked,
+  requirePremiumFromServer,
   setPremiumUnlocked,
-  syncPremiumFromServer,
 } from "@/lib/fortune/premium-unlock";
 import {
   getPremiumOnboardPath,
@@ -149,17 +148,12 @@ export function PremiumHomePage({
       if (cancelled) return;
       setProfile(next);
       const fromServer = forceUnlocked
-        ? true
-        : await syncPremiumFromServer(
+        ? { ok: true, authenticated: true }
+        : await requirePremiumFromServer(
             next ? { birthDate: next.birthDate, nickname: next.nickname } : null
           );
       if (cancelled) return;
-      const isUnlocked =
-        forceUnlocked ||
-        fromServer ||
-        isPremiumUnlocked(
-          next ? { birthDate: next.birthDate, nickname: next.nickname } : null
-        );
+      const isUnlocked = forceUnlocked || fromServer.ok;
       setUnlocked(isUnlocked);
       setShowDeepen(
         Boolean(isUnlocked && hasDeepenAfterPay() && needsPremiumDeepen(next))

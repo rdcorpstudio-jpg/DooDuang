@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import {
   analyzeFaceWithOpenAI,
   analyzePalmWithOpenAI,
   isOpenAIScanConfigured,
 } from "@/lib/fortune/scan/openai-scan";
+import { requirePremiumSession } from "@/lib/premium-entitlement";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
 type ScanMode = "face" | "palm";
@@ -23,6 +26,21 @@ function collectImages(body: {
 
 export async function POST(request: Request) {
   try {
+    const premium = await requirePremiumSession();
+    if (!premium) {
+      const session = await auth();
+      if (!session?.user) {
+        return NextResponse.json(
+          { error: "ต้องเข้าสู่ระบบก่อน", code: "UNAUTHENTICATED" },
+          { status: 401 }
+        );
+      }
+      return NextResponse.json(
+        { error: "ต้องเป็นสมาชิกพรีเมียม", code: "PREMIUM_REQUIRED" },
+        { status: 403 }
+      );
+    }
+
     if (!isOpenAIScanConfigured()) {
       return NextResponse.json(
         { error: "OPENAI_API_KEY ยังไม่ได้ตั้ง", code: "NO_API_KEY" },

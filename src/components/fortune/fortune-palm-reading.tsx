@@ -34,7 +34,7 @@ import { handElementArt } from "@/lib/fortune/scan/hand-element-art";
 import { pickPalmLineCopy } from "@/lib/fortune/content/face-palm-library";
 import type { PalmLineId } from "@/lib/fortune/scan/types";
 import {
-  isPremiumUnlocked,
+  requirePremiumFromServer,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
 import { FORTUNE_UNLOCK_PRICE, APP_NAME } from "@/lib/site";
@@ -105,12 +105,20 @@ export function FortunePalmReading({
   }
 
   useEffect(() => {
-    setUnlocked(isPremiumUnlocked());
-    const saved = readSavedPalmScan();
-    if (saved) {
-      setPack(saved.pack);
-    }
-    refreshCooldown();
+    let cancelled = false;
+    void (async () => {
+      const access = await requirePremiumFromServer();
+      if (cancelled) return;
+      setUnlocked(access.ok);
+      const saved = readSavedPalmScan();
+      if (saved) {
+        setPack(saved.pack);
+      }
+      refreshCooldown();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function handlePaid() {

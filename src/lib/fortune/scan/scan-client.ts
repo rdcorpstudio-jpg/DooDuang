@@ -22,6 +22,12 @@ async function fileToDataUrl(file: File): Promise<string> {
 }
 
 function messageForScanFailure(status: number, code?: string, error?: string) {
+  if (status === 401 || code === "UNAUTHENTICATED") {
+    return "ต้องเข้าสู่ระบบก่อนใช้ฟีเจอร์นี้";
+  }
+  if (status === 403 || code === "PREMIUM_REQUIRED") {
+    return "ต้องเป็นสมาชิกพรีเมียมก่อนสแกน";
+  }
   if (status === 503 || code === "NO_API_KEY") {
     return "ยังไม่ได้ตั้งค่า OPENAI_API_KEY บนเซิร์ฟเวอร์";
   }

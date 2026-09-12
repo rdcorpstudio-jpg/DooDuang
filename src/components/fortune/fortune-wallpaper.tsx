@@ -14,7 +14,7 @@ import {
   type PremiumWallpaper,
 } from "@/lib/fortune/premium-wallpaper";
 import {
-  isPremiumUnlocked,
+  requirePremiumFromServer,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
@@ -43,13 +43,20 @@ export function FortuneWallpaper({ className }: { className?: string }) {
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    const ok = isPremiumUnlocked();
-    setUnlocked(ok);
-    if (ok) {
-      setWallpaper(assignPremiumWallpaperIfNeeded());
-    } else {
-      setWallpaper(getPremiumWallpaperTeaser());
-    }
+    let cancelled = false;
+    void (async () => {
+      const access = await requirePremiumFromServer();
+      if (cancelled) return;
+      setUnlocked(access.ok);
+      if (access.ok) {
+        setWallpaper(assignPremiumWallpaperIfNeeded());
+      } else {
+        setWallpaper(getPremiumWallpaperTeaser());
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

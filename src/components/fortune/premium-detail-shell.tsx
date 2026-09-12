@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { PageBackButton } from "@/components/ui/page-back-button";
-import { isPremiumUnlocked, syncPremiumFromServer } from "@/lib/fortune/premium-unlock";
+import { requirePremiumFromServer } from "@/lib/fortune/premium-unlock";
 import {
   hydrateFortuneProfileFromWizard,
   readFortuneProfile,
@@ -23,16 +23,23 @@ export function usePremiumProfileGate() {
       const next = readFortuneProfile();
       if (cancelled) return;
       setProfile(next);
-      const unlocked = await syncPremiumFromServer(
+      const access = await requirePremiumFromServer(
         next ? { birthDate: next.birthDate, nickname: next.nickname } : null
       );
       if (cancelled) return;
-      if (!unlocked && !isPremiumUnlocked(next ? { birthDate: next.birthDate, nickname: next.nickname } : null)) {
+      if (!access.authenticated) {
+        const callback = `${window.location.pathname}${window.location.search}`;
+        router.replace(`/login?callbackUrl=${encodeURIComponent(callback)}`);
+        return;
+      }
+      if (!access.ok) {
         router.replace("/menu");
         return;
       }
       if (!next?.birthDate) {
-        router.replace(`/reading?next=${encodeURIComponent(window.location.pathname)}`);
+        router.replace(
+          `/reading?next=${encodeURIComponent(window.location.pathname)}`
+        );
         return;
       }
       setReady(true);

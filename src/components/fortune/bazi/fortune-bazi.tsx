@@ -10,7 +10,7 @@ import { PageBackButton } from "@/components/ui/page-back-button";
 import { buildBaziChart } from "@/lib/fortune/bazi";
 import type { BaziInput } from "@/lib/fortune/bazi";
 import {
-  isPremiumUnlocked,
+  requirePremiumFromServer,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
 import { readFortuneProfile } from "@/lib/fortune/profile-storage";
@@ -36,30 +36,42 @@ export function FortuneBazi({ className }: { className?: string }) {
   useStripePaymentReturn(handlePaid);
 
   useEffect(() => {
-    setUnlocked(isPremiumUnlocked());
-    const profile = readFortuneProfile();
-    if (
-      profile?.birthDate &&
-      profile.gender &&
-      /^\d{4}-\d{2}-\d{2}$/.test(profile.birthDate)
-    ) {
-      const gender =
-        profile.gender === "female" || profile.gender === "male"
-          ? profile.gender
-          : "other";
-      setInput({
-        birthDate: profile.birthDate,
-        birthTime: profile.birthTime?.trim() || undefined,
-        gender,
-        timezone: "Asia/Bangkok",
-        birthPlace: profile.birthPlace,
-      });
-      setNickname(profile.nickname);
-      setMissing(false);
-    } else {
-      setMissing(true);
-    }
-    setReady(true);
+    let cancelled = false;
+    void (async () => {
+      const profile = readFortuneProfile();
+      const access = await requirePremiumFromServer(
+        profile
+          ? { birthDate: profile.birthDate, nickname: profile.nickname }
+          : null
+      );
+      if (cancelled) return;
+      setUnlocked(access.ok);
+      if (
+        profile?.birthDate &&
+        profile.gender &&
+        /^\d{4}-\d{2}-\d{2}$/.test(profile.birthDate)
+      ) {
+        const gender =
+          profile.gender === "female" || profile.gender === "male"
+            ? profile.gender
+            : "other";
+        setInput({
+          birthDate: profile.birthDate,
+          birthTime: profile.birthTime?.trim() || undefined,
+          gender,
+          timezone: "Asia/Bangkok",
+          birthPlace: profile.birthPlace,
+        });
+        setNickname(profile.nickname);
+        setMissing(false);
+      } else {
+        setMissing(true);
+      }
+      setReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const { chart, computeError } = useMemo(() => {
