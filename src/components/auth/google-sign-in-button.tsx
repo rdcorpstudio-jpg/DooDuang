@@ -27,13 +27,6 @@ export function authCompletePath(callbackUrl: string) {
   return `/auth/complete?callbackUrl=${cb}`;
 }
 
-/** @deprecated handoff unused — kept for any deep links */
-function loginHandoffUrl(callbackUrl: string) {
-  if (typeof window === "undefined") return undefined;
-  const cb = encodeURIComponent(safeCallback(callbackUrl));
-  return `${window.location.origin}/login?callbackUrl=${cb}`;
-}
-
 /** After login → premium checkout (not account) */
 export const DEFAULT_LOGIN_CALLBACK = "/premium?checkout=1";
 
