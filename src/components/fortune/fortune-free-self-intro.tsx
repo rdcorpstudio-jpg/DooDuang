@@ -71,7 +71,6 @@ export function FortuneFreeSelfIntro({
   focus,
   gender,
   className,
-  seed: _seed,
   premium = false,
 }: {
   nickname: string;
@@ -83,6 +82,7 @@ export function FortuneFreeSelfIntro({
   /** true = หัวข้อ「เชิงลึก」หลังสมัครพรีเมียม */
   premium?: boolean;
   className?: string;
+  /** @deprecated unused — callers may still pass */
   seed?: string;
 }) {
   const [expanded, setExpanded] = useState(true);

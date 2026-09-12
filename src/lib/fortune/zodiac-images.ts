@@ -50,8 +50,10 @@ export function getZodiacImageSrc(
  * Pack assets are transparent WebP — no mix-blend needed.
  */
 export function zodiacImageNeedsBlend(
-  _sign: ZodiacSign,
-  _variant: ZodiacImageVariant = "orb"
+  sign: ZodiacSign,
+  variant: ZodiacImageVariant = "orb"
 ): boolean {
+  void sign;
+  void variant;
   return false;
 }
