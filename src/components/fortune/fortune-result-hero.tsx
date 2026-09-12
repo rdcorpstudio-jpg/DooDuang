@@ -1,7 +1,6 @@
 "use client";
 
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
-import { PageBackButton } from "@/components/ui/page-back-button";
 import { cn } from "@/lib/utils";
 
 function formatHeroDate(date = new Date()) {
@@ -92,8 +91,7 @@ export function FortuneResultHero({
       </div>
 
       <div className="relative z-10 flex h-full min-h-[188px] flex-col px-3.5 py-2.5">
-        <div className="flex items-center justify-between gap-3">
-          <PageBackButton href="/premium" label="กลับ" className="!min-h-9 !px-2.5 !py-1.5 !text-[12px]" />
+        <div className="flex items-center justify-end gap-3">
           <p className="dd-hero-shadow text-[11px] font-medium text-[#f7f4ec]/85">
             สวัสดี คุณ{displayName}
           </p>
