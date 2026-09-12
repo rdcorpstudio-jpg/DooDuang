@@ -130,8 +130,7 @@ export async function recordPayment(opts: {
     .from(payments)
     .where(eq(payments.stripeSessionId, opts.stripeRef))
     .limit(1);
-  if (existing) return;
-
+  if (existing) return { inserted: false as const };
   await db.insert(payments).values({
     userId: opts.userId,
     stripeSessionId: opts.stripeRef,
@@ -139,6 +138,20 @@ export async function recordPayment(opts: {
     credits: opts.credits ?? 0,
     status: "completed",
   });
+  return { inserted: true as const };
+}
+
+export async function findPaymentByStripeRef(stripeRef: string) {
+  const db = requireDb();
+  const [existing] = await db
+    .select({
+      id: payments.id,
+      userId: payments.userId,
+    })
+    .from(payments)
+    .where(eq(payments.stripeSessionId, stripeRef))
+    .limit(1);
+  return existing ?? null;
 }
 
 export async function getUserSubscription(userId: string) {
@@ -156,19 +169,19 @@ export async function getUserSubscription(userId: string) {
   return user ?? null;
 }
 
-/** Extend premium_until by calendar months from now or current until. */
+/** Extend premium_until by calendar days from now or current until. */
 export async function extendPremiumUntil(
   userId: string,
-  months: number,
-  opts?: { status?: string }
+  days: number,
+  opts?: { status?: string; customerId?: string | null }
 ) {
   const db = requireDb();
   const existing = await getUserSubscription(userId);
   const now = Date.now();
   const current = existing?.premiumUntil?.getTime() ?? 0;
-  const base = current > now ? new Date(current) : new Date(now);
-  const until = new Date(base.getTime());
-  until.setMonth(until.getMonth() + months);
+  const baseMs = current > now ? current : now;
+  const safeDays = Number.isFinite(days) && days > 0 ? Math.floor(days) : 365;
+  const until = new Date(baseMs + safeDays * 24 * 60 * 60 * 1000);
 
   await db
     .update(users)
@@ -176,8 +189,65 @@ export async function extendPremiumUntil(
       premiumUntil: until,
       subscriptionStatus:
         opts?.status ?? existing?.subscriptionStatus ?? "active",
+      ...(opts?.customerId
+        ? { stripeCustomerId: opts.customerId }
+        : {}),
     })
     .where(eq(users.id, userId));
 
   return until;
+}
+
+/**
+ * One-time Checkout fulfillment — extend premium by days.
+ * Idempotent via payments.stripe_session_id.
+ */
+export async function applyOneTimePremiumCheckout(opts: {
+  userId?: string | null;
+  checkoutSession: Stripe.Checkout.Session;
+  days: number;
+  amount: number;
+  credits?: number;
+}) {
+  const session = opts.checkoutSession;
+  const customerId = stripeId(session.customer);
+  const userId = await findUserIdForStripe({
+    userId: opts.userId || session.metadata?.userId || session.client_reference_id,
+    customerId,
+  });
+  if (!userId) return null;
+
+  const already = await findPaymentByStripeRef(session.id);
+  if (already) {
+    const existing = await getUserSubscription(userId);
+    const until = existing?.premiumUntil ?? null;
+    const status = existing?.subscriptionStatus ?? "active";
+    return {
+      userId,
+      status,
+      premiumUntil: until,
+      premium: hasPremiumAccess({ status, until }),
+      alreadyFulfilled: true as const,
+    };
+  }
+
+  const until = await extendPremiumUntil(userId, opts.days, {
+    status: "active",
+    customerId,
+  });
+
+  await recordPayment({
+    userId,
+    stripeRef: session.id,
+    amount: opts.amount,
+    credits: opts.credits ?? 0,
+  });
+
+  return {
+    userId,
+    status: "active",
+    premiumUntil: until,
+    premium: hasPremiumAccess({ status: "active", until }),
+    alreadyFulfilled: false as const,
+  };
 }

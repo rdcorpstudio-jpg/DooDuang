@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import {
   APP_BRAND_MARK,
-  FORTUNE_PACKAGE_MONTHS,
+  FORTUNE_PACKAGE_LABEL,
   LINE_OA_ADD_URL,
   LINE_OA_HANDLE,
 } from "@/lib/site";
@@ -67,7 +67,7 @@ export function PremiumThanksPage() {
   const statusLine = !ready
     ? "กำลังยืนยันการชำระ…"
     : premium
-      ? `พรีเมียม ${FORTUNE_PACKAGE_MONTHS} เดือนปลดล็อกแล้ว`
+      ? `พรีเมียม ${FORTUNE_PACKAGE_LABEL} ปลดล็อกแล้ว`
       : "กำลังยืนยันสิทธิ์…";
 
   return (

@@ -44,7 +44,7 @@ import {
   setPremiumUnlocked,
   syncPremiumFromServer,
 } from "@/lib/fortune/premium-unlock";
-import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type AccountUser = {
@@ -321,7 +321,7 @@ export function AccountDashboard({
           >
             <p className="text-[11px] text-[#e8d19a]/75">แพ็กเกจ</p>
             <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
-              {premium ? `พรีเมียม ${FORTUNE_PACKAGE_MONTHS} เดือน` : "ยังไม่มี"}
+              {premium ? `พรีเมียม ${FORTUNE_PACKAGE_LABEL}` : "ยังไม่มี"}
             </p>
             <p className="text-[11px] text-[#f7f4ec]/55">
               {premium && premiumUntil

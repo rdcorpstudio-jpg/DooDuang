@@ -1,4 +1,4 @@
-import { APP_NAME, FORTUNE_PACKAGE_MONTHS, LEGAL_UPDATED_AT } from "@/lib/site";
+import { APP_NAME, FORTUNE_PACKAGE_LABEL, LEGAL_UPDATED_AT } from "@/lib/site";
 import { LegalSection } from "@/components/layout/legal-section";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { PageHero } from "@/components/ui/page-hero";
@@ -42,7 +42,7 @@ export default function TermsPage() {
         <LegalSection title="4. แพ็กเกจพรีเมียมและการชำระเงิน">
           <p>
             แพ็กเกจพรีเมียมให้สิทธิ์เข้าถึงเนื้อหาพิเศษตามระยะเวลาที่ระบุในหน้าชำระเงิน
-            (ปัจจุบัน {FORTUNE_PACKAGE_MONTHS} เดือน) การชำระเงินดำเนินการผ่าน Stripe
+            (ปัจจุบัน {FORTUNE_PACKAGE_LABEL}) การชำระเงินดำเนินการผ่าน Stripe
           </p>
           <p>
             แพ็กเกจเป็นสิทธิ์ใช้งานดิจิทัลในบริการนี้เท่านั้น ไม่สามารถแลกเป็นเงินสด

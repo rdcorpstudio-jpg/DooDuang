@@ -7,8 +7,12 @@ export const APP_TAGLINE = "พามู พาดูดวง พามั่�
 export const APP_PURPOSE =
   "แม่มั่งมี พามู เป็นเว็บดูดวงออนไลน์ เปิดไพ่ทาโรต์ ดูดวงความรัก การงาน การเงิน และสุขภาพได้ทันที โดยไม่ต้องเข้าสู่ระบบ กรอกอีเมลหลังดูดวงเพื่อรับลิงก์ดูผลซ้ำ";
 export const FORTUNE_UNLOCK_PRICE = 399;
-/** Premium access duration after purchase (months) */
-export const FORTUNE_PACKAGE_MONTHS = 1;
+/** Premium access after one-time purchase (exact days) */
+export const FORTUNE_PACKAGE_DAYS = 365;
+/** Display label for package duration */
+export const FORTUNE_PACKAGE_LABEL = "1 ปี";
+/** @deprecated use FORTUNE_PACKAGE_DAYS / FORTUNE_PACKAGE_LABEL — kept as ~12 months */
+export const FORTUNE_PACKAGE_MONTHS = 12;
 /** LINE Official Account — add friend after purchase (CRM) */
 export const LINE_OA_ADD_URL = "https://line.me/R/ti/p/@maemangmee";
 export const LINE_OA_HANDLE = "@maemangmee";

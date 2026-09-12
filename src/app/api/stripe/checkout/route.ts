@@ -117,7 +117,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "รหัสสินค้าใน Vercel ไม่เจอใน Stripe — ตรวจ STRIPE_PRICE_STARTER ให้เป็น price_ จากโหมดเดียวกับ Secret Key",
+            "รหัสสินค้าใน Vercel ไม่เจอใน Stripe — ตรวจ STRIPE_PRICE_STARTER / STRIPE_PRICE_ONETIME ให้เป็น price_ one-time จากโหมดเดียวกับ Secret Key",
         },
         { status: 400 }
       );

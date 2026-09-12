@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { stripe } from "@/lib/stripe";
-import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import type Stripe from "stripe";
+import { stripe, PREMIUM_UNLOCK } from "@/lib/stripe";
+import { FORTUNE_PACKAGE_DAYS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import {
+  applyOneTimePremiumCheckout,
   applyStripeSubscription,
   recordPayment,
 } from "@/lib/premium-entitlement";
@@ -13,6 +15,24 @@ export const dynamic = "force-dynamic";
 function stripeId(value: string | { id: string } | null | undefined) {
   if (!value) return null;
   return typeof value === "string" ? value : value.id;
+}
+
+function daysFromCheckout(checkout: {
+  metadata?: Stripe.Metadata | null;
+}) {
+  const raw = checkout.metadata?.days ?? checkout.metadata?.months;
+  const n = raw ? Number(raw) : NaN;
+  // Legacy: months metadata → approximate days
+  if (
+    Number.isFinite(n) &&
+    n > 0 &&
+    checkout.metadata?.days == null &&
+    checkout.metadata?.months != null
+  ) {
+    return Math.floor(n) * 30;
+  }
+  if (Number.isFinite(n) && n > 0) return Math.floor(n);
+  return FORTUNE_PACKAGE_DAYS;
 }
 
 /** Verify Stripe Checkout session after redirect and unlock premium. */
@@ -46,9 +66,16 @@ export async function POST(request: Request) {
       expand: ["subscription"],
     });
     const paid =
-      checkout.payment_status === "paid" || checkout.status === "complete";
+      checkout.payment_status === "paid" ||
+      checkout.payment_status === "no_payment_required";
     if (!paid) {
-      return NextResponse.json({ error: "ยังไม่ได้ชำระเงิน" }, { status: 402 });
+      return NextResponse.json(
+        {
+          error: "ยังไม่ได้ชำระเงิน หรือรอ Confirm จาก PromptPay",
+          code: "PAYMENT_PENDING",
+        },
+        { status: 402 }
+      );
     }
 
     const metaUser = checkout.metadata?.userId || checkout.client_reference_id;
@@ -57,50 +84,66 @@ export async function POST(request: Request) {
     }
 
     const purpose = checkout.metadata?.purpose || "premium-unlock";
-    const packageId = checkout.metadata?.packageId || "premium-unlock";
+    const packageId = checkout.metadata?.packageId || PREMIUM_UNLOCK.id;
     const credits = parseInt(checkout.metadata?.credits ?? "0", 10);
     const amount =
       typeof checkout.amount_total === "number"
         ? Math.round(checkout.amount_total / 100)
         : FORTUNE_UNLOCK_PRICE;
 
-    const rawSub = checkout.subscription;
-    const subscription =
-      rawSub && typeof rawSub !== "string"
-        ? rawSub
-        : stripeId(rawSub)
-          ? await stripe.subscriptions.retrieve(stripeId(rawSub)!)
-          : null;
+    // Legacy subscription checkouts (if any still open)
+    if (checkout.mode === "subscription") {
+      const rawSub = checkout.subscription;
+      const subscription =
+        rawSub && typeof rawSub !== "string"
+          ? rawSub
+          : stripeId(rawSub)
+            ? await stripe.subscriptions.retrieve(stripeId(rawSub)!)
+            : null;
 
-    const applied = subscription
-      ? await applyStripeSubscription({
+      const applied = subscription
+        ? await applyStripeSubscription({
+            userId: session.user.id,
+            subscription,
+          })
+        : null;
+
+      try {
+        await recordPayment({
           userId: session.user.id,
-          subscription,
-        })
-      : null;
+          stripeRef: checkout.id,
+          amount,
+          credits,
+        });
+      } catch (err) {
+        console.error("Confirm payment DB write failed:", err);
+      }
 
-    try {
-      await recordPayment({
-        userId: session.user.id,
-        stripeRef: checkout.id,
-        amount,
-        credits,
+      return NextResponse.json({
+        ok: true,
+        purpose,
+        packageId,
+        premiumUnlocked: applied?.premium ?? false,
+        premiumUntil: applied?.premiumUntil?.toISOString() ?? null,
+        subscriptionStatus: applied?.status ?? null,
       });
-    } catch (err) {
-      console.error("Confirm payment DB write failed:", err);
     }
 
-    const premiumUnlocked = applied
-      ? applied.premium
-      : purpose === "premium-unlock" || packageId === "premium-unlock";
+    const applied = await applyOneTimePremiumCheckout({
+      userId: session.user.id,
+      checkoutSession: checkout,
+      days: daysFromCheckout(checkout),
+      amount,
+      credits,
+    });
 
     return NextResponse.json({
       ok: true,
       purpose,
       packageId,
-      premiumUnlocked,
+      premiumUnlocked: Boolean(applied?.premium),
       premiumUntil: applied?.premiumUntil?.toISOString() ?? null,
-      subscriptionStatus: applied?.status ?? null,
+      subscriptionStatus: applied?.status ?? "active",
     });
   } catch (err) {
     console.error("Stripe confirm failed:", err);

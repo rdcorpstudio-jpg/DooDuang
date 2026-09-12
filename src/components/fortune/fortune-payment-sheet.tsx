@@ -7,7 +7,7 @@ import { Check, ChevronLeft, Loader2, Lock, X } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
 import { PREMIUM_LIST_PRICE } from "@/lib/fortune/premium-offer-countdown";
-import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK } from "@/lib/site";
+import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK } from "@/lib/site";
 import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,7 @@ type SessionUser = {
 };
 
 const PERKS = [
-  `สิทธิ์พรีเมียมครบ ${FORTUNE_PACKAGE_MONTHS} เดือน`,
+  `สิทธิ์พรีเมียมครบ ${FORTUNE_PACKAGE_LABEL}`,
   "ปฏิทินฤกษ์ 12 ปี",
   "แผนที่ตัวตน · ราศีเชิงลึก",
   "โหงวเฮ้ง · ลายมือ · ดวงคู่",
@@ -228,10 +228,7 @@ export function FortunePaymentSheet({
   if (!open) return null;
   if (!isPage && !isInline && !host) return null;
 
-  const monthly =
-    FORTUNE_PACKAGE_MONTHS > 1
-      ? Math.round(FORTUNE_UNLOCK_PRICE / FORTUNE_PACKAGE_MONTHS)
-      : null;
+  const monthly = Math.round(FORTUNE_UNLOCK_PRICE / 12);
 
   const saveBaht = PREMIUM_LIST_PRICE - FORTUNE_UNLOCK_PRICE;
   const body = (
@@ -266,7 +263,7 @@ export function FortunePaymentSheet({
           ปลดล็อกดวงพรีเมียม
         </h2>
         <p className="mt-2 text-[12px] leading-relaxed text-[#9aa3b2]">
-          แพ็ก {PREMIUM_UNLOCK.months} เดือน · เนื้อหาเต็มทุกบท
+          แพ็ก {FORTUNE_PACKAGE_LABEL} · เนื้อหาเต็มทุกบท
         </p>
       </div>
 
@@ -287,9 +284,8 @@ export function FortunePaymentSheet({
           </span>
         </p>
         <p className="mt-2 text-[11px] text-[#9aa3b2]">
-          {monthly !== null
-            ? `เฉลี่ย ${monthly} บาท/เดือน`
-            : `ใช้งานได้ ${FORTUNE_PACKAGE_MONTHS} เดือน`}
+          ใช้งานได้ {FORTUNE_PACKAGE_LABEL}
+          <span className="text-[#9aa3b2]/70"> · เฉลี่ย ~{monthly} บาท/เดือน</span>
         </p>
         <PremiumOfferCountdown compact className="mt-3.5" />
       </div>

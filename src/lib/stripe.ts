@@ -19,6 +19,7 @@ export const stripe = process.env.STRIPE_SECRET_KEY
     })
   : null;
 
+/** Prefer dedicated one-time price; fall back to STRIPE_PRICE_STARTER. */
 function priceIdForPackage(packageId: string) {
   if (
     packageId === PREMIUM_UNLOCK.id ||
@@ -26,8 +27,10 @@ function priceIdForPackage(packageId: string) {
     packageId === "popular" ||
     packageId === "premium"
   ) {
-    // All paid unlocks use the monthly starter price.
-    return process.env.STRIPE_PRICE_STARTER;
+    return (
+      process.env.STRIPE_PRICE_ONETIME ||
+      process.env.STRIPE_PRICE_STARTER
+    );
   }
   return undefined;
 }
@@ -68,6 +71,7 @@ export function resolveCheckoutPackage(packageId: string) {
       id: PREMIUM_UNLOCK.id,
       name: PREMIUM_UNLOCK.name,
       credits: 0,
+      days: PREMIUM_UNLOCK.days,
       months: PREMIUM_UNLOCK.months,
       price: PREMIUM_UNLOCK.price,
       priceId: priceIdForPackage(packageId),
@@ -81,6 +85,7 @@ export function resolveCheckoutPackage(packageId: string) {
     id: PREMIUM_UNLOCK.id,
     name: pkg.name,
     credits: 0,
+    days: PREMIUM_UNLOCK.days,
     months: PREMIUM_UNLOCK.months,
     price: pkg.price,
     priceId: priceIdForPackage(pkg.id),
@@ -88,7 +93,7 @@ export function resolveCheckoutPackage(packageId: string) {
   };
 }
 
-/** Shared Stripe Checkout URL for premium unlock */
+/** Shared Stripe Checkout URL for premium unlock (one-time payment). */
 export async function createPremiumCheckoutUrl(opts: {
   userId: string;
   email?: string | null;
@@ -124,7 +129,7 @@ export async function createPremiumCheckoutUrl(opts: {
   }
 
   const checkoutSession = await stripe.checkout.sessions.create({
-    mode: "subscription",
+    mode: "payment",
     ...(existing?.stripeCustomerId
       ? { customer: existing.stripeCustomerId }
       : opts.email
@@ -132,6 +137,15 @@ export async function createPremiumCheckoutUrl(opts: {
         : {}),
     line_items: [{ price: priceId, quantity: 1 }],
     allow_promotion_codes: true,
+    // PromptPay / async methods still complete via webhook + confirm
+    payment_intent_data: {
+      metadata: {
+        userId: opts.userId,
+        packageId: pkg.id,
+        purpose: pkg.purpose,
+        days: String(pkg.days),
+      },
+    },
     success_url: `${opts.origin}/premium/thanks?payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${opts.origin}${safeReturn}?payment=cancelled`,
     client_reference_id: opts.userId,
@@ -140,13 +154,7 @@ export async function createPremiumCheckoutUrl(opts: {
       packageId: pkg.id,
       credits: String(pkg.credits),
       purpose: pkg.purpose,
-    },
-    subscription_data: {
-      metadata: {
-        userId: opts.userId,
-        packageId: pkg.id,
-        purpose: pkg.purpose,
-      },
+      days: String(pkg.days),
     },
   });
 

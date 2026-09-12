@@ -1,5 +1,5 @@
 import { assignPremiumWallpaperIfNeeded } from "@/lib/fortune/premium-wallpaper";
-import { FORTUNE_PACKAGE_MONTHS } from "@/lib/site";
+import { FORTUNE_PACKAGE_DAYS } from "@/lib/site";
 
 /** Global entitlement — premium tab, face, palm, report */
 export const PREMIUM_UNLOCK_KEY = "dooduang-premium-unlocked";
@@ -10,10 +10,8 @@ function legacyUnlockKey(birthDate: string, nickname: string) {
   return `lukkana-unlock-overall-${birthDate}-${nickname}`;
 }
 
-function addCalendarMonths(from: Date, months: number) {
-  const d = new Date(from.getTime());
-  d.setMonth(d.getMonth() + months);
-  return d;
+function addDays(from: Date, days: number) {
+  return new Date(from.getTime() + days * 24 * 60 * 60 * 1000);
 }
 
 function readUntilMs(): number | null {
@@ -44,7 +42,7 @@ function clearExpiredFlags() {
   }
 }
 
-/** Grant / extend premium for FORTUNE_PACKAGE_MONTHS from now (or from current until if still active). */
+/** Grant / extend premium for FORTUNE_PACKAGE_DAYS from now (or from current until if still active). */
 export function setPremiumUnlocked(profile?: {
   birthDate: string;
   nickname: string;
@@ -53,7 +51,7 @@ export function setPremiumUnlocked(profile?: {
   const existing = readUntilMs();
   const base =
     existing !== null && existing > now ? new Date(existing) : new Date(now);
-  const until = addCalendarMonths(base, FORTUNE_PACKAGE_MONTHS).getTime();
+  const until = addDays(base, FORTUNE_PACKAGE_DAYS).getTime();
   writeUntilMs(until);
 
   try {

@@ -2,12 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { FORTUNE_PACKAGE_MONTHS } from "@/lib/site";
+import { FORTUNE_PACKAGE_LABEL } from "@/lib/site";
 
 interface PricingCardProps {
   name: string;
   credits?: number;
-  months?: number;
+  durationLabel?: string;
   price: number;
   description: string;
   popular?: boolean;
@@ -16,7 +16,7 @@ interface PricingCardProps {
 
 export function PricingCard({
   name,
-  months = FORTUNE_PACKAGE_MONTHS,
+  durationLabel = FORTUNE_PACKAGE_LABEL,
   price,
   description,
   popular,
@@ -39,7 +39,7 @@ export function PricingCard({
           {formatPrice(price)}
         </span>
         <span className="ml-2 text-[13px] text-white/45">
-          / {months} เดือน
+          / {durationLabel}
         </span>
       </div>
       <form action="/api/stripe/checkout" method="POST" className="mt-auto">
@@ -48,11 +48,13 @@ export function PricingCard({
         <Button
           type="submit"
           className={cn(
-            "mae-gold-cta w-full border-0 text-[#101827] shadow-none hover:brightness-105",
-            !popular && "opacity-95"
+            "w-full",
+            popular
+              ? "bg-gradient-to-r from-[#b8860b] via-[#e8c547] to-[#c9a227] text-[#1f1704] hover:opacity-95"
+              : "bg-white/10 text-white hover:bg-white/15"
           )}
         >
-          ปลดล็อกพรีเมียม
+          ชำระเงิน
         </Button>
       </form>
     </Card>
