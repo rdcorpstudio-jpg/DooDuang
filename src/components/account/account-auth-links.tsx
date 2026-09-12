@@ -7,6 +7,7 @@ import { Loader2, Phone, X } from "lucide-react";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { normalizeThaiMobile } from "@/lib/phone";
 import type { AccountLinkStatus } from "@/lib/account-links";
+import { PHONE_AUTH_ENABLED } from "@/lib/auth-features";
 import { cn } from "@/lib/utils";
 
 function digitsOnly(value: string) {
@@ -483,6 +484,7 @@ export function AccountAuthLinks({ className }: { className?: string }) {
   const google = links?.google ?? false;
   const line = links?.line ?? false;
   const phone = links?.phone ?? false;
+  const showPhone = PHONE_AUTH_ENABLED;
 
   return (
     <div className={cn("flex shrink-0 flex-col items-end gap-1", className)}>
@@ -499,17 +501,19 @@ export function AccountAuthLinks({ className }: { className?: string }) {
           busy={busy === "line"}
           onClick={linkLine}
         />
-        <LinkChip
-          variant="phone"
-          linked={phone}
-          busy={busy === "phone"}
-          onClick={() => {
-            setMessage(null);
-            setPhoneOpen(true);
-          }}
-        />
+        {showPhone ? (
+          <LinkChip
+            variant="phone"
+            linked={phone}
+            busy={busy === "phone"}
+            onClick={() => {
+              setMessage(null);
+              setPhoneOpen(true);
+            }}
+          />
+        ) : null}
       </div>
-      {links?.phoneMasked ? (
+      {showPhone && links?.phoneMasked ? (
         <p className="max-w-[5.5rem] truncate text-right text-[9px] text-[#f7f4ec]/45">
           {links.phoneMasked}
         </p>
@@ -519,14 +523,16 @@ export function AccountAuthLinks({ className }: { className?: string }) {
           {message}
         </p>
       ) : null}
-      <PhoneLinkSheet
-        open={phoneOpen}
-        onClose={() => setPhoneOpen(false)}
-        onLinked={() => {
-          setMessage("เชื่อมเบอร์แล้ว");
-          void refresh();
-        }}
-      />
+      {showPhone ? (
+        <PhoneLinkSheet
+          open={phoneOpen}
+          onClose={() => setPhoneOpen(false)}
+          onLinked={() => {
+            setMessage("เชื่อมเบอร์แล้ว");
+            void refresh();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

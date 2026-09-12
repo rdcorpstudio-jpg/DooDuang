@@ -10,6 +10,7 @@ import { PhoneLoginForm } from "@/components/auth/phone-login-form";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PageBackButton } from "@/components/ui/page-back-button";
 import { AnimatedPage } from "@/components/ui/reveal";
+import { PHONE_AUTH_ENABLED } from "@/lib/auth-features";
 
 function AuthDivider({ label = "หรือ" }: { label?: string }) {
   return (
@@ -84,9 +85,9 @@ export function LoginScreen({
       </div>
 
       <div className="flex flex-1 flex-col justify-center py-3">
-        <div className="mae-aspect-card mx-auto w-full max-w-[min(100%,22rem)] px-3 py-4 text-center sm:px-4">
+        <div className="mae-aspect-card mx-auto w-full max-w-[min(100%,22rem)] px-3.5 py-5 text-center sm:px-5">
           <div
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
+            className="mx-auto flex h-11 w-11 items-center justify-center rounded-full"
             style={{
               background:
                 "radial-gradient(circle at 35% 30%, rgba(255,248,228,0.18), rgba(213,177,111,0.08) 55%, transparent)",
@@ -97,14 +98,14 @@ export function LoginScreen({
             <FortuneIcon name="profile" size={22} plain />
           </div>
 
-          <p className="mae-gold-text mt-2.5 text-[10px] font-semibold tracking-[0.2em]">
+          <p className="mae-gold-text mt-3 text-[10px] font-semibold tracking-[0.2em]">
             แม่มั่งมี
           </p>
-          <h1 className="mt-0.5 font-sans text-[1.2rem] font-bold leading-snug tracking-[0.03em] text-[#f7f4ec]">
+          <h1 className="mt-1 font-sans text-[1.25rem] font-bold leading-snug tracking-[0.03em] text-[#f7f4ec]">
             เข้าสู่ระบบ
           </h1>
-          <p className="login-keyboard-hide mx-auto mt-1 max-w-[16rem] text-[12px] leading-snug text-[#c5cdd9]/70">
-            Google · LINE · หรือเบอร์
+          <p className="mx-auto mt-1.5 max-w-[16rem] text-[12px] leading-snug text-[#c5cdd9]/70">
+            {PHONE_AUTH_ENABLED ? "Google · LINE · หรือเบอร์" : "Google หรือ LINE"}
           </p>
 
           {lineErrorMessage ? (
@@ -113,36 +114,39 @@ export function LoginScreen({
             </p>
           ) : null}
 
-          <div className="login-keyboard-hide mt-3.5 space-y-2">
+          <div className="mt-4 space-y-2.5">
             <GoogleSignInButton
               callbackUrl={callbackUrl}
               coloredIcon
               label="เข้าสู่ระบบด้วย Google"
               className="w-full space-y-1.5"
-              buttonClassName="h-10 text-[13px]"
+              buttonClassName="h-11 text-[13px]"
             />
 
             <LineSignInButton
               callbackUrl={callbackUrl}
-              buttonClassName="h-10 text-[13.5px] whitespace-nowrap"
+              buttonClassName="h-11 text-[13.5px] whitespace-nowrap"
             />
           </div>
 
-          <div className="login-keyboard-hide">
-            <AuthDivider label="หรือใช้เบอร์" />
-          </div>
+          {PHONE_AUTH_ENABLED ? (
+            <>
+              <div className="login-keyboard-hide">
+                <AuthDivider label="หรือใช้เบอร์" />
+              </div>
+              <PhoneLoginForm callbackUrl={callbackUrl} compact />
+            </>
+          ) : null}
 
-          <PhoneLoginForm callbackUrl={callbackUrl} compact />
-
-          <div className="login-keyboard-hide">
+          <div className="mt-4">
             <AuthDivider />
 
-            <p className="text-[12px] leading-snug text-[#c5cdd9]/65">
+            <p className="mt-1 text-[12px] leading-snug text-[#c5cdd9]/65">
               ดูดวงได้โดยไม่ต้องเข้าสู่ระบบ
             </p>
             <Link
               href="/reading"
-              className="mae-gold-cta group mt-2 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full text-[13.5px] font-semibold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              className="mae-gold-cta group mt-2.5 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-full text-[13.5px] font-semibold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
             >
               ไปดูดวงฟรี
               <ArrowRight
