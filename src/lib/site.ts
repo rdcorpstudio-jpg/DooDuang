@@ -9,6 +9,9 @@ export const APP_PURPOSE =
 export const FORTUNE_UNLOCK_PRICE = 399;
 /** Premium access duration after purchase (months) */
 export const FORTUNE_PACKAGE_MONTHS = 1;
+/** LINE Official Account — add friend after purchase (CRM) */
+export const LINE_OA_ADD_URL = "https://line.me/R/ti/p/@maemangmee";
+export const LINE_OA_HANDLE = "@maemangmee";
 export const FORTUNE_DISCLAIMER = "จักรวาลชี้ทาง — คุณเลือกก้าวต่อ";
 export const SITE_URL = "https://dooduang-bay.vercel.app";
 export const LEGAL_UPDATED_AT = "3 กันยายน 2569";

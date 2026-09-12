@@ -132,7 +132,7 @@ export async function createPremiumCheckoutUrl(opts: {
         : {}),
     line_items: [{ price: priceId, quantity: 1 }],
     allow_promotion_codes: true,
-    success_url: `${opts.origin}${safeReturn}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${opts.origin}/premium/thanks?payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${opts.origin}${safeReturn}?payment=cancelled`,
     client_reference_id: opts.userId,
     metadata: {

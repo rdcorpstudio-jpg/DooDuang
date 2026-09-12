@@ -6,10 +6,7 @@ import { trackLinePurchaseConversions } from "@/components/analytics/line-tag";
 import { trackMetaPurchase } from "@/components/analytics/meta-pixel";
 import { confirmStripePremiumUnlock } from "@/components/fortune/fortune-payment-sheet";
 import { applyPremiumUntil, setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
-import {
-  getPremiumOnboardPath,
-  readFortuneProfile,
-} from "@/lib/fortune/profile-storage";
+import { readFortuneProfile } from "@/lib/fortune/profile-storage";
 
 /** After Stripe redirect (?payment=success&session_id=...), confirm + unlock. */
 export function useStripePaymentReturn(onUnlocked?: () => void) {
@@ -63,7 +60,8 @@ export function useStripePaymentReturn(onUnlocked?: () => void) {
       } finally {
         if (!cancelled) {
           if (unlockedOk) {
-            router.replace(getPremiumOnboardPath(readFortuneProfile()));
+            // CRM funnel: celebrate + add LINE OA (don't bounce to onboard yet)
+            router.replace("/premium/thanks");
           } else {
             router.replace(pathname || "/premium");
           }
