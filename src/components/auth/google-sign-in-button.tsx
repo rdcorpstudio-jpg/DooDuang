@@ -12,11 +12,6 @@ import {
 } from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
-import { OpenInBrowserBanner } from "@/components/auth/open-in-browser-banner";
-import {
-  isInAppBrowser,
-  openInExternalBrowser,
-} from "@/lib/browser/in-app-browser";
 import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
 import { cn } from "@/lib/utils";
 
@@ -32,11 +27,10 @@ export function authCompletePath(callbackUrl: string) {
   return `/auth/complete?callbackUrl=${cb}`;
 }
 
-/** Open Safari/Chrome on the real login page — user taps Google (user gesture → popup). */
+/** @deprecated handoff unused — kept for any deep links */
 function loginHandoffUrl(callbackUrl: string) {
   if (typeof window === "undefined") return undefined;
   const cb = encodeURIComponent(safeCallback(callbackUrl));
-  // Do NOT auto-start redirect — Safari loses redirect state → white error page
   return `${window.location.origin}/login?callbackUrl=${cb}`;
 }
 
@@ -299,7 +293,6 @@ export function GoogleSignInButton({
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [needExternal, setNeedExternal] = useState(false);
   const bootstrapped = useRef(false);
 
   async function runGoogleSignIn() {
@@ -308,42 +301,11 @@ export function GoogleSignInButton({
       return;
     }
 
-    // IG / LINE / FB WebView: Google popup/redirect fails — leave to Safari/Chrome
-    if (isInAppBrowser()) {
-      const handoff = loginHandoffUrl(callbackUrl);
-      setLoading(true);
-      setError(null);
-      setNeedExternal(false);
-      openInExternalBrowser(handoff);
-
-      let left = false;
-      const markLeft = () => {
-        left = true;
-      };
-      window.addEventListener("pagehide", markLeft);
-      const onVis = () => {
-        if (document.visibilityState === "hidden") left = true;
-      };
-      document.addEventListener("visibilitychange", onVis);
-
-      window.setTimeout(() => {
-        window.removeEventListener("pagehide", markLeft);
-        document.removeEventListener("visibilitychange", onVis);
-        if (left) return;
-        // Still in WebView — IG often swallows deep links with no UI
-        setLoading(false);
-        setNeedExternal(true);
-        setError("แอปนี้บล็อกการเข้าสู่ระบบ — เปิดในเบราว์เซอร์หลักก่อน");
-      }, 850);
-      return;
-    }
-
     setLoading(true);
     setError(null);
-    setNeedExternal(false);
 
     try {
-      // Prefer popup on direct tap (user gesture). iOS often allows this.
+      // Prefer popup on direct tap (user gesture). Avoid redirect (Safari white screen).
       const result = await signInWithPopup(getFirebaseAuth(), makeProvider());
       await completeAppLogin(result.user, { callbackUrl, onSuccess });
       setLoading(false);
@@ -360,7 +322,6 @@ export function GoogleSignInButton({
         (raw.toLowerCase().includes("popup") &&
           code !== "auth/popup-closed-by-user")
       ) {
-        // Avoid signInWithRedirect — causes Safari “missing initial state” white page
         setError("เบราว์เซอร์บล็อกป๊อปอัป — อนุญาตป๊อปอัปแล้วกดเข้าสู่ระบบอีกครั้ง");
         setLoading(false);
         return;
@@ -479,12 +440,6 @@ export function GoogleSignInButton({
         </span>
       </Button>
       {error && <p className="text-center text-xs text-red-500/80">{error}</p>}
-      {needExternal ? (
-        <OpenInBrowserBanner
-          compact
-          pageUrl={loginHandoffUrl(callbackUrl)}
-        />
-      ) : null}
     </div>
   );
 }

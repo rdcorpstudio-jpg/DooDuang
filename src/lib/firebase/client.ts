@@ -1,12 +1,5 @@
-import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import {
-  getAuth,
-  initializeAuth,
-  indexedDBLocalPersistence,
-  browserLocalPersistence,
-  browserPopupRedirectResolver,
-  type Auth,
-} from "firebase/auth";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
 
 export function isFirebaseClientConfigured() {
   return Boolean(
@@ -30,36 +23,21 @@ export function resolveFirebaseAuthDomain() {
   return process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "";
 }
 
-function createFirebaseApp(): FirebaseApp {
+/** Client-only Auth. Uses getAuth (stable) — avoid initializeAuth SSR crashes. */
+export function getFirebaseAuth(): Auth {
+  if (!isFirebaseClientConfigured()) {
+    throw new Error("Firebase client is not configured");
+  }
+
   const authDomain = resolveFirebaseAuthDomain();
-  return getApps().length
+
+  const app = getApps().length
     ? getApp()
     : initializeApp({
         apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
         authDomain,
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       });
-}
 
-/**
- * Prefer IndexedDB persistence + popup resolver so Safari / partitioned
- * storage does not break Google login (missing redirect initial state).
- * @see https://firebase.google.com/docs/auth/web/redirect-best-practices
- */
-export function getFirebaseAuth(): Auth {
-  if (!isFirebaseClientConfigured()) {
-    throw new Error("Firebase client is not configured");
-  }
-
-  const app = createFirebaseApp();
-
-  try {
-    return initializeAuth(app, {
-      persistence: [indexedDBLocalPersistence, browserLocalPersistence],
-      popupRedirectResolver: browserPopupRedirectResolver,
-    });
-  } catch {
-    // Auth already initialized on this app instance
-    return getAuth(app);
-  }
+  return getAuth(app);
 }

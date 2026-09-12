@@ -1,22 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
-import {
-  GoogleSignInButton,
-} from "@/components/auth/google-sign-in-button";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { LineSignInButton } from "@/components/auth/line-sign-in-button";
-import { OpenInBrowserBanner } from "@/components/auth/open-in-browser-banner";
 import { PhoneLoginForm } from "@/components/auth/phone-login-form";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PageBackButton } from "@/components/ui/page-back-button";
 import { AnimatedPage } from "@/components/ui/reveal";
-import {
-  getInAppBrowserKind,
-  type InAppBrowserKind,
-} from "@/lib/browser/in-app-browser";
 
 function AuthDivider({ label = "หรือ" }: { label?: string }) {
   return (
@@ -48,17 +41,12 @@ export function LoginScreen({
   lineError,
 }: {
   callbackUrl?: string;
-  /** Legacy query — no longer auto-redirects (Safari white-screen). Strip from URL. */
+  /** Legacy query — strip from URL only */
   autoStartGoogle?: boolean;
   /** From `/api/auth/line/callback` when OAuth fails */
   lineError?: string;
 }) {
   const router = useRouter();
-  const [inAppKind, setInAppKind] = useState<InAppBrowserKind>(null);
-
-  useEffect(() => {
-    setInAppKind(getInAppBrowserKind());
-  }, []);
 
   const lineErrorMessage =
     lineError === "denied"
@@ -71,28 +59,18 @@ export function LoginScreen({
             ? "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ"
             : null;
 
-  // Strip legacy ?autologin=1 — never auto signInWithRedirect (missing initial state)
   useEffect(() => {
-    if (!autoStartGoogle) return;
     try {
       const url = new URL(window.location.href);
       if (url.searchParams.has("autologin")) {
         url.searchParams.delete("autologin");
         window.history.replaceState({}, "", url.pathname + url.search);
       }
-    } catch {
-      /* ignore */
-    }
-  }, [autoStartGoogle]);
-
-  // Clear stale redirect flags when opening login (prevents white-screen loops)
-  useEffect(() => {
-    try {
       sessionStorage.removeItem("dooduang-oauth-pending");
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [autoStartGoogle]);
 
   return (
     <AnimatedPage className="relative flex min-h-full flex-col overflow-x-hidden overflow-y-auto px-3 pb-6 pt-3 sm:px-4">
@@ -133,12 +111,6 @@ export function LoginScreen({
             <p className="mt-2.5 text-[12px] leading-snug text-[#ff8fa3]">
               {lineErrorMessage}
             </p>
-          ) : null}
-
-          {inAppKind ? (
-            <div className="login-keyboard-hide mt-3.5">
-              <OpenInBrowserBanner compact />
-            </div>
           ) : null}
 
           <div className="login-keyboard-hide mt-3.5 space-y-2">
