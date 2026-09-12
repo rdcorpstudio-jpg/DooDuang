@@ -293,17 +293,16 @@ export function AccountDashboard({
           >
             <p className="text-[11px] text-[#e8d19a]/75">แพ็กเกจ</p>
             <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
-              {FORTUNE_PACKAGE_MONTHS} เดือน
+              {premium ? `พรีเมียม ${FORTUNE_PACKAGE_MONTHS} เดือน` : "ยังไม่มี"}
             </p>
             <p className="text-[11px] text-[#f7f4ec]/55">
-              {FORTUNE_UNLOCK_PRICE} บาท
               {premium && premiumUntil
-                ? ` · ถึง ${new Intl.DateTimeFormat("th-TH", {
+                ? `ถึง ${new Intl.DateTimeFormat("th-TH", {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
                   }).format(premiumUntil)}`
-                : null}
+                : `ปลดล็อก ${FORTUNE_UNLOCK_PRICE} บาท`}
             </p>
           </div>
           <Link
@@ -316,9 +315,11 @@ export function AccountDashboard({
           >
             <p className="text-[11px] text-[#e8d19a]/75">สถานะ</p>
             <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
-              {premium ? "ปลดล็อกแล้ว" : "ยังไม่ปลดล็อก"}
+              {premium ? "ใช้งานอยู่" : "สมาชิกทั่วไป"}
             </p>
-            <p className="text-[11px] text-[#d5b16f]">ดูพรีเมียม →</p>
+            <p className="text-[11px] text-[#d5b16f]">
+              {premium ? "จัดการพรีเมียม →" : "ดูพรีเมียม →"}
+            </p>
           </Link>
         </div>
       </section>
