@@ -42,6 +42,15 @@ export async function POST(request: Request) {
 
     const { userId, isNewUser } = await upsertUserByPhone(phone);
 
+    if (isNewUser) {
+      const { notifyNewRegistration } = await import("@/lib/line-group-notify");
+      notifyNewRegistration({
+        channel: "phone",
+        userId,
+        phone,
+      });
+    }
+
     let checkoutUrl: string | undefined;
     if (wantCheckout) {
       checkoutUrl = await createPremiumCheckoutUrl({

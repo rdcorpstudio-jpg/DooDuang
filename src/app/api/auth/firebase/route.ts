@@ -110,6 +110,7 @@ export async function POST(request: Request) {
       .limit(1);
 
     let userId = profile.id;
+    let isNewUser = false;
 
     if (byId) {
       await database
@@ -144,12 +145,24 @@ export async function POST(request: Request) {
           firebaseUid: profile.id,
           credits: 0,
         });
+        isNewUser = true;
       }
     } else {
       await database.insert(users).values({
         ...profile,
         firebaseUid: profile.id,
         credits: 0,
+      });
+      isNewUser = true;
+    }
+
+    if (isNewUser) {
+      const { notifyNewRegistration } = await import("@/lib/line-group-notify");
+      notifyNewRegistration({
+        channel: "google",
+        userId,
+        name: profile.name,
+        email: profile.email,
       });
     }
 

@@ -92,7 +92,15 @@ export async function GET(request: Request) {
       return dashboardRedirect(request, returnPath);
     }
 
-    const { userId } = await upsertUserByLineId(profile);
+    const { userId, isNewUser } = await upsertUserByLineId(profile);
+    if (isNewUser) {
+      const { notifyNewRegistration } = await import("@/lib/line-group-notify");
+      notifyNewRegistration({
+        channel: "line",
+        userId,
+        name: profile.name,
+      });
+    }
     const token = await createSessionToken(userId);
 
     const response = NextResponse.redirect(new URL(returnPath, request.url));

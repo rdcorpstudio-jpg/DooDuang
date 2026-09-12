@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type Stripe from "stripe";
 import { auth, type Session } from "@/lib/auth";
 import { requireDb } from "@/lib/db";
-import { payments, users } from "@/lib/db/schema";
+import { payments, users, fortuneProfiles } from "@/lib/db/schema";
 
 const ACCESS_STATUSES = new Set(["active", "trialing", "past_due"]);
 
@@ -242,6 +242,47 @@ export async function applyOneTimePremiumCheckout(opts: {
     amount: opts.amount,
     credits: opts.credits ?? 0,
   });
+
+  try {
+    const { notifyPremiumPayment } = await import("@/lib/line-group-notify");
+    const db = requireDb();
+    const [u] = await db
+      .select({
+        name: users.name,
+        email: users.email,
+        phone: users.phone,
+        lineUserId: users.lineUserId,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    const [profile] = await db
+      .select({
+        nickname: fortuneProfiles.nickname,
+        birthDate: fortuneProfiles.birthDate,
+        realName: fortuneProfiles.realName,
+      })
+      .from(fortuneProfiles)
+      .where(eq(fortuneProfiles.userId, userId))
+      .limit(1);
+    const stripeEmail =
+      session.customer_details?.email ||
+      session.customer_email ||
+      null;
+    notifyPremiumPayment({
+      userId,
+      amount: opts.amount,
+      days: opts.days,
+      name: u?.name || profile?.realName || profile?.nickname,
+      email: u?.email || stripeEmail,
+      phone: u?.phone,
+      lineLinked: Boolean(u?.lineUserId),
+      nickname: profile?.nickname,
+      birthDate: profile?.birthDate,
+    });
+  } catch (err) {
+    console.error("LINE payment notify skipped:", err);
+  }
 
   return {
     userId,
