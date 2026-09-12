@@ -325,39 +325,39 @@ export function MaeLanding() {
               </p>
             </div>
           </div>
+        </div>
 
-          <a
-            href="#belief"
-            className="mae-concept-link group mt-4 inline-flex flex-col items-center gap-1 outline-none transition active:opacity-80"
-          >
-            <span className="inline-flex items-center justify-center gap-1.5">
-              <span
-                className="text-[10px] leading-none transition group-hover:opacity-100"
-                style={{ color: C.gold }}
-                aria-hidden
-              >
-                ✦
-              </span>
-              <span className="mae-gold-text text-[12.5px] font-medium tracking-[0.04em]">
-                อ่านแนวคิดแม่มั่งมี
-              </span>
-            </span>
+        <a
+          href="#belief"
+          className="mae-concept-link group mt-4 inline-flex flex-col items-center gap-1 outline-none transition active:opacity-80"
+        >
+          <span className="inline-flex items-center justify-center gap-1.5">
             <span
-              className="mae-concept-arrow flex h-4 w-4 items-center justify-center rounded-full"
-              style={{
-                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
-                background: "rgba(16,24,39,0.35)",
-              }}
+              className="text-[10px] leading-none transition group-hover:opacity-100"
+              style={{ color: C.gold }}
               aria-hidden
             >
-              <ArrowDown
-                className="h-2.5 w-2.5"
-                style={{ color: C.gold }}
-                strokeWidth={2.6}
-              />
+              ✦
             </span>
-          </a>
-        </div>
+            <span className="mae-gold-text text-[14px] font-medium tracking-[0.04em] sm:text-[15.5px]">
+              อ่านแนวคิดแม่มั่งมี
+            </span>
+          </span>
+          <span
+            className="mae-concept-arrow flex h-4 w-4 items-center justify-center rounded-full"
+            style={{
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+              background: "rgba(16,24,39,0.35)",
+            }}
+            aria-hidden
+          >
+            <ArrowDown
+              className="h-2.5 w-2.5"
+              style={{ color: C.gold }}
+              strokeWidth={2.6}
+            />
+          </span>
+        </a>
       </section>
 
       {/* BELIEF — cultural history (restored) + 30/70 */}

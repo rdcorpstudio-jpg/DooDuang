@@ -85,7 +85,7 @@
   text-size-adjust: 100%;
 }
 
-/* Desktop only: optional centered phone-column mockup.
+/* Desktop only: centered column like HD Mall horoscope (.container max-width: 480px).
    Require fine pointer so tablets / phones never letterbox. */
 @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .phone-shell {
@@ -93,8 +93,8 @@
   }
 
   .phone-frame {
-    width: min(100vw, calc(100dvh * 9 / 16), 430px);
-    max-width: 430px;
+    width: min(100vw, 480px);
+    max-width: 480px;
     height: 100dvh;
     box-shadow: 0 0 0 1px rgba(213, 177, 111, 0.12);
   }
@@ -612,7 +612,7 @@
   scroll-behavior: smooth;
 }
 
-/* Hero — desktop phone-mockup defaults (do not shrink for real phones here) */
+/* Hero — base (shared); desktop/mobile overrides below */
 .mae-hero-wordmark {
   top: 44%;
   width: min(68%, 13.5rem);
@@ -623,24 +623,70 @@
   flex: 1 1 auto;
 }
 
-@media (min-width: 768px) and (hover: hover) and (pointer: fine) and (min-height: 780px) {
+/* Desktop — logo stays put; lift copy block; concept link near bottom edge */
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .mae-hero-wordmark {
-    top: 46%;
+    top: 44%;
+    width: min(74%, 15.75rem);
   }
 
   .mae-hero-spacer {
+    flex: 1 1 auto;
     min-height: 52%;
+  }
+
+  .mae-hero-copy {
+    margin-top: auto !important;
+    /* Raise lower block from bottom — logo stays fixed */
+    margin-bottom: 30%;
+    padding-top: 0.35rem;
+    padding-bottom: 0.25rem;
+    align-items: center;
+  }
+
+  .mae-hero-award {
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+  }
+
+  .mae-hero-award .mae-award-glow {
+    height: 4.45rem;
+    width: 4.45rem;
+  }
+
+  .mae-hero-award .mae-award-trophy {
+    height: 4.3rem;
+    width: 4.3rem;
+  }
+
+  .mae-hero-award .mae-gold-text {
+    font-size: 1.28rem;
+  }
+
+  /* Pin to hero plate bottom (sibling of copy — not nested in award) */
+  .mae-hero-plate > .mae-concept-link {
+    position: absolute;
+    left: 50%;
+    bottom: max(0.9rem, env(safe-area-inset-bottom));
+    z-index: 12;
+    margin-top: 0;
+    transform: translateX(-50%);
+  }
+
+  .mae-hero-plate > .mae-concept-link .mae-gold-text {
+    font-size: 15.5px;
+    letter-spacing: 0.03em;
   }
 }
 
-/* Short desktop mockup only — never apply to real phones */
-@media (min-width: 768px) and (hover: hover) and (pointer: fine) and (max-height: 700px) {
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) and (min-height: 900px) {
   .mae-hero-wordmark {
-    top: 42%;
+    top: 44%;
   }
 
   .mae-hero-spacer {
-    min-height: 48%;
+    min-height: 54%;
   }
 }
 
