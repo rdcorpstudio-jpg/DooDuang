@@ -36,7 +36,7 @@ function AuthDivider({ label = "หรือ" }: { label?: string }) {
 }
 
 export function LoginScreen({
-  callbackUrl = "/premium?checkout=1",
+  callbackUrl = "/dashboard",
   autoStartGoogle = false,
   lineError,
 }: {

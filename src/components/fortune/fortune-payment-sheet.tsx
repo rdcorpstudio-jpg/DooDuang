@@ -4,7 +4,6 @@ import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } f
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { Check, ChevronLeft, Loader2, Lock, X } from "lucide-react";
-import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
 import { PREMIUM_LIST_PRICE } from "@/lib/fortune/premium-offer-countdown";
@@ -181,7 +180,7 @@ export function FortunePaymentSheet({
       if (res.status === 401 || data.code === "UNAUTHENTICATED") {
         setUser(null);
         setStep("ready");
-        setError("กรุณาเข้าสู่ระบบด้วย Google ก่อนชำระเงิน");
+        setError("กรุณาเข้าสู่ระบบก่อนชำระเงิน");
         return;
       }
 
@@ -339,12 +338,18 @@ export function FortunePaymentSheet({
             <p className="mx-auto max-w-[16rem] text-center text-[11px] leading-relaxed text-[#9aa3b2]">
               เข้าสู่ระบบเพื่อยืนยันสิทธิ์พรีเมียมหลังชำระ
             </p>
-            <GoogleSignInButton
-              label="เข้าสู่ระบบด้วย Google"
-              callbackUrl={LOGIN_THEN_CHECKOUT}
-              className="w-full space-y-2"
-              coloredIcon
-            />
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                router.push(
+                  `/login?callbackUrl=${encodeURIComponent(LOGIN_THEN_CHECKOUT)}`
+                );
+              }}
+              className="mae-gold-cta flex w-full items-center justify-center rounded-full px-4 py-3.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+            >
+              เข้าสู่ระบบ
+            </button>
           </div>
         ) : (
           <div className="space-y-2">

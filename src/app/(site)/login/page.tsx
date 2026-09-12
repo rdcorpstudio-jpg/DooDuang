@@ -11,15 +11,10 @@ interface LoginPageProps {
 }
 
 function safeCallback(callbackUrl?: string) {
-  const raw =
-    (callbackUrl || "/premium?checkout=1").trim() || "/premium?checkout=1";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/premium?checkout=1";
-  if (raw.startsWith("/login") || raw.startsWith("/auth/")) {
-    return "/premium?checkout=1";
-  }
-  if (raw === "/dashboard" || raw.startsWith("/dashboard?")) {
-    return "/premium?checkout=1";
-  }
+  const fallback = "/dashboard";
+  const raw = (callbackUrl || fallback).trim() || fallback;
+  if (!raw.startsWith("/") || raw.startsWith("//")) return fallback;
+  if (raw.startsWith("/login") || raw.startsWith("/auth/")) return fallback;
   return raw;
 }
 
@@ -29,8 +24,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const session = await auth().catch(() => null);
   if (session?.user) {
-    // Already logged in → pay (not account)
-    redirect(next.includes("checkout=1") ? next : "/api/stripe/checkout");
+    if (next.includes("checkout=1")) {
+      redirect("/api/stripe/checkout");
+    }
+    redirect(next);
   }
 
   return (

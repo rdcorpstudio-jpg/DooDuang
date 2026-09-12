@@ -23,7 +23,7 @@ export function AuthCompleteClient({
   start?: string;
 }) {
   const [error, setError] = useState<string | null>(null);
-  const next = safeCallback(callbackUrl || "/premium?checkout=1");
+  const next = safeCallback(callbackUrl || "/dashboard");
 
   useEffect(() => {
     if (!isFirebaseClientConfigured()) {
@@ -33,7 +33,7 @@ export function AuthCompleteClient({
 
     let cancelled = false;
     const target = safeCallback(
-      callbackUrl || readCallback("/premium?checkout=1")
+      callbackUrl || readCallback("/dashboard")
     );
     rememberCallback(target);
 

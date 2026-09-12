@@ -27,16 +27,13 @@ export function authCompletePath(callbackUrl: string) {
   return `/auth/complete?callbackUrl=${cb}`;
 }
 
-/** After login → premium checkout (not account) */
-export const DEFAULT_LOGIN_CALLBACK = "/premium?checkout=1";
+/** After login → account dashboard (checkout only when callback has checkout=1) */
+export const DEFAULT_LOGIN_CALLBACK = "/dashboard";
 
 export function safeCallback(callbackUrl: string) {
   const raw = (callbackUrl || DEFAULT_LOGIN_CALLBACK).trim() || DEFAULT_LOGIN_CALLBACK;
   if (!raw.startsWith("/") || raw.startsWith("//")) return DEFAULT_LOGIN_CALLBACK;
   if (raw.startsWith("/login") || raw.startsWith("/auth/")) return DEFAULT_LOGIN_CALLBACK;
-  if (raw === "/dashboard" || raw.startsWith("/dashboard?")) {
-    return DEFAULT_LOGIN_CALLBACK;
-  }
   return raw;
 }
 
@@ -183,9 +180,7 @@ export async function resolveFirebaseUserAfterRedirect(): Promise<User | null> {
 
 export function wantsCheckoutAfterLogin(callbackUrl: string) {
   const next = safeCallback(callbackUrl);
-  if (next.includes("checkout=1")) return true;
-  if (next === "/premium" || next.startsWith("/premium?")) return true;
-  return next === DEFAULT_LOGIN_CALLBACK;
+  return next.includes("checkout=1");
 }
 
 /** Create Stripe session and leave the app — no intermediate pay button page */
