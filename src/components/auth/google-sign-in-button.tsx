@@ -12,6 +12,7 @@ import {
 } from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
+import { OpenInBrowserBanner } from "@/components/auth/open-in-browser-banner";
 import {
   isInAppBrowser,
   openInExternalBrowser,
@@ -275,6 +276,7 @@ export function GoogleSignInButton({
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needExternal, setNeedExternal] = useState(false);
   const bootstrapped = useRef(false);
 
   async function runGoogleSignIn() {
@@ -283,14 +285,39 @@ export function GoogleSignInButton({
       return;
     }
 
-    // LINE / FB: open Safari on /login (auto-starts Google — no middle page)
+    // IG / LINE / FB WebView: Google popup/redirect fails — leave to Safari/Chrome
     if (isInAppBrowser()) {
-      openInExternalBrowser(loginHandoffUrl(callbackUrl));
+      const handoff = loginHandoffUrl(callbackUrl);
+      setLoading(true);
+      setError(null);
+      setNeedExternal(false);
+      openInExternalBrowser(handoff);
+
+      let left = false;
+      const markLeft = () => {
+        left = true;
+      };
+      window.addEventListener("pagehide", markLeft);
+      const onVis = () => {
+        if (document.visibilityState === "hidden") left = true;
+      };
+      document.addEventListener("visibilitychange", onVis);
+
+      window.setTimeout(() => {
+        window.removeEventListener("pagehide", markLeft);
+        document.removeEventListener("visibilitychange", onVis);
+        if (left) return;
+        // Still in WebView — IG often swallows deep links with no UI
+        setLoading(false);
+        setNeedExternal(true);
+        setError("แอปนี้บล็อกการเข้าสู่ระบบ — เปิดในเบราว์เซอร์หลักก่อน");
+      }, 850);
       return;
     }
 
     setLoading(true);
     setError(null);
+    setNeedExternal(false);
 
     try {
       // Prefer popup on direct tap (user gesture). iOS often allows this.
@@ -433,6 +460,12 @@ export function GoogleSignInButton({
         </span>
       </Button>
       {error && <p className="text-center text-xs text-red-500/80">{error}</p>}
+      {needExternal ? (
+        <OpenInBrowserBanner
+          compact
+          pageUrl={loginHandoffUrl(callbackUrl)}
+        />
+      ) : null}
     </div>
   );
 }

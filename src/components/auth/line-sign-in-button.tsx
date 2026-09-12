@@ -7,6 +7,12 @@ import {
   rememberCallback,
   safeCallback,
 } from "@/components/auth/google-sign-in-button";
+import { OpenInBrowserBanner } from "@/components/auth/open-in-browser-banner";
+import {
+  getInAppBrowserKind,
+  isInAppBrowser,
+  openInExternalBrowser,
+} from "@/lib/browser/in-app-browser";
 import { cn } from "@/lib/utils";
 
 /** LINE brand mark — simple chat bubble glyph */
@@ -23,8 +29,15 @@ function LineMark({ className }: { className?: string }) {
   );
 }
 
+function loginPageUrl(callbackUrl: string) {
+  if (typeof window === "undefined") return undefined;
+  const next = encodeURIComponent(safeCallback(callbackUrl));
+  return `${window.location.origin}/login?callbackUrl=${next}`;
+}
+
 /**
  * LINE login — navigates to `/api/auth/line/start` (backend redirects to LINE OAuth).
+ * Inside IG/FB/TikTok WebView, hand off to Safari/Chrome first (OAuth often dies silently).
  */
 export function LineSignInButton({
   callbackUrl = DEFAULT_LOGIN_CALLBACK,
@@ -36,17 +49,50 @@ export function LineSignInButton({
   buttonClassName?: string;
 }) {
   const [loading, setLoading] = useState(false);
+  const [needExternal, setNeedExternal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function startLineLogin() {
-    setLoading(true);
     rememberCallback(callbackUrl);
     const next = encodeURIComponent(safeCallback(callbackUrl));
+    const startPath = `/api/auth/line/start?callbackUrl=${next}`;
+
+    // Inside LINE app WebView, LINE OAuth usually works via full navigation
+    const kind = getInAppBrowserKind();
+    if (isInAppBrowser() && kind !== "line") {
+      setLoading(true);
+      setError(null);
+      setNeedExternal(false);
+      openInExternalBrowser(loginPageUrl(callbackUrl));
+
+      let left = false;
+      const markLeft = () => {
+        left = true;
+      };
+      window.addEventListener("pagehide", markLeft);
+      const onVis = () => {
+        if (document.visibilityState === "hidden") left = true;
+      };
+      document.addEventListener("visibilitychange", onVis);
+
+      window.setTimeout(() => {
+        window.removeEventListener("pagehide", markLeft);
+        document.removeEventListener("visibilitychange", onVis);
+        if (left) return;
+        setLoading(false);
+        setNeedExternal(true);
+        setError("แอปนี้บล็อกการเข้าสู่ระบบ — เปิดในเบราว์เซอร์หลักก่อน");
+      }, 850);
+      return;
+    }
+
+    setLoading(true);
     // Full navigation so Set-Cookie (state) from start route is kept for callback
-    window.location.assign(`/api/auth/line/start?callbackUrl=${next}`);
+    window.location.assign(startPath);
   }
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full space-y-1.5", className)}>
       <button
         type="button"
         onClick={startLineLogin}
@@ -65,8 +111,14 @@ export function LineSignInButton({
         ) : (
           <LineMark className="h-4 w-4" />
         )}
-        {loading ? "กำลังเปิด LINE…" : "เข้าสู่ระบบด้วย LINE"}
+        {loading ? "กำลังเปิด…" : "เข้าสู่ระบบด้วย LINE"}
       </button>
+      {error ? (
+        <p className="text-center text-xs text-red-500/80">{error}</p>
+      ) : null}
+      {needExternal ? (
+        <OpenInBrowserBanner compact pageUrl={loginPageUrl(callbackUrl)} />
+      ) : null}
     </div>
   );
 }

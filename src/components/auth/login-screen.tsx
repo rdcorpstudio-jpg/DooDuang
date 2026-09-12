@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronLeft } from "lucide-react";
@@ -9,9 +9,14 @@ import {
   startGoogleRedirect,
 } from "@/components/auth/google-sign-in-button";
 import { LineSignInButton } from "@/components/auth/line-sign-in-button";
+import { OpenInBrowserBanner } from "@/components/auth/open-in-browser-banner";
 import { PhoneLoginForm } from "@/components/auth/phone-login-form";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { AnimatedPage } from "@/components/ui/reveal";
+import {
+  getInAppBrowserKind,
+  type InAppBrowserKind,
+} from "@/lib/browser/in-app-browser";
 import { isFirebaseClientConfigured } from "@/lib/firebase/client";
 
 function AuthDivider({ label = "หรือ" }: { label?: string }) {
@@ -51,6 +56,11 @@ export function LoginScreen({
 }) {
   const router = useRouter();
   const started = useRef(false);
+  const [inAppKind, setInAppKind] = useState<InAppBrowserKind>(null);
+
+  useEffect(() => {
+    setInAppKind(getInAppBrowserKind());
+  }, []);
 
   const lineErrorMessage =
     lineError === "denied"
@@ -124,6 +134,12 @@ export function LoginScreen({
             <p className="mt-2.5 text-[12px] leading-snug text-[#ff8fa3]">
               {lineErrorMessage}
             </p>
+          ) : null}
+
+          {inAppKind ? (
+            <div className="login-keyboard-hide mt-3.5">
+              <OpenInBrowserBanner compact />
+            </div>
           ) : null}
 
           <div className="login-keyboard-hide mt-3.5 space-y-2">
