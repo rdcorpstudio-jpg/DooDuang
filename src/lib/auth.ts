@@ -12,6 +12,8 @@ export type SessionUser = {
   name?: string | null;
   email?: string | null;
   phone?: string | null;
+  lineUserId?: string | null;
+  firebaseUid?: string | null;
   image?: string | null;
   credits: number;
   premiumUntil?: Date | null;
@@ -76,6 +78,8 @@ export async function auth(): Promise<Session | null> {
         name: users.name,
         email: users.email,
         phone: users.phone,
+        lineUserId: users.lineUserId,
+        firebaseUid: users.firebaseUid,
         image: users.image,
         credits: users.credits,
         premiumUntil: users.premiumUntil,

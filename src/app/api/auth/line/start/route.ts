@@ -3,6 +3,7 @@ import {
   isLineLoginConfigured,
   lineAuthorizeUrl,
   lineCallbackUrl,
+  LINE_LINK_COOKIE,
   LINE_RETURN_COOKIE,
   LINE_STATE_COOKIE,
   oauthCookieOptions,
@@ -22,7 +23,11 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const state = crypto.randomUUID();
-  const returnPath = safeReturnPath(url.searchParams.get("callbackUrl"));
+  const linkMode = url.searchParams.get("link") === "1";
+  const returnPath = safeReturnPath(
+    url.searchParams.get("callbackUrl") ||
+      (linkMode ? "/dashboard" : null)
+  );
   const callbackUrl = lineCallbackUrl(request);
   const authorize = lineAuthorizeUrl({
     channelId: process.env.LINE_CHANNEL_ID || "",
@@ -34,5 +39,10 @@ export async function GET(request: Request) {
   const cookies = oauthCookieOptions();
   response.cookies.set(LINE_STATE_COOKIE, state, cookies);
   response.cookies.set(LINE_RETURN_COOKIE, returnPath, cookies);
+  if (linkMode) {
+    response.cookies.set(LINE_LINK_COOKIE, "1", cookies);
+  } else {
+    response.cookies.delete(LINE_LINK_COOKIE);
+  }
   return response;
 }

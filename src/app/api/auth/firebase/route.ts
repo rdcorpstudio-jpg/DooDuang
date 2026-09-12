@@ -118,6 +118,7 @@ export async function POST(request: Request) {
           email: profile.email,
           name: profile.name,
           image: profile.image,
+          firebaseUid: profile.id,
         })
         .where(eq(users.id, profile.id));
     } else if (profile.email) {
@@ -134,17 +135,20 @@ export async function POST(request: Request) {
           .set({
             name: profile.name,
             image: profile.image,
+            firebaseUid: profile.id,
           })
           .where(eq(users.id, byEmail.id));
       } else {
         await database.insert(users).values({
           ...profile,
+          firebaseUid: profile.id,
           credits: 0,
         });
       }
     } else {
       await database.insert(users).values({
         ...profile,
+        firebaseUid: profile.id,
         credits: 0,
       });
     }

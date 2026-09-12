@@ -26,6 +26,7 @@ import { BirthDatePicker } from "@/components/fortune/birth-date-picker";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { ZodiacSignImage } from "@/components/fortune/zodiac-sign-image";
+import { AccountAuthLinks } from "@/components/account/account-auth-links";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { getZodiacByBirthDate } from "@/lib/fortune/zodiac";
 import {
@@ -263,7 +264,7 @@ export function AccountDashboard({
 
       {/* Identity */}
       <section className="mae-aspect-card relative overflow-hidden rounded-[22px] px-4 py-5">
-        <div className="relative z-[1] flex items-center gap-3.5">
+        <div className="relative z-[1] flex items-start gap-3">
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full shadow-[0_0_0_2px_rgba(213,177,111,0.45)]">
             {user.image ? (
               <Image
@@ -301,6 +302,7 @@ export function AccountDashboard({
               {premium ? "พรีเมียมใช้งานอยู่" : "สมาชิกทั่วไป"}
             </p>
           </div>
+          <AccountAuthLinks />
         </div>
 
         <div className="relative z-[1] mt-4 grid grid-cols-2 gap-2">

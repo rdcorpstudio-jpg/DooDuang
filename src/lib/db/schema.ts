@@ -20,6 +20,8 @@ export const users = pgTable("users", {
   phone: text("phone").unique(),
   /** LINE Login userId — unique per LINE Login channel */
   lineUserId: text("line_user_id").unique(),
+  /** Firebase Auth UID when Google (or other Firebase) is linked */
+  firebaseUid: text("firebase_uid").unique(),
   image: text("image"),
   credits: integer("credits").default(0).notNull(),
   stripeCustomerId: text("stripe_customer_id").unique(),

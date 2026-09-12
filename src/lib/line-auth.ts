@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/site";
 
 export const LINE_STATE_COOKIE = "dd_line_state";
 export const LINE_RETURN_COOKIE = "dd_line_return";
+export const LINE_LINK_COOKIE = "dd_line_link";
 const DEFAULT_RETURN = "/premium?checkout=1";
 
 export function isLineLoginConfigured() {
