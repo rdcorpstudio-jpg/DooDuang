@@ -28,6 +28,15 @@ import { cn } from "@/lib/utils";
 
 const WEEKDAYS = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"] as const;
 
+const MAE = {
+  gold: "#d5b16f",
+  goldSoft: "#e8d19a",
+  navy: "#101827",
+  muted: "#9aa3b2",
+  soft: "#c5cdd9",
+  ink: "#f7f4ec",
+} as const;
+
 function MarkerIcon({
   marker,
   size = 12,
@@ -38,7 +47,7 @@ function MarkerIcon({
   if (marker === "victory") {
     return (
       <Crown
-        className="text-[#F4BC52]"
+        className="text-[#d5b16f]"
         style={{ width: size, height: size }}
         strokeWidth={2.2}
       />
@@ -47,13 +56,26 @@ function MarkerIcon({
   if (marker === "chaos") {
     return (
       <span
-        className="inline-block rounded-full bg-[#2A1A1A]"
-        style={{ width: size - 1, height: size - 1 }}
+        className="inline-flex items-center justify-center rounded-full"
+        style={{
+          width: size,
+          height: size,
+          background:
+            "linear-gradient(145deg, #c4a070 0%, #8a6a48 55%, #5c4634 100%)",
+          boxShadow: "inset 0 0 0 0.5px rgba(213,177,111,0.45)",
+        }}
         title="วันโลกาวินาศ"
-      />
+      >
+        <span
+          className="font-bold leading-none text-[#f7f4ec]/90"
+          style={{ fontSize: Math.max(6, size * 0.48) }}
+        >
+          !
+        </span>
+      </span>
     );
   }
-  // holy / fortune — gold coin
+  // holy / fortune — champagne gold coin
   return (
     <span
       className="relative inline-flex items-center justify-center rounded-full"
@@ -61,12 +83,12 @@ function MarkerIcon({
         width: size,
         height: size,
         background:
-          "linear-gradient(145deg, #FFE7A8 0%, #F4BC52 45%, #C9922E 100%)",
-        boxShadow: "0 0 0 0.5px rgba(184,120,40,0.5)",
+          "linear-gradient(145deg, #fff8e4 0%, #e8d19a 42%, #d5b16f 72%, #b8924f 100%)",
+        boxShadow: "0 0 0 0.5px rgba(128,96,49,0.45)",
       }}
     >
       <span
-        className="font-bold leading-none text-[#5C3A10]"
+        className="font-bold leading-none text-[#101827]"
         style={{ fontSize: Math.max(7, size * 0.55) }}
       >
         {marker === "fortune" ? "฿" : "P"}
@@ -118,17 +140,17 @@ function DayCell({
       type="button"
       onClick={onSelect}
       className={cn(
-        "relative mx-auto flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-semibold outline-none transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#F4BC52]/55",
+        "relative mx-auto flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-semibold outline-none transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
         locked && "opacity-55"
       )}
       style={{
-        color: "#0C1427",
+        color: MAE.navy,
         background: `radial-gradient(circle at 32% 28%, ${soft}, ${color})`,
         boxShadow: selected
-          ? `0 0 0 2px #F4BC52, 0 0 14px rgba(244,188,82,0.45)`
+          ? `0 0 0 2px ${MAE.gold}, 0 0 14px rgba(213,177,111,0.42)`
           : isToday
-            ? `0 0 0 1.5px rgba(247,248,255,0.85)`
-            : `0 1px 2px rgba(0,0,0,0.2)`,
+            ? `0 0 0 1.5px rgba(232,209,154,0.75)`
+            : `0 1px 2px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,248,228,0.18)`,
       }}
       aria-label={`${dayNum}${locked ? " (ล็อก)" : ""}`}
       aria-pressed={selected}
@@ -140,8 +162,11 @@ function DayCell({
         </span>
       ) : null}
       {locked ? (
-        <span className="absolute -bottom-0.5 -left-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#0C1427]/85 ring-1 ring-[#F4BC52]/5">
-          <Lock className="h-2 w-2 text-[#F4BC52]" strokeWidth={2.5} />
+        <span
+          className="absolute -bottom-0.5 -left-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full ring-1 ring-[#d5b16f]/45"
+          style={{ background: "rgba(16,24,39,0.88)" }}
+        >
+          <Lock className="h-2 w-2 text-[#d5b16f]" strokeWidth={2.5} />
         </span>
       ) : null}
     </button>
@@ -160,33 +185,33 @@ function DayDetailCards({
 
   return (
     <div className="space-y-3.5">
-      <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/90">
+      <p className="mae-gold-text text-[11px] font-semibold tracking-[0.14em]">
         ฤกษ์มงคล · {titleDate}
       </p>
 
       <div>
         <div className="flex items-center gap-2">
           <EnergyDot energy={profile.energy} size={14} />
-          <p className="text-[14px] font-semibold text-[#F7F8FF]">
+          <p className="text-[14px] font-semibold text-[#f7f4ec]">
             {ENERGY_META[profile.energy].label}
           </p>
         </div>
-        <p className="mt-1.5 text-[13px] leading-[1.65] text-[#B7C3D8]">
+        <p className="mt-1.5 text-[13px] leading-[1.65] text-[#c5cdd9]/85">
           {adviceForDay({ ...profile, markers: [] })}
         </p>
       </div>
 
       {primaryMarkers.length > 0 ? (
-        <div className="space-y-3 border-t border-white/[0.08] pt-3.5">
+        <div className="space-y-3 border-t border-[#d5b16f]/18 pt-3.5">
           {primaryMarkers.map((m) => (
             <div key={m}>
               <div className="flex items-center gap-2">
                 <MarkerIcon marker={m} size={14} />
-                <p className="text-[12px] font-semibold tracking-wide text-[#E4C56A]/90">
+                <p className="text-[12px] font-semibold tracking-wide text-[#d5b16f]">
                   {MARKER_META[m].label}
                 </p>
               </div>
-              <p className="mt-1 text-[13px] leading-[1.65] text-[#E8EEF8]">
+              <p className="mt-1 text-[13px] leading-[1.65] text-[#c5cdd9]/88">
                 {MARKER_META[m].hint}
               </p>
             </div>
@@ -195,11 +220,14 @@ function DayDetailCards({
       ) : null}
 
       {hasChaos ? (
-        <div className="border-t border-white/[0.08] pt-3.5">
-          <p className="text-[12px] font-semibold tracking-wide text-[#F16DB5]">
-            {MARKER_META.chaos.label}
-          </p>
-          <p className="mt-1 text-[13px] leading-[1.65] text-[#E8EEF8]">
+        <div className="border-t border-[#d5b16f]/18 pt-3.5">
+          <div className="flex items-center gap-2">
+            <MarkerIcon marker="chaos" size={14} />
+            <p className="text-[12px] font-semibold tracking-wide text-[#c4a070]">
+              {MARKER_META.chaos.label}
+            </p>
+          </div>
+          <p className="mt-1 text-[13px] leading-[1.65] text-[#c5cdd9]/88">
             {MARKER_META.chaos.hint}
           </p>
         </div>
@@ -207,11 +235,11 @@ function DayDetailCards({
 
       {(hasChaos && primaryMarkers.includes("victory")) ||
       profile.markers.length > 1 ? (
-        <div className="border-t border-white/[0.08] pt-3.5">
-          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#B7C3D8]">
+        <div className="border-t border-[#d5b16f]/18 pt-3.5">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#9aa3b2]">
             หมายเหตุ
           </p>
-          <p className="mt-1 text-[13px] leading-[1.65] text-[#E8EEF8]">
+          <p className="mt-1 text-[13px] leading-[1.65] text-[#c5cdd9]/88">
             {adviceForDay(profile)}
           </p>
         </div>
@@ -308,34 +336,29 @@ export function FortuneAuspiciousCalendar({
   }
 
   return (
-    <section
-      className={cn(
-        "fortune-glass overflow-hidden rounded-[22px]",
-        className
-      )}
-    >
+    <section className={cn("mae-aspect-card overflow-hidden rounded-[22px]", className)}>
       <div className="relative px-3.5 pb-3.5 pt-3.5">
         <div
-          className="pointer-events-none absolute inset-0 opacity-40"
+          className="pointer-events-none absolute inset-0 opacity-50"
           aria-hidden
           style={{
             background:
-              "radial-gradient(ellipse 80% 50% at 50% -5%, rgba(244,188,82,0.16), transparent 55%)",
+              "radial-gradient(ellipse 80% 50% at 50% -5%, rgba(213,177,111,0.14), transparent 55%)",
           }}
         />
 
         <div className="relative z-[1]">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="flex items-center gap-1.5 text-[12px] font-semibold tracking-wide text-[#F4BC52]">
+              <p className="flex items-center gap-1.5 text-[12px] font-semibold tracking-wide text-[#d5b16f]">
                 <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
                 ปฏิทินฤกษ์ 12 ปี
               </p>
-              <h2 className="mt-1 text-[18px] font-semibold text-[#F7F8FF]">
+              <h2 className="mae-gold-text mt-1 text-[18px] font-semibold">
                 {canBrowse ? "ดูฤกษ์มงคลรายวัน" : "ฤกษ์ย้อนหลัง 1 เดือน"}
               </h2>
               {canBrowse ? (
-                <p className="mt-0.5 text-[12px] text-[#9AB8DC]">
+                <p className="mt-0.5 text-[12px] text-[#9aa3b2]">
                   พ.ศ. {yearRange.start + 543}–{yearRange.end + 543}
                 </p>
               ) : null}
@@ -343,7 +366,11 @@ export function FortuneAuspiciousCalendar({
             <button
               type="button"
               onClick={goToday}
-              className="shrink-0 rounded-full border border-[#F4BC52]/35 bg-[#F4BC52]/12 px-2.5 py-1 text-[11px] font-semibold text-[#F4BC52] outline-none focus-visible:ring-2 focus-visible:ring-[#F4BC52]/45"
+              className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold text-[#d5b16f] outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              style={{
+                background: "rgba(16,24,39,0.55)",
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.4)",
+              }}
             >
               วันนี้
             </button>
@@ -354,18 +381,18 @@ export function FortuneAuspiciousCalendar({
             <button
               type="button"
               onClick={() => shiftMonth(-1)}
-              className="flex h-8 w-8 items-center justify-center text-[#A07E1A] outline-none transition active:opacity-60"
+              className="flex h-8 w-8 items-center justify-center text-[#d5b16f] outline-none transition active:opacity-60"
               aria-label="เดือนก่อน"
             >
               <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
             </button>
-            <p className="text-[15px] font-semibold text-[#241C4F]">
+            <p className="mae-gold-text text-[15px] font-semibold">
               {formatThaiMonthYear(viewYear, viewMonth)}
             </p>
             <button
               type="button"
               onClick={() => shiftMonth(1)}
-              className="flex h-8 w-8 items-center justify-center text-[#A07E1A] outline-none transition active:opacity-60"
+              className="flex h-8 w-8 items-center justify-center text-[#d5b16f] outline-none transition active:opacity-60"
               aria-label="เดือนถัดไป"
             >
               <ChevronRight className="h-5 w-5" strokeWidth={2.2} />
@@ -377,7 +404,7 @@ export function FortuneAuspiciousCalendar({
             {WEEKDAYS.map((d) => (
               <p
                 key={d}
-                className="text-center text-[11px] font-medium text-[#9AB8DC]/80"
+                className="text-center text-[11px] font-medium text-[#9aa3b2]"
               >
                 {d}
               </p>
@@ -410,12 +437,12 @@ export function FortuneAuspiciousCalendar({
             <button
               type="button"
               onClick={() => setLegendOpen((v) => !v)}
-              className="flex w-full items-center justify-between text-left"
+              className="flex w-full items-center justify-between text-left outline-none"
             >
-              <p className="text-[13px] font-semibold text-[#F7F8FF]">
+              <p className="text-[13px] font-semibold text-[#f7f4ec]">
                 รายละเอียดของวัน
               </p>
-              <span className="text-[11px] text-[#9AB8DC]">
+              <span className="text-[11px] text-[#9aa3b2]">
                 {legendOpen ? "ย่อ" : "ดูคำอธิบาย"}
               </span>
             </button>
@@ -424,7 +451,7 @@ export function FortuneAuspiciousCalendar({
                 {(Object.keys(ENERGY_META) as DayEnergy[]).map((e) => (
                   <div key={e} className="flex items-center gap-2">
                     <EnergyDot energy={e} />
-                    <span className="text-[12px] text-[#9AB8DC]">
+                    <span className="text-[12px] text-[#c5cdd9]/85">
                       {ENERGY_META[e].label}
                     </span>
                   </div>
@@ -432,7 +459,7 @@ export function FortuneAuspiciousCalendar({
                 {(["holy", "victory", "fortune"] as DayMarker[]).map((m) => (
                   <div key={m} className="flex items-center gap-2">
                     <MarkerIcon marker={m} size={14} />
-                    <span className="text-[12px] text-[#9AB8DC]">
+                    <span className="text-[12px] text-[#c5cdd9]/85">
                       {MARKER_META[m].label}
                     </span>
                   </div>
@@ -445,7 +472,7 @@ export function FortuneAuspiciousCalendar({
             className="my-3 h-px w-full"
             style={{
               background:
-                "linear-gradient(90deg, transparent, rgba(244,188,82,0.45), transparent)",
+                "linear-gradient(90deg, transparent, rgba(213,177,111,0.45), transparent)",
             }}
           />
 
@@ -456,12 +483,7 @@ export function FortuneAuspiciousCalendar({
               type="button"
               onClick={onUnlock}
               disabled={!onUnlock}
-              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-semibold text-[#1A1208] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#F4BC52]/5 disabled:opacity-60"
-              style={{
-                background:
-                  "linear-gradient(135deg, #FFF0C4 0%, #F4BC52 40%, #C9922E 100%)",
-                boxShadow: "0 10px 28px rgba(244,188,82,0.35)",
-              }}
+              className="mae-gold-cta mt-3 flex h-11 w-full items-center justify-center gap-1.5 rounded-full text-[14px] font-semibold outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
             >
               <Lock className="h-3.5 w-3.5" strokeWidth={2.2} />
               ปลดล็อกปฏิทิน 12 ปี · {FORTUNE_UNLOCK_PRICE} บาท

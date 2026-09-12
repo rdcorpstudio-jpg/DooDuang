@@ -19,11 +19,12 @@ export const ENERGY_META: Record<
   DayEnergy,
   { label: string; color: string; soft: string }
 > = {
-  strong: { label: "วันพลังงานดี", color: "#3D9B4A", soft: "#5CB86A" },
-  smooth: { label: "วันราบรื่น", color: "#7BC47F", soft: "#9AD69D" },
-  relax: { label: "วันผ่อนคลาย", color: "#E8A03A", soft: "#F0B85C" },
-  slow: { label: "วันชะลอตัว", color: "#E89B5C", soft: "#F0B48A" },
-  rest: { label: "วันพักใจ", color: "#C4A574", soft: "#D4B98E" },
+  /** Mae-harmonized energy hues — still distinct, sit on navy/gold */
+  strong: { label: "วันพลังงานดี", color: "#4A8F5C", soft: "#6BAB7A" },
+  smooth: { label: "วันราบรื่น", color: "#6A9E78", soft: "#8BB898" },
+  relax: { label: "วันผ่อนคลาย", color: "#C9A05A", soft: "#D5B16F" },
+  slow: { label: "วันชะลอตัว", color: "#B8925A", soft: "#C9A878" },
+  rest: { label: "วันพักใจ", color: "#A89068", soft: "#C5B28A" },
 };
 
 export const MARKER_META: Record<
