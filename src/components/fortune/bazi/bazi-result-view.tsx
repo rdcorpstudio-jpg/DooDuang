@@ -75,8 +75,10 @@ export function BaziResultView({
   nickname?: string;
 }) {
   const [yearIdx, setYearIdx] = useState(0);
+  const [cycleOpen, setCycleOpen] = useState(false);
   const selectedYear = chart.annual[yearIdx] ?? chart.annual[0];
   const maxEl = Math.max(...chart.elements.map((e) => e.count), 1);
+  const cycle = chart.currentCycleMeaning;
 
   return (
     <div
@@ -437,7 +439,7 @@ export function BaziResultView({
           </div>
         </SectionCard>
 
-        {/* Current cycle CTA */}
+        {/* Current cycle CTA + meaning */}
         <section className="mae-aspect-card px-3.5 py-3.5 text-center">
           <p className="text-[13px] font-bold text-[#d5b16f]">
             ดวงจรช่วงนี้ (วัยจร + ปีจร)
@@ -448,19 +450,72 @@ export function BaziResultView({
           <div className="my-3 h-px bg-[rgba(213,177,111,0.22)]" />
           <button
             type="button"
+            aria-expanded={cycleOpen}
             className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full text-[13px] font-semibold text-[#e8d19a] outline-none transition active:scale-[0.99]"
             style={{
-              background: "rgba(213,177,111,0.12)",
+              background: cycleOpen
+                ? "rgba(213,177,111,0.22)"
+                : "rgba(213,177,111,0.12)",
               boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.55)",
             }}
             onClick={() => {
-              const el = document.getElementById("bazi-deep");
-              el?.scrollIntoView({ behavior: "smooth", block: "start" });
+              setCycleOpen((open) => {
+                const next = !open;
+                if (next) {
+                  requestAnimationFrame(() => {
+                    document
+                      .getElementById("bazi-cycle-meaning")
+                      ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                  });
+                }
+                return next;
+              });
             }}
           >
-            อ่านความหมายจากดวงจร
+            {cycleOpen ? "ปิดความหมายดวงจร" : "อ่านความหมายจากดวงจร"}
           </button>
-          <p id="bazi-deep" className="mt-2 text-[10.5px] text-[#9aa3b2]">
+
+          {cycleOpen && cycle ? (
+            <div
+              id="bazi-cycle-meaning"
+              className="mt-3 space-y-3 text-left"
+            >
+              {cycle.luck ? (
+                <div>
+                  <p className="text-[12px] font-semibold text-[#d5b16f]">
+                    {cycle.luck.title}
+                  </p>
+                  <p className="mt-0.5 text-[10.5px] text-[#9aa3b2]">
+                    ช่วงอายุ {cycle.luck.ageFrom.toFixed(2)}–
+                    {cycle.luck.ageTo.toFixed(2)} ปี
+                  </p>
+                  <p className="mt-1.5 text-[12px] leading-relaxed text-[#f7f4ec]/88">
+                    {cycle.luck.body}
+                  </p>
+                </div>
+              ) : null}
+              {cycle.luck ? (
+                <div className="h-px bg-[rgba(213,177,111,0.2)]" />
+              ) : null}
+              <div>
+                <p className="text-[12px] font-semibold text-[#d5b16f]">
+                  {cycle.annual.title}
+                </p>
+                <p className="mt-0.5 text-[10.5px] text-[#9aa3b2]">
+                  ปีจร {cycle.annual.year} (เริ่มที่立春)
+                </p>
+                <p className="mt-1.5 text-[12px] leading-relaxed text-[#f7f4ec]/88">
+                  {cycle.annual.body}
+                </p>
+              </div>
+              <div className="h-px bg-[rgba(213,177,111,0.2)]" />
+              <p className="text-[12px] leading-relaxed text-[#c5cdd9]/85">
+                {cycle.combo}
+              </p>
+            </div>
+          ) : null}
+
+          <p className="mt-2 text-[10.5px] text-[#9aa3b2]">
             คำนวณจากวัน–เวลาเกิดในโปรไฟล์ · ใช้หลักปาจื้อคลาสสิก
           </p>
         </section>
