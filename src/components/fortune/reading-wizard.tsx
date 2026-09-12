@@ -4,7 +4,6 @@ import { useEffect, useState, type FocusEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Check,
-  ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
@@ -16,6 +15,7 @@ import {
   GENDER_OPTIONS,
   type Gender,
 } from "@/components/ui/sacred-form";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { READING_OPTIONS } from "@/lib/fortune/zodiac";
 import type { ExtendedFortuneResult } from "@/lib/fortune/extended";
 import {
@@ -753,14 +753,7 @@ export function ReadingWizard() {
           {step === "gender" ? (
             <span aria-hidden className="justify-self-start" />
           ) : (
-            <button
-              type="button"
-              onClick={goBack}
-              className="inline-flex items-center gap-0.5 justify-self-start text-[14px] font-medium text-white/85 transition-opacity active:opacity-60"
-            >
-              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-              กลับ
-            </button>
+            <PageBackButton onClick={goBack} className="justify-self-start" />
           )}
           <div className="flex flex-col items-center justify-self-center" aria-hidden />
           <div className="justify-self-end text-right">

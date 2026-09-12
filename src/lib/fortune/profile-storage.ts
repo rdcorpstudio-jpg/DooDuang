@@ -88,6 +88,9 @@ export function writeFortuneProfile(
   };
   try {
     localStorage.setItem(FORTUNE_PROFILE_KEY, JSON.stringify(profile));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("dooduang-profile-changed"));
+    }
     // Keep wizard session in sync so old cache cannot overwrite a saved profile
     const raw = sessionStorage.getItem(WIZARD_CACHE_KEY);
     if (raw) {

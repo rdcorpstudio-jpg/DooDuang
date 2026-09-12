@@ -2,10 +2,10 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { ChevronLeft, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import {
   LUCKY_SHIRT_CATALOG,
   getLuckyShirtById,
@@ -90,20 +90,13 @@ function LuckyShirtPageInner() {
   return (
     <div className="relative h-full overflow-y-auto overscroll-contain">
     <div className="relative mx-auto w-full max-w-[480px] px-4 pb-16 pt-2">
-      <header className="relative flex items-center justify-between py-1.5">
-        <Link
-          href="/menu"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#d5b16f] outline-none transition active:scale-95"
-          aria-label="กลับ"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-        </Link>
-        <div className="min-w-0 flex-1 px-2 text-center">
+      <header className="relative flex min-h-11 items-center justify-center py-1.5">
+        <PageBackButton href="/menu" absolute />
+        <div className="min-w-0 px-16 text-center">
           <h1 className="mae-gold-text text-[1.25rem] font-bold tracking-wide">
             สีเสื้อมงคล
           </h1>
         </div>
-        <span className="w-9" aria-hidden />
       </header>
 
       {!ready ? (

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
 import type { BaziChart, BaziElement } from "@/lib/fortune/bazi";
 import { elementColor } from "@/lib/fortune/bazi";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { cn } from "@/lib/utils";
 
 const ELEMENT_ICON: Record<BaziElement, string> = {
@@ -88,18 +88,11 @@ export function BaziResultView({
       )}
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-0.5 text-[14px] font-medium text-white/85 outline-none transition active:opacity-60"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-          กลับ
-        </button>
+        <PageBackButton onClick={onBack} />
         <p className="text-[11px] font-semibold tracking-[0.18em] text-[#d5b16f]/80">
           ปาจื้อ{nickname ? ` · ${nickname}` : ""}
         </p>
-        <span className="w-[3.5rem]" aria-hidden />
+        <span className="w-[5.5rem]" aria-hidden />
       </div>
 
       <div className="mx-auto flex max-w-[360px] flex-col gap-3.5">

@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { MysticBackground } from "@/components/fortune/mystic-background";
 import { FortuneCategoryCard } from "@/components/fortune/fortune-category-card";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { Reveal } from "@/components/ui/reveal";
 import { HOME_CATEGORY_OPTIONS } from "@/lib/fortune/zodiac";
 import { FORTUNE_DISCLAIMER } from "@/lib/site";
@@ -27,13 +26,7 @@ export function CategorySelect() {
 
       <div className="relative z-10 flex h-full flex-col px-5 pb-5 pt-3">
         <Reveal visible={mounted} delay={0} className="shrink-0">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-0.5 text-[15px] font-medium text-white/55 transition-opacity active:opacity-60"
-          >
-            <ChevronLeft className="h-5 w-5" strokeWidth={2} />
-            กลับ
-          </Link>
+          <PageBackButton href="/premium" />
         </Reveal>
 
         <Reveal visible={mounted} delay={70} className="mt-5 shrink-0">

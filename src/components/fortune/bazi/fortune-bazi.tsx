@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Loader2, Lock } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import { BaziResultView } from "@/components/fortune/bazi/bazi-result-view";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { buildBaziChart } from "@/lib/fortune/bazi";
 import type { BaziInput } from "@/lib/fortune/bazi";
 import {
@@ -97,14 +98,7 @@ export function FortuneBazi({ className }: { className?: string }) {
           className
         )}
       >
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-0.5 self-start text-[14px] font-medium text-white/85 outline-none transition active:opacity-60"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-          กลับ
-        </button>
+        <PageBackButton onClick={() => router.back()} />
 
         <div className="mae-aspect-card mx-auto mt-14 w-full max-w-[320px] px-4 py-7 text-center">
           <span
@@ -153,14 +147,7 @@ export function FortuneBazi({ className }: { className?: string }) {
           className
         )}
       >
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-0.5 self-start text-[14px] font-medium text-white/85 outline-none transition active:opacity-60"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-          กลับ
-        </button>
+        <PageBackButton onClick={() => router.back()} />
 
         <div className="mae-aspect-card mx-auto mt-16 w-full max-w-[320px] px-4 py-6 text-center">
           <p className="mae-gold-text text-[1.15rem] font-bold">ปาจื้อ 八字</p>
@@ -189,14 +176,7 @@ export function FortuneBazi({ className }: { className?: string }) {
           className
         )}
       >
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-0.5 self-start text-[14px] font-medium text-white/85 outline-none transition active:opacity-60"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-          กลับ
-        </button>
+        <PageBackButton onClick={() => router.back()} />
         <div className="mae-aspect-card mx-auto mt-16 w-full max-w-[320px] px-4 py-6 text-center">
           <p className="text-[14px] font-semibold text-[#ff8fa3]">
             คำนวณปาจื้อไม่สำเร็จ

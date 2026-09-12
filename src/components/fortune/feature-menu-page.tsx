@@ -2,11 +2,11 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import {
   isPremiumUnlocked,
   setPremiumUnlocked,
@@ -408,22 +408,16 @@ function FeatureMenuPageInner({
         className
       )}
     >
-      <header className="relative py-3 text-center">
-        {backHref ? (
-          <Link
-            href={backHref}
-            className="absolute left-0 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-[#d5b16f] outline-none transition active:scale-95"
-            aria-label="กลับ"
-          >
-            <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-          </Link>
-        ) : null}
-        <h1 className="mae-gold-text text-[1.45rem] font-bold leading-snug tracking-wide">
-          เลือกเรื่องที่อยากรู้
-        </h1>
-        <p className="mt-1.5 text-[14px] font-medium leading-snug text-[#f7f4ec]/90">
-          ค้นหาคำแนะนำในแบบของคุณ
-        </p>
+      <header className="relative flex min-h-12 items-center justify-center py-3">
+        {backHref ? <PageBackButton href={backHref} absolute /> : null}
+        <div className={cn("min-w-0 text-center", backHref && "px-20")}>
+          <h1 className="mae-gold-text text-[1.45rem] font-bold leading-snug tracking-wide">
+            เลือกเรื่องที่อยากรู้
+          </h1>
+          <p className="mt-1.5 text-[14px] font-medium leading-snug text-[#f7f4ec]/90">
+            ค้นหาคำแนะนำในแบบของคุณ
+          </p>
+        </div>
       </header>
 
       {!ready ? null : !hasBasics ? (

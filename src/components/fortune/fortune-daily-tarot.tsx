@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Lock, Star } from "lucide-react";
+import { Lock, Star } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { TarotPrayerSheet } from "@/components/fortune/tarot-prayer-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import {
   drawTarotCard,
   tarotCardImageSrc,
@@ -134,14 +135,10 @@ export function FortuneDailyTarot({
     <div className={cn("sky-copy relative h-full overflow-y-auto", className)}>
       <div className="relative mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          <button
-            type="button"
+          <PageBackButton
             onClick={() => router.back()}
-            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#f7f4ec]/85 outline-none transition active:opacity-60"
-          >
-            <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-            กลับ
-          </button>
+            className="justify-self-start"
+          />
           <div className="flex flex-col items-center justify-self-center" aria-hidden />
 
           <p className="justify-self-end text-right text-[11px] tracking-wide text-[#e8d19a]/75">

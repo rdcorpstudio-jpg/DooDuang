@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
-import { APP_BRAND_MARK } from "@/lib/site";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { cn } from "@/lib/utils";
 
 function formatHeroDate(date = new Date()) {
@@ -95,19 +93,7 @@ export function FortuneResultHero({
 
       <div className="relative z-10 flex h-full min-h-[188px] flex-col px-3.5 py-2.5">
         <div className="flex items-center justify-between gap-3">
-          <Link
-            href="/reading"
-            className="inline-flex items-center gap-0.5 outline-none transition active:opacity-60 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4"
-            aria-label="กลับ"
-          >
-            <ChevronLeft
-              className="dd-hero-shadow h-[1.15rem] w-[1.15rem] text-[#f7f4ec]/90"
-              strokeWidth={2.3}
-            />
-            <span className="mae-gold-text text-[11px] font-bold tracking-[0.18em]">
-              {APP_BRAND_MARK}
-            </span>
-          </Link>
+          <PageBackButton href="/premium" label="กลับ" className="!min-h-9 !px-2.5 !py-1.5 !text-[12px]" />
           <p className="dd-hero-shadow text-[11px] font-medium text-[#f7f4ec]/85">
             สวัสดี คุณ{displayName}
           </p>

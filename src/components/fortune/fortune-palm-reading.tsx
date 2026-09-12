@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, ChevronLeft, ImageIcon, Lock, RotateCcw, X } from "lucide-react";
+import { Camera, ImageIcon, Lock, RotateCcw, X } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { GuidedScanCapture } from "@/components/fortune/guided-scan-capture";
 import { ScanAnalyzingPanel } from "@/components/fortune/scan-analyzing-panel";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import {
   LockedPreviewTile,
   UnlockDetailBanner,
@@ -368,14 +369,7 @@ export function FortunePalmReading({
 function Header({ onBack }: { onBack: () => void }) {
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-      <button
-        type="button"
-        onClick={onBack}
-        className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#e8d19a] outline-none transition active:opacity-60"
-      >
-        <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-        กลับ
-      </button>
+      <PageBackButton onClick={onBack} className="justify-self-start" />
       <span className="justify-self-center" aria-hidden />
       <span aria-hidden className="justify-self-end" />
     </div>

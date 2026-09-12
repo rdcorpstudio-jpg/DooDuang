@@ -7,9 +7,10 @@ import { BirthDatePicker } from "@/components/fortune/birth-date-picker";
 import { FortuneLoading } from "@/components/fortune/fortune-loading";
 import { FortuneResultView } from "@/components/fortune/fortune-result-view";
 import { ZodiacWheelBg } from "@/components/layout/zodiac-wheel-bg";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { READING_OPTIONS } from "@/lib/fortune/zodiac";
 import type { ExtendedFortuneResult } from "@/lib/fortune/extended";
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
 import {
   GENDER_OPTIONS,
   type Gender,
@@ -177,13 +178,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
       <div className="relative z-10 min-h-full px-5 pb-10 pt-4">
         {!result && !loading ? (
           <>
-            <Link
-              href="/reading"
-              className="inline-flex items-center gap-0.5 text-[14px] font-medium text-white/85 transition-opacity active:opacity-60"
-            >
-              <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-              กลับ
-            </Link>
+            <PageBackButton href="/reading" />
 
             <div className="mx-auto mt-4 max-w-[340px]">
               <div className="wizard-step-header relative mb-5 text-center">

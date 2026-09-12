@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { FortuneFreeMonthTrend } from "@/components/fortune/fortune-free-month-trend";
 import {
   usePremiumProfileGate,
@@ -28,15 +27,9 @@ export function PremiumYearPage() {
 
   return (
     <div className="relative mx-auto w-full max-w-[480px] px-4 pb-16 pt-2">
-      <header className="relative flex items-center justify-between py-2">
-        <Link
-          href="/menu"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#d5b16f] outline-none transition active:scale-95"
-          aria-label="กลับ"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-        </Link>
-        <div className="min-w-0 flex-1 px-2 text-center">
+      <header className="relative flex min-h-11 items-center justify-center py-2">
+        <PageBackButton href="/menu" absolute />
+        <div className="min-w-0 px-20 text-center">
           <p className="text-[11px] tracking-[0.18em] text-[#d5b16f]/75">
             {APP_BRAND_MARK}
           </p>
@@ -44,7 +37,6 @@ export function PremiumYearPage() {
             ดวงรายปี
           </h1>
         </div>
-        <span className="w-9" aria-hidden />
       </header>
 
       <p className="mt-1 text-center text-[12.5px] leading-relaxed text-[#c5cdd9]/75">

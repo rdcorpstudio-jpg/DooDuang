@@ -1,11 +1,9 @@
 ﻿"use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import {
   Bookmark,
   Check,
-  ChevronLeft,
   Heart,
   Lightbulb,
   MessageCircle,
@@ -16,6 +14,7 @@ import {
   User,
 } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { APP_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -300,14 +299,8 @@ export function FreeDailyReading({
         className
       )}
     >
-      <header className="relative flex items-center justify-between px-1 py-2">
-        <Link
-          href={backHref}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#d5b16f] outline-none transition active:scale-95"
-          aria-label="กลับ"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-        </Link>
+      <header className="relative flex min-h-11 items-center justify-between px-1 py-2">
+        <PageBackButton href={backHref} />
         <div className="flex min-w-0 flex-1 items-center justify-center gap-2 px-2">
           <span
             className="hidden h-px w-6 sm:block"
@@ -329,7 +322,11 @@ export function FreeDailyReading({
         </div>
         <button
           type="button"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[#d5b16f] outline-none transition active:scale-95"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[#d5b16f] outline-none transition active:scale-95"
+          style={{
+            background: "rgba(213,177,111,0.14)",
+            boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
+          }}
           aria-label="บันทึก"
         >
           <Bookmark className="h-[18px] w-[18px]" strokeWidth={2} />

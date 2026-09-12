@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import {
   hydrateFortuneProfileFromWizard,
@@ -61,13 +60,7 @@ export function PremiumDetailShell({
           className="fortune-reveal flex items-center"
           style={{ "--fortune-delay": "30ms" } as CSSProperties}
         >
-          <Link
-            href={backHref}
-            className="inline-flex items-center gap-0.5 text-[15px] font-medium text-[#f7f4ec]/75 outline-none transition active:opacity-60"
-          >
-            <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-            กลับ
-          </Link>
+          <PageBackButton href={backHref} />
         </div>
         {title ? (
           <h1

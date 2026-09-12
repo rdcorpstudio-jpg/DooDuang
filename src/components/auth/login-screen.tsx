@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ChevronLeft } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import {
   GoogleSignInButton,
   startGoogleRedirect,
@@ -12,6 +12,7 @@ import { LineSignInButton } from "@/components/auth/line-sign-in-button";
 import { OpenInBrowserBanner } from "@/components/auth/open-in-browser-banner";
 import { PhoneLoginForm } from "@/components/auth/phone-login-form";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { AnimatedPage } from "@/components/ui/reveal";
 import {
   getInAppBrowserKind,
@@ -92,14 +93,10 @@ export function LoginScreen({
   return (
     <AnimatedPage className="relative flex min-h-full flex-col overflow-x-hidden overflow-y-auto px-3 pb-6 pt-3 sm:px-4">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <button
-          type="button"
+        <PageBackButton
           onClick={() => router.back()}
-          className="inline-flex items-center gap-0.5 justify-self-start text-[14px] font-medium text-white/85 outline-none transition active:opacity-60"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-          กลับ
-        </button>
+          className="justify-self-start"
+        />
         <span aria-hidden className="justify-self-center" />
         <span aria-hidden className="justify-self-end" />
       </div>

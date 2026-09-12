@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { APP_NAME } from "@/lib/site";
-import { MaeLanding } from "@/components/home/mae-landing";
+import { HomeGate } from "@/components/home/home-gate";
 
 export const metadata: Metadata = {
   title: "แม่มั่งมี — อ่านดวงอุ่นใจ",
@@ -22,7 +22,7 @@ export default function HomePage() {
         <Link href="/privacy">นโยบายความเป็นส่วนตัว</Link>
         <Link href="/terms">ข้อกำหนดการใช้งาน</Link>
       </section>
-      <MaeLanding />
+      <HomeGate />
     </>
   );
 }

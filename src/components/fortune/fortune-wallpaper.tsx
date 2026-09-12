@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Download, Lock } from "lucide-react";
+import { Download, Lock } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import {
   assignPremiumWallpaperIfNeeded,
   getPremiumWallpaperTeaser,
@@ -107,14 +108,10 @@ export function FortuneWallpaper({ className }: { className?: string }) {
     <div className={cn("no-sky-lift relative h-full overflow-hidden", className)}>
       <div className="relative mx-auto flex h-full w-full max-w-[480px] flex-col px-4 pb-3 pt-2.5">
         <div className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2">
-          <button
-            type="button"
+          <PageBackButton
             onClick={() => router.back()}
-            className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#f7f4ec]/85 outline-none transition active:opacity-60"
-          >
-            <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-            กลับ
-          </button>
+            className="justify-self-start"
+          />
           <div className="flex flex-col items-center justify-self-center" aria-hidden />
 
           <span

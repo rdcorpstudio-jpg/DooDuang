@@ -7,6 +7,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isMaeShellPath } from "@/lib/mae-shell";
 import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import {
+  hasFreeReadingBasics,
+  hydrateFortuneProfileFromWizard,
+  readFortuneProfile,
+} from "@/lib/fortune/profile-storage";
 
 type NavTab = {
   href: string;
@@ -22,17 +27,26 @@ const HOME_TAB: NavTab = {
   match: (p) => p === "/" || p === "/mae" || p.startsWith("/mae/"),
 };
 
-/** หน้าดวง — ฟรีป้ายดูดวง / สมัครแล้วป้ายพรีเมียม */
+/** After profile — home = daily fortune (marketing landing skipped) */
+const APP_HOME_FREE_TAB: NavTab = {
+  href: "/premium",
+  label: "หน้าแรก",
+  src: "/images/icons/nav/home.webp",
+  match: (p) => p === "/" || p === "/premium",
+};
+
+const APP_HOME_PREMIUM_TAB: NavTab = {
+  ...APP_HOME_FREE_TAB,
+  label: "พรีเมียม",
+  src: "/images/icons/nav/horoscope.webp",
+};
+
+/** Pre-profile — ดูดวง tab */
 const FORTUNE_FREE_TAB: NavTab = {
   href: "/premium",
   label: "ดูดวง",
   src: "/images/icons/nav/horoscope.webp",
   match: (p) => p === "/premium",
-};
-
-const FORTUNE_PREMIUM_TAB: NavTab = {
-  ...FORTUNE_FREE_TAB,
-  label: "พรีเมียม",
 };
 
 const MENU_TAB: NavTab = {
@@ -63,33 +77,39 @@ const ACCOUNT_TAB: NavTab = {
     p.startsWith("/pricing"),
 };
 
-/** Bottom nav — หน้าแรก · ดูดวง · เมนู · บัญชี */
+/** Bottom nav — after fill: หน้าแรก/พรีเมียม · เมนู · บัญชี (no marketing home) */
 export function BottomNav() {
   const pathname = usePathname() || "/";
   const maeNav = isMaeShellPath(pathname);
   const [premium, setPremium] = useState(false);
+  const [hasBasics, setHasBasics] = useState(false);
 
   useEffect(() => {
     function sync() {
+      hydrateFortuneProfileFromWizard();
       setPremium(isPremiumUnlocked());
+      setHasBasics(hasFreeReadingBasics(readFortuneProfile()));
     }
     sync();
     window.addEventListener("dooduang-premium-changed", sync);
+    window.addEventListener("dooduang-profile-changed", sync);
     window.addEventListener("storage", sync);
     window.addEventListener("focus", sync);
     return () => {
       window.removeEventListener("dooduang-premium-changed", sync);
+      window.removeEventListener("dooduang-profile-changed", sync);
       window.removeEventListener("storage", sync);
       window.removeEventListener("focus", sync);
     };
   }, []);
 
-  const tabs: NavTab[] = [
-    HOME_TAB,
-    premium ? FORTUNE_PREMIUM_TAB : FORTUNE_FREE_TAB,
-    MENU_TAB,
-    ACCOUNT_TAB,
-  ];
+  const tabs: NavTab[] = hasBasics
+    ? [
+        premium ? APP_HOME_PREMIUM_TAB : APP_HOME_FREE_TAB,
+        MENU_TAB,
+        ACCOUNT_TAB,
+      ]
+    : [HOME_TAB, FORTUNE_FREE_TAB, MENU_TAB, ACCOUNT_TAB];
 
   return (
     <nav
@@ -107,7 +127,12 @@ export function BottomNav() {
         paddingBottom: "max(0.2rem, env(safe-area-inset-bottom))",
       }}
     >
-      <div className="mx-auto grid max-w-[480px] grid-cols-4 gap-0 px-1 pt-1 pb-0.5">
+      <div
+        className={cn(
+          "mx-auto grid max-w-[480px] gap-0 px-1 pt-1 pb-0.5",
+          tabs.length === 3 ? "grid-cols-3" : "grid-cols-4"
+        )}
+      >
         {tabs.map(({ href, label, src, match }) => {
           const active = match(pathname);
 
