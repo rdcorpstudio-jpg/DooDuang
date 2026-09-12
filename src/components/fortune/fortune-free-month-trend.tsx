@@ -522,6 +522,7 @@ function UnlockedTwelveYearTrend({
   birthDate = "2000-01-01",
   nickname = "",
   birthTime,
+  birthPlace,
   focus,
   gender,
   className,
@@ -530,6 +531,7 @@ function UnlockedTwelveYearTrend({
   birthDate?: string;
   nickname?: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   className?: string;
@@ -540,7 +542,7 @@ function UnlockedTwelveYearTrend({
   const [mode, setMode] = useState<"month" | "year">("month");
 
   const years = useMemo((): YearPoint[] => {
-    const input = { birthDate, nickname, birthTime, focus, gender };
+    const input = { birthDate, nickname, birthTime, birthPlace, focus, gender };
     return Array.from({ length: 12 }, (_, i) => {
       const ce = nowCe - 2 + i;
       const detail = YEAR_DETAILS[i]!;
@@ -553,10 +555,10 @@ function UnlockedTwelveYearTrend({
         ...detail,
       };
     });
-  }, [seed, nowCe, birthDate, nickname, birthTime, focus, gender]);
+  }, [seed, nowCe, birthDate, nickname, birthTime, birthPlace, focus, gender]);
 
   const months = useMemo((): MonthPoint[] => {
-    const input = { birthDate, nickname, birthTime, focus, gender };
+    const input = { birthDate, nickname, birthTime, birthPlace, focus, gender };
     return Array.from({ length: 36 }, (_, i) => {
       const offset = i - 18;
       const d = new Date(nowCe, nowMonth + offset, 1);
@@ -573,7 +575,7 @@ function UnlockedTwelveYearTrend({
         isNow,
       };
     });
-  }, [birthDate, nickname, birthTime, focus, gender, nowCe, nowMonth]);
+  }, [birthDate, nickname, birthTime, birthPlace, focus, gender, nowCe, nowMonth]);
 
   const yearNowIdx = years.findIndex((y) => y.ce === nowCe);
   const monthNowIdx = months.findIndex((m) => m.isNow);
@@ -790,6 +792,7 @@ export function FortuneFreeMonthTrend({
   birthDate,
   nickname,
   birthTime,
+  birthPlace,
   focus,
   gender,
   className,
@@ -801,6 +804,7 @@ export function FortuneFreeMonthTrend({
   birthDate?: string;
   nickname?: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   className?: string;
@@ -812,6 +816,7 @@ export function FortuneFreeMonthTrend({
         birthDate={birthDate}
         nickname={nickname}
         birthTime={birthTime}
+        birthPlace={birthPlace}
         focus={focus}
         gender={gender}
         className={className}
@@ -825,6 +830,7 @@ export function FortuneFreeMonthTrend({
       birthDate={birthDate}
       nickname={nickname}
       birthTime={birthTime}
+      birthPlace={birthPlace}
       focus={focus}
       gender={gender}
       onUnlock={onUnlock}
@@ -838,6 +844,7 @@ function FreeMonthTrendTeaser({
   birthDate = "2000-01-01",
   nickname = "",
   birthTime,
+  birthPlace,
   focus,
   gender,
   onUnlock,
@@ -847,6 +854,7 @@ function FreeMonthTrendTeaser({
   birthDate?: string;
   nickname?: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   onUnlock?: () => void;
@@ -857,7 +865,7 @@ function FreeMonthTrendTeaser({
   const nowYear = now.getFullYear();
 
   const months = useMemo((): MonthPoint[] => {
-    const input = { birthDate, nickname, birthTime, focus, gender };
+    const input = { birthDate, nickname, birthTime, birthPlace, focus, gender };
     const scoreMap = new Map<string, number>();
     if (Array.isArray(points)) {
       for (const p of points) {
@@ -895,6 +903,7 @@ function FreeMonthTrendTeaser({
     birthDate,
     nickname,
     birthTime,
+    birthPlace,
     focus,
     gender,
     nowMonth,

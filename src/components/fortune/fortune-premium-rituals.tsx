@@ -30,6 +30,7 @@ type Props = {
   birthDate: string;
   nickname: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   className?: string;
@@ -40,13 +41,14 @@ export function FortunePremiumRituals({
   birthDate,
   nickname,
   birthTime,
+  birthPlace,
   focus,
   gender,
   className,
 }: Props) {
   const input = useMemo(
-    () => ({ birthDate, nickname, birthTime, focus, gender }),
-    [birthDate, nickname, birthTime, focus, gender]
+    () => ({ birthDate, nickname, birthTime, birthPlace, focus, gender }),
+    [birthDate, nickname, birthTime, birthPlace, focus, gender]
   );
   const pack = useMemo(() => buildPremiumRitualsPack(input), [input]);
 

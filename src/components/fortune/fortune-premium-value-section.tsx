@@ -33,6 +33,7 @@ export function FortunePremiumValueSection({
   birthDate,
   nickname,
   birthTime,
+  birthPlace,
   focus,
   gender,
   className,
@@ -40,6 +41,7 @@ export function FortunePremiumValueSection({
   birthDate: string;
   nickname: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   className?: string;
@@ -50,10 +52,11 @@ export function FortunePremiumValueSection({
         birthDate,
         nickname,
         birthTime,
+        birthPlace,
         focus,
         gender,
       }),
-    [birthDate, nickname, birthTime, focus, gender]
+    [birthDate, nickname, birthTime, birthPlace, focus, gender]
   );
 
   const today = pack.outlook[0]!;

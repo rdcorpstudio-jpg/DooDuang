@@ -161,6 +161,7 @@ export function LifeInsightMockup({
             birthDate={birthDate}
             nickname={nickname}
             birthTime={deepTime}
+            birthPlace={deepPlace}
             focus={typedFocus}
             gender={gender}
           />
@@ -223,6 +224,7 @@ export function LifeInsightMockup({
           birthDate={birthDate}
           nickname={nickname}
           birthTime={deepTime}
+          birthPlace={deepPlace}
           focus={typedFocus}
           gender={gender}
           unlocked={unlocked}
@@ -239,6 +241,7 @@ export function LifeInsightMockup({
           nickname={nickname}
           birthDate={birthDate}
           birthTime={deepTime}
+          birthPlace={deepPlace}
           focus={typedFocus}
           gender={gender}
           from={isPremiumPage ? "premium" : "reading"}
@@ -254,6 +257,7 @@ export function LifeInsightMockup({
           birthDate={birthDate}
           nickname={nickname}
           birthTime={deepTime}
+          birthPlace={deepPlace}
           focus={typedFocus}
           gender={gender}
         />
@@ -279,6 +283,7 @@ export function LifeInsightMockup({
           birthDate={birthDate}
           nickname={nickname}
           birthTime={deepTime}
+          birthPlace={deepPlace}
           focus={typedFocus}
           gender={gender}
           unlocked={contentUnlocked}
@@ -295,6 +300,7 @@ export function LifeInsightMockup({
           birthDate={birthDate}
           nickname={nickname}
           birthTime={deepTime}
+          birthPlace={deepPlace}
           focus={typedFocus}
           gender={gender}
           points={monthPoints}
@@ -312,6 +318,7 @@ export function LifeInsightMockup({
           nickname={nickname}
           birthDate={birthDate}
           birthTime={deepTime}
+          birthPlace={deepPlace}
           focus={typedFocus}
           gender={gender}
           premium={isPremiumPage}
@@ -328,6 +335,7 @@ export function LifeInsightMockup({
             nickname={nickname}
             birthDate={birthDate}
             birthTime={deepTime}
+            birthPlace={deepPlace}
             focus={typedFocus}
             gender={gender}
           />
@@ -343,6 +351,7 @@ export function LifeInsightMockup({
             birthDate={birthDate}
             nickname={nickname}
             birthTime={deepTime}
+            birthPlace={deepPlace}
             focus={typedFocus}
             gender={gender}
           />

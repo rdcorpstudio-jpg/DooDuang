@@ -26,7 +26,7 @@ const READINGS: ReadingItem[] = [
     id: "bazi",
     title: "ปาจื้อ",
     badge: "พรีเมียม",
-    locked: false,
+    locked: true,
     icon: "/images/extra/bazi.webp?v=mae6",
   },
   {
@@ -176,17 +176,16 @@ export function FortuneExtraReadings({
       router.push(`/reading/tarot?seed=${encodeURIComponent(seed)}`);
       return;
     }
-    if (item.id === "bazi") {
-      // UI scaffold — open for review; lock gate later with real engine
-      router.push("/reading/bazi");
-      return;
-    }
     if (isLocked) {
       if (onUnlock) {
         onUnlock();
         return;
       }
       router.push("/premium");
+      return;
+    }
+    if (item.id === "bazi") {
+      router.push("/reading/bazi");
       return;
     }
     if (item.id === "wallpaper") {

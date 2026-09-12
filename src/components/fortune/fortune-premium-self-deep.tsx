@@ -1017,6 +1017,7 @@ export function FortunePremiumSelfDeep({
   nickname,
   birthDate = "2000-01-01",
   birthTime,
+  birthPlace,
   focus,
   gender,
   className,
@@ -1025,6 +1026,7 @@ export function FortunePremiumSelfDeep({
   nickname: string;
   birthDate?: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   className?: string;
@@ -1034,6 +1036,7 @@ export function FortunePremiumSelfDeep({
       birthDate,
       nickname,
       birthTime,
+      birthPlace,
       focus,
       gender,
     });
@@ -1110,7 +1113,7 @@ export function FortunePremiumSelfDeep({
       elements,
       strongest,
     };
-  }, [seed, birthDate, nickname, birthTime, focus, gender]);
+  }, [seed, birthDate, nickname, birthTime, birthPlace, focus, gender]);
 
   const [axisIndex, setAxisIndex] = useState(data.topIdx);
   const name = nickname.trim() || "คุณ";

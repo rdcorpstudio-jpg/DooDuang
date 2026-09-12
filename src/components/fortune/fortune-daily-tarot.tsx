@@ -28,8 +28,9 @@ function formatThaiDate(d = new Date()) {
   });
 }
 
-const HOLD_MS = 650;
+const HOLD_MS = 450;
 const UNLOCK_KEY = "dooduang-tarot-unlocked";
+const HOLD_MOVE_CANCEL_PX = 14;
 
 /** Daily tarot — Mae navy–gold */
 export function FortuneDailyTarot({
@@ -55,6 +56,8 @@ export function FortuneDailyTarot({
   const timerRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const startRef = useRef(0);
+  const originRef = useRef({ x: 0, y: 0 });
+  const openedByHoldRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -93,8 +96,10 @@ export function FortuneDailyTarot({
     }
   }, [clearHold, openKey]);
 
-  const startHold = () => {
-    if (opened) return;
+  const startHold = (clientX: number, clientY: number) => {
+    if (opened || !readyToDraw) return;
+    openedByHoldRef.current = false;
+    originRef.current = { x: clientX, y: clientY };
     setHolding(true);
     startRef.current = performance.now();
 
@@ -106,6 +111,7 @@ export function FortuneDailyTarot({
     rafRef.current = window.requestAnimationFrame(tick);
 
     timerRef.current = window.setTimeout(() => {
+      openedByHoldRef.current = true;
       openCard();
     }, HOLD_MS);
   };
@@ -165,22 +171,52 @@ export function FortuneDailyTarot({
           {!opened ? (
             <button
               type="button"
-              aria-label="แตะค้างไว้เพื่อเปิดไพ่รายวัน"
+              aria-label="แตะเพื่อเปิดไพ่รายวัน"
               disabled={!readyToDraw}
+              onClick={() => {
+                if (!readyToDraw || openedByHoldRef.current) return;
+                openCard();
+              }}
               onPointerDown={(e) => {
                 if (!readyToDraw || e.button !== 0) return;
-                e.currentTarget.setPointerCapture(e.pointerId);
-                startHold();
+                try {
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                } catch {
+                  /* ignore */
+                }
+                startHold(e.clientX, e.clientY);
               }}
-              onPointerUp={clearHold}
+              onPointerMove={(e) => {
+                if (!holding) return;
+                const dx = e.clientX - originRef.current.x;
+                const dy = e.clientY - originRef.current.y;
+                if (dx * dx + dy * dy > HOLD_MOVE_CANCEL_PX * HOLD_MOVE_CANCEL_PX) {
+                  clearHold();
+                }
+              }}
+              onPointerUp={() => {
+                const elapsed = performance.now() - startRef.current;
+                const wasHolding = holding;
+                clearHold();
+                // Short press counts as tap — more reliable than click after capture
+                if (
+                  readyToDraw &&
+                  wasHolding &&
+                  !openedByHoldRef.current &&
+                  elapsed > 40 &&
+                  elapsed < HOLD_MS
+                ) {
+                  openCard();
+                }
+              }}
               onPointerCancel={clearHold}
               onContextMenu={(e) => e.preventDefault()}
               className={cn(
-                "relative mx-auto w-[min(72vw,248px)] select-none outline-none transition",
+                "no-tap relative mx-auto w-[min(72vw,248px)] select-none outline-none transition",
                 holding && "scale-[0.985]",
                 !readyToDraw && "pointer-events-none opacity-55"
               )}
-              style={{ aspectRatio: "840 / 1440", touchAction: "none" }}
+              style={{ aspectRatio: "840 / 1440", touchAction: "manipulation" }}
             >
               <span
                 className="relative block h-full w-full overflow-hidden rounded-[16px] p-[3px] shadow-[0_14px_36px_rgba(0,0,0,0.5)]"
@@ -197,7 +233,8 @@ export function FortuneDailyTarot({
                     sizes="248px"
                     priority
                     unoptimized
-                    className="object-contain"
+                    draggable={false}
+                    className="pointer-events-none object-contain"
                   />
 
                   <span
@@ -208,7 +245,7 @@ export function FortuneDailyTarot({
                       {readyToDraw
                         ? holding
                           ? "กำลังเปิด…"
-                          : "แตะค้างไว้เพื่อเปิด"
+                          : "แตะเพื่อเปิด"
                         : "รอตั้งจิตก่อน"}
                     </span>
                   </span>

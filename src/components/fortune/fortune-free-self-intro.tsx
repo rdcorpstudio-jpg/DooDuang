@@ -12,6 +12,7 @@ export function FortuneFreeSelfIntro({
   nickname,
   birthDate = "2000-01-01",
   birthTime,
+  birthPlace,
   focus,
   gender,
   premium = false,
@@ -21,6 +22,7 @@ export function FortuneFreeSelfIntro({
   nickname: string;
   birthDate?: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   premium?: boolean;
@@ -35,6 +37,7 @@ export function FortuneFreeSelfIntro({
       birthDate,
       nickname,
       birthTime,
+      birthPlace,
       focus,
       gender,
     });
@@ -53,7 +56,7 @@ export function FortuneFreeSelfIntro({
         : [deep.personality, deep.advice].filter(Boolean).join(" "),
       strengths: strengths.length ? strengths : ["โฟกัสได้ดี", "จริงจัง"],
     };
-  }, [birthDate, nickname, birthTime, focus, gender, premium]);
+  }, [birthDate, nickname, birthTime, birthPlace, focus, gender, premium]);
 
   const name = nickname.replace(/^คุณ\s*/, "").trim();
 

@@ -21,6 +21,7 @@ export function FortuneFreeZodiacToday({
   birthDate,
   nickname,
   birthTime,
+  birthPlace,
   focus,
   gender,
   unlocked = false,
@@ -31,6 +32,7 @@ export function FortuneFreeZodiacToday({
   birthDate: string;
   nickname: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   unlocked?: boolean;
@@ -44,10 +46,11 @@ export function FortuneFreeZodiacToday({
         birthDate,
         nickname,
         birthTime,
+        birthPlace,
         focus,
         gender,
       }),
-    [birthDate, nickname, birthTime, focus, gender]
+    [birthDate, nickname, birthTime, birthPlace, focus, gender]
   );
 
   const zodiac = analysis.zodiac;

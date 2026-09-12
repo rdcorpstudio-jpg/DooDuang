@@ -22,7 +22,9 @@ import {
   WIZARD_CACHE_KEY,
   writeFortuneProfile,
   readFortuneProfile,
+  hasBasicFortuneProfile,
 } from "@/lib/fortune/profile-storage";
+import { rebuildPremiumReading } from "@/lib/fortune/rebuild-premium-reading";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import { cn } from "@/lib/utils";
 
@@ -431,11 +433,15 @@ export function ReadingWizard() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Premium onboard: always start at gender first
+    // Premium onboard: only collect missing basics; skip if already complete
     if (afterPremium) {
       clearWizardCache();
       try {
         const saved = readFortuneProfile();
+        if (hasBasicFortuneProfile(saved)) {
+          router.replace("/premium");
+          return;
+        }
         if (saved) {
           setProfile({
             realName: saved.realName,
@@ -445,11 +451,16 @@ export function ReadingWizard() {
             birthTime: saved.birthTime ?? "",
             focus: saved.focus ?? "life",
           });
+          // Resume at first missing field instead of forcing gender again
+          if (!saved.gender) setStep("gender");
+          else if (!saved.birthDate) setStep("birth");
+          else setStep("name");
+        } else {
+          setStep("gender");
         }
       } catch {
-        /* ignore */
+        setStep("gender");
       }
-      setStep("gender");
       setReady(true);
       return;
     }
@@ -481,7 +492,7 @@ export function ReadingWizard() {
       }
     }
     setReady(true);
-  }, [afterPremium]);
+  }, [afterPremium, router]);
 
   useEffect(() => {
     if (!ready) return;
@@ -526,7 +537,7 @@ export function ReadingWizard() {
     }
 
     const existing = readFortuneProfile();
-    writeFortuneProfile({
+    const written = writeFortuneProfile({
       realName: profile.realName,
       nickname: profile.nickname,
       birthDate: profile.birthDate,
@@ -538,6 +549,10 @@ export function ReadingWizard() {
       profileLockedUntil: existing?.profileLockedUntil,
     });
     clearWizardCache();
+    // Full premium deepen already present → rebuild packs now
+    if (written.birthTime && written.birthPlace) {
+      rebuildPremiumReading(written);
+    }
     router.replace("/premium");
   }
 
@@ -549,6 +564,23 @@ export function ReadingWizard() {
     }
 
     if (afterPremium) {
+      if (!profile.birthDate) {
+        setError("กรุณาเลือกวันเกิด");
+        setStep("birth");
+        return;
+      }
+      if (!profile.realName.trim() || !profile.nickname.trim()) {
+        setError("กรุณากรอกชื่อจริงและชื่อเล่น");
+        setStep("name");
+        return;
+      }
+
+      setStep("loading");
+      setError(null);
+      setProgress(0);
+      await wait(MIN_LOADING_MS);
+      setProgress(100);
+      await wait(150);
       finishPremiumOnboard();
       return;
     }

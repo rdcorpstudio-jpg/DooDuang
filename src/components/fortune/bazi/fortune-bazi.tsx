@@ -2,22 +2,40 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2, Lock } from "lucide-react";
 import { BaziResultView } from "@/components/fortune/bazi/bazi-result-view";
+import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
+import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { buildBaziChart } from "@/lib/fortune/bazi";
 import type { BaziInput } from "@/lib/fortune/bazi";
+import {
+  isPremiumUnlocked,
+  setPremiumUnlocked,
+} from "@/lib/fortune/premium-unlock";
 import { readFortuneProfile } from "@/lib/fortune/profile-storage";
+import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-/** ปาจื้อ — ใช้ข้อมูลพรีเมียมที่มีอยู่แล้ว ไม่กรอกซ้ำ */
+/** ปาจื้อ — พรีเมียม · ใช้ข้อมูลโปรไฟล์ที่มีอยู่แล้ว */
 export function FortuneBazi({ className }: { className?: string }) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
   const [missing, setMissing] = useState(false);
   const [input, setInput] = useState<BaziInput | null>(null);
   const [nickname, setNickname] = useState<string | undefined>();
 
+  function handlePaid() {
+    setPremiumUnlocked();
+    setUnlocked(true);
+    setPayOpen(false);
+  }
+
+  useStripePaymentReturn(handlePaid);
+
   useEffect(() => {
+    setUnlocked(isPremiumUnlocked());
     const profile = readFortuneProfile();
     if (
       profile?.birthDate &&
@@ -44,7 +62,9 @@ export function FortuneBazi({ className }: { className?: string }) {
   }, []);
 
   const { chart, computeError } = useMemo(() => {
-    if (!input) return { chart: null, computeError: null as string | null };
+    if (!input || !unlocked) {
+      return { chart: null, computeError: null as string | null };
+    }
     try {
       return { chart: buildBaziChart(input), computeError: null };
     } catch (err) {
@@ -54,7 +74,7 @@ export function FortuneBazi({ className }: { className?: string }) {
           err instanceof Error ? err.message : "คำนวณปาจื้อไม่สำเร็จ",
       };
     }
-  }, [input]);
+  }, [input, unlocked]);
 
   if (!ready) {
     return (
@@ -65,6 +85,62 @@ export function FortuneBazi({ className }: { className?: string }) {
         )}
       >
         <Loader2 className="h-5 w-5 animate-spin" strokeWidth={2.2} />
+      </div>
+    );
+  }
+
+  if (!unlocked) {
+    return (
+      <div
+        className={cn(
+          "relative flex h-full flex-col overflow-y-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] pt-3",
+          className
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-0.5 self-start text-[14px] font-medium text-white/85 outline-none transition active:opacity-60"
+        >
+          <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
+          กลับ
+        </button>
+
+        <div className="mae-aspect-card mx-auto mt-14 w-full max-w-[320px] px-4 py-7 text-center">
+          <span
+            className="mx-auto flex h-12 w-12 items-center justify-center rounded-full"
+            style={{
+              background: "rgba(213,177,111,0.12)",
+              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.4)",
+            }}
+          >
+            <Lock className="h-5 w-5 text-[#d5b16f]" strokeWidth={2} />
+          </span>
+          <p className="mt-3 text-[11px] font-semibold tracking-[0.2em] text-[#d5b16f]/85">
+            PREMIUM
+          </p>
+          <h1 className="mae-gold-text mt-1.5 text-[1.25rem] font-bold">
+            ปาจื้อ 八字
+          </h1>
+          <p className="mt-2 text-[13px] leading-relaxed text-[#c5cdd9]/80">
+            ดูสี่เสา ธาตุ สิบเทพ วัยจร และปีจรจากวันเกิดของคุณ
+            — ปลดล็อกพรีเมียมเพื่ออ่านฉบับเต็ม
+          </p>
+          <button
+            type="button"
+            onClick={() => setPayOpen(true)}
+            className="mae-gold-cta mt-5 inline-flex h-11 w-full items-center justify-center rounded-full text-[14px] font-bold outline-none transition active:scale-[0.99]"
+          >
+            ปลดล็อก · {FORTUNE_UNLOCK_PRICE} บาท
+          </button>
+        </div>
+
+        <FortunePaymentSheet
+          open={payOpen}
+          onClose={() => setPayOpen(false)}
+          onPaid={handlePaid}
+          returnPath="/reading/bazi"
+        />
       </div>
     );
   }

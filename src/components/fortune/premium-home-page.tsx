@@ -150,7 +150,7 @@ export function PremiumHomePage({
 
   if (showDeepen && profile) {
     return (
-      <AnimatedPage className="mx-auto flex min-h-full w-full max-w-[480px] flex-col items-center justify-center px-4 py-8">
+      <AnimatedPage className="relative mx-auto flex min-h-full w-full max-w-[480px] flex-col items-center justify-center px-4 py-8">
         <PremiumDeepenForm
           profile={profile}
           onSaved={(next) => {
@@ -199,6 +199,7 @@ export function PremiumHomePage({
       ) : null}
 
       <LifeInsightMockup
+        key={seed}
         seed={seed}
         birthDate={birthDate}
         nickname={nickname}

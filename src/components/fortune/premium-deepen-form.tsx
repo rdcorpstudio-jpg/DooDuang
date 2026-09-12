@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapPin, Clock } from "lucide-react";
+import { FortuneLoading } from "@/components/fortune/fortune-loading";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import {
   writeFortuneProfile,
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
+import { rebuildPremiumReading } from "@/lib/fortune/rebuild-premium-reading";
 import { cn } from "@/lib/utils";
 
 const FOCUS_OPTIONS: { id: FortuneFocus; label: string }[] = [
@@ -16,6 +18,8 @@ const FOCUS_OPTIONS: { id: FortuneFocus; label: string }[] = [
   { id: "love", label: "ความรัก" },
   { id: "health", label: "สุขภาพ" },
 ];
+
+const MIN_LOADING_MS = 4800;
 
 /** After premium unlock — collect time + birth place for deeper analysis */
 export function PremiumDeepenForm({
@@ -33,6 +37,36 @@ export function PremiumDeepenForm({
   const [birthPlace, setBirthPlace] = useState(profile.birthPlace ?? "");
   const [focus, setFocus] = useState<FortuneFocus>(profile.focus ?? "life");
   const [error, setError] = useState<string | null>(null);
+  const [phase, setPhase] = useState<"form" | "loading">("form");
+  const [savedProfile, setSavedProfile] = useState<FortuneUserProfile | null>(
+    null
+  );
+  const [progress, setProgress] = useState(0);
+  const onSavedRef = useRef(onSaved);
+  onSavedRef.current = onSaved;
+
+  useEffect(() => {
+    if (phase !== "loading" || !savedProfile) return;
+
+    // Recompute packs with full birth time / place (not the free reading)
+    const rebuilt = rebuildPremiumReading(savedProfile);
+
+    const started = Date.now();
+    const tick = window.setInterval(() => {
+      const elapsed = Date.now() - started;
+      setProgress(Math.min(96, (elapsed / MIN_LOADING_MS) * 100));
+    }, 200);
+
+    const done = window.setTimeout(() => {
+      setProgress(100);
+      window.setTimeout(() => onSavedRef.current(rebuilt), 150);
+    }, MIN_LOADING_MS);
+
+    return () => {
+      window.clearInterval(tick);
+      window.clearTimeout(done);
+    };
+  }, [phase, savedProfile]);
 
   function save() {
     if (!/^\d{1,2}:\d{2}$/.test(birthTime)) {
@@ -50,7 +84,9 @@ export function PremiumDeepenForm({
       focus,
       deepenSkipped: false,
     });
-    onSaved(next);
+    setSavedProfile(next);
+    setProgress(0);
+    setPhase("loading");
   }
 
   function skip() {
@@ -61,10 +97,22 @@ export function PremiumDeepenForm({
     onSkip(next);
   }
 
+  if (phase === "loading") {
+    return (
+      <div className="absolute inset-0 z-20">
+        <FortuneLoading
+          nickname={profile.nickname}
+          categoryTitle="พรีเมียมเชิงลึก"
+          progress={progress}
+        />
+      </div>
+    );
+  }
+
   return (
     <section
       className={cn(
-        "mae-aspect-card mx-auto w-full max-w-[360px] rounded-[22px] px-4 py-5 text-center",
+        "mae-aspect-card mx-auto my-auto w-full max-w-[360px] rounded-[22px] px-4 py-5 text-center",
         className
       )}
     >

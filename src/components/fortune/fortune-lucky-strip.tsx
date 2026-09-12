@@ -13,6 +13,7 @@ export function FortuneLuckyStrip({
   birthDate = "2000-01-01",
   nickname = "",
   birthTime,
+  birthPlace,
   focus,
   gender,
   className,
@@ -21,6 +22,7 @@ export function FortuneLuckyStrip({
   birthDate?: string;
   nickname?: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   className?: string;
@@ -31,11 +33,12 @@ export function FortuneLuckyStrip({
       birthDate,
       nickname,
       birthTime,
+      birthPlace,
       focus,
       gender,
     });
     return pack.lucky;
-  }, [birthDate, nickname, birthTime, focus, gender]);
+  }, [birthDate, nickname, birthTime, birthPlace, focus, gender]);
 
   const [c0, c1] = lucky.colors;
 

@@ -3,7 +3,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInView } from "@/hooks/use-in-view";
 
@@ -274,21 +274,23 @@ export function MaeLanding() {
             mounted && "is-visible"
           )}
         >
-          <h1 className="mt-0 flex flex-col items-center gap-0 overflow-visible font-sans text-white">
-            <span className="text-[1.55rem] font-bold leading-[1.3] tracking-[0.03em] sm:text-[1.65rem]">
+          <h1 className="mt-0 flex flex-col items-center overflow-visible font-sacred text-white">
+            <span className="text-[1.62rem] font-normal leading-[1.28] tracking-[0.02em] text-white sm:text-[1.72rem]">
               เข้าใจจังหวะชีวิต
             </span>
-            <span className="mae-hero-gold-line text-[1.55rem] font-bold leading-[1.3] tracking-[0.03em] sm:text-[1.65rem]">
+            <span className="mae-hero-gold-line mt-1 text-[1.72rem] font-normal leading-[1.28] tracking-[0.02em] sm:text-[1.82rem]">
               ก้าวต่ออย่างอุ่นใจ
             </span>
           </h1>
 
-          <p className="mx-auto mt-2.5 max-w-[18.5rem] text-[12.5px] leading-[1.6] tracking-[0.01em] text-white/85">
+          <p className="mx-auto mt-3 max-w-[18rem] text-[12.5px] leading-[1.75] tracking-[0.015em] text-[#d8dee8]/88">
             บางช่วง… เราตั้งใจเต็มที่
             <br />
             แต่หลายอย่างกลับไม่เป็นอย่างหวัง
             <br />
-            ลองให้การอ่านดวง เป็นอีกมุมในการทบทวนตัวเอง
+            <span className="text-[#e8d19a]/88">
+              ลองให้การอ่านดวง เป็นอีกมุมในการทบทวนตัวเอง
+            </span>
           </p>
 
           <Link
@@ -304,24 +306,62 @@ export function MaeLanding() {
             />
           </Link>
 
+          {/* Award strip — trophy left, title right, centered as a group */}
+          <div className="mx-auto mt-5 flex w-fit max-w-[min(100%,20.5rem)] -translate-x-2.5 items-center gap-1 text-left">
+            <span className="mae-award-glow relative flex h-[3.85rem] w-[3.85rem] shrink-0 items-center justify-center">
+              <Image
+                src="/images/brand/diamond-trophy-transparent.webp"
+                alt="รางวัลเพชรสยาม"
+                width={72}
+                height={72}
+                unoptimized
+                className="mae-award-trophy relative z-[1] h-[3.7rem] w-[3.7rem] object-contain"
+              />
+            </span>
+            <div className="min-w-0 py-0.5">
+              <p className="text-[9.5px] font-semibold tracking-[0.18em] text-[#d5b16f]/90">
+                เกียรติยศ
+              </p>
+              <p className="mae-gold-text mt-0.5 font-sacred text-[1.08rem] leading-snug tracking-tight sm:text-[1.14rem]">
+                รางวัลเพชรสยาม 2026
+              </p>
+              <p className="mt-0.5 text-[11px] leading-snug tracking-[0.01em] text-[#c5cdd9]/88 sm:text-[11.5px]">
+                สาขา ธุรกิจบริการออนไลน์ยอดเยี่ยม
+              </p>
+            </div>
+          </div>
+
           <a
             href="#belief"
-            className="mae-concept-link mt-3 inline-flex items-center gap-1.5 text-[13px] text-white/85 transition hover:text-white"
+            className="mae-concept-link group mt-4 inline-flex flex-col items-center gap-1 outline-none transition active:opacity-80"
           >
-            <span className="underline decoration-white/50 underline-offset-[5px]">
-              อ่านแนวคิดแม่มั่งมี
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                className="text-[10px] leading-none transition group-hover:opacity-100"
+                style={{ color: C.gold }}
+                aria-hidden
+              >
+                ✦
+              </span>
+              <span className="mae-gold-text text-[12.5px] font-medium tracking-[0.04em]">
+                อ่านแนวคิดแม่มั่งมี
+              </span>
             </span>
-            <span className="mae-concept-arrow" aria-hidden>
-              ↓
+            <span
+              className="mae-concept-arrow flex h-4 w-4 items-center justify-center rounded-full"
+              style={{
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
+                background: "rgba(16,24,39,0.35)",
+              }}
+              aria-hidden
+            >
+              <ArrowDown
+                className="h-2.5 w-2.5"
+                style={{ color: C.gold }}
+                strokeWidth={2.6}
+              />
             </span>
           </a>
-
-          <p className="mt-3 flex items-center justify-center gap-1.5 text-[11.5px] leading-snug text-[#c5cdd9]/85">
-            <span style={{ color: C.gold }} aria-hidden>
-              ✦
-            </span>
-            อ่านดวงอย่างมีสติ · ทุกการตัดสินใจยังเป็นของคุณ
-          </p>
         </div>
       </section>
 

@@ -152,10 +152,16 @@ export function hasBasicFortuneProfile(
   );
 }
 
-/** After unlock: always start reading wizard at gender → birth → name */
+/**
+ * After unlock: if gender/birth/name already exist → premium deepen only.
+ * Otherwise collect basics via reading wizard first.
+ */
 export function getPremiumOnboardPath(
-  _profile: FortuneUserProfile | null | undefined = null
+  profile: FortuneUserProfile | null | undefined = null
 ): string {
+  if (hasBasicFortuneProfile(profile)) {
+    return "/premium";
+  }
   return "/reading?afterPremium=1";
 }
 

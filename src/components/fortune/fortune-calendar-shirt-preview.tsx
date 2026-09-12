@@ -29,6 +29,7 @@ export function FortuneCalendarShirtPreview({
   birthDate = "2000-01-01",
   nickname = "",
   birthTime,
+  birthPlace,
   focus,
   gender,
   unlocked = false,
@@ -39,6 +40,7 @@ export function FortuneCalendarShirtPreview({
   birthDate?: string;
   nickname?: string;
   birthTime?: string;
+  birthPlace?: string;
   focus?: FortuneFocus;
   gender?: string;
   unlocked?: boolean;
@@ -54,10 +56,11 @@ export function FortuneCalendarShirtPreview({
       birthDate,
       nickname,
       birthTime,
+      birthPlace,
       focus,
       gender,
     }).shirt;
-  }, [birthDate, nickname, birthTime, focus, gender]);
+  }, [birthDate, nickname, birthTime, birthPlace, focus, gender]);
 
   const previewDays = useMemo(() => {
     const today = new Date();
