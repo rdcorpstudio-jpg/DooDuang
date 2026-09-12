@@ -51,6 +51,13 @@ export async function POST(request: Request) {
       });
     }
 
+    const { trackEvent } = await import("@/lib/analytics/track");
+    void trackEvent({
+      name: isNewUser ? "signup" : "login",
+      userId,
+      props: { channel: "phone" },
+    });
+
     let checkoutUrl: string | undefined;
     if (wantCheckout) {
       checkoutUrl = await createPremiumCheckoutUrl({

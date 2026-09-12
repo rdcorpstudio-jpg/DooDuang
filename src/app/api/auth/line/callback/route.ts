@@ -101,6 +101,14 @@ export async function GET(request: Request) {
         name: profile.name,
       });
     }
+
+    const { trackEvent } = await import("@/lib/analytics/track");
+    void trackEvent({
+      name: isNewUser ? "signup" : "login",
+      userId,
+      props: { channel: "line" },
+    });
+
     const token = await createSessionToken(userId);
 
     const response = NextResponse.redirect(new URL(returnPath, request.url));

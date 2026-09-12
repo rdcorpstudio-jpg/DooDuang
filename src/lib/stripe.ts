@@ -161,5 +161,17 @@ export async function createPremiumCheckoutUrl(opts: {
   if (!checkoutSession.url) {
     throw new Error("ไม่สามารถสร้าง checkout ได้");
   }
+
+  const { trackEvent } = await import("@/lib/analytics/track");
+  void trackEvent({
+    name: "checkout_started",
+    userId: opts.userId,
+    props: {
+      packageId: pkg.id,
+      days: pkg.days,
+      stripeSessionId: checkoutSession.id,
+    },
+  });
+
   return checkoutSession.url;
 }

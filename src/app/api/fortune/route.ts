@@ -46,6 +46,17 @@ export async function POST(request: Request) {
 
     const fortune = await generateReading(type, profile);
 
+    const { auth } = await import("@/lib/auth");
+    const { readingTypeToFeature } = await import("@/lib/analytics/events");
+    const { trackEvent } = await import("@/lib/analytics/track");
+    const session = await auth();
+    void trackEvent({
+      name: "feature_complete",
+      userId: session?.user?.id,
+      feature: readingTypeToFeature(type),
+      props: { readingType: type },
+    });
+
     // Do not persist readings to DB (avoids history bloat). Share links disabled.
     return NextResponse.json({
       title: fortune.title,

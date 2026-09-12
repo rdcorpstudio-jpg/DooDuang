@@ -93,6 +93,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const { trackEvent } = await import("@/lib/analytics/track");
+    void trackEvent({
+      name: "feature_complete",
+      userId: premium.session.user.id,
+      feature: mode,
+      props: { mode },
+    });
+
     return NextResponse.json({ ok: true, mode, pack });
   } catch (err) {
     console.error("fortune scan route error:", err);

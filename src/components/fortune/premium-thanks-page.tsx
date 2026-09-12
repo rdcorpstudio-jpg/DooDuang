@@ -16,6 +16,7 @@ import {
   readFortuneProfile,
 } from "@/lib/fortune/profile-storage";
 import { requirePremiumFromServer } from "@/lib/fortune/premium-unlock";
+import { trackClientEvent } from "@/lib/analytics/client";
 
 function LineMark({ className }: { className?: string }) {
   return (
@@ -162,6 +163,12 @@ export function PremiumThanksPage() {
             href={LINE_OA_ADD_URL}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => {
+              trackClientEvent({
+                name: "thanks_line_cta",
+                path: "/premium/thanks",
+              });
+            }}
             className="mt-5 inline-flex h-12 w-full max-w-[240px] items-center justify-center gap-2 rounded-full text-[15px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
             style={{
               background: "#06C755",

@@ -139,8 +139,33 @@ export const fortuneProfiles = pgTable("fortune_profiles", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+/** Product analytics — funnel + feature usage */
+export const analyticsEvents = pgTable(
+  "analytics_events",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+    name: text("name").notNull(),
+    feature: text("feature"),
+    path: text("path"),
+    props: text("props"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("analytics_events_name_created_idx").on(table.name, table.createdAt),
+    index("analytics_events_feature_created_idx").on(
+      table.feature,
+      table.createdAt
+    ),
+    index("analytics_events_user_created_idx").on(table.userId, table.createdAt),
+  ]
+);
+
 export type User = typeof users.$inferSelect;
 export type PhoneOtp = typeof phoneOtps.$inferSelect;
 export type Reading = typeof readings.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
 export type FortuneProfile = typeof fortuneProfiles.$inferSelect;
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;

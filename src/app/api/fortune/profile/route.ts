@@ -50,6 +50,13 @@ export async function PUT(request: Request) {
     }
 
     const row = await upsertFortuneProfileForUser(session.user.id, input);
+
+    const { trackEvent } = await import("@/lib/analytics/track");
+    void trackEvent({
+      name: "profile_saved",
+      userId: session.user.id,
+    });
+
     return NextResponse.json({
       ok: true,
       profile: rowToFortuneProfilePayload(row),

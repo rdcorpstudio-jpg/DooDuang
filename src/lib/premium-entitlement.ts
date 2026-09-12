@@ -284,6 +284,14 @@ export async function applyOneTimePremiumCheckout(opts: {
     console.error("LINE payment notify skipped:", err);
   }
 
+  const { trackPaymentSucceededOnce } = await import("@/lib/analytics/track");
+  void trackPaymentSucceededOnce({
+    userId,
+    stripeSessionId: session.id,
+    amount: opts.amount,
+    days: opts.days,
+  });
+
   return {
     userId,
     status: "active",
