@@ -14,6 +14,8 @@ export type SessionUser = {
   phone?: string | null;
   image?: string | null;
   credits: number;
+  premiumUntil?: Date | null;
+  subscriptionStatus?: string | null;
 };
 
 export type Session = {
@@ -76,6 +78,8 @@ export async function auth(): Promise<Session | null> {
         phone: users.phone,
         image: users.image,
         credits: users.credits,
+        premiumUntil: users.premiumUntil,
+        subscriptionStatus: users.subscriptionStatus,
       })
       .from(users)
       .where(eq(users.id, uid))

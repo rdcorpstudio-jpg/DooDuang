@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { isMaeShellPath } from "@/lib/mae-shell";
 import { StarfieldBackground } from "@/components/layout/starfield-background";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { syncPremiumFromServer } from "@/lib/fortune/premium-unlock";
 
 interface PhoneFrameProps {
   children: React.ReactNode;
@@ -25,6 +26,10 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
      Home hero is a tight 1-screen composition — comfort zoom crushes it on real phones. */
   const disableComfortZoom =
     isAuthPath || keyboardOpen || pathname === "/" || pathname === "";
+
+  useEffect(() => {
+    void syncPremiumFromServer();
+  }, [pathname]);
 
   useEffect(() => {
     const root = document.documentElement;

@@ -22,6 +22,10 @@ export const users = pgTable("users", {
   lineUserId: text("line_user_id").unique(),
   image: text("image"),
   credits: integer("credits").default(0).notNull(),
+  stripeCustomerId: text("stripe_customer_id").unique(),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStatus: text("subscription_status"),
+  premiumUntil: timestamp("premium_until", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 

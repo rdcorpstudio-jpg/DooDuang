@@ -16,6 +16,8 @@ export async function GET() {
       email: session.user.email,
       phone: session.user.phone,
       image: session.user.image,
+      premiumUntil: session.user.premiumUntil,
+      subscriptionStatus: session.user.subscriptionStatus,
     },
   });
 }

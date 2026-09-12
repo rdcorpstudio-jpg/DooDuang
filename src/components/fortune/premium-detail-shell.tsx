@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { PageBackButton } from "@/components/ui/page-back-button";
-import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import { isPremiumUnlocked, syncPremiumFromServer } from "@/lib/fortune/premium-unlock";
 import {
   hydrateFortuneProfileFromWizard,
   readFortuneProfile,
@@ -17,21 +17,29 @@ export function usePremiumProfileGate() {
   const [profile, setProfile] = useState<FortuneUserProfile | null>(null);
 
   useEffect(() => {
-    hydrateFortuneProfileFromWizard();
-    const next = readFortuneProfile();
-    setProfile(next);
-    const unlocked = isPremiumUnlocked(
-      next ? { birthDate: next.birthDate, nickname: next.nickname } : null
-    );
-    if (!unlocked) {
-      router.replace("/menu");
-      return;
-    }
-    if (!next?.birthDate) {
-      router.replace(`/reading?next=${encodeURIComponent(window.location.pathname)}`);
-      return;
-    }
-    setReady(true);
+    let cancelled = false;
+    void (async () => {
+      hydrateFortuneProfileFromWizard();
+      const next = readFortuneProfile();
+      if (cancelled) return;
+      setProfile(next);
+      const unlocked = await syncPremiumFromServer(
+        next ? { birthDate: next.birthDate, nickname: next.nickname } : null
+      );
+      if (cancelled) return;
+      if (!unlocked && !isPremiumUnlocked(next ? { birthDate: next.birthDate, nickname: next.nickname } : null)) {
+        router.replace("/menu");
+        return;
+      }
+      if (!next?.birthDate) {
+        router.replace(`/reading?next=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+      setReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   return { ready, profile };

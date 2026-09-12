@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { trackLinePurchaseConversions } from "@/components/analytics/line-tag";
 import { trackMetaPurchase } from "@/components/analytics/meta-pixel";
 import { confirmStripePremiumUnlock } from "@/components/fortune/fortune-payment-sheet";
-import { setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import { applyPremiumUntil, setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import {
   getPremiumOnboardPath,
   readFortuneProfile,
@@ -36,11 +36,23 @@ export function useStripePaymentReturn(onUnlocked?: () => void) {
         if (result.premiumUnlocked) {
           unlockedOk = true;
           const profile = readFortuneProfile();
-          setPremiumUnlocked(
-            profile
-              ? { birthDate: profile.birthDate, nickname: profile.nickname }
-              : null
-          );
+          const untilMs = result.premiumUntil
+            ? Date.parse(result.premiumUntil)
+            : NaN;
+          if (Number.isFinite(untilMs)) {
+            applyPremiumUntil(
+              untilMs,
+              profile
+                ? { birthDate: profile.birthDate, nickname: profile.nickname }
+                : null
+            );
+          } else {
+            setPremiumUnlocked(
+              profile
+                ? { birthDate: profile.birthDate, nickname: profile.nickname }
+                : null
+            );
+          }
           trackMetaPurchase(sessionId);
           trackLinePurchaseConversions(sessionId);
           onUnlockedRef.current?.();

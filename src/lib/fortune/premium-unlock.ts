@@ -120,6 +120,57 @@ export function clearPremiumUnlocked(): void {
   }
 }
 
+export function applyPremiumUntil(
+  untilMs: number | null,
+  profile?: {
+    birthDate: string;
+    nickname: string;
+  } | null
+): boolean {
+  if (untilMs === null || untilMs <= Date.now()) {
+    clearPremiumUnlocked();
+    return false;
+  }
+
+  writeUntilMs(untilMs);
+  try {
+    sessionStorage.setItem(PREMIUM_UNLOCK_KEY, "1");
+    if (profile?.birthDate && profile?.nickname) {
+      sessionStorage.setItem(
+        legacyUnlockKey(profile.birthDate, profile.nickname),
+        "1"
+      );
+    }
+  } catch {
+    /* ignore */
+  }
+  assignPremiumWallpaperIfNeeded();
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("dooduang-premium-changed"));
+  }
+  return true;
+}
+
+/** Pull entitlement from the logged-in account. No-op when logged out. */
+export async function syncPremiumFromServer(profile?: {
+  birthDate: string;
+  nickname: string;
+} | null): Promise<boolean> {
+  try {
+    const res = await fetch("/api/premium/status", { cache: "no-store" });
+    if (!res.ok) return isPremiumUnlocked(profile);
+    const data = (await res.json()) as {
+      authenticated?: boolean;
+      premium?: boolean;
+      untilMs?: number | null;
+    };
+    if (!data.authenticated) return isPremiumUnlocked(profile);
+    return applyPremiumUntil(data.premium ? data.untilMs ?? null : null, profile);
+  } catch {
+    return isPremiumUnlocked(profile);
+  }
+}
+
 export function getPremiumUnlockedUntil(): Date | null {
   const until = readUntilMs();
   if (until === null || until <= Date.now()) return null;

@@ -35,7 +35,7 @@ import {
   writeFortuneProfile,
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
-import { getPremiumUnlockedUntil, isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import { getPremiumUnlockedUntil, syncPremiumFromServer } from "@/lib/fortune/premium-unlock";
 import { FORTUNE_PACKAGE_MONTHS, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -112,14 +112,15 @@ export function AccountDashboard({
     const loaded =
       hydrateFortuneProfileFromWizard() ?? readFortuneProfile();
     setProfile(loaded);
-    setPremium(
-      isPremiumUnlocked(
+    void (async () => {
+      const premiumOn = await syncPremiumFromServer(
         loaded
           ? { birthDate: loaded.birthDate, nickname: loaded.nickname }
           : null
-      )
-    );
-    setPremiumUntil(getPremiumUnlockedUntil());
+      );
+      setPremium(premiumOn);
+      setPremiumUntil(getPremiumUnlockedUntil());
+    })();
     if (loaded) {
       setDraft({
         realName: loaded.realName,

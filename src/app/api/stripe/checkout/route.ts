@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import {
+  AlreadySubscribedError,
   createPremiumCheckoutUrl,
   resolveCheckoutPackage,
 } from "@/lib/stripe";
@@ -29,6 +30,9 @@ export async function GET(request: Request) {
     });
     return NextResponse.redirect(url, 303);
   } catch (err) {
+    if (err instanceof AlreadySubscribedError) {
+      return NextResponse.redirect(new URL("/premium", request.url));
+    }
     console.error("Stripe go failed:", err);
     const premium = new URL("/premium?checkout=1", request.url);
     premium.searchParams.set("payError", "1");
@@ -60,9 +64,12 @@ async function readPackageId(request: Request) {
 }
 
 export async function POST(request: Request) {
+  let wantsJson = true;
   try {
     const session = await auth();
-    const { packageId, returnPath, wantsJson } = await readPackageId(request);
+    const parsed = await readPackageId(request);
+    const { packageId, returnPath } = parsed;
+    wantsJson = parsed.wantsJson;
 
     if (!session?.user) {
       if (wantsJson) {
@@ -95,6 +102,12 @@ export async function POST(request: Request) {
 
     return NextResponse.redirect(url, 303);
   } catch (err) {
+    if (err instanceof AlreadySubscribedError) {
+      if (wantsJson) {
+        return NextResponse.json({ error: err.message, code: "ALREADY_SUBSCRIBED" }, { status: 409 });
+      }
+      return NextResponse.redirect(new URL("/premium", request.url), 303);
+    }
     console.error("Stripe checkout failed:", err);
     const message = err instanceof Error ? err.message : "";
     if (

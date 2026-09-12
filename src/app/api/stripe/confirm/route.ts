@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
-import { requireDb } from "@/lib/db";
-import { payments } from "@/lib/db/schema";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
+import {
+  applyStripeSubscription,
+  recordPayment,
+} from "@/lib/premium-entitlement";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+function stripeId(value: string | { id: string } | null | undefined) {
+  if (!value) return null;
+  return typeof value === "string" ? value : value.id;
+}
 
 /** Verify Stripe Checkout session after redirect and unlock premium. */
 export async function POST(request: Request) {
@@ -36,12 +42,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "session ไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const checkout = await stripe.checkout.sessions.retrieve(sessionId);
-    if (checkout.payment_status !== "paid") {
+    const checkout = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["subscription"],
+    });
+    const paid =
+      checkout.payment_status === "paid" || checkout.status === "complete";
+    if (!paid) {
       return NextResponse.json({ error: "ยังไม่ได้ชำระเงิน" }, { status: 402 });
     }
 
-    const metaUser = checkout.metadata?.userId;
+    const metaUser = checkout.metadata?.userId || checkout.client_reference_id;
     if (metaUser && metaUser !== session.user.id) {
       return NextResponse.json({ error: "บัญชีไม่ตรงกับการชำระ" }, { status: 403 });
     }
@@ -54,33 +64,43 @@ export async function POST(request: Request) {
         ? Math.round(checkout.amount_total / 100)
         : FORTUNE_UNLOCK_PRICE;
 
-    try {
-      const db = requireDb();
-      const existing = await db
-        .select({ id: payments.id })
-        .from(payments)
-        .where(eq(payments.stripeSessionId, checkout.id))
-        .limit(1);
+    const rawSub = checkout.subscription;
+    const subscription =
+      rawSub && typeof rawSub !== "string"
+        ? rawSub
+        : stripeId(rawSub)
+          ? await stripe.subscriptions.retrieve(stripeId(rawSub)!)
+          : null;
 
-      if (!existing[0]) {
-        await db.insert(payments).values({
+    const applied = subscription
+      ? await applyStripeSubscription({
           userId: session.user.id,
-          stripeSessionId: checkout.id,
-          amount,
-          credits,
-          status: "completed",
-        });
-      }
+          subscription,
+        })
+      : null;
+
+    try {
+      await recordPayment({
+        userId: session.user.id,
+        stripeRef: checkout.id,
+        amount,
+        credits,
+      });
     } catch (err) {
       console.error("Confirm payment DB write failed:", err);
     }
+
+    const premiumUnlocked = applied
+      ? applied.premium
+      : purpose === "premium-unlock" || packageId === "premium-unlock";
 
     return NextResponse.json({
       ok: true,
       purpose,
       packageId,
-      premiumUnlocked:
-        purpose === "premium-unlock" || packageId === "premium-unlock",
+      premiumUnlocked,
+      premiumUntil: applied?.premiumUntil?.toISOString() ?? null,
+      subscriptionStatus: applied?.status ?? null,
     });
   } catch (err) {
     console.error("Stripe confirm failed:", err);

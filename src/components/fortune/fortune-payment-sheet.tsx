@@ -474,6 +474,7 @@ export async function confirmStripePremiumUnlock(sessionId: string) {
   const data = (await res.json().catch(() => ({}))) as {
     ok?: boolean;
     premiumUnlocked?: boolean;
+    premiumUntil?: string | null;
     error?: string;
   };
   if (!res.ok) {

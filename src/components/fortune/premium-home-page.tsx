@@ -10,6 +10,7 @@ import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-
 import {
   isPremiumUnlocked,
   setPremiumUnlocked,
+  syncPremiumFromServer,
 } from "@/lib/fortune/premium-unlock";
 import {
   getPremiumOnboardPath,
@@ -142,28 +143,41 @@ export function PremiumHomePage({
   });
 
   useEffect(() => {
-    const next = mergeProfile();
-    setProfile(next);
-    const isUnlocked =
-      forceUnlocked ||
-      isPremiumUnlocked(
-        next ? { birthDate: next.birthDate, nickname: next.nickname } : null
+    let cancelled = false;
+    void (async () => {
+      const next = mergeProfile();
+      if (cancelled) return;
+      setProfile(next);
+      const fromServer = forceUnlocked
+        ? true
+        : await syncPremiumFromServer(
+            next ? { birthDate: next.birthDate, nickname: next.nickname } : null
+          );
+      if (cancelled) return;
+      const isUnlocked =
+        forceUnlocked ||
+        fromServer ||
+        isPremiumUnlocked(
+          next ? { birthDate: next.birthDate, nickname: next.nickname } : null
+        );
+      setUnlocked(isUnlocked);
+      setShowDeepen(
+        Boolean(isUnlocked && hasDeepenAfterPay() && needsPremiumDeepen(next))
       );
-    setUnlocked(isUnlocked);
-    // อย่าเด้งฟอร์มพรีเมียมตอนเข้าหน้าธรรมดา — เฉพาะหลังจ่าย (หรือกดแบนเนอร์เอง)
-    setShowDeepen(
-      Boolean(isUnlocked && hasDeepenAfterPay() && needsPremiumDeepen(next))
-    );
-    setReady(true);
+      setReady(true);
 
-    if (isUnlocked && !forceUnlocked && !hasBasicFortuneProfile(next)) {
-      router.replace(getPremiumOnboardPath(next));
-      return;
-    }
+      if (isUnlocked && !forceUnlocked && !hasBasicFortuneProfile(next)) {
+        router.replace(getPremiumOnboardPath(next));
+        return;
+      }
 
-    if (!forceUnlocked && !hasFreeReadingBasics(next)) {
-      router.replace("/reading");
-    }
+      if (!forceUnlocked && !hasFreeReadingBasics(next)) {
+        router.replace("/reading");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [forceUnlocked, router]);
 
   const seed = useMemo(() => {

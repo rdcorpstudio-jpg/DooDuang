@@ -1,8 +1,16 @@
 import Stripe from "stripe";
 import { CREDIT_PACKAGES, PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
+import { getUserSubscription, hasPremiumAccess } from "@/lib/premium-entitlement";
 
 export { CREDIT_PACKAGES, PREMIUM_UNLOCK };
 export type { CreditPackageId } from "@/lib/stripe-catalog";
+
+export class AlreadySubscribedError extends Error {
+  constructor() {
+    super("มีสมาชิกพรีเมียมอยู่แล้ว");
+    this.name = "AlreadySubscribedError";
+  }
+}
 
 export const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -18,7 +26,7 @@ function priceIdForPackage(packageId: string) {
     packageId === "popular" ||
     packageId === "premium"
   ) {
-    // All paid unlocks use the 3-month starter price for now.
+    // All paid unlocks use the monthly starter price.
     return process.env.STRIPE_PRICE_STARTER;
   }
   return undefined;
@@ -105,17 +113,39 @@ export async function createPremiumCheckoutUrl(opts: {
       ? opts.returnPath
       : "/premium";
 
+  const existing = await getUserSubscription(opts.userId);
+  if (
+    hasPremiumAccess({
+      status: existing?.subscriptionStatus,
+      until: existing?.premiumUntil,
+    })
+  ) {
+    throw new AlreadySubscribedError();
+  }
+
   const checkoutSession = await stripe.checkout.sessions.create({
-    mode: "payment",
-    customer_email: opts.email ?? undefined,
+    mode: "subscription",
+    ...(existing?.stripeCustomerId
+      ? { customer: existing.stripeCustomerId }
+      : opts.email
+        ? { customer_email: opts.email }
+        : {}),
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${opts.origin}${safeReturn}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${opts.origin}${safeReturn}?payment=cancelled`,
+    client_reference_id: opts.userId,
     metadata: {
       userId: opts.userId,
       packageId: pkg.id,
       credits: String(pkg.credits),
       purpose: pkg.purpose,
+    },
+    subscription_data: {
+      metadata: {
+        userId: opts.userId,
+        packageId: pkg.id,
+        purpose: pkg.purpose,
+      },
     },
   });
 
