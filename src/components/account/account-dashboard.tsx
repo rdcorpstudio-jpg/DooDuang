@@ -384,41 +384,30 @@ export function AccountDashboard({
 
       {/* Contact Mae via LINE OA — after membership, before profile edit */}
       <section className="mae-aspect-card rounded-[20px] px-3.5 py-3.5">
-        <div className="flex items-start gap-3">
-          <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
-            style={{ background: "#06C755" }}
-            aria-hidden
-          >
-            <LineMark className="h-[18px] w-[18px]" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-[15px] font-semibold leading-snug text-[#f7f4ec]">
-              รับข่าวจากแม่ และปรึกษาได้ในไลน์
-            </h2>
-            <a
-              href={LINE_OA_ADD_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                trackClientEvent({
-                  name: "thanks_line_cta",
-                  path: "/dashboard",
-                  props: { source: "account" },
-                });
-              }}
-              className="mt-2.5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
-              style={{
-                background: "#06C755",
-                boxShadow:
-                  "0 8px 20px rgba(6,199,85,0.28), 0 0 0 1px rgba(255,255,255,0.06)",
-              }}
-            >
-              <LineMark className="h-4 w-4" />
-              คุยกับแม่มั่งมี
-            </a>
-          </div>
-        </div>
+        <h2 className="text-center text-[15px] font-semibold leading-snug text-[#f7f4ec]">
+          รับข่าวจากแม่ และปรึกษาได้ในไลน์
+        </h2>
+        <a
+          href={LINE_OA_ADD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => {
+            trackClientEvent({
+              name: "thanks_line_cta",
+              path: "/dashboard",
+              props: { source: "account" },
+            });
+          }}
+          className="mt-2.5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
+          style={{
+            background: "#06C755",
+            boxShadow:
+              "0 8px 20px rgba(6,199,85,0.28), 0 0 0 1px rgba(255,255,255,0.06)",
+          }}
+        >
+          <LineMark className="h-4 w-4" />
+          คุยกับแม่มั่งมี
+        </a>
       </section>
 
       {/* Fortune profile */}
