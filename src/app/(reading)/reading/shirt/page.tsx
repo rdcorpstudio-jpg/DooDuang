@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, Lock, Sparkles } from "lucide-react";
+import { ChevronLeft, Lock } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
@@ -11,7 +11,6 @@ import {
   LUCKY_SHIRT_CATALOG,
   getLuckyShirtById,
   pickLuckyShirtForDay,
-  pickLuckyShirtsForRange,
   type LuckyShirtInfo,
 } from "@/lib/fortune/content/lucky-shirts";
 import {
@@ -25,7 +24,7 @@ import {
 import { APP_BRAND_MARK, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-/** Free = วันนี้เท่านั้น · พรีเมียม = ดูรายละเอียดทุกสี + สีแนะนำ 7 วัน */
+/** Free = วันนี้เท่านั้น · พรีเมียม = ดูรายละเอียดทุกสี */
 function LuckyShirtPageInner() {
   const [ready, setReady] = useState(false);
   const [premium, setPremium] = useState(false);
@@ -77,11 +76,6 @@ function LuckyShirtPageInner() {
   const todayShirt = useMemo(
     () => pickLuckyShirtForDay(input),
     [input]
-  );
-
-  const week = useMemo(
-    () => (premium ? pickLuckyShirtsForRange(input, 7) : []),
-    [input, premium]
   );
 
   const active: LuckyShirtInfo = selectedId
@@ -184,7 +178,7 @@ function LuckyShirtPageInner() {
             ) : (
               <div className="mt-4 space-y-2.5 text-left">
                 <p className="text-[13px] leading-[1.65] text-[#f7f4ec]/55">
-                  ฟรีดูรายละเอียดเต็มได้เฉพาะสีแนะนำวันนี้ — ปลดล็อกเพื่ออ่านทุกสีและสีแนะนำ 7 วัน
+                  ฟรีดูรายละเอียดเต็มได้เฉพาะสีแนะนำวันนี้ — ปลดล็อกเพื่ออ่านทุกสี
                 </p>
                 <button
                   type="button"
@@ -247,66 +241,6 @@ function LuckyShirtPageInner() {
               })}
             </div>
           </section>
-
-          {premium ? (
-            <section className="mae-aspect-card rounded-[20px] px-3.5 py-3.5">
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-[#d5b16f]" strokeWidth={1.8} />
-                <p className="text-[13px] font-semibold text-[#d5b16f]">
-                  สีแนะนำ 7 วัน
-                </p>
-              </div>
-              <ul className="mt-3 space-y-2">
-                {week.map((d) => (
-                  <li key={d.iso}>
-                    <button
-                      type="button"
-                      onClick={() => selectShirt(d.shirt)}
-                      className="flex w-full items-center gap-3 rounded-[14px] px-2.5 py-2 text-left outline-none transition active:scale-[0.99]"
-                      style={{
-                        background: "rgba(16,24,39,0.45)",
-                        boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.2)",
-                      }}
-                    >
-                      <Image
-                        src={d.shirt.src}
-                        alt=""
-                        width={40}
-                        height={40}
-                        unoptimized
-                        className="h-9 w-9 object-contain"
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-[12px] font-semibold text-[#f7f4ec]">
-                          {d.label}
-                        </span>
-                        <span className="mt-0.5 block text-[11px] text-[#e8d19a]/9">
-                          สี{d.shirt.name} · {d.shirt.meaning}
-                        </span>
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : (
-            <section className="mae-aspect-card rounded-[20px] px-3.5 py-3.5 text-center">
-              <p className="text-[13px] font-semibold text-[#d5b16f]">
-                พรีเมียม · ดูสีแนะนำทั้งสัปดาห์
-              </p>
-              <p className="mt-1.5 text-[12px] leading-snug text-[#f7f4ec]/65">
-                ฟรีดูได้เฉพาะวันนี้ · ปลดล็อกเพื่ออ่านรายละเอียดทุกสีและแผน 7 วัน
-              </p>
-              <button
-                type="button"
-                onClick={() => setPayOpen(true)}
-                className="mae-gold-cta mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full py-2.5 text-[13px] font-semibold"
-              >
-                <Lock className="h-3.5 w-3.5" strokeWidth={2.2} />
-                ปลดล็อกพรีเมียม
-              </button>
-            </section>
-          )}
         </div>
       )}
 
