@@ -218,13 +218,13 @@ export function FortunePalmReading({
         <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
           <Header onBack={() => router.back()} />
           <div className="fortune-glass mt-8 rounded-[22px] px-4 py-6 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#9B7FE8]/12 ring-1 ring-[#9B7FE8]/30">
-              <Lock className="h-5 w-5 text-[#7B5FD4]" strokeWidth={1.9} />
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(213,177,111,0.12)] ring-1 ring-[#d5b16f]/35">
+              <Lock className="h-5 w-5 text-[#d5b16f]" strokeWidth={1.9} />
             </span>
-            <h1 className="mt-3 text-[1.4rem] font-bold tracking-tight text-[#241C4F]">
+            <h1 className="mt-3 text-[1.4rem] font-bold tracking-tight text-[#f7f4ec]">
               ดูลายมือ · พรีเมียม
             </h1>
-            <p className="mt-2 text-[13px] leading-relaxed text-[#5E5688]">
+            <p className="mt-2 text-[13px] leading-relaxed text-[#c5cdd9]/80">
               ถ่ายฝ่ามือตามกรอบนำทาง เพื่ออ่านธาตุมือและเส้นหลัก
             </p>
             <button
@@ -259,13 +259,13 @@ export function FortunePalmReading({
         {step === "ready" ? (
           <>
             <header className="mt-5">
-              <h1 className="text-[1.55rem] font-bold tracking-tight text-[#241C4F]">
+              <h1 className="text-[1.55rem] font-bold tracking-tight text-[#f7f4ec]">
                 อ่านลายมือ
               </h1>
-              <p className="mt-1 text-[14px] font-medium text-[#7B5FD4]">
+              <p className="mt-1 text-[14px] font-medium text-[#d5b16f]">
                 ถ่ายฝ่ามือแล้ววิเคราะห์ด้วย AI
               </p>
-              <p className="mt-1 text-[12px] leading-relaxed text-[#6B6490]">
+              <p className="mt-1 text-[12px] leading-relaxed text-[#c5cdd9]/75">
                 {canRescan
                   ? "อัปโหลดรูปดูพรีวิวก่อน หรือถ่ายด้วยกล้อง · สแกนได้ 1 ครั้ง / 7 วัน"
                   : `สแกนรอบถัดไปในอีก ${cooldownDays} วัน — กดดูผลล่าสุดได้`}
@@ -318,12 +318,12 @@ export function FortunePalmReading({
             <button
               type="button"
               onClick={() => setScanOpen(true)}
-              className="no-sky-lift mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/70 py-3.5 text-[15px] font-semibold text-[#5B45B8] ring-1 ring-[#9B7FE8]/30 outline-none transition active:scale-[0.99]"
+              className="no-sky-lift mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/70 py-3.5 text-[15px] font-semibold text-[#d5b16f] ring-1 ring-[#d5b16f]/35 outline-none transition active:scale-[0.99]"
             >
               <Camera className="h-4 w-4" strokeWidth={2} />
               เปิดกล้องสแกน
             </button>
-            <p className="mt-3 text-center text-[11px] leading-relaxed text-[#8A82B0]">
+            <p className="mt-3 text-center text-[11px] leading-relaxed text-[#9aa3b2]">
               ใช้วิเคราะห์ผลลัพธ์เท่านั้น — ไม่เก็บรูปถาวร
             </p>
               </>
@@ -332,7 +332,7 @@ export function FortunePalmReading({
                 {error ? (
                   <p className="mt-3 text-center text-[12px] text-[#E11D48]">{error}</p>
                 ) : null}
-                <p className="mt-4 rounded-[16px] bg-white/65 px-3.5 py-3 text-center text-[12px] leading-relaxed text-[#5E5688] ring-1 ring-[#7B6BB0]/12">
+                <p className="mt-4 rounded-[16px] bg-white/65 px-3.5 py-3 text-center text-[12px] leading-relaxed text-[#c5cdd9]/80 ring-1 ring-[#d5b16f]/18">
                   คูลดาวน์ 7 วัน · ดูผลเดิมได้ตลอดจนกว่าจะสแกนรอบใหม่
                 </p>
               </>
@@ -379,7 +379,7 @@ function Header({ onBack }: { onBack: () => void }) {
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+        className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#e8d19a] outline-none transition active:opacity-60"
       >
         <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
         กลับ
@@ -404,14 +404,14 @@ function PalmPhotoSlot({
   return (
     <div className="fortune-glass mx-auto w-full max-w-[220px] overflow-hidden rounded-[18px]">
       <div className="flex items-center justify-between px-3 pt-2.5">
-        <p className="text-[11px] font-semibold tracking-[0.12em] text-[#7B5FD4]">
+        <p className="text-[11px] font-semibold tracking-[0.12em] text-[#d5b16f]">
           {label}
         </p>
         {url ? (
           <button
             type="button"
             onClick={onClear}
-            className="rounded-full p-1 text-[#8A82B0] outline-none transition active:opacity-60"
+            className="rounded-full p-1 text-[#9aa3b2] outline-none transition active:opacity-60"
             aria-label={`ลบรูป${label}`}
           >
             <X className="h-3.5 w-3.5" strokeWidth={2.2} />
@@ -421,7 +421,7 @@ function PalmPhotoSlot({
       <button
         type="button"
         onClick={onPick}
-        className="relative mt-1.5 flex aspect-[3/4] w-full flex-col items-center justify-center gap-1.5 bg-[#9B7FE8]/08 outline-none transition active:opacity-85"
+        className="relative mt-1.5 flex aspect-[3/4] w-full flex-col items-center justify-center gap-1.5 bg-[rgba(213,177,111,0.08)] outline-none transition active:opacity-85"
       >
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -432,10 +432,10 @@ function PalmPhotoSlot({
           />
         ) : (
           <>
-            <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/70 ring-1 ring-[#9B7FE8]/25">
-              <ImageIcon className="h-4 w-4 text-[#7B5FD4]" strokeWidth={1.9} />
+            <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/70 ring-1 ring-[#d5b16f]/30">
+              <ImageIcon className="h-4 w-4 text-[#d5b16f]" strokeWidth={1.9} />
             </span>
-            <span className="text-[12px] font-medium text-[#5B45B8]">
+            <span className="text-[12px] font-medium text-[#d5b16f]">
               อัปโหลด
             </span>
           </>
@@ -476,14 +476,14 @@ function PalmResult({
     <div className="mt-5 space-y-3 pb-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-[1.4rem] font-bold tracking-tight text-[#241C4F]">
+          <h1 className="text-[1.4rem] font-bold tracking-tight text-[#f7f4ec]">
             ผลอ่านลายมือ
           </h1>
-          <p className="mt-0.5 text-[12px] text-[#7B5FD4]">
+          <p className="mt-0.5 text-[12px] text-[#d5b16f]">
             อ่านจากฝ่ามือ · ธาตุและเส้นหลัก
           </p>
           {!unlocked ? (
-            <p className="mt-1 text-[11px] text-[#8A82B0]">
+            <p className="mt-1 text-[11px] text-[#9aa3b2]">
               ดูเบื้องต้นฟรี · รายละเอียดล็อกไว้
             </p>
           ) : null}
@@ -492,20 +492,20 @@ function PalmResult({
           <button
             type="button"
             onClick={onRescan}
-            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/70 px-2.5 py-1.5 text-[11px] font-medium text-[#5B45B8] ring-1 ring-[#9B7FE8]/25"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/70 px-2.5 py-1.5 text-[11px] font-medium text-[#d5b16f] ring-1 ring-[#d5b16f]/30"
           >
             <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
             สแกนใหม่
           </button>
         ) : (
-          <span className="inline-flex shrink-0 items-center rounded-full bg-[#F3EEFF] px-2.5 py-1.5 text-[11px] font-medium text-[#7A72A0]">
+          <span className="inline-flex shrink-0 items-center rounded-full bg-[rgba(213,177,111,0.12)] px-2.5 py-1.5 text-[11px] font-medium text-[#9aa3b2]">
             สแกนใหม่ใน {cooldownDays} วัน
           </span>
         )}
       </div>
 
       <div className="fortune-glass flex gap-3 rounded-[20px] p-3.5">
-        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#9B7FE8]/10 ring-1 ring-[#C9A227]/25">
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[rgba(213,177,111,0.1)] ring-1 ring-[#C9A227]/25">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={elementSrc}
@@ -514,10 +514,10 @@ function PalmResult({
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[17px] font-bold tracking-tight text-[#241C4F]">
+          <p className="text-[17px] font-bold tracking-tight text-[#f7f4ec]">
             {elementTitle}
           </p>
-          <p className="mt-1 text-[12px] leading-relaxed text-[#5E5688]">
+          <p className="mt-1 text-[12px] leading-relaxed text-[#c5cdd9]/80">
             {unlocked ? natureCopy.strength : natureCopy.personality}
           </p>
           <div className="mt-2 flex items-center justify-between gap-2">
@@ -538,13 +538,13 @@ function PalmResult({
       </div>
 
       <div className="fortune-glass rounded-[20px] px-4 py-4">
-        <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[#7B5FD4]">
+        <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
           ธาตุมือของคุณ
         </h2>
         {unlocked ? (
           <ExpandableBody text={natureCopy.personality} />
         ) : (
-          <p className="mt-1 text-[13px] leading-[1.75] text-[#3A3270]">
+          <p className="mt-1 text-[13px] leading-[1.75] text-[#c5cdd9]/88">
             {natureCopy.personality}
           </p>
         )}

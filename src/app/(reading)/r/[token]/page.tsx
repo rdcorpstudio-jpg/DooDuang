@@ -60,8 +60,8 @@ export default async function SavedReadingPage({ params }: SavedReadingPageProps
     return (
       <div className="relative flex h-full items-center justify-center px-6">
         <div className="relative z-10 text-center">
-          <p className="text-purple-200/70">เปิดผลดูดวงนี้ไม่ได้</p>
-          <Link href="/reading" className="mt-4 inline-block text-sm text-purple-400">
+          <p className="text-[#f7f4ec]/70">เปิดผลดูดวงนี้ไม่ได้</p>
+          <Link href="/reading" className="mt-4 inline-block text-sm text-[#d5b16f]">
             ดูดวงใหม่
           </Link>
         </div>

@@ -280,7 +280,7 @@ export function GuidedScanCapture({
             className="flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-[3px] border-white/85 bg-white outline-none transition enabled:active:scale-95 disabled:opacity-40"
             aria-label="กดถ่าย"
           >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#9B7FE8] to-[#7B5FD4]">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#d5b16f] to-[#b8924f]">
               <Camera className="h-6 w-6 text-white" strokeWidth={1.9} />
             </span>
           </button>

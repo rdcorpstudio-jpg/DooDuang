@@ -398,6 +398,7 @@ export function AccountDashboard({
                 วันเกิด
               </span>
               <BirthDatePicker
+                tone="mae"
                 value={draft.birthDate}
                 onChange={(birthDate) =>
                   setDraft((d) => ({ ...d, birthDate }))

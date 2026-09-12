@@ -250,9 +250,16 @@
 }
 
 .phone-frame--mae .bg-\[\#6A48C8\],
-.phone-frame--mae .bg-\[\#F3EEFF\] {
+.phone-frame--mae .bg-\[\#F3EEFF\],
+.phone-frame--mae .bg-\[\#EDE6FF\],
+.phone-frame--mae .bg-\[\#EDE6FF\]\/55,
+.phone-frame--mae .bg-\[\#EDE6FF\]\/9 {
   background-color: rgba(213, 177, 111, 0.16) !important;
   color: #d5b16f !important;
+}
+
+.phone-frame--mae .border-\[\#9B7FE8\]\/35 {
+  border-color: rgba(213, 177, 111, 0.4) !important;
 }
 
 /* Gold headings → champagne foil (not chips / icons / pill labels) */
@@ -605,6 +612,78 @@
   scroll-behavior: smooth;
 }
 
+/* Hero spacer — desktop phone mockup keeps Mae mid-frame; short phones get less */
+.mae-hero-spacer {
+  min-height: 46%;
+  flex: 1 1 auto;
+}
+
+@media (min-height: 780px) {
+  .mae-hero-spacer {
+    min-height: 50%;
+  }
+
+  .mae-hero-wordmark {
+    top: 44% !important;
+    width: min(66%, 13.5rem);
+  }
+}
+
+/* Real phones with browser chrome — keep copy readable in one viewport */
+@media (max-height: 740px) {
+  .mae-hero-spacer {
+    min-height: 40%;
+    max-height: 46%;
+  }
+
+  .mae-hero-wordmark {
+    top: 38% !important;
+    width: min(58%, 11.25rem) !important;
+  }
+
+  .mae-hero-copy h1 > span:first-child {
+    font-size: 1.38rem;
+  }
+
+  .mae-hero-copy .mae-hero-gold-line {
+    font-size: 1.45rem;
+  }
+
+  .mae-hero-lede {
+    margin-top: 0.5rem;
+    font-size: 11.5px;
+    line-height: 1.55;
+  }
+
+  .mae-hero-award {
+    margin-top: 0.65rem;
+  }
+
+  .mae-concept-link {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-height: 640px) {
+  .mae-hero-spacer {
+    min-height: 34%;
+  }
+
+  .mae-hero-lede br:nth-of-type(2) {
+    display: none;
+  }
+
+  .mae-hero-award .mae-award-glow {
+    height: 2.85rem;
+    width: 2.85rem;
+  }
+
+  .mae-hero-award .mae-award-trophy {
+    height: 2.7rem;
+    width: 2.7rem;
+  }
+}
+
 /* Reading wizard — Mae navy/gold tone */
 .mae-wizard .mae-wizard-input,
 .mae-wizard .name-step-input {
@@ -634,6 +713,26 @@
 .mae-wizard .mae-wizard-input:focus,
 .mae-wizard .name-step-input:focus {
   background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 0 0 1.5px rgba(213, 177, 111, 0.55) !important;
+}
+
+/* Account / any Mae page — name inputs match navy-gold */
+.phone-frame--mae .name-step-input {
+  color: #f4f1ea !important;
+  -webkit-text-fill-color: #f4f1ea !important;
+  caret-color: #e8d19a !important;
+  background: rgba(16, 24, 39, 0.72) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px rgba(213, 177, 111, 0.35) !important;
+}
+
+.phone-frame--mae .name-step-input::placeholder {
+  color: rgba(197, 205, 217, 0.55) !important;
+  -webkit-text-fill-color: rgba(197, 205, 217, 0.55) !important;
+}
+
+.phone-frame--mae .name-step-input:focus {
+  background: rgba(16, 24, 39, 0.85) !important;
   box-shadow: inset 0 0 0 1.5px rgba(213, 177, 111, 0.55) !important;
 }
 
@@ -2338,32 +2437,31 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
     padding-top: 0.85rem;
     padding-bottom: 0.85rem;
     line-height: 1.65;
-    color: #2c2458;
-    -webkit-text-fill-color: #2c2458;
-    caret-color: #d5b16f;
+    color: #f4f1ea;
+    -webkit-text-fill-color: #f4f1ea;
+    caret-color: #e8d19a;
     -webkit-appearance: none;
     appearance: none;
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(16, 24, 39, 0.72);
     background-image: none;
     -webkit-background-clip: border-box;
     background-clip: border-box;
     transform: none;
-    box-shadow:
-      0 4px 14px rgba(90, 70, 150, 0.08),
-      inset 0 0 0 1px rgba(123, 107, 176, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(213, 177, 111, 0.35);
     transition:
       box-shadow 0.2s ease,
       background 0.2s ease;
   }
 
   .name-step-input::placeholder {
-    color: rgba(107, 100, 144, 0.65);
+    color: rgba(197, 205, 217, 0.55);
+    -webkit-text-fill-color: rgba(197, 205, 217, 0.55);
     line-height: 1.35;
   }
 
   .name-step-input:focus {
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: inset 0 0 0 1.5px rgba(155, 127, 232, 0.55);
+    background: rgba(16, 24, 39, 0.85);
+    box-shadow: inset 0 0 0 1.5px rgba(213, 177, 111, 0.55);
   }
 
   .name-step-cta {
@@ -3560,7 +3658,7 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
 }
 
 .scan-analyze-frame {
-  box-shadow: 0 8px 22px rgba(74, 58, 138, 0.14);
+  box-shadow: 0 8px 22px rgba(16, 24, 39, 0.35);
 }
 
 .scan-analyze-beam {

@@ -221,12 +221,12 @@ export function MaeLanding() {
       className="mae-landing h-full max-w-full overflow-x-hidden overflow-y-auto overscroll-y-contain text-white"
       style={{ background: C.navy }}
     >
-      {/* HERO — full-bleed 9:16 plate */}
-      <section className="relative flex h-full min-h-full flex-col overflow-hidden px-5 pb-6 pt-3">
+      {/* HERO — one composition; spacing adapts to real phone chrome */}
+      <section className="mae-hero-plate relative flex min-h-full flex-col overflow-hidden px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
           <video
             className="absolute inset-0 h-full w-full object-cover"
-            style={{ objectPosition: "50% 50%" }}
+            style={{ objectPosition: "50% 42%" }}
             autoPlay
             muted
             loop
@@ -241,16 +241,16 @@ export function MaeLanding() {
             className="absolute inset-0"
             style={{
               background: `
-                linear-gradient(180deg, rgba(16,24,39,0.12) 0%, transparent 20%, transparent 52%, rgba(16,24,39,0.5) 78%, rgba(16,24,39,0.72) 100%)
+                linear-gradient(180deg, rgba(16,24,39,0.1) 0%, transparent 18%, transparent 48%, rgba(16,24,39,0.45) 72%, rgba(16,24,39,0.78) 100%)
               `,
             }}
           />
         </div>
 
-        {/* Brand mark — slightly below hands, mid frame */}
+        {/* Brand mark — anchored in upper mid frame */}
         <div
-          className="pointer-events-none absolute left-1/2 z-10 w-[min(68%,13.5rem)] -translate-x-1/2 -translate-y-1/2 sm:w-[14.5rem]"
-          style={{ top: "45%" }}
+          className="mae-hero-wordmark pointer-events-none absolute left-1/2 z-10 w-[min(62%,12.25rem)] -translate-x-1/2 -translate-y-1/2 sm:w-[13.75rem]"
+          style={{ top: "42%" }}
         >
           <Reveal visible={mounted} delay={60} variant="glow">
             <Image
@@ -265,25 +265,25 @@ export function MaeLanding() {
           </Reveal>
         </div>
 
-        {/* Spacer — keeps headline/copy mid-lower, tight under wordmark */}
-        <div className="relative z-0 min-h-[52%] w-full shrink-0" aria-hidden />
+        {/* Flexible spacer — leaves room for copy without crushing on short phones */}
+        <div className="mae-hero-spacer relative z-0 w-full shrink-0" aria-hidden />
 
         <div
           className={cn(
-            "mae-hero-copy mae-hero-stagger relative z-10 mb-6 flex w-full flex-col items-center pt-1 text-center sm:mb-8",
+            "mae-hero-copy mae-hero-stagger relative z-10 mt-auto flex w-full flex-col items-center pt-0 text-center",
             mounted && "is-visible"
           )}
         >
           <h1 className="mt-0 flex flex-col items-center overflow-visible font-sacred text-white">
-            <span className="text-[1.62rem] font-normal leading-[1.28] tracking-[0.02em] text-white sm:text-[1.72rem]">
+            <span className="text-[1.5rem] font-normal leading-[1.22] tracking-[0.02em] text-white sm:text-[1.72rem] sm:leading-[1.28]">
               เข้าใจจังหวะชีวิต
             </span>
-            <span className="mae-hero-gold-line mt-1 text-[1.72rem] font-normal leading-[1.28] tracking-[0.02em] sm:text-[1.82rem]">
+            <span className="mae-hero-gold-line mt-0.5 text-[1.58rem] font-normal leading-[1.22] tracking-[0.02em] sm:mt-1 sm:text-[1.82rem] sm:leading-[1.28]">
               ก้าวต่ออย่างอุ่นใจ
             </span>
           </h1>
 
-          <p className="mx-auto mt-3 max-w-[18rem] text-[12.5px] leading-[1.75] tracking-[0.015em] text-[#d8dee8]/88">
+          <p className="mae-hero-lede mx-auto mt-2.5 max-w-[18rem] text-[12px] leading-[1.65] tracking-[0.015em] text-[#d8dee8]/88 sm:mt-3 sm:text-[12.5px] sm:leading-[1.75]">
             บางช่วง… เราตั้งใจเต็มที่
             <br />
             แต่หลายอย่างกลับไม่เป็นอย่างหวัง
@@ -295,7 +295,7 @@ export function MaeLanding() {
 
           <Link
             href="/reading"
-            className="mae-gold-cta group relative mx-auto mt-5 flex h-11 w-full max-w-[240px] items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+            className="mae-gold-cta group relative mx-auto mt-4 flex h-11 w-full max-w-[240px] items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 sm:mt-5"
           >
             <span className="text-[14px] font-bold tracking-wide">
               เลือกเรื่องที่อยากรู้
@@ -306,26 +306,26 @@ export function MaeLanding() {
             />
           </Link>
 
-          {/* Award strip — trophy left, title right, centered as a group */}
-          <div className="mx-auto mt-5 flex w-fit max-w-[min(100%,20.5rem)] -translate-x-2.5 items-center gap-1 text-left">
-            <span className="mae-award-glow relative flex h-[3.85rem] w-[3.85rem] shrink-0 items-center justify-center">
+          {/* Award strip — optically centered */}
+          <div className="mae-hero-award mx-auto mt-3.5 flex w-fit max-w-[min(100%,19.5rem)] items-center gap-1.5 text-left sm:mt-5 sm:max-w-[min(100%,20.5rem)] sm:gap-1 sm:-translate-x-2.5">
+            <span className="mae-award-glow relative flex h-[3.35rem] w-[3.35rem] shrink-0 items-center justify-center sm:h-[3.85rem] sm:w-[3.85rem]">
               <Image
                 src="/images/brand/diamond-trophy-transparent.webp"
                 alt="รางวัลเพชรสยาม"
                 width={72}
                 height={72}
                 unoptimized
-                className="mae-award-trophy relative z-[1] h-[3.7rem] w-[3.7rem] object-contain"
+                className="mae-award-trophy relative z-[1] h-[3.2rem] w-[3.2rem] object-contain sm:h-[3.7rem] sm:w-[3.7rem]"
               />
             </span>
             <div className="min-w-0 py-0.5">
-              <p className="text-[9.5px] font-semibold tracking-[0.18em] text-[#d5b16f]/90">
+              <p className="text-[9px] font-semibold tracking-[0.16em] text-[#d5b16f]/90 sm:text-[9.5px] sm:tracking-[0.18em]">
                 เกียรติยศ
               </p>
-              <p className="mae-gold-text mt-0.5 font-sacred text-[1.08rem] leading-snug tracking-tight sm:text-[1.14rem]">
+              <p className="mae-gold-text mt-0.5 font-sacred text-[1rem] leading-snug tracking-tight sm:text-[1.14rem]">
                 รางวัลเพชรสยาม 2026
               </p>
-              <p className="mt-0.5 text-[11px] leading-snug tracking-[0.01em] text-[#c5cdd9]/88 sm:text-[11.5px]">
+              <p className="mt-0.5 text-[10.5px] leading-snug tracking-[0.01em] text-[#c5cdd9]/88 sm:text-[11.5px]">
                 สาขา ธุรกิจบริการออนไลน์ยอดเยี่ยม
               </p>
             </div>
@@ -333,7 +333,7 @@ export function MaeLanding() {
 
           <a
             href="#belief"
-            className="mae-concept-link group mt-4 inline-flex flex-col items-center gap-1 outline-none transition active:opacity-80"
+            className="mae-concept-link group mt-3 inline-flex flex-col items-center gap-0.5 outline-none transition active:opacity-80 sm:mt-4 sm:gap-1"
           >
             <span className="inline-flex items-center gap-1.5">
               <span
@@ -343,7 +343,7 @@ export function MaeLanding() {
               >
                 ✦
               </span>
-              <span className="mae-gold-text text-[12.5px] font-medium tracking-[0.04em]">
+              <span className="mae-gold-text text-[12px] font-medium tracking-[0.04em] sm:text-[12.5px]">
                 อ่านแนวคิดแม่มั่งมี
               </span>
             </span>

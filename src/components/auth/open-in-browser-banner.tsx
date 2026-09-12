@@ -30,7 +30,7 @@ export function OpenInBrowserBanner({
       type="button"
       onClick={() => openInExternalBrowser()}
       className={cn(
-        "inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#241C4F] font-semibold text-white outline-none transition active:scale-[0.99]",
+        "mae-gold-cta inline-flex w-full items-center justify-center gap-1.5 rounded-full font-semibold outline-none transition active:scale-[0.99]",
         compact ? "h-10 text-[13px]" : "h-11 text-[14px]",
         className
       )}

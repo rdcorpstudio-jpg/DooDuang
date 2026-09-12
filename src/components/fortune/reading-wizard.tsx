@@ -23,6 +23,7 @@ import {
   writeFortuneProfile,
   readFortuneProfile,
   hasBasicFortuneProfile,
+  hasFreeReadingBasics,
 } from "@/lib/fortune/profile-storage";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import { cn } from "@/lib/utils";
@@ -430,6 +431,7 @@ export function ReadingWizard() {
   const [progress, setProgress] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [ready, setReady] = useState(false);
+  const [autoStartFree, setAutoStartFree] = useState(false);
 
   useEffect(() => {
     // Premium onboard: collect only missing basics — never show analysis loading here.
@@ -480,11 +482,25 @@ export function ReadingWizard() {
           setProfile({
             realName: saved.realName,
             nickname: saved.nickname,
-            birthDate: saved.birthDate,
+            birthDate: saved.birthDate || todayIso(),
             gender: saved.gender,
             birthTime: saved.birthTime ?? "",
             focus: saved.focus ?? "life",
           });
+          if (hasFreeReadingBasics(saved)) {
+            // Already have gender/birth/nickname — skip re-entry, open free reading
+            setStep("loading");
+            setAutoStartFree(true);
+          } else if (!saved.gender) {
+            setStep("gender");
+          } else if (
+            !saved.birthDate ||
+            !/^\d{4}-\d{2}-\d{2}$/.test(saved.birthDate)
+          ) {
+            setStep("birth");
+          } else {
+            setStep("name");
+          }
         }
       } catch {
         /* ignore */
@@ -492,6 +508,13 @@ export function ReadingWizard() {
     }
     setReady(true);
   }, [afterPremium, router]);
+
+  useEffect(() => {
+    if (!ready || afterPremium || !autoStartFree) return;
+    setAutoStartFree(false);
+    void runFortune();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot after profile hydrate
+  }, [ready, afterPremium, autoStartFree]);
 
   useEffect(() => {
     if (!ready) return;

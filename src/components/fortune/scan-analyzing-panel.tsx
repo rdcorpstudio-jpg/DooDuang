@@ -29,7 +29,7 @@ function ScanFrame({
   return (
     <div
       className={cn(
-        "scan-analyze-frame relative overflow-hidden bg-[#9B7FE8]/12 ring-1 ring-[#9B7FE8]/30",
+        "scan-analyze-frame relative overflow-hidden bg-[rgba(213,177,111,0.12)] ring-1 ring-[#d5b16f]/35",
         wide ? "h-28 w-28 rounded-[20px]" : "h-24 w-20 rounded-[16px]",
         className
       )}
@@ -84,12 +84,12 @@ export function ScanAnalyzingPanel({
         <ScanFrame src={photoUrl} wide />
       )}
 
-      <p className="mt-5 text-[15px] font-semibold text-[#241C4F]">
+      <p className="mt-5 text-[15px] font-semibold text-[#f7f4ec]">
         กำลังวิเคราะห์ด้วย AI…
       </p>
       <p
         key={steps[stepIndex]}
-        className="scan-analyze-step mt-2 max-w-[17rem] text-[13px] font-medium leading-snug text-[#5B45B8]"
+        className="scan-analyze-step mt-2 max-w-[17rem] text-[13px] font-medium leading-snug text-[#d5b16f]"
       >
         {steps[stepIndex]}
       </p>
@@ -103,17 +103,17 @@ export function ScanAnalyzingPanel({
               key={label}
               className={cn(
                 "flex items-center gap-2 rounded-[12px] px-2.5 py-1.5 text-[12px] transition-colors duration-300",
-                active && "bg-[#EDE6FF]/9 text-[#3A2F6B]",
-                done && "text-[#6A48C8]",
-                !done && !active && "text-[#9A92B8]"
+                active && "bg-[rgba(213,177,111,0.14)] text-[#e8d19a]",
+                done && "text-[#d5b16f]",
+                !done && !active && "text-[#9aa3b2]"
               )}
             >
               <span
                 className={cn(
                   "flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold",
-                  done && "bg-[#6A48C8] text-white",
-                  active && "scan-analyze-dot bg-[#9B7FE8] text-white",
-                  !done && !active && "bg-[#D8D0F0] text-transparent"
+                  done && "bg-[#d5b16f] text-[#101827]",
+                  active && "scan-analyze-dot bg-[#d5b16f] text-[#101827]",
+                  !done && !active && "bg-[rgba(213,177,111,0.2)] text-transparent"
                 )}
               >
                 {done ? "✓" : active ? "•" : ""}
@@ -124,13 +124,13 @@ export function ScanAnalyzingPanel({
         })}
       </ul>
 
-      <div className="mt-5 h-1.5 w-44 overflow-hidden rounded-full bg-[#9B7FE8]/20">
+      <div className="mt-5 h-1.5 w-44 overflow-hidden rounded-full bg-[rgba(213,177,111,0.16)]">
         <div
-          className="scan-analyze-bar h-full rounded-full bg-gradient-to-r from-[#7B5FD4] via-[#9B7FE8] to-[#C9A227]"
+          className="scan-analyze-bar h-full rounded-full bg-gradient-to-r from-[#b8924f] via-[#d5b16f] to-[#C9A227]"
           style={{ width: `${progress}%` }}
         />
       </div>
-      <p className="mt-2 text-[11px] text-[#8A82B0]">
+      <p className="mt-2 text-[11px] text-[#9aa3b2]">
         {mode === "face"
           ? "อ่านโหงวเฮ้งจากรูปหน้าและด้านข้าง"
           : "อ่านลายมือจากรูปฝ่ามือ"}

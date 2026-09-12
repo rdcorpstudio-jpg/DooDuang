@@ -205,16 +205,16 @@ export function FortuneFaceReading({
         <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
           <Header onBack={() => router.back()} />
           <div className="fortune-glass mt-8 rounded-[24px] px-5 py-7 text-center">
-            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#9B7FE8]/12 ring-1 ring-[#9B7FE8]/30">
-              <Lock className="h-5 w-5 text-[#7B5FD4]" strokeWidth={1.9} />
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px] bg-[rgba(213,177,111,0.12)] ring-1 ring-[#d5b16f]/35">
+              <Lock className="h-5 w-5 text-[#d5b16f]" strokeWidth={1.9} />
             </span>
-            <p className="mt-4 text-[11px] font-semibold tracking-[0.18em] text-[#7B5FD4]">
+            <p className="mt-4 text-[11px] font-semibold tracking-[0.18em] text-[#d5b16f]">
               PREMIUM
             </p>
-            <h1 className="mt-1.5 text-[1.55rem] font-bold tracking-tight text-[#241C4F]">
+            <h1 className="mt-1.5 text-[1.55rem] font-bold tracking-tight text-[#f7f4ec]">
               ดูโหงวเฮ้ง
             </h1>
-            <p className="mt-2 text-[13px] leading-relaxed text-[#5E5688]">
+            <p className="mt-2 text-[13px] leading-relaxed text-[#c5cdd9]/80">
               ถ่ายใบหน้าด้านหน้าและด้านข้าง เพื่อวิเคราะห์รูปหน้าและจังหวะวันนี้
             </p>
             <button
@@ -249,13 +249,13 @@ export function FortuneFaceReading({
         {step === "ready" ? (
           <>
             <header className="mt-5">
-              <h1 className="text-[1.55rem] font-bold tracking-tight text-[#241C4F]">
+              <h1 className="text-[1.55rem] font-bold tracking-tight text-[#f7f4ec]">
                 โหงวเฮ้ง
               </h1>
-              <p className="mt-1 text-[14px] font-medium text-[#7B5FD4]">
+              <p className="mt-1 text-[14px] font-medium text-[#d5b16f]">
                 ถ่ายด้านหน้า + ด้านข้าง แล้ววิเคราะห์ด้วย AI
               </p>
-              <p className="mt-1 text-[12px] leading-relaxed text-[#6B6490]">
+              <p className="mt-1 text-[12px] leading-relaxed text-[#c5cdd9]/75">
                 {canRescan
                   ? "อัปโหลดทีละรูป หรือถ่ายด้วยกล้อง — ต้องครบ 2 มุม · สแกนได้ 1 ครั้ง / 7 วัน"
                   : `สแกนรอบถัดไปในอีก ${cooldownDays} วัน — กดดูผลล่าสุดได้`}
@@ -266,7 +266,7 @@ export function FortuneFaceReading({
               <button
                 type="button"
                 onClick={viewSaved}
-                className="no-sky-lift mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#6A48C8] py-3.5 text-[15px] font-semibold text-white outline-none transition active:scale-[0.99]"
+                className="mae-gold-cta no-sky-lift mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-[15px] font-semibold outline-none transition active:scale-[0.99]"
               >
                 ดูผลล่าสุดอีกครั้ง
               </button>
@@ -324,12 +324,12 @@ export function FortuneFaceReading({
             <button
               type="button"
               onClick={() => setScanOpen(true)}
-              className="no-sky-lift mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/70 py-3.5 text-[15px] font-semibold text-[#5B45B8] ring-1 ring-[#9B7FE8]/30 outline-none transition active:scale-[0.99]"
+              className="no-sky-lift mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/70 py-3.5 text-[15px] font-semibold text-[#d5b16f] ring-1 ring-[#d5b16f]/35 outline-none transition active:scale-[0.99]"
             >
               <Camera className="h-4 w-4" strokeWidth={2} />
               เปิดกล้องสแกน · หน้า+ข้าง
             </button>
-            <p className="mt-3 text-center text-[11px] leading-relaxed text-[#8A82B0]">
+            <p className="mt-3 text-center text-[11px] leading-relaxed text-[#9aa3b2]">
               ใช้วิเคราะห์ผลลัพธ์เท่านั้น — ไม่เก็บรูปถาวร
             </p>
               </>
@@ -338,7 +338,7 @@ export function FortuneFaceReading({
                 {error ? (
                   <p className="mt-3 text-center text-[12px] text-[#E11D48]">{error}</p>
                 ) : null}
-                <p className="mt-4 rounded-[16px] bg-white/65 px-3.5 py-3 text-center text-[12px] leading-relaxed text-[#5E5688] ring-1 ring-[#7B6BB0]/12">
+                <p className="mt-4 rounded-[16px] bg-white/65 px-3.5 py-3 text-center text-[12px] leading-relaxed text-[#c5cdd9]/80 ring-1 ring-[#d5b16f]/18">
                   คูลดาวน์ 7 วัน · ดูผลเดิมได้ตลอดจนกว่าจะสแกนรอบใหม่
                 </p>
               </>
@@ -390,7 +390,7 @@ function Header({ onBack }: { onBack: () => void }) {
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#3A2F6B] outline-none transition active:opacity-60"
+        className="inline-flex items-center gap-0.5 justify-self-start text-[15px] font-medium text-[#e8d19a] outline-none transition active:opacity-60"
       >
         <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
         กลับ
@@ -415,14 +415,14 @@ function PhotoSlot({
   return (
     <div className="fortune-glass overflow-hidden rounded-[18px]">
       <div className="flex items-center justify-between px-3 pt-2.5">
-        <p className="text-[11px] font-semibold tracking-[0.12em] text-[#7B5FD4]">
+        <p className="text-[11px] font-semibold tracking-[0.12em] text-[#d5b16f]">
           {label}
         </p>
         {url ? (
           <button
             type="button"
             onClick={onClear}
-            className="rounded-full p-1 text-[#8A82B0] outline-none transition active:opacity-60"
+            className="rounded-full p-1 text-[#9aa3b2] outline-none transition active:opacity-60"
             aria-label={`ลบรูป${label}`}
           >
             <X className="h-3.5 w-3.5" strokeWidth={2.2} />
@@ -432,17 +432,17 @@ function PhotoSlot({
       <button
         type="button"
         onClick={onPick}
-        className="relative mt-1.5 flex aspect-[3/4] w-full flex-col items-center justify-center gap-1.5 bg-[#9B7FE8]/08 outline-none transition active:opacity-85"
+        className="relative mt-1.5 flex aspect-[3/4] w-full flex-col items-center justify-center gap-1.5 bg-[rgba(213,177,111,0.08)] outline-none transition active:opacity-85"
       >
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
         ) : (
           <>
-            <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/70 ring-1 ring-[#9B7FE8]/25">
-              <ImageIcon className="h-4 w-4 text-[#7B5FD4]" strokeWidth={1.9} />
+            <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/70 ring-1 ring-[#d5b16f]/30">
+              <ImageIcon className="h-4 w-4 text-[#d5b16f]" strokeWidth={1.9} />
             </span>
-            <span className="text-[12px] font-medium text-[#5B45B8]">
+            <span className="text-[12px] font-medium text-[#d5b16f]">
               อัปโหลด
             </span>
           </>
@@ -478,12 +478,12 @@ function FaceResult({
     <div className="mt-5 space-y-3 pb-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-[1.4rem] font-bold tracking-tight text-[#241C4F]">
+          <h1 className="text-[1.4rem] font-bold tracking-tight text-[#f7f4ec]">
             ผลโหงวเฮ้ง
           </h1>
-          <p className="mt-0.5 text-[12px] text-[#7B5FD4]">{shapeCopy.blurb}</p>
+          <p className="mt-0.5 text-[12px] text-[#d5b16f]">{shapeCopy.blurb}</p>
           {!unlocked ? (
-            <p className="mt-1 text-[11px] text-[#8A82B0]">
+            <p className="mt-1 text-[11px] text-[#9aa3b2]">
               ดูเบื้องต้นฟรี · รายละเอียดล็อกไว้
             </p>
           ) : null}
@@ -492,13 +492,13 @@ function FaceResult({
           <button
             type="button"
             onClick={onRescan}
-            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/70 px-2.5 py-1.5 text-[11px] font-medium text-[#5B45B8] ring-1 ring-[#9B7FE8]/25"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/70 px-2.5 py-1.5 text-[11px] font-medium text-[#d5b16f] ring-1 ring-[#d5b16f]/30"
           >
             <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
             สแกนใหม่
           </button>
         ) : (
-          <span className="inline-flex shrink-0 items-center rounded-full bg-[#F3EEFF] px-2.5 py-1.5 text-[11px] font-medium text-[#7A72A0]">
+          <span className="inline-flex shrink-0 items-center rounded-full bg-[rgba(213,177,111,0.12)] px-2.5 py-1.5 text-[11px] font-medium text-[#9aa3b2]">
             สแกนใหม่ใน {cooldownDays} วัน
           </span>
         )}
@@ -507,7 +507,7 @@ function FaceResult({
       <div className="fortune-glass overflow-hidden rounded-[20px] p-3.5">
         <div className="flex gap-3">
           <div className="flex shrink-0 gap-1.5">
-            <div className="relative flex h-24 w-[4.5rem] items-center justify-center overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
+            <div className="relative flex h-24 w-[4.5rem] items-center justify-center overflow-hidden rounded-[14px] bg-[rgba(213,177,111,0.1)]">
               {photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -524,7 +524,7 @@ function FaceResult({
                 />
               )}
             </div>
-            <div className="relative flex h-24 w-[4.5rem] items-center justify-center overflow-hidden rounded-[14px] bg-[#9B7FE8]/10">
+            <div className="relative flex h-24 w-[4.5rem] items-center justify-center overflow-hidden rounded-[14px] bg-[rgba(213,177,111,0.1)]">
               {photoRightUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -543,18 +543,18 @@ function FaceResult({
             </div>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold text-[#241C4F]">
+            <p className="text-[15px] font-semibold text-[#f7f4ec]">
               {shapeLabel}
             </p>
-            <p className="mt-1 text-[12px] leading-relaxed text-[#5E5688]">
+            <p className="mt-1 text-[12px] leading-relaxed text-[#c5cdd9]/80">
               {shapeCopy.title}
             </p>
-            <p className="mt-2 text-[11px] text-[#8A82B0]">หน้า · ข้าง</p>
+            <p className="mt-2 text-[11px] text-[#9aa3b2]">หน้า · ข้าง</p>
           </div>
         </div>
         <div className="mt-3 flex items-center justify-between gap-3">
-          <p className="text-[12px] text-[#5E5688]">ความชัดของสแกน</p>
-          <p className="text-[12px] font-medium text-[#5B45B8]">{clarity}%</p>
+          <p className="text-[12px] text-[#c5cdd9]/80">ความชัดของสแกน</p>
+          <p className="text-[12px] font-medium text-[#d5b16f]">{clarity}%</p>
         </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[rgba(213,177,111,0.16)]">
             <div
@@ -569,13 +569,13 @@ function FaceResult({
       </div>
 
       <div className="fortune-glass rounded-[20px] px-4 py-4">
-        <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[#7B5FD4]">
+        <h2 className="text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
           รูปหน้าของคุณ
         </h2>
         {unlocked ? (
           <ExpandableBody text={shapeCopy.body} />
         ) : (
-          <p className="mt-1 text-[13px] leading-[1.75] text-[#3A3270]">
+          <p className="mt-1 text-[13px] leading-[1.75] text-[#c5cdd9]/88">
             {shapeCopy.body}
           </p>
         )}
@@ -613,26 +613,26 @@ function FaceResult({
         onUnlock={onUnlock}
         subtitle={`จุดแข็ง การงาน ความรัก ภาพลักษณ์ · ${FORTUNE_UNLOCK_PRICE} บาท`}
       >
-        <p className="text-[12px] font-semibold text-[#5B45B8]">จุดแข็ง</p>
+        <p className="text-[12px] font-semibold text-[#d5b16f]">จุดแข็ง</p>
         <ul className="mt-2 space-y-1.5">
           {shapeCopy.strengths.map((s) => (
-            <li key={s} className="text-[12px] text-[#5E5688]">
+            <li key={s} className="text-[12px] text-[#c5cdd9]/80">
               · {s}
             </li>
           ))}
         </ul>
-        <div className="mt-3.5 space-y-3.5 border-t border-[#7B6BB0]/12 pt-3.5">
+        <div className="mt-3.5 space-y-3.5 border-t border-[rgba(213,177,111,0.18)] pt-3.5">
           {aspects.map((a) => (
             <div key={a.id}>
               <p className="text-[13px] font-semibold text-[#2C2458]">
                 {a.copy.title}
               </p>
-              <p className="mt-0.5 text-[11px] text-[#7B5FD4]">{a.copy.blurb}</p>
+              <p className="mt-0.5 text-[11px] text-[#d5b16f]">{a.copy.blurb}</p>
               <ExpandableBody text={a.copy.body} className="mt-1.5" />
               {a.copy.highlights.length > 0 ? (
                 <ul className="mt-2 space-y-1">
                   {a.copy.highlights.map((h) => (
-                    <li key={h} className="text-[12px] text-[#5E5688]">
+                    <li key={h} className="text-[12px] text-[#c5cdd9]/80">
                       · {h}
                     </li>
                   ))}
@@ -664,7 +664,7 @@ function ExpandableBody({
 }) {
   return (
     <div className={className}>
-      <p className="text-[13px] leading-[1.75] text-[#3A3270]">{text}</p>
+      <p className="text-[13px] leading-[1.75] text-[#c5cdd9]/88">{text}</p>
     </div>
   );
 }

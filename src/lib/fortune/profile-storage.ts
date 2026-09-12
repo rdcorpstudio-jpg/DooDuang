@@ -154,6 +154,21 @@ export function hasBasicFortuneProfile(
 }
 
 /**
+ * Enough to open free daily reading without re-entering the wizard.
+ * realName is optional (account profile allows empty).
+ */
+export function hasFreeReadingBasics(
+  profile: FortuneUserProfile | null | undefined
+): boolean {
+  if (!profile) return false;
+  return (
+    profile.nickname.trim().length > 0 &&
+    /^\d{4}-\d{2}-\d{2}$/.test(profile.birthDate) &&
+    Boolean(profile.gender)
+  );
+}
+
+/**
  * After unlock:
  * - basic complete → /premium (deepen time/place only, then loading)
  * - otherwise → reading wizard for missing gender/birth/name (no loading yet)

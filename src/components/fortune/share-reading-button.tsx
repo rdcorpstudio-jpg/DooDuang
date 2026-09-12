@@ -130,7 +130,7 @@ export function ShareReadingButton({
         "no-sky-lift inline-flex items-center justify-center gap-2 rounded-full py-3 text-[14px] font-semibold outline-none transition active:scale-[0.99]",
         variant === "primary"
           ? "dd-gold-glass-btn w-full text-[#5C4810]"
-          : "w-full bg-white/70 text-[#5B45B8] ring-1 ring-[#9B7FE8]/30",
+          : "w-full bg-white/70 text-[#d5b16f] ring-1 ring-[#d5b16f]/35",
         className
       )}
     >

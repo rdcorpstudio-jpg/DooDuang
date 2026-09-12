@@ -83,10 +83,10 @@ export function UnlockDetailBanner({
           <Lock className="h-4 w-4 text-[#B8921F]" strokeWidth={1.9} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-semibold text-[#241C4F]">
+          <span className="block text-[13px] font-semibold text-[#f7f4ec]">
             {title}
           </span>
-          <span className="mt-0.5 block text-[11.5px] leading-snug text-[#6B6490]">
+          <span className="mt-0.5 block text-[11.5px] leading-snug text-[#c5cdd9]/75">
             {subtitle ??
               `ดูรายละเอียดเชิงลึก · ${FORTUNE_UNLOCK_PRICE} บาท`}
           </span>

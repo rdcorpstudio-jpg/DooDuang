@@ -165,7 +165,7 @@ export function PhotoSourceSheet({
               onClick={() => galleryRef.current?.click()}
               className="flex flex-col items-center gap-2 rounded-[16px] border border-white/12 bg-white/[0.05] px-3 py-4 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-white/30"
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#BB6CF0]/15 text-[#BB6CF0]">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(213,177,111,0.15)] text-[#d5b16f]">
                 <ImageIcon className="h-5 w-5" strokeWidth={1.8} />
               </span>
               <span className="text-[13px] font-semibold text-white">อัปโหลด</span>
@@ -306,7 +306,7 @@ export function PhotoSlot({
       <button
         type="button"
         onClick={onPick}
-        className="relative block w-full overflow-hidden rounded-[16px] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45"
+        className="relative block w-full overflow-hidden rounded-[16px] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
         style={{
           aspectRatio: "1 / 1",
           border: "1.5px dashed rgba(123,95,212,0.45)",
@@ -323,9 +323,9 @@ export function PhotoSlot({
             className="h-full w-full object-cover"
           />
         ) : (
-          <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-[#5B45B8]">
+          <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-[#d5b16f]">
             <span
-              className="flex h-12 w-12 items-center justify-center rounded-full text-[24px] font-light text-[#7B5FD4]"
+              className="flex h-12 w-12 items-center justify-center rounded-full text-[24px] font-light text-[#d5b16f]"
               style={{
                 border: "1.5px dashed rgba(123,95,212,0.4)",
                 background: "rgba(155,127,232,0.12)",
@@ -333,7 +333,7 @@ export function PhotoSlot({
             >
               +
             </span>
-            <span className="px-2 text-center text-[12px] font-medium leading-snug text-[#3A3270]">
+            <span className="px-2 text-center text-[12px] font-medium leading-snug text-[#c5cdd9]/88">
               ถ่ายหรืออัปโหลด
             </span>
           </span>
@@ -343,23 +343,23 @@ export function PhotoSlot({
             "absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold",
             badgeTone === "required"
               ? "bg-[#E11D48] text-white"
-              : "bg-white text-[#5E5688] ring-1 ring-[#7B6BB0]/25"
+              : "bg-white text-[#c5cdd9]/80 ring-1 ring-[rgba(213,177,111,0.28)]"
           )}
         >
           {badge}
         </span>
       </button>
-      <p className="mt-1.5 text-[13px] font-semibold text-[#241C4F]">{label}</p>
+      <p className="mt-1.5 text-[13px] font-semibold text-[#f7f4ec]">{label}</p>
       {error ? (
         <p className="mt-0.5 text-[11px] leading-snug text-[#E11D48]">{error}</p>
       ) : hint ? (
-        <p className="mt-0.5 text-[11px] leading-snug text-[#6B6490]">{hint}</p>
+        <p className="mt-0.5 text-[11px] leading-snug text-[#c5cdd9]/75">{hint}</p>
       ) : null}
       {previewUrl && onClear ? (
         <button
           type="button"
           onClick={onClear}
-          className="mt-1 text-[11px] text-[#7B5FD4] underline-offset-2 hover:underline"
+          className="mt-1 text-[11px] text-[#d5b16f] underline-offset-2 hover:underline"
         >
           ลบรูป
         </button>

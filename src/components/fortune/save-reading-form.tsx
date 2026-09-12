@@ -53,8 +53,8 @@ export function SaveReadingForm({ token }: { token: string | null }) {
 
   return (
     <MysticFrame radius={16} contentClassName="p-4 text-left">
-      <div className="mb-3 flex items-center gap-2 text-purple-100/85">
-        <Mail className="h-4 w-4 text-amber-200/70" />
+      <div className="mb-3 flex items-center gap-2 text-[#f7f4ec]/85">
+        <Mail className="h-4 w-4 text-[#d5b16f]" />
         <p className="text-[13px] font-medium">ส่งลิงก์ดูผลซ้ำเข้าเมล</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-3">

@@ -21,8 +21,10 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     pathname.startsWith("/auth") || pathname.startsWith("/login");
   const hideNav =
     isAuthPath || pathname === "/" || pathname === "" || keyboardOpen;
-  /* CSS zoom on ancestors breaks iOS caret / focus for phone OTP fields */
-  const disableComfortZoom = isAuthPath || keyboardOpen;
+  /* CSS zoom on ancestors breaks iOS caret / focus for phone OTP fields.
+     Home hero is a tight 1-screen composition — comfort zoom crushes it on real phones. */
+  const disableComfortZoom =
+    isAuthPath || keyboardOpen || pathname === "/" || pathname === "";
 
   useEffect(() => {
     const root = document.documentElement;

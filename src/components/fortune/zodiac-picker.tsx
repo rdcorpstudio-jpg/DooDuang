@@ -81,7 +81,7 @@ export function ZodiacPicker({ selected, onSelect }: ZodiacPickerProps) {
               <div className="relative z-[1] text-xs font-semibold text-white/90">
                 {zodiac.thaiName}
               </div>
-              <div className="relative z-[1] mt-1 text-[9px] leading-tight text-purple-300/50">
+              <div className="relative z-[1] mt-1 text-[9px] leading-tight text-[#d5b16f]/50">
                 {zodiac.dateRange}
               </div>
               <span
