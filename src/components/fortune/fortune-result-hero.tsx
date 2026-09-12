@@ -74,79 +74,71 @@ export function FortuneResultHero({
           style={{
             background: `
               linear-gradient(90deg,
-                rgba(8,12,22,0.82) 0%,
-                rgba(10,16,28,0.58) 36%,
-                rgba(12,18,32,0.2) 60%,
-                transparent 80%
+                rgba(8,12,22,0.86) 0%,
+                rgba(10,16,28,0.62) 38%,
+                rgba(12,18,32,0.22) 62%,
+                transparent 82%
               ),
               linear-gradient(180deg,
-                rgba(8,12,22,0.28) 0%,
-                transparent 30%,
-                transparent 70%,
-                rgba(8,12,22,0.4) 100%
+                rgba(8,12,22,0.22) 0%,
+                transparent 32%,
+                transparent 68%,
+                rgba(8,12,22,0.42) 100%
               )
             `,
           }}
         />
       </div>
 
-      <div className="relative z-10 flex h-full min-h-[188px] flex-col px-3.5 py-2.5">
-        <div className="flex items-center justify-end gap-3">
-          <p className="dd-hero-shadow text-[11px] font-medium text-[#f7f4ec]/85">
+      <div className="relative z-10 flex h-full min-h-[188px] flex-col justify-between px-3.5 py-3">
+        {/* Top: badge + date | greeting */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+            <span
+              className="rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#e8d19a]"
+              style={{
+                background: "rgba(16,24,39,0.55)",
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
+              }}
+            >
+              ดวงประจำวัน
+            </span>
+            <span
+              className="hidden h-2.5 w-px shrink-0 bg-[rgba(213,177,111,0.4)] xs:block sm:block"
+              aria-hidden
+            />
+            <span className="dd-hero-shadow text-[11px] font-medium text-[#f7f4ec]/85">
+              {dateLabel}
+            </span>
+          </div>
+          <p className="dd-hero-shadow shrink-0 text-right text-[11px] font-medium text-[#f7f4ec]/85">
             สวัสดี คุณ{displayName}
           </p>
         </div>
 
-        <div className="mt-2.5 flex max-w-[66%] flex-wrap items-center gap-x-2 gap-y-1">
-          <span
-            className="rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#e8d19a]"
-            style={{
-              background: "rgba(16,24,39,0.55)",
-              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
-            }}
-          >
-            ดวงประจำวัน
-          </span>
-          <span
-            className="h-2.5 w-px shrink-0 bg-[rgba(213,177,111,0.4)]"
-            aria-hidden
-          />
-          <span className="dd-hero-shadow text-[11px] font-medium text-[#f7f4ec]/85">
-            {dateLabel}
-          </span>
+        {/* Middle: headline + support — left column clear of art */}
+        <div className="mt-2 max-w-[64%] flex-1">
+          <h2 className="mae-gold-text font-sans text-[1.22rem] font-bold leading-[1.28] tracking-tight sm:text-[1.28rem]">
+            {headline}
+          </h2>
+          <p className="dd-hero-shadow mt-1.5 text-[12.5px] font-medium leading-snug text-[#f7f4ec]/92">
+            {support}
+          </p>
         </div>
 
-        <h2 className="mae-gold-text mt-2 max-w-[68%] font-sans text-[1.28rem] font-bold leading-[1.25] tracking-tight">
-          {headline}
-        </h2>
+        {/* Bottom tip */}
         <div
-          className="mt-1.5 h-[2px] w-9 rounded-full"
-          style={{
-            background:
-              "linear-gradient(90deg, #d5b16f 0%, rgba(213,177,111,0.25) 100%)",
-          }}
-          aria-hidden
-        />
-        <p className="dd-hero-shadow mt-1.5 max-w-[60%] text-[12.5px] font-medium leading-snug text-[#f7f4ec]">
-          {support}
-        </p>
-
-        <div
-          className="mt-auto max-w-[66%] pt-2"
+          className="max-w-[68%] pt-2"
           style={{
             borderTop: "1px solid rgba(213,177,111,0.28)",
           }}
         >
-          <div className="flex items-center gap-1.5 pt-1.5">
+          <div className="flex items-start gap-1.5 pt-1.5">
             <FortuneIcon
               name="sparkle"
               size={13}
               plain
-              className="fortune-spark shrink-0"
-            />
-            <span
-              className="h-2.5 w-px shrink-0 bg-[rgba(213,177,111,0.45)]"
-              aria-hidden
+              className="fortune-spark mt-0.5 shrink-0"
             />
             <p className="dd-hero-shadow text-[11px] font-semibold leading-snug text-[#e8d19a]">
               {footerTip}
