@@ -302,6 +302,26 @@ export function FeatureMenuPage({
   className?: string;
   backHref?: string;
 }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="px-4 py-10 text-center text-[14px] text-[#f7f4ec]/55">
+          กำลังเปิดเมนู…
+        </div>
+      }
+    >
+      <FeatureMenuPageInner className={className} backHref={backHref} />
+    </Suspense>
+  );
+}
+
+function FeatureMenuPageInner({
+  className,
+  backHref,
+}: {
+  className?: string;
+  backHref?: string;
+}) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [hasBasics, setHasBasics] = useState(false);
