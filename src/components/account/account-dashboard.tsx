@@ -393,12 +393,9 @@ export function AccountDashboard({
             <LineMark className="h-[18px] w-[18px]" />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="text-[15px] font-semibold text-[#f7f4ec]">
-              คุยกับแม่มั่งมี
-            </h2>
-            <p className="mt-0.5 text-[12px] leading-snug text-[#f7f4ec]/65">
+            <h2 className="text-[15px] font-semibold leading-snug text-[#f7f4ec]">
               รับข่าวจากแม่ และปรึกษาได้ในไลน์
-            </p>
+            </h2>
             <a
               href={LINE_OA_ADD_URL}
               target="_blank"
@@ -418,7 +415,7 @@ export function AccountDashboard({
               }}
             >
               <LineMark className="h-4 w-4" />
-              เพิ่มเพื่อนใน LINE
+              คุยกับแม่มั่งมี
             </a>
           </div>
         </div>
