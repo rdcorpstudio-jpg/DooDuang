@@ -23,17 +23,31 @@ const CELESTIAL_SKY = {
   backgroundRepeat: "no-repeat" as const,
 };
 
+/** Same plate as reading wizard gender step (page 1) */
+const WIZARD_SKY = {
+  backgroundImage: "url(/images/bg/mae-app-bg.webp?v=gate4)",
+  backgroundSize: "cover" as const,
+  backgroundPosition: "50% 30%",
+  backgroundRepeat: "no-repeat" as const,
+};
+
 export function StarfieldBackground() {
   const pathname = usePathname() || "/";
   const isMaeHome = pathname === "/" || pathname === "";
   const isGuanyinHome =
     pathname === "/mae" || pathname.startsWith("/mae/");
+  const isLoginAuth =
+    pathname.startsWith("/login") || pathname.startsWith("/auth");
 
   // Mae main landing renders its own full-bleed video
   if (isMaeHome) return null;
 
   const celestial = isMaeCelestialPath(pathname);
-  const sky = celestial ? CELESTIAL_SKY : GUANYIN_SKY;
+  const sky = isLoginAuth
+    ? WIZARD_SKY
+    : celestial
+      ? CELESTIAL_SKY
+      : GUANYIN_SKY;
 
   return (
     <div
@@ -57,18 +71,33 @@ export function StarfieldBackground() {
         <div className="absolute inset-0" style={sky} />
       )}
 
-      {/* Clear soft blur only — fades in from top → bottom, no white veil */}
-      <div
-        className="absolute inset-0 origin-center scale-[1.1]"
-        style={{
-          ...(isGuanyinHome ? GUANYIN_SKY : sky),
-          filter: "blur(10px) saturate(1.02)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
-          maskImage:
-            "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
-        }}
-      />
+      {isLoginAuth ? (
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(180deg,
+                rgba(10,14,24,0.12) 0%,
+                rgba(10,14,24,0.22) 40%,
+                rgba(10,14,24,0.45) 70%,
+                rgba(10,14,24,0.62) 100%)
+            `,
+          }}
+        />
+      ) : (
+        /* Clear soft blur only — fades in from top → bottom, no white veil */
+        <div
+          className="absolute inset-0 origin-center scale-[1.1]"
+          style={{
+            ...(isGuanyinHome ? GUANYIN_SKY : sky),
+            filter: "blur(10px) saturate(1.02)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
+            maskImage:
+              "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
+          }}
+        />
+      )}
     </div>
   );
 }
