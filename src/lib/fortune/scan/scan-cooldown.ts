@@ -22,15 +22,11 @@ export type ScanMode = keyof typeof KEYS;
 export type SavedFaceScan = {
   scannedAt: string;
   pack: FaceReadingPack;
-  /** [front, side] compressed data URLs */
-  photoDataUrls?: string[];
 };
 
 export type SavedPalmScan = {
   scannedAt: string;
   pack: PalmReadingPack;
-  /** [palm] compressed data URL */
-  photoDataUrls?: string[];
 };
 
 function isPackish(value: unknown): value is { result: unknown } {
@@ -39,7 +35,7 @@ function isPackish(value: unknown): value is { result: unknown } {
 
 function readRaw(
   mode: ScanMode
-): { scannedAt: string; pack: unknown; photoDataUrls?: string[] } | null {
+): { scannedAt: string; pack: unknown } | null {
   try {
     for (const legacy of LEGACY_KEYS) {
       /* keep reading only current keys; legacy cleared on save */
@@ -63,19 +59,29 @@ function readRaw(
     const parsed = JSON.parse(raw) as {
       scannedAt?: string;
       pack?: unknown;
-      photoDataUrls?: string[];
+      photoDataUrls?: unknown;
     };
     if (!parsed?.scannedAt || !isPackish(parsed.pack)) return null;
     if (Number.isNaN(Date.parse(parsed.scannedAt))) return null;
-    const photos = Array.isArray(parsed.photoDataUrls)
-      ? parsed.photoDataUrls.filter(
-          (u) => typeof u === "string" && u.startsWith("data:image/")
-        )
-      : undefined;
+
+    // Drop any legacy embedded photos so storage stays light
+    if (parsed.photoDataUrls != null) {
+      try {
+        localStorage.setItem(
+          KEYS[mode],
+          JSON.stringify({
+            scannedAt: parsed.scannedAt,
+            pack: parsed.pack,
+          })
+        );
+      } catch {
+        /* ignore rewrite failures */
+      }
+    }
+
     return {
       scannedAt: parsed.scannedAt,
       pack: parsed.pack,
-      photoDataUrls: photos?.length ? photos : undefined,
     };
   } catch {
     return null;
@@ -88,7 +94,6 @@ export function readSavedFaceScan(): SavedFaceScan | null {
   return {
     scannedAt: raw.scannedAt,
     pack: raw.pack as FaceReadingPack,
-    photoDataUrls: raw.photoDataUrls,
   };
 }
 
@@ -98,7 +103,6 @@ export function readSavedPalmScan(): SavedPalmScan | null {
   return {
     scannedAt: raw.scannedAt,
     pack: raw.pack as PalmReadingPack,
-    photoDataUrls: raw.photoDataUrls,
   };
 }
 
@@ -114,14 +118,8 @@ export function clearSavedScan(mode: ScanMode): void {
   }
 }
 
-/**
- * Replace any previous result with the new pack (+ optional photos).
- * Always deletes old data first, then writes the latest.
- */
-export function saveFaceScan(
-  pack: FaceReadingPack,
-  photoDataUrls?: string[]
-): void {
+/** Replace any previous result with the new pack (text only — never store photos). */
+export function saveFaceScan(pack: FaceReadingPack): void {
   clearSavedScan("face");
   try {
     localStorage.setItem(
@@ -129,29 +127,14 @@ export function saveFaceScan(
       JSON.stringify({
         scannedAt: new Date().toISOString(),
         pack,
-        photoDataUrls: photoDataUrls?.length ? photoDataUrls : undefined,
       } satisfies SavedFaceScan)
     );
   } catch {
-    // Retry without photos if quota exceeded
-    try {
-      localStorage.setItem(
-        KEYS.face,
-        JSON.stringify({
-          scannedAt: new Date().toISOString(),
-          pack,
-        } satisfies SavedFaceScan)
-      );
-    } catch {
-      /* ignore */
-    }
+    /* ignore */
   }
 }
 
-export function savePalmScan(
-  pack: PalmReadingPack,
-  photoDataUrls?: string[]
-): void {
+export function savePalmScan(pack: PalmReadingPack): void {
   clearSavedScan("palm");
   try {
     localStorage.setItem(
@@ -159,21 +142,10 @@ export function savePalmScan(
       JSON.stringify({
         scannedAt: new Date().toISOString(),
         pack,
-        photoDataUrls: photoDataUrls?.length ? photoDataUrls : undefined,
       } satisfies SavedPalmScan)
     );
   } catch {
-    try {
-      localStorage.setItem(
-        KEYS.palm,
-        JSON.stringify({
-          scannedAt: new Date().toISOString(),
-          pack,
-        } satisfies SavedPalmScan)
-      );
-    } catch {
-      /* ignore */
-    }
+    /* ignore */
   }
 }
 
@@ -197,33 +169,4 @@ export function scanCooldownDaysLeft(mode: ScanMode): number {
 
 export function hasSavedScan(mode: ScanMode): boolean {
   return readRaw(mode) != null;
-}
-
-/** Compress image file to a small data URL for local re-view. */
-export async function fileToStoredDataUrl(
-  file: File,
-  maxEdge = 720,
-  quality = 0.72
-): Promise<string> {
-  const objectUrl = URL.createObjectURL(file);
-  try {
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const el = new Image();
-      el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error("อ่านรูปไม่สำเร็จ"));
-      el.src = objectUrl;
-    });
-    const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
-    const w = Math.max(1, Math.round(img.width * scale));
-    const h = Math.max(1, Math.round(img.height * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("canvas");
-    ctx.drawImage(img, 0, 0, w, h);
-    return canvas.toDataURL("image/jpeg", quality);
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
 }

@@ -612,76 +612,52 @@
   scroll-behavior: smooth;
 }
 
-/* Hero spacer — desktop phone mockup keeps Mae mid-frame; short phones get less */
+/* Hero — one type scale; only spacer/logo position adapt to height */
+.mae-hero-wordmark {
+  top: 44%;
+  width: min(68%, 13.5rem);
+}
+
 .mae-hero-spacer {
-  min-height: 46%;
+  min-height: 50%;
   flex: 1 1 auto;
 }
 
 @media (min-height: 780px) {
-  .mae-hero-spacer {
-    min-height: 50%;
+  .mae-hero-wordmark {
+    top: 46%;
   }
 
-  .mae-hero-wordmark {
-    top: 44% !important;
-    width: min(66%, 13.5rem);
+  .mae-hero-spacer {
+    min-height: 52%;
   }
 }
 
-/* Real phones with browser chrome — keep copy readable in one viewport */
-@media (max-height: 740px) {
-  .mae-hero-spacer {
-    min-height: 40%;
-    max-height: 46%;
-  }
-
+@media (max-height: 700px) {
   .mae-hero-wordmark {
-    top: 38% !important;
-    width: min(58%, 11.25rem) !important;
+    top: 40%;
   }
 
-  .mae-hero-copy h1 > span:first-child {
-    font-size: 1.38rem;
-  }
-
-  .mae-hero-copy .mae-hero-gold-line {
-    font-size: 1.45rem;
-  }
-
-  .mae-hero-lede {
-    margin-top: 0.5rem;
-    font-size: 11.5px;
-    line-height: 1.55;
-  }
-
-  .mae-hero-award {
-    margin-top: 0.65rem;
-  }
-
-  .mae-concept-link {
-    margin-top: 0.5rem;
+  .mae-hero-spacer {
+    min-height: 44%;
   }
 }
 
-@media (max-height: 640px) {
+@media (max-height: 620px) {
+  .mae-hero-wordmark {
+    top: 36%;
+  }
+
   .mae-hero-spacer {
-    min-height: 34%;
+    min-height: 38%;
   }
+}
 
-  .mae-hero-lede br:nth-of-type(2) {
-    display: none;
-  }
-
-  .mae-hero-award .mae-award-glow {
-    height: 2.85rem;
-    width: 2.85rem;
-  }
-
-  .mae-hero-award .mae-award-trophy {
-    height: 2.7rem;
-    width: 2.7rem;
-  }
+/* Keep award gold title from stretching full card width */
+.mae-hero-award .mae-gold-text {
+  display: inline;
+  width: auto;
+  max-width: none;
 }
 
 /* Reading wizard — Mae navy/gold tone */

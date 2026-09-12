@@ -24,12 +24,12 @@ import {
 import {
   canRescanScan,
   clearSavedScan,
-  fileToStoredDataUrl,
   hasSavedScan,
   readSavedFaceScan,
   saveFaceScan,
   scanCooldownDaysLeft,
 } from "@/lib/fortune/scan/scan-cooldown";
+import { FaceResultIconTiles } from "@/components/fortune/face-shape-icons";
 import {
   isPremiumUnlocked,
   setPremiumUnlocked,
@@ -58,7 +58,6 @@ export function FortuneFaceReading({
   const [sideFile, setSideFile] = useState<File | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
   const [pack, setPack] = useState<FaceReadingPack | null>(null);
-  const [savedPhotoUrls, setSavedPhotoUrls] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [canRescan, setCanRescan] = useState(true);
   const [cooldownDays, setCooldownDays] = useState(0);
@@ -68,8 +67,6 @@ export function FortuneFaceReading({
   const sidePreviewUrl = useObjectUrl(sideFile);
   const livePhotoUrl = useObjectUrl(photos[0] ?? null);
   const livePhotoRightUrl = useObjectUrl(photos[1] ?? null);
-  const photoUrl = livePhotoUrl ?? savedPhotoUrls[0] ?? null;
-  const photoRightUrl = livePhotoRightUrl ?? savedPhotoUrls[1] ?? null;
 
   function refreshCooldown() {
     setCanRescan(canRescanScan("face"));
@@ -82,7 +79,6 @@ export function FortuneFaceReading({
     const saved = readSavedFaceScan();
     if (saved) {
       setPack(saved.pack);
-      setSavedPhotoUrls(saved.photoDataUrls ?? []);
     }
     refreshCooldown();
   }, []);
@@ -111,16 +107,15 @@ export function FortuneFaceReading({
     setStep("analyzing");
     try {
       const next = await buildFaceReadingPack(files.slice(0, 2), `${seed}-face`);
-      const thumbs = await Promise.all(
-        files.slice(0, 2).map((f) => fileToStoredDataUrl(f))
-      );
-      // ลบผลเก่าแล้วเก็บผลใหม่แทน
+      // ลบผลเก่าแล้วเก็บผลใหม่แทน — ไม่เก็บรูป (กัน localStorage บวม)
       clearSavedScan("face");
-      saveFaceScan(next, thumbs);
+      saveFaceScan(next);
       setPack(next);
-      setSavedPhotoUrls(thumbs);
       refreshCooldown();
       await new Promise((r) => setTimeout(r, 700));
+      setPhotos([]);
+      setFrontFile(null);
+      setSideFile(null);
       setStep("result");
     } catch (err) {
       setError(
@@ -167,7 +162,6 @@ export function FortuneFaceReading({
     const saved = readSavedFaceScan();
     if (saved) {
       setPack(saved.pack);
-      setSavedPhotoUrls(saved.photoDataUrls ?? []);
     }
   }
 
@@ -178,7 +172,6 @@ export function FortuneFaceReading({
       return;
     }
     setPack(saved.pack);
-    setSavedPhotoUrls(saved.photoDataUrls ?? []);
     setPhotos([]);
     setFrontFile(null);
     setSideFile(null);
@@ -349,15 +342,13 @@ export function FortuneFaceReading({
         {step === "analyzing" ? (
           <ScanAnalyzingPanel
             mode="face"
-            photoUrl={photoUrl}
-            photoRightUrl={photoRightUrl}
+            photoUrl={livePhotoUrl}
+            photoRightUrl={livePhotoRightUrl}
           />
         ) : null}
 
         {step === "result" && pack ? (
           <FaceResult
-            photoUrl={photoUrl}
-            photoRightUrl={photoRightUrl}
             pack={pack}
             unlocked={unlocked}
             onUnlock={() => setPayOpen(true)}
@@ -453,8 +444,6 @@ function PhotoSlot({
 }
 
 function FaceResult({
-  photoUrl,
-  photoRightUrl,
   pack,
   unlocked,
   onUnlock,
@@ -462,8 +451,6 @@ function FaceResult({
   canRescan,
   cooldownDays,
 }: {
-  photoUrl: string | null;
-  photoRightUrl: string | null;
   pack: FaceReadingPack;
   unlocked: boolean;
   onUnlock: () => void;
@@ -506,42 +493,7 @@ function FaceResult({
 
       <div className="fortune-glass overflow-hidden rounded-[20px] p-3.5">
         <div className="flex gap-3">
-          <div className="flex shrink-0 gap-1.5">
-            <div className="relative flex h-24 w-[4.5rem] items-center justify-center overflow-hidden rounded-[14px] bg-[rgba(213,177,111,0.1)]">
-              {photoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={photoUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src="/images/app-icon.webp"
-                  alt=""
-                  className="h-12 w-12 object-contain"
-                />
-              )}
-            </div>
-            <div className="relative flex h-24 w-[4.5rem] items-center justify-center overflow-hidden rounded-[14px] bg-[rgba(213,177,111,0.1)]">
-              {photoRightUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={photoRightUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src="/images/app-icon.webp"
-                  alt=""
-                  className="h-12 w-12 object-contain opacity-80"
-                />
-              )}
-            </div>
-          </div>
+          <FaceResultIconTiles shape={result.shape} />
           <div className="min-w-0 flex-1">
             <p className="text-[15px] font-semibold text-[#f7f4ec]">
               {shapeLabel}
