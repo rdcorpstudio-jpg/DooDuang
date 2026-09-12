@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { trackLinePurchaseConversions } from "@/components/analytics/line-tag";
+import { trackMetaPurchase } from "@/components/analytics/meta-pixel";
 import { confirmStripePremiumUnlock } from "@/components/fortune/fortune-payment-sheet";
 import { setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import {
@@ -39,6 +41,8 @@ export function useStripePaymentReturn(onUnlocked?: () => void) {
               ? { birthDate: profile.birthDate, nickname: profile.nickname }
               : null
           );
+          trackMetaPurchase(sessionId);
+          trackLinePurchaseConversions(sessionId);
           onUnlockedRef.current?.();
         }
       } catch (err) {

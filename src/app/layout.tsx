@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Sarabun, Srisakdi } from "next/font/google";
+import { LineTag } from "@/components/analytics/line-tag";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { PhoneFrame } from "@/components/layout/phone-frame";
 import { APP_NAME } from "@/lib/site";
 import "./globals.css";
@@ -51,6 +53,8 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={`${sarabun.variable} ${srisakdi.variable} font-sans`}>
+        <LineTag />
+        <MetaPixel />
         <PhoneFrame>{children}</PhoneFrame>
       </body>
     </html>
