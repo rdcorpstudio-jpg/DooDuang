@@ -133,7 +133,7 @@ export function IntroScreen() {
 
           <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[#6B6490]">
             <FortuneIcon name="lock" size={16} />
-            ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
+            ข้อมูลของคุณจะถูกเก็บเป็นความลับ เพื่อการทำนายเท่านั้น
           </p>
         </Reveal>
 

@@ -360,7 +360,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
                   <span style={{ color: MAE.gold }} aria-hidden>
                     ✦
                   </span>
-                  ข้อมูลของคุณจะถูกเก็บเป็นส่วนตัว
+                  ข้อมูลของคุณจะถูกเก็บเป็นความลับ เพื่อการทำนายเท่านั้น
                 </p>
               </form>
             </div>
