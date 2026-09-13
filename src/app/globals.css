@@ -107,7 +107,7 @@
   }
 
   .phone-shell--admin {
-    background: #f4f5f7;
+    background: #0b0f14;
   }
 
   .phone-frame--admin {
@@ -121,7 +121,7 @@
 .phone-frame--admin {
   width: 100%;
   max-width: 100%;
-  background: #f4f5f7;
+  background: #0b0f14;
   --dd-comfort-zoom: 1;
   font-size: 15px;
 }

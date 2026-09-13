@@ -285,11 +285,17 @@ export async function applyOneTimePremiumCheckout(opts: {
   }
 
   const { trackPaymentSucceededOnce } = await import("@/lib/analytics/track");
+  const paymentMethod =
+    Array.isArray(session.payment_method_types) &&
+    session.payment_method_types.length > 0
+      ? session.payment_method_types[0]
+      : null;
   void trackPaymentSucceededOnce({
     userId,
     stripeSessionId: session.id,
     amount: opts.amount,
     days: opts.days,
+    paymentMethod,
   });
 
   return {

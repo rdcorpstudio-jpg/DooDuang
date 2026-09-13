@@ -49,6 +49,7 @@ export async function trackPaymentSucceededOnce(opts: {
   stripeSessionId: string;
   amount?: number;
   days?: number;
+  paymentMethod?: string | null;
 }): Promise<void> {
   try {
     if (!db) return;
@@ -76,6 +77,7 @@ export async function trackPaymentSucceededOnce(opts: {
         stripeSessionId: opts.stripeSessionId,
         amount: opts.amount,
         days: opts.days,
+        paymentMethod: opts.paymentMethod || null,
       },
     });
   } catch (err) {
