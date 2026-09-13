@@ -87,7 +87,7 @@ function markSent(key: string) {
 
 /**
  * Fire once per Stripe session_id after confirmed unlock.
- * Retries briefly if fbq is not ready yet (common on thank-you land).
+ * Retries if fbq is slow; also sends an image beacon as backup.
  */
 export function trackMetaPurchase(sessionId?: string | null) {
   if (typeof window === "undefined") return;
@@ -95,23 +95,48 @@ export function trackMetaPurchase(sessionId?: string | null) {
   const key = sessionId ? `meta-purchase-${sessionId}` : null;
   if (key && alreadySent(key)) return;
 
-  const send = () => {
-    if (typeof window.fbq !== "function") return false;
-    window.fbq("track", "Purchase", {
-      currency: META_PURCHASE_CURRENCY,
-      value: META_PURCHASE_VALUE,
-    });
-    if (key) markSent(key);
-    return true;
+  const sendBeacon = () => {
+    try {
+      const img = new Image();
+      img.referrerPolicy = "no-referrer-when-downgrade";
+      img.src = `https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=Purchase&cd[currency]=${META_PURCHASE_CURRENCY}&cd[value]=${META_PURCHASE_VALUE}&noscript=1`;
+    } catch {
+      /* ignore */
+    }
   };
 
-  if (send()) return;
+  const send = () => {
+    if (typeof window.fbq === "function") {
+      window.fbq("track", "Purchase", {
+        currency: META_PURCHASE_CURRENCY,
+        value: META_PURCHASE_VALUE,
+      });
+      if (key) markSent(key);
+      return true;
+    }
+    return false;
+  };
+
+  if (send()) {
+    sendBeacon();
+    return;
+  }
 
   let tries = 0;
   const timer = window.setInterval(() => {
     tries += 1;
-    if (send() || tries >= 25) window.clearInterval(timer);
-  }, 120);
+    if (send()) {
+      sendBeacon();
+      window.clearInterval(timer);
+      return;
+    }
+    if (tries >= 30) {
+      // Last resort: beacon only (still counts in many Meta setups)
+      sendBeacon();
+      if (key) markSent(key);
+      window.clearInterval(timer);
+    }
+  }, 150);
 }
 
 export function trackMetaPageView() {

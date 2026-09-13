@@ -38,14 +38,6 @@ function daysFromCheckout(checkout: {
 /** Verify Stripe Checkout session after redirect and unlock premium. */
 export async function POST(request: Request) {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: "ต้องเข้าสู่ระบบก่อน", code: "UNAUTHENTICATED" },
-        { status: 401 }
-      );
-    }
-
     if (!stripe) {
       return NextResponse.json(
         { error: "Stripe ยังไม่ได้ตั้งค่า" },
@@ -73,23 +65,42 @@ export async function POST(request: Request) {
         {
           error: "ยังไม่ได้ชำระเงิน หรือรอ Confirm จาก PromptPay",
           code: "PAYMENT_PENDING",
+          paid: false,
         },
         { status: 402 }
       );
     }
 
+    const amount =
+      typeof checkout.amount_total === "number"
+        ? Math.round(checkout.amount_total / 100)
+        : FORTUNE_UNLOCK_PRICE;
+
+    const authSession = await auth();
+    // Cookie often drops after Stripe redirect (Safari / in-app). Still tell the
+    // client the charge is paid so thank-you page can fire Purchase pixels.
+    if (!authSession?.user) {
+      return NextResponse.json(
+        {
+          ok: true,
+          paid: true,
+          premiumUnlocked: false,
+          code: "UNAUTHENTICATED",
+          amount,
+          error: "ต้องเข้าสู่ระบบก่อน",
+        },
+        { status: 401 }
+      );
+    }
+
     const metaUser = checkout.metadata?.userId || checkout.client_reference_id;
-    if (metaUser && metaUser !== session.user.id) {
+    if (metaUser && metaUser !== authSession.user.id) {
       return NextResponse.json({ error: "บัญชีไม่ตรงกับการชำระ" }, { status: 403 });
     }
 
     const purpose = checkout.metadata?.purpose || "premium-unlock";
     const packageId = checkout.metadata?.packageId || PREMIUM_UNLOCK.id;
     const credits = parseInt(checkout.metadata?.credits ?? "0", 10);
-    const amount =
-      typeof checkout.amount_total === "number"
-        ? Math.round(checkout.amount_total / 100)
-        : FORTUNE_UNLOCK_PRICE;
 
     // Legacy subscription checkouts (if any still open)
     if (checkout.mode === "subscription") {
@@ -103,14 +114,14 @@ export async function POST(request: Request) {
 
       const applied = subscription
         ? await applyStripeSubscription({
-            userId: session.user.id,
+            userId: authSession.user.id,
             subscription,
           })
         : null;
 
       try {
         await recordPayment({
-          userId: session.user.id,
+          userId: authSession.user.id,
           stripeRef: checkout.id,
           amount,
           credits,
@@ -121,6 +132,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         ok: true,
+        paid: true,
         purpose,
         packageId,
         premiumUnlocked: applied?.premium ?? false,
@@ -130,7 +142,7 @@ export async function POST(request: Request) {
     }
 
     const applied = await applyOneTimePremiumCheckout({
-      userId: session.user.id,
+      userId: authSession.user.id,
       checkoutSession: checkout,
       days: daysFromCheckout(checkout),
       amount,
@@ -139,6 +151,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
+      paid: true,
       purpose,
       packageId,
       premiumUnlocked: Boolean(applied?.premium),

@@ -474,10 +474,16 @@ export async function confirmStripePremiumUnlock(sessionId: string) {
   });
   const data = (await res.json().catch(() => ({}))) as {
     ok?: boolean;
+    paid?: boolean;
     premiumUnlocked?: boolean;
     premiumUntil?: string | null;
     error?: string;
+    code?: string;
   };
+  // Paid but logged-out (cookie lost after Stripe) — still OK for Purchase pixel
+  if (res.status === 401 && data.paid) {
+    return { ...data, ok: true, paid: true, premiumUnlocked: false };
+  }
   if (!res.ok) {
     throw new Error(data.error || "ยืนยันการชำระไม่สำเร็จ");
   }
