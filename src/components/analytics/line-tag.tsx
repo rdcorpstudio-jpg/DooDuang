@@ -11,11 +11,11 @@ declare global {
   }
 }
 
-/** LINE Ads Platform tag — base + page view */
-export const LINE_TAG_ID = "67b0794a-95c0-40c6-bf68-6f17e52e7fdd";
+/** LINE Ads Platform tag — base + page view (homepage / site-wide) */
+export const LINE_TAG_ID = "366d48f5-0b4f-406e-91d4-8206a7b0df14";
 
-/** LINE purchase / conversion tag — fire only after paid unlock */
-export const LINE_PURCHASE_TAG_ID = "16f50e85-230a-49e6-9e00-5454eb15b6c0";
+/** LINE purchase / conversion tag — fire only after paid unlock (thank-you) */
+export const LINE_PURCHASE_TAG_ID = "0f7d0234-5cad-4de7-8bd2-4112ed3c08c7";
 
 function LineTagRoutePv() {
   const pathname = usePathname();
@@ -84,12 +84,13 @@ export function trackLinePurchaseConversions(sessionId?: string | null) {
 
   const send = () => {
     if (typeof window._lt !== "function") return false;
+    // Match LINE purchase-page snippet order: init → Conversion → Purchase
     window._lt("init", {
       customerType: "lap",
       tagId: LINE_PURCHASE_TAG_ID,
     });
-    window._lt("send", "cv", { type: "Purchase" }, [LINE_PURCHASE_TAG_ID]);
     window._lt("send", "cv", { type: "Conversion" }, [LINE_PURCHASE_TAG_ID]);
+    window._lt("send", "cv", { type: "Purchase" }, [LINE_PURCHASE_TAG_ID]);
     if (key) {
       try {
         sessionStorage.setItem(key, "1");
