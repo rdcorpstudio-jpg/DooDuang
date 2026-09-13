@@ -259,7 +259,6 @@ export async function applyOneTimePremiumCheckout(opts: {
     const [profile] = await db
       .select({
         nickname: fortuneProfiles.nickname,
-        birthDate: fortuneProfiles.birthDate,
         realName: fortuneProfiles.realName,
       })
       .from(fortuneProfiles)
@@ -278,7 +277,6 @@ export async function applyOneTimePremiumCheckout(opts: {
       phone: u?.phone,
       lineLinked: Boolean(u?.lineUserId),
       nickname: profile?.nickname,
-      birthDate: profile?.birthDate,
     });
   } catch (err) {
     console.error("LINE payment notify skipped:", err);

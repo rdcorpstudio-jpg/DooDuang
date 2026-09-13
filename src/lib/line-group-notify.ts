@@ -120,14 +120,12 @@ export function notifyPremiumPayment(opts: {
   phone?: string | null;
   lineLinked?: boolean;
   nickname?: string | null;
-  birthDate?: string | null;
   alreadyFulfilled?: boolean;
 }) {
   if (opts.alreadyFulfilled) return;
   const email = maskEmail(opts.email);
   const phone = maskPhone(opts.phone);
   const nickname = opts.nickname?.trim() || null;
-  const birthDate = opts.birthDate?.trim() || null;
   const lines = [
     "💰 ชำระพรีเมียมสำเร็จ",
     `จำนวน: ${opts.amount.toLocaleString("th-TH")} บาท`,
@@ -137,7 +135,6 @@ export function notifyPremiumPayment(opts: {
     phone ? `เบอร์: ${phone}` : null,
     opts.lineLinked ? "LINE: เชื่อมแล้ว" : null,
     nickname ? `ชื่อเล่นดวง: ${nickname}` : null,
-    birthDate ? `วันเกิด: ${birthDate}` : null,
     `id: ${opts.userId.slice(0, 8)}…`,
   ].filter(Boolean);
   notifyLineGroup(lines.join("\n"));
