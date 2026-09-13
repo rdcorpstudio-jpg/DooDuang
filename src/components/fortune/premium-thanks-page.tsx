@@ -31,7 +31,10 @@ function LineMark({ className }: { className?: string }) {
   );
 }
 
-/** Post-payment thanks — Mae elder hero vibe + LINE OA CTA */
+/**
+ * Post-payment thank-you page (Stripe success_url).
+ * Site-wide listener on this URL confirms pay + fires Meta/LINE Purchase.
+ */
 export function PremiumThanksPage() {
   const [ready, setReady] = useState(false);
   const [premium, setPremium] = useState(false);

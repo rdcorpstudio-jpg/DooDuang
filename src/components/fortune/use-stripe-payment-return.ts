@@ -8,6 +8,14 @@ import { confirmStripePremiumUnlock } from "@/components/fortune/fortune-payment
 import { applyPremiumUntil, setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import { readFortuneProfile } from "@/lib/fortune/profile-storage";
 
+const THANKS_PATH = "/premium/thanks";
+
+/** Fire all post-purchase ad conversions (Meta + LINE). Deduped per session. */
+export function firePostPurchasePixels(sessionId: string) {
+  trackMetaPurchase(sessionId);
+  trackLinePurchaseConversions(sessionId);
+}
+
 /** After Stripe redirect (?payment=success&session_id=...), confirm + unlock. */
 export function useStripePaymentReturn(onUnlocked?: () => void) {
   const searchParams = useSearchParams();
@@ -25,11 +33,17 @@ export function useStripePaymentReturn(onUnlocked?: () => void) {
     handled.current = sessionId;
 
     let cancelled = false;
+    let finished = false;
+
     void (async () => {
       let unlockedOk = false;
       try {
         const result = await confirmStripePremiumUnlock(sessionId);
-        if (cancelled) return;
+        if (cancelled) {
+          // Strict Mode remount — allow the next effect to run
+          handled.current = null;
+          return;
+        }
         if (result.premiumUnlocked) {
           unlockedOk = true;
           const profile = readFortuneProfile();
@@ -50,21 +64,28 @@ export function useStripePaymentReturn(onUnlocked?: () => void) {
                 : null
             );
           }
-          trackMetaPurchase(sessionId);
-          trackLinePurchaseConversions(sessionId);
+          // Thank-you page conversions (retry until pixel scripts ready)
+          firePostPurchasePixels(sessionId);
           onUnlockedRef.current?.();
         }
+        finished = true;
       } catch (err) {
         console.error("Stripe return unlock failed:", err);
         handled.current = null;
       } finally {
-        if (!cancelled) {
-          if (unlockedOk) {
-            // CRM funnel: celebrate + add LINE OA (don't bounce to onboard yet)
-            router.replace("/premium/thanks");
-          } else {
-            router.replace(pathname || "/premium");
-          }
+        if (cancelled) {
+          if (!finished) handled.current = null;
+          return;
+        }
+        if (unlockedOk) {
+          // Let pixels queue before stripping success query
+          await new Promise((r) => window.setTimeout(r, 400));
+          if (cancelled) return;
+          router.replace(THANKS_PATH);
+        } else {
+          router.replace(
+            pathname === THANKS_PATH ? THANKS_PATH : pathname || "/premium"
+          );
         }
       }
     })();

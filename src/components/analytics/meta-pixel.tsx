@@ -68,24 +68,50 @@ fbq('track', 'PageView');`}
   );
 }
 
-/** Fire once per Stripe session_id after confirmed unlock. */
-export function trackMetaPurchase(sessionId?: string | null) {
-  if (typeof window === "undefined" || typeof window.fbq !== "function") return;
-
-  if (sessionId) {
-    try {
-      const key = `meta-purchase-${sessionId}`;
-      if (sessionStorage.getItem(key) === "1") return;
-      sessionStorage.setItem(key, "1");
-    } catch {
-      /* ignore */
-    }
+/** Dedupe key helpers — mark only after a successful send */
+function alreadySent(key: string) {
+  try {
+    return sessionStorage.getItem(key) === "1";
+  } catch {
+    return false;
   }
+}
 
-  window.fbq("track", "Purchase", {
-    currency: META_PURCHASE_CURRENCY,
-    value: META_PURCHASE_VALUE,
-  });
+function markSent(key: string) {
+  try {
+    sessionStorage.setItem(key, "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Fire once per Stripe session_id after confirmed unlock.
+ * Retries briefly if fbq is not ready yet (common on thank-you land).
+ */
+export function trackMetaPurchase(sessionId?: string | null) {
+  if (typeof window === "undefined") return;
+
+  const key = sessionId ? `meta-purchase-${sessionId}` : null;
+  if (key && alreadySent(key)) return;
+
+  const send = () => {
+    if (typeof window.fbq !== "function") return false;
+    window.fbq("track", "Purchase", {
+      currency: META_PURCHASE_CURRENCY,
+      value: META_PURCHASE_VALUE,
+    });
+    if (key) markSent(key);
+    return true;
+  };
+
+  if (send()) return;
+
+  let tries = 0;
+  const timer = window.setInterval(() => {
+    tries += 1;
+    if (send() || tries >= 25) window.clearInterval(timer);
+  }, 120);
 }
 
 export function trackMetaPageView() {

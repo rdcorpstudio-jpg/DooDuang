@@ -71,23 +71,40 @@ _lt('send', 'pv', ['${LINE_TAG_ID}']);`}
 
 /** Purchase + Conversion — once per Stripe session after confirmed unlock. */
 export function trackLinePurchaseConversions(sessionId?: string | null) {
-  if (typeof window === "undefined" || typeof window._lt !== "function") return;
+  if (typeof window === "undefined") return;
 
-  if (sessionId) {
+  const key = sessionId ? `line-purchase-cv-${sessionId}` : null;
+  if (key) {
     try {
-      const key = `line-purchase-cv-${sessionId}`;
       if (sessionStorage.getItem(key) === "1") return;
-      sessionStorage.setItem(key, "1");
     } catch {
       /* ignore */
     }
   }
 
-  // Purchase-page snippet: init purchase tag, then Purchase + Conversion
-  window._lt("init", {
-    customerType: "lap",
-    tagId: LINE_PURCHASE_TAG_ID,
-  });
-  window._lt("send", "cv", { type: "Purchase" }, [LINE_PURCHASE_TAG_ID]);
-  window._lt("send", "cv", { type: "Conversion" }, [LINE_PURCHASE_TAG_ID]);
+  const send = () => {
+    if (typeof window._lt !== "function") return false;
+    window._lt("init", {
+      customerType: "lap",
+      tagId: LINE_PURCHASE_TAG_ID,
+    });
+    window._lt("send", "cv", { type: "Purchase" }, [LINE_PURCHASE_TAG_ID]);
+    window._lt("send", "cv", { type: "Conversion" }, [LINE_PURCHASE_TAG_ID]);
+    if (key) {
+      try {
+        sessionStorage.setItem(key, "1");
+      } catch {
+        /* ignore */
+      }
+    }
+    return true;
+  };
+
+  if (send()) return;
+
+  let tries = 0;
+  const timer = window.setInterval(() => {
+    tries += 1;
+    if (send() || tries >= 25) window.clearInterval(timer);
+  }, 120);
 }
