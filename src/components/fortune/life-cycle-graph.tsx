@@ -537,6 +537,11 @@ export function LifeCycleGraph({
               className="block"
               role="img"
               aria-label={title}
+              style={{
+                letterSpacing: "normal",
+                fontFamily:
+                  "var(--font-sarabun), Sarabun, ui-sans-serif, system-ui, sans-serif",
+              }}
             >
               <defs>
                 <linearGradient id={strokeId} x1="0%" y1="0%" x2="100%" y2="0%">

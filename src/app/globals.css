@@ -64,6 +64,13 @@
   outline: none !important;
 }
 
+/* Thai diacritics break in SVG if body letter-spacing is inherited */
+.phone-frame svg text,
+.phone-frame svg tspan {
+  letter-spacing: normal;
+  font-family: var(--font-sarabun), Sarabun, ui-sans-serif, system-ui, sans-serif;
+}
+
 .phone-frame {
   width: 100%;
   max-width: 100%;

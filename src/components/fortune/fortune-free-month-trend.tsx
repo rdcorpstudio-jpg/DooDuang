@@ -235,6 +235,11 @@ function StockStylePanChart({
           className="block max-w-none"
           role="img"
           aria-label={ariaLabel}
+          style={{
+            letterSpacing: "normal",
+            fontFamily:
+              "var(--font-sarabun), Sarabun, ui-sans-serif, system-ui, sans-serif",
+          }}
         >
           <defs>
             <linearGradient

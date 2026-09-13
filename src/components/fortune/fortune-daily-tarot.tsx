@@ -14,6 +14,10 @@ import {
   tarotCardImageSrc,
   TAROT_DECK_COUNT,
 } from "@/lib/fortune/tarot-deck";
+import {
+  requirePremiumFromServer,
+  setPremiumUnlocked,
+} from "@/lib/fortune/premium-unlock";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +34,6 @@ function formatThaiDate(d = new Date()) {
 }
 
 const HOLD_MS = 450;
-const UNLOCK_KEY = "dooduang-tarot-unlocked";
 const HOLD_MOVE_CANCEL_PX = 14;
 
 /** Daily tarot — Mae navy–gold */
@@ -68,11 +71,31 @@ export function FortuneDailyTarot({
       } else {
         setPrayerOpen(true);
       }
-      if (sessionStorage.getItem(UNLOCK_KEY) === "1") setUnlocked(true);
     } catch {
       setPrayerOpen(true);
     }
   }, [openKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncPremium() {
+      const access = await requirePremiumFromServer();
+      if (!cancelled) setUnlocked(access.ok);
+    }
+
+    void syncPremium();
+    const onChange = () => {
+      void syncPremium();
+    };
+    window.addEventListener("dooduang-premium-changed", onChange);
+    window.addEventListener("focus", onChange);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("dooduang-premium-changed", onChange);
+      window.removeEventListener("focus", onChange);
+    };
+  }, []);
 
   const clearHold = useCallback(() => {
     if (timerRef.current != null) {
@@ -120,11 +143,7 @@ export function FortuneDailyTarot({
   useEffect(() => () => clearHold(), [clearHold]);
 
   function handlePaid() {
-    try {
-      sessionStorage.setItem(UNLOCK_KEY, "1");
-    } catch {
-      /* ignore */
-    }
+    setPremiumUnlocked();
     setUnlocked(true);
     setPayOpen(false);
   }
