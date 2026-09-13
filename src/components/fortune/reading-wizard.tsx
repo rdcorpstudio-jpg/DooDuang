@@ -377,7 +377,7 @@ function FormContinueButton({
     <button
       type="button"
       className={cn(
-        "mae-gold-cta wizard-anim-item group relative mt-6 flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3.5 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-45",
+        "mae-gold-cta wizard-anim-item group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3.5 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-45",
         className,
       )}
       style={{ "--wizard-delay": `${delayMs}ms` } as React.CSSProperties}
@@ -393,10 +393,19 @@ function FormContinueButton({
   );
 }
 
-function PrivacyNote({ delayMs = 520 }: { delayMs?: number }) {
+function PrivacyNote({
+  delayMs = 520,
+  className,
+}: {
+  delayMs?: number;
+  className?: string;
+}) {
   return (
     <p
-      className="wizard-keyboard-hide wizard-anim-item mt-4 flex items-center justify-center gap-1.5 text-[12px]"
+      className={cn(
+        "wizard-keyboard-hide wizard-anim-item flex items-center justify-center gap-1.5 text-[12px]",
+        className
+      )}
       style={
         {
           "--wizard-delay": `${delayMs}ms`,
@@ -723,7 +732,7 @@ export function ReadingWizard() {
   return (
     <div
       data-wizard-scroll
-      className="mae-wizard relative h-full overflow-x-hidden overflow-y-auto overscroll-contain text-white"
+      className="mae-wizard relative flex h-full flex-col overflow-hidden text-white"
     >
       {/* Shared celestial plate — home/mae keep their own art */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
@@ -748,8 +757,8 @@ export function ReadingWizard() {
         />
       </div>
 
-      <div className="wizard-keyboard-compact relative z-10 flex min-h-full flex-col px-5 pb-5 pt-3">
-        <div className="relative z-20 mb-2 grid grid-cols-[minmax(4.5rem,1fr)_auto_minmax(4.5rem,1fr)] items-center gap-2">
+      <div className="wizard-keyboard-compact relative z-10 flex min-h-0 flex-1 flex-col px-5 pt-3">
+        <div className="relative z-20 mb-2 grid shrink-0 grid-cols-[minmax(4.5rem,1fr)_auto_minmax(4.5rem,1fr)] items-center gap-2">
           {step === "gender" ? (
             <span aria-hidden className="justify-self-start" />
           ) : (
@@ -780,154 +789,178 @@ export function ReadingWizard() {
           </div>
         </div>
 
-        <div
-          className={cn(
-            "relative mx-auto flex w-full max-w-[340px] flex-1 flex-col",
-            step === "name"
-              ? "wizard-name-stage justify-start pb-4 pt-6 sm:pt-10"
-              : "justify-center py-6"
-          )}
-        >
-          <div className="wizard-step-stage">
-            <div
-              key={`${step}-${direction}`}
-              className={cn(
-                "wizard-step-panel",
-                direction === "forward" ? "wizard-step-forward" : "wizard-step-back",
-              )}
-            >
-            {step === "gender" && (
-              <>
-                <StepHeader
-                  title="เลือกเพศของคุณ"
-                  subtitle="ช่วยปรับโทนคำทำนายให้เข้ากับคุณ"
-                />
-
-                <GenderSelectList
-                  value={profile.gender}
-                  onSelect={(gender) => setProfile((p) => ({ ...p, gender }))}
-                />
-                <FormContinueButton
-                  label="ไปต่อ"
-                  delayMs={420}
-                  className="mt-6"
-                  disabled={!profile.gender}
-                  onClick={() => goToStep("birth", "forward")}
-                />
-                <PrivacyNote delayMs={520} />
-              </>
+        {/* Scrollable step body — CTA stays pinned below */}
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
+          <div
+            className={cn(
+              "relative mx-auto flex w-full max-w-[340px] flex-col pb-3",
+              step === "name"
+                ? "wizard-name-stage justify-start pt-4 sm:pt-8"
+                : "justify-start pt-2"
             )}
+          >
+            <div className="wizard-step-stage">
+              <div
+                key={`${step}-${direction}`}
+                className={cn(
+                  "wizard-step-panel",
+                  direction === "forward"
+                    ? "wizard-step-forward"
+                    : "wizard-step-back"
+                )}
+              >
+                {step === "gender" && (
+                  <>
+                    <StepHeader
+                      title="เลือกเพศของคุณ"
+                      subtitle="ช่วยปรับโทนคำทำนายให้เข้ากับคุณ"
+                    />
+                    <GenderSelectList
+                      value={profile.gender}
+                      onSelect={(gender) =>
+                        setProfile((p) => ({ ...p, gender }))
+                      }
+                    />
+                  </>
+                )}
 
-            {step === "birth" && (
-              <>
-                <StepHeader
-                  title="วันเดือนปีเกิด"
-                  subtitle="ดวงเบื้องต้นคำนวณจากวันเกิดของคุณ"
-                />
-
-                <WizardShell>
-                  <BirthDatePicker
-                    tone="mae"
-                    value={profile.birthDate}
-                    onChange={(birthDate) =>
-                      setProfile((p) => ({ ...p, birthDate }))
-                    }
-                  />
-
-                  <p
-                    className="mt-4 rounded-[14px] px-3 py-2.5 text-center text-[12px] leading-snug"
-                    style={{
-                      background: "rgba(213,177,111,0.1)",
-                      boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.22)",
-                      color: "rgba(236,214,168,0.9)",
-                    }}
-                  >
-                    เวลาเกิดและสถานที่เกิด จะขอตอนสมัครพรีเมียม
-                    เพื่อวิเคราะห์เชิงลึกให้แม่นขึ้น
-                  </p>
-                </WizardShell>
-
-                <FormContinueButton
-                  label="ไปต่อ"
-                  delayMs={280}
-                  disabled={!profile.birthDate}
-                  onClick={() => goToStep("name", "forward")}
-                />
-                <PrivacyNote delayMs={380} />
-              </>
-            )}
-
-            {step === "name" && (
-              <>
-                <StepHeader
-                  title="ชื่อของคุณ"
-                  subtitle="ใช้เรียกคุณในคำทำนายเบื้องต้น"
-                />
-
-                <WizardShell>
-                  <div className="flex flex-col gap-4">
-                    <label className="block">
-                      <span
-                        className="mb-2 block text-[13px] font-medium tracking-wide"
-                        style={{ color: "rgba(236,214,168,0.88)" }}
-                      >
-                        ชื่อจริง
-                      </span>
-                      <input
-                        type="text"
-                        value={profile.realName}
-                        onChange={(e) =>
-                          setProfile((p) => ({ ...p, realName: e.target.value }))
+                {step === "birth" && (
+                  <>
+                    <StepHeader
+                      title="วันเดือนปีเกิด"
+                      subtitle="ดวงเบื้องต้นคำนวณจากวันเกิดของคุณ"
+                    />
+                    <WizardShell className="p-3.5 sm:p-5">
+                      <BirthDatePicker
+                        tone="mae"
+                        value={profile.birthDate}
+                        onChange={(birthDate) =>
+                          setProfile((p) => ({ ...p, birthDate }))
                         }
-                        onFocus={scrollFieldIntoView}
-                        placeholder="ชื่อจริงของคุณ"
-                        className="name-step-input mae-wizard-input"
-                        autoComplete="name"
-                        enterKeyHint="next"
                       />
-                    </label>
-
-                    <label className="block">
-                      <span
-                        className="mb-2 block text-[13px] font-medium tracking-wide"
-                        style={{ color: "rgba(236,214,168,0.88)" }}
+                      <p
+                        className="mt-3 rounded-[14px] px-3 py-2 text-center text-[11.5px] leading-snug sm:mt-4 sm:py-2.5 sm:text-[12px]"
+                        style={{
+                          background: "rgba(213,177,111,0.1)",
+                          boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.22)",
+                          color: "rgba(236,214,168,0.9)",
+                        }}
                       >
-                        ชื่อเล่น
-                      </span>
-                      <input
-                        type="text"
-                        value={profile.nickname}
-                        onChange={(e) =>
-                          setProfile((p) => ({ ...p, nickname: e.target.value }))
-                        }
-                        onFocus={scrollFieldIntoView}
-                        placeholder="ชื่อที่อยากให้เรียก"
-                        className="name-step-input mae-wizard-input"
-                        autoComplete="nickname"
-                        enterKeyHint="done"
-                      />
-                    </label>
+                        เวลาเกิดและสถานที่เกิด จะขอตอนสมัครพรีเมียม
+                        เพื่อวิเคราะห์เชิงลึกให้แม่นขึ้น
+                      </p>
+                    </WizardShell>
+                  </>
+                )}
 
-                    {error ? (
-                      <div className="rounded-xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 text-[14px] text-rose-200">
-                        {error}
+                {step === "name" && (
+                  <>
+                    <StepHeader
+                      title="ชื่อของคุณ"
+                      subtitle="ใช้เรียกคุณในคำทำนายเบื้องต้น"
+                    />
+                    <WizardShell>
+                      <div className="flex flex-col gap-4">
+                        <label className="block">
+                          <span
+                            className="mb-2 block text-[13px] font-medium tracking-wide"
+                            style={{ color: "rgba(236,214,168,0.88)" }}
+                          >
+                            ชื่อจริง
+                          </span>
+                          <input
+                            type="text"
+                            value={profile.realName}
+                            onChange={(e) =>
+                              setProfile((p) => ({
+                                ...p,
+                                realName: e.target.value,
+                              }))
+                            }
+                            onFocus={scrollFieldIntoView}
+                            placeholder="ชื่อจริงของคุณ"
+                            className="name-step-input mae-wizard-input"
+                            autoComplete="name"
+                            enterKeyHint="next"
+                          />
+                        </label>
+
+                        <label className="block">
+                          <span
+                            className="mb-2 block text-[13px] font-medium tracking-wide"
+                            style={{ color: "rgba(236,214,168,0.88)" }}
+                          >
+                            ชื่อเล่น
+                          </span>
+                          <input
+                            type="text"
+                            value={profile.nickname}
+                            onChange={(e) =>
+                              setProfile((p) => ({
+                                ...p,
+                                nickname: e.target.value,
+                              }))
+                            }
+                            onFocus={scrollFieldIntoView}
+                            placeholder="ชื่อที่อยากให้เรียก"
+                            className="name-step-input mae-wizard-input"
+                            autoComplete="nickname"
+                            enterKeyHint="done"
+                          />
+                        </label>
+
+                        {error ? (
+                          <div className="rounded-xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 text-[14px] text-rose-200">
+                            {error}
+                          </div>
+                        ) : null}
                       </div>
-                    ) : null}
-                  </div>
-                </WizardShell>
-
-                <FormContinueButton
-                  label={
-                    afterPremium ? "ไปกรอกข้อมูลเชิงลึก" : "เปิดดูดวงเบื้องต้น"
-                  }
-                  delayMs={280}
-                  disabled={!profile.realName.trim() || !profile.nickname.trim()}
-                  onClick={() => void runFortune()}
-                />
-                <PrivacyNote delayMs={380} />
-              </>
-            )}
+                    </WizardShell>
+                  </>
+                )}
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Always-visible CTA — survives Large Text / short viewports */}
+        <div
+          className="relative z-20 shrink-0 px-0 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(10,14,24,0) 0%, rgba(10,14,24,0.82) 28%, rgba(10,14,24,0.96) 100%)",
+          }}
+        >
+          <div className="mx-auto w-full max-w-[340px]">
+            {step === "gender" ? (
+              <FormContinueButton
+                label="ไปต่อ"
+                delayMs={420}
+                disabled={!profile.gender}
+                onClick={() => goToStep("birth", "forward")}
+              />
+            ) : null}
+            {step === "birth" ? (
+              <FormContinueButton
+                label="ไปต่อ"
+                delayMs={280}
+                disabled={!profile.birthDate}
+                onClick={() => goToStep("name", "forward")}
+              />
+            ) : null}
+            {step === "name" ? (
+              <FormContinueButton
+                label={
+                  afterPremium ? "ไปกรอกข้อมูลเชิงลึก" : "เปิดดูดวงเบื้องต้น"
+                }
+                delayMs={280}
+                disabled={
+                  !profile.realName.trim() || !profile.nickname.trim()
+                }
+                onClick={() => void runFortune()}
+              />
+            ) : null}
+            <PrivacyNote delayMs={380} className="mt-3" />
           </div>
         </div>
       </div>

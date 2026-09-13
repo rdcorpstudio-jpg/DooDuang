@@ -87,7 +87,7 @@ function WheelColumn({
   }
 
   return (
-    <div className="relative z-[2] h-[200px] flex-1 overflow-hidden">
+    <div className="relative z-[2] h-[min(200px,34svh)] min-h-[148px] max-h-[200px] flex-1 overflow-hidden">
       <div
         ref={ref}
         role="listbox"
