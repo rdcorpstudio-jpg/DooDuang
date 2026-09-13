@@ -53,7 +53,7 @@ export function LoginScreen({
     lineError === "denied"
       ? "ยกเลิกการเข้าสู่ระบบด้วย LINE"
       : lineError === "state" || lineError === "missing"
-        ? "เซสชัน LINE หมดอายุ กรุณาลองใหม่"
+        ? "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
         : lineError === "failed"
           ? "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่"
           : lineError

@@ -9,6 +9,7 @@ import {
   LINE_LINK_COOKIE,
   LINE_RETURN_COOKIE,
   LINE_STATE_COOKIE,
+  parseLineOAuthState,
   safeReturnPath,
   upsertUserByLineId,
 } from "@/lib/line-auth";
@@ -48,9 +49,19 @@ export async function GET(request: Request) {
     const lineError = url.searchParams.get("error");
 
     const store = await cookies();
-    const expectedState = store.get(LINE_STATE_COOKIE)?.value || null;
-    const returnPath = safeReturnPath(store.get(LINE_RETURN_COOKIE)?.value);
-    const linkMode = store.get(LINE_LINK_COOKIE)?.value === "1";
+    const parsedState = parseLineOAuthState(state);
+    const cookieState = store.get(LINE_STATE_COOKIE)?.value || null;
+
+    // Prefer signed state (works without cookies). Cookie is optional double-check.
+    const stateOk =
+      Boolean(parsedState) &&
+      (!cookieState || cookieState === state);
+
+    const returnPath = safeReturnPath(
+      parsedState?.r || store.get(LINE_RETURN_COOKIE)?.value
+    );
+    const linkMode =
+      parsedState?.l === 1 || store.get(LINE_LINK_COOKIE)?.value === "1";
 
     if (lineError) {
       console.error("LINE authorize denied:", lineError);
@@ -64,7 +75,12 @@ export async function GET(request: Request) {
         : loginRedirect(request, "missing");
     }
 
-    if (!expectedState || expectedState !== state) {
+    if (!stateOk || !parsedState) {
+      console.error("LINE OAuth state invalid", {
+        hasParsed: Boolean(parsedState),
+        hasCookie: Boolean(cookieState),
+        cookieMatch: cookieState === state,
+      });
       return linkMode
         ? dashboardRedirect(request, returnPath, "state")
         : loginRedirect(request, "state");
@@ -118,8 +134,13 @@ export async function GET(request: Request) {
   } catch (err) {
     console.error("LINE login failed:", err);
     const store = await cookies();
-    const linkMode = store.get(LINE_LINK_COOKIE)?.value === "1";
-    const returnPath = safeReturnPath(store.get(LINE_RETURN_COOKIE)?.value);
+    const url = new URL(request.url);
+    const parsedState = parseLineOAuthState(url.searchParams.get("state"));
+    const linkMode =
+      parsedState?.l === 1 || store.get(LINE_LINK_COOKIE)?.value === "1";
+    const returnPath = safeReturnPath(
+      parsedState?.r || store.get(LINE_RETURN_COOKIE)?.value
+    );
     return linkMode
       ? dashboardRedirect(request, returnPath, "failed")
       : loginRedirect(request, "failed");

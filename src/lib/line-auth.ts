@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "crypto";
 import { eq } from "drizzle-orm";
 import { requireDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -7,6 +8,7 @@ export const LINE_STATE_COOKIE = "dd_line_state";
 export const LINE_RETURN_COOKIE = "dd_line_return";
 export const LINE_LINK_COOKIE = "dd_line_link";
 const DEFAULT_RETURN = "/dashboard";
+const STATE_TTL_MS = 15 * 60 * 1000;
 
 export function isLineLoginConfigured() {
   return Boolean(
@@ -41,7 +43,7 @@ export function lineAuthorizeUrl(opts: {
   url.searchParams.set("redirect_uri", opts.callbackUrl);
   url.searchParams.set("state", opts.state);
   url.searchParams.set("scope", "profile openid");
-  url.searchParams.set("nonce", opts.state);
+  url.searchParams.set("nonce", crypto.randomUUID());
   return url.toString();
 }
 
@@ -57,6 +59,79 @@ type LineProfile = {
   displayName?: string;
   pictureUrl?: string;
 };
+
+export type LineOAuthStatePayload = {
+  /** return path */
+  r: string;
+  /** link mode */
+  l?: 1;
+  /** expiry epoch ms */
+  exp: number;
+};
+
+function stateSecret() {
+  const secret =
+    process.env.AUTH_SECRET || process.env.LINE_CHANNEL_SECRET || "";
+  if (!secret) {
+    throw new Error("AUTH_SECRET is not configured");
+  }
+  return secret;
+}
+
+function signPayload(body: string) {
+  return createHmac("sha256", stateSecret()).update(body).digest("base64url");
+}
+
+/**
+ * Self-contained OAuth state — survives LINE in-app browser where
+ * SameSite cookies set on redirect-out are often dropped.
+ */
+export function createLineOAuthState(opts: {
+  returnPath: string;
+  linkMode?: boolean;
+}) {
+  const payload: LineOAuthStatePayload = {
+    r: safeReturnPath(opts.returnPath),
+    exp: Date.now() + STATE_TTL_MS,
+    ...(opts.linkMode ? { l: 1 as const } : {}),
+  };
+  const body = Buffer.from(JSON.stringify(payload), "utf8").toString(
+    "base64url"
+  );
+  return `${body}.${signPayload(body)}`;
+}
+
+export function parseLineOAuthState(
+  state: string | null | undefined
+): LineOAuthStatePayload | null {
+  if (!state) return null;
+  const dot = state.lastIndexOf(".");
+  if (dot <= 0) return null;
+  const body = state.slice(0, dot);
+  const sig = state.slice(dot + 1);
+  if (!body || !sig) return null;
+
+  try {
+    const expected = signPayload(body);
+    const a = Buffer.from(sig);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+
+    const payload = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8")
+    ) as LineOAuthStatePayload;
+    if (!payload || typeof payload.exp !== "number") return null;
+    if (payload.exp < Date.now()) return null;
+    if (typeof payload.r !== "string") return null;
+    return {
+      r: safeReturnPath(payload.r),
+      exp: payload.exp,
+      ...(payload.l === 1 ? { l: 1 as const } : {}),
+    };
+  } catch {
+    return null;
+  }
+}
 
 export async function exchangeLineCode(opts: {
   code: string;
@@ -152,8 +227,9 @@ export function oauthCookieOptions() {
   return {
     httpOnly: true,
     secure,
-    sameSite: "lax" as const,
+    // Prefer None in production so LINE in-app / cross-site return keeps cookies
+    sameSite: (secure ? "none" : "lax") as "none" | "lax",
     path: "/",
-    maxAge: 10 * 60,
+    maxAge: 15 * 60,
   };
 }

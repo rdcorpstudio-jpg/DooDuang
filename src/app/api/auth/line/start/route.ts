@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  createLineOAuthState,
   isLineLoginConfigured,
   lineAuthorizeUrl,
   lineCallbackUrl,
@@ -22,12 +23,12 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const state = crypto.randomUUID();
   const linkMode = url.searchParams.get("link") === "1";
   const returnPath = safeReturnPath(
     url.searchParams.get("callbackUrl") ||
       (linkMode ? "/dashboard" : null)
   );
+  const state = createLineOAuthState({ returnPath, linkMode });
   const callbackUrl = lineCallbackUrl(request);
   const authorize = lineAuthorizeUrl({
     channelId: process.env.LINE_CHANNEL_ID || "",
@@ -37,6 +38,7 @@ export async function GET(request: Request) {
 
   const response = NextResponse.redirect(authorize);
   const cookies = oauthCookieOptions();
+  // Best-effort cookies (may be dropped by LINE in-app browser)
   response.cookies.set(LINE_STATE_COOKIE, state, cookies);
   response.cookies.set(LINE_RETURN_COOKIE, returnPath, cookies);
   if (linkMode) {
