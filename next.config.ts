@@ -20,6 +20,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // Old static-hosting habit / ads typos — no real index.html in Next.js
+      { source: "/index.html", destination: "/", permanent: true },
+      { source: "/index.htm", destination: "/", permanent: true },
+    ];
+  },
   async rewrites() {
     if (!firebaseAuthProxyHost) return [];
     return [
