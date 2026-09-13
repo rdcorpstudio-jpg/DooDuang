@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import {
   AlreadySubscribedError,
   createPremiumCheckoutUrl,
+  parseCheckoutPaymentMethod,
   resolveCheckoutPackage,
 } from "@/lib/stripe";
 import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
@@ -11,46 +12,31 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-/** After login: browser hits this and 303s straight to Stripe (no React spinner wait). */
+/** Legacy entry: send shoppers to in-app method picker (not straight to Stripe). */
 export async function GET(request: Request) {
-  try {
-    const session = await auth();
-    if (!session?.user) {
-      const login = new URL("/login", request.url);
-      login.searchParams.set("callbackUrl", "/premium?checkout=1");
-      return NextResponse.redirect(login);
-    }
-
-    const url = await createPremiumCheckoutUrl({
-      userId: session.user.id,
-      email: session.user.email,
-      origin: new URL(request.url).origin,
-      returnPath: "/premium",
-      packageId: PREMIUM_UNLOCK.id,
-    });
-    return NextResponse.redirect(url, 303);
-  } catch (err) {
-    if (err instanceof AlreadySubscribedError) {
-      return NextResponse.redirect(new URL("/premium", request.url));
-    }
-    console.error("Stripe go failed:", err);
-    const premium = new URL("/premium?checkout=1", request.url);
-    premium.searchParams.set("payError", "1");
-    return NextResponse.redirect(premium);
+  const pay = new URL("/premium/pay", request.url);
+  const session = await auth().catch(() => null);
+  if (!session?.user) {
+    const login = new URL("/login", request.url);
+    login.searchParams.set("callbackUrl", "/premium/pay");
+    return NextResponse.redirect(login);
   }
+  return NextResponse.redirect(pay);
 }
 
-async function readPackageId(request: Request) {
+async function readCheckoutBody(request: Request) {
   const contentType = request.headers.get("content-type") || "";
   if (contentType.includes("application/json")) {
     const body = (await request.json().catch(() => null)) as {
       packageId?: string;
       returnPath?: string;
+      paymentMethod?: string;
     } | null;
     return {
       packageId: typeof body?.packageId === "string" ? body.packageId : "",
       returnPath:
-        typeof body?.returnPath === "string" ? body.returnPath : "/premium",
+        typeof body?.returnPath === "string" ? body.returnPath : "/premium/pay",
+      paymentMethod: parseCheckoutPaymentMethod(body?.paymentMethod),
       wantsJson: true,
     };
   }
@@ -58,7 +44,8 @@ async function readPackageId(request: Request) {
   const formData = await request.formData();
   return {
     packageId: String(formData.get("packageId") || ""),
-    returnPath: String(formData.get("returnPath") || "/premium"),
+    returnPath: String(formData.get("returnPath") || "/premium/pay"),
+    paymentMethod: parseCheckoutPaymentMethod(formData.get("paymentMethod")),
     wantsJson: false,
   };
 }
@@ -67,8 +54,8 @@ export async function POST(request: Request) {
   let wantsJson = true;
   try {
     const session = await auth();
-    const parsed = await readPackageId(request);
-    const { packageId, returnPath } = parsed;
+    const parsed = await readCheckoutBody(request);
+    const { packageId, returnPath, paymentMethod } = parsed;
     wantsJson = parsed.wantsJson;
 
     if (!session?.user) {
@@ -79,8 +66,18 @@ export async function POST(request: Request) {
         );
       }
       const login = new URL("/login", request.url);
-      login.searchParams.set("callbackUrl", returnPath || "/premium?checkout=1");
+      login.searchParams.set("callbackUrl", returnPath || "/premium/pay");
       return NextResponse.redirect(login);
+    }
+
+    if (!paymentMethod) {
+      if (wantsJson) {
+        return NextResponse.json(
+          { error: "กรุณาเลือกวิธีชำระเงิน", code: "PAYMENT_METHOD_REQUIRED" },
+          { status: 400 }
+        );
+      }
+      return NextResponse.redirect(new URL("/premium/pay", request.url), 303);
     }
 
     const pkg = resolveCheckoutPackage(packageId || PREMIUM_UNLOCK.id);
@@ -94,6 +91,7 @@ export async function POST(request: Request) {
       origin: new URL(request.url).origin,
       returnPath,
       packageId: pkg.id,
+      paymentMethod,
     });
 
     if (wantsJson) {

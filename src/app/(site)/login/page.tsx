@@ -25,7 +25,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth().catch(() => null);
   if (session?.user) {
     if (next.includes("checkout=1")) {
-      redirect("/api/stripe/checkout");
+      redirect("/premium/pay");
     }
     redirect(next);
   }

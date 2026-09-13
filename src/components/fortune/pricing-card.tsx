@@ -1,5 +1,7 @@
+"use client";
+
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { FORTUNE_PACKAGE_LABEL } from "@/lib/site";
@@ -20,7 +22,6 @@ export function PricingCard({
   price,
   description,
   popular,
-  packageId,
 }: PricingCardProps) {
   return (
     <Card
@@ -42,21 +43,17 @@ export function PricingCard({
           / {durationLabel}
         </span>
       </div>
-      <form action="/api/stripe/checkout" method="POST" className="mt-auto">
-        <input type="hidden" name="packageId" value={packageId} />
-        <input type="hidden" name="returnPath" value="/premium" />
-        <Button
-          type="submit"
-          className={cn(
-            "w-full",
-            popular
-              ? "bg-gradient-to-r from-[#b8860b] via-[#e8c547] to-[#c9a227] text-[#1f1704] hover:opacity-95"
-              : "bg-white/10 text-white hover:bg-white/15"
-          )}
-        >
-          ชำระเงิน
-        </Button>
-      </form>
+      <Link
+        href="/premium/pay"
+        className={cn(
+          "mt-auto inline-flex w-full items-center justify-center rounded-full px-5 py-2.5 text-[14px] font-medium tracking-wide transition active:scale-[0.98]",
+          popular
+            ? "bg-gradient-to-r from-[#b8860b] via-[#e8c547] to-[#c9a227] text-[#1f1704] hover:opacity-95"
+            : "bg-white/10 text-white hover:bg-white/15"
+        )}
+      >
+        ชำระเงิน
+      </Link>
     </Card>
   );
 }

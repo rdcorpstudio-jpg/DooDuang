@@ -26,3 +26,13 @@ export const CREDIT_PACKAGES = [
 ] as const;
 
 export type CreditPackageId = (typeof CREDIT_PACKAGES)[number]["id"];
+
+/** Stripe Checkout payment_method_types we offer in-app. */
+export type CheckoutPaymentMethod = "card" | "promptpay";
+
+export function parseCheckoutPaymentMethod(
+  raw: unknown
+): CheckoutPaymentMethod | null {
+  if (raw === "card" || raw === "promptpay") return raw;
+  return null;
+}

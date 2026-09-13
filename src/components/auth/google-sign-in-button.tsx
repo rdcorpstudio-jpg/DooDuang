@@ -12,7 +12,6 @@ import {
 } from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
-import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
 import { cn } from "@/lib/utils";
 
 const CALLBACK_KEY = "dooduang-login-callback";
@@ -180,32 +179,16 @@ export async function resolveFirebaseUserAfterRedirect(): Promise<User | null> {
 
 export function wantsCheckoutAfterLogin(callbackUrl: string) {
   const next = safeCallback(callbackUrl);
-  return next.includes("checkout=1");
+  return next.includes("checkout=1") || next.startsWith("/premium/pay");
 }
 
-/** Create Stripe session and leave the app — no intermediate pay button page */
+/** @deprecated Prefer /premium/pay — kept for rare callers */
 export async function goToStripeCheckout(returnPath = "/premium") {
-  const res = await fetch("/api/stripe/checkout", {
-    method: "POST",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      packageId: PREMIUM_UNLOCK.id,
-      returnPath,
-    }),
-  });
-  const data = (await res.json().catch(() => ({}))) as {
-    url?: string;
-    error?: string;
-    code?: string;
-  };
-  if (res.status === 401 || data.code === "UNAUTHENTICATED") {
-    throw new Error("ต้องเข้าสู่ระบบก่อนชำระเงิน");
-  }
-  if (!res.ok || !data.url) {
-    throw new Error(data.error || "สร้างลิงก์ชำระเงินไม่สำเร็จ");
-  }
-  window.location.replace(data.url);
+  window.location.replace(
+    returnPath === "/premium" || returnPath === "/premium/pay"
+      ? "/premium/pay"
+      : `/premium/pay?return=${encodeURIComponent(returnPath)}`
+  );
 }
 
 export async function completeAppLogin(
@@ -216,7 +199,7 @@ export async function completeAppLogin(
   const wantPay = !opts?.onSuccess && wantsCheckoutAfterLogin(next);
   const idToken = await user.getIdToken();
 
-  // Login only (fast) — then browser navigates to Stripe via /api/stripe/checkout
+  // Login only (fast) — then browser navigates to in-app pay page
   const data = await exchangeIdToken(idToken, {
     checkout: false,
     returnPath: "/premium",
@@ -230,8 +213,9 @@ export async function completeAppLogin(
   }
 
   if (wantPay) {
-    // Leave this page immediately; Stripe session is created on the next hop
-    window.location.replace("/api/stripe/checkout");
+    window.location.replace(
+      next.startsWith("/premium/pay") ? next : "/premium/pay"
+    );
     return { navigated: true as const, next };
   }
 

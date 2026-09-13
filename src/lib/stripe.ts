@@ -1,9 +1,13 @@
 import Stripe from "stripe";
-import { CREDIT_PACKAGES, PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
+import {
+  CREDIT_PACKAGES,
+  PREMIUM_UNLOCK,
+  type CheckoutPaymentMethod,
+} from "@/lib/stripe-catalog";
 import { getUserSubscription, hasPremiumAccess } from "@/lib/premium-entitlement";
 
-export { CREDIT_PACKAGES, PREMIUM_UNLOCK };
-export type { CreditPackageId } from "@/lib/stripe-catalog";
+export { CREDIT_PACKAGES, PREMIUM_UNLOCK, parseCheckoutPaymentMethod } from "@/lib/stripe-catalog";
+export type { CreditPackageId, CheckoutPaymentMethod } from "@/lib/stripe-catalog";
 
 export class AlreadySubscribedError extends Error {
   constructor() {
@@ -100,6 +104,8 @@ export async function createPremiumCheckoutUrl(opts: {
   origin: string;
   returnPath?: string;
   packageId?: string;
+  /** When set, Stripe Checkout shows only this method. */
+  paymentMethod?: CheckoutPaymentMethod | null;
 }): Promise<string> {
   if (!stripe) {
     throw new Error("Stripe ยังไม่ได้ตั้งค่า");
@@ -128,8 +134,11 @@ export async function createPremiumCheckoutUrl(opts: {
     throw new AlreadySubscribedError();
   }
 
+  const paymentMethod = opts.paymentMethod ?? null;
+
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: "payment",
+    locale: "th",
     ...(existing?.stripeCustomerId
       ? { customer: existing.stripeCustomerId }
       : opts.email
@@ -137,6 +146,9 @@ export async function createPremiumCheckoutUrl(opts: {
         : {}),
     line_items: [{ price: priceId, quantity: 1 }],
     allow_promotion_codes: true,
+    ...(paymentMethod
+      ? { payment_method_types: [paymentMethod] }
+      : {}),
     // PromptPay / async methods still complete via webhook + confirm
     payment_intent_data: {
       metadata: {
@@ -144,6 +156,7 @@ export async function createPremiumCheckoutUrl(opts: {
         packageId: pkg.id,
         purpose: pkg.purpose,
         days: String(pkg.days),
+        ...(paymentMethod ? { paymentMethod } : {}),
       },
     },
     success_url: `${opts.origin}/premium/thanks?payment=success&session_id={CHECKOUT_SESSION_ID}`,
@@ -155,6 +168,7 @@ export async function createPremiumCheckoutUrl(opts: {
       credits: String(pkg.credits),
       purpose: pkg.purpose,
       days: String(pkg.days),
+      ...(paymentMethod ? { paymentMethod } : {}),
     },
   });
 
@@ -170,6 +184,7 @@ export async function createPremiumCheckoutUrl(opts: {
       packageId: pkg.id,
       days: pkg.days,
       stripeSessionId: checkoutSession.id,
+      ...(paymentMethod ? { paymentMethod } : {}),
     },
   });
 

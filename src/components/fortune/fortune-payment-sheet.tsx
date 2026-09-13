@@ -8,7 +8,6 @@ import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
 import { PREMIUM_LIST_PRICE } from "@/lib/fortune/premium-offer-countdown";
 import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK } from "@/lib/site";
-import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
 import { cn } from "@/lib/utils";
 
 type CheckoutStep = "ready" | "redirecting";
@@ -30,7 +29,7 @@ const IS_LOCAL_DEV =
   process.env.NODE_ENV === "development" ||
   process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
 
-const LOGIN_THEN_CHECKOUT = "/premium?checkout=1";
+const LOGIN_THEN_PAY = "/premium/pay";
 
 const MAE_PANEL: CSSProperties = {
   background: "#101827",
@@ -91,8 +90,8 @@ export function FortunePaymentSheet({
   const [loadingSession, setLoadingSession] = useState(true);
   const [step, setStep] = useState<CheckoutStep>("ready");
   const [error, setError] = useState<string | null>(null);
-  const [wantsAutoCheckout, setWantsAutoCheckout] = useState(false);
-  const autoCheckoutStarted = useRef(false);
+  const [wantsAutoPay, setWantsAutoPay] = useState(false);
+  const autoPayStarted = useRef(false);
 
   const resolvedReturn =
     returnPath ||
@@ -125,13 +124,13 @@ export function FortunePaymentSheet({
     if (!open) return;
     setStep("ready");
     setError(null);
-    autoCheckoutStarted.current = false;
+    autoPayStarted.current = false;
     try {
-      setWantsAutoCheckout(
+      setWantsAutoPay(
         new URLSearchParams(window.location.search).get("checkout") === "1"
       );
     } catch {
-      setWantsAutoCheckout(false);
+      setWantsAutoPay(false);
     }
     void refreshSession();
   }, [open, refreshSession]);
@@ -159,48 +158,21 @@ export function FortunePaymentSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose, step, isPage, isInline]);
 
-  const startCheckout = useCallback(async () => {
-    setError(null);
-    setStep("redirecting");
-    try {
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          packageId: PREMIUM_UNLOCK.id,
-          returnPath: resolvedReturn.split("?")[0] || "/premium",
-        }),
-      });
-      const data = (await res.json().catch(() => ({}))) as {
-        url?: string;
-        error?: string;
-        code?: string;
-      };
+  const goToPayPage = useCallback(() => {
+    const ret = resolvedReturn.split("?")[0] || "/premium";
+    const qs = new URLSearchParams();
+    if (ret !== "/premium" && ret !== "/premium/pay") qs.set("return", ret);
+    const path = qs.size ? `/premium/pay?${qs}` : "/premium/pay";
+    if (!isPage && !isInline) onClose();
+    router.push(path);
+  }, [isInline, isPage, onClose, resolvedReturn, router]);
 
-      if (res.status === 401 || data.code === "UNAUTHENTICATED") {
-        setUser(null);
-        setStep("ready");
-        setError("กรุณาเข้าสู่ระบบก่อนชำระเงิน");
-        return;
-      }
-
-      if (!res.ok || !data.url) {
-        throw new Error(data.error || "สร้างลิงก์ชำระเงินไม่สำเร็จ");
-      }
-
-      window.location.href = data.url;
-    } catch (err) {
-      setStep("ready");
-      setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
-    }
-  }, [resolvedReturn]);
-
-  // Logged in + ?checkout=1 → Stripe immediately (no second tap)
+  // Logged in + ?checkout=1 → in-app pay page (pick method, then Stripe)
   useEffect(() => {
     if (!open || loadingSession || !user) return;
-    if (!wantsAutoCheckout) return;
-    if (autoCheckoutStarted.current || step === "redirecting") return;
-    autoCheckoutStarted.current = true;
+    if (!wantsAutoPay) return;
+    if (autoPayStarted.current || step === "redirecting") return;
+    autoPayStarted.current = true;
 
     try {
       const url = new URL(window.location.href);
@@ -213,14 +185,14 @@ export function FortunePaymentSheet({
       /* ignore */
     }
 
-    void startCheckout();
+    goToPayPage();
   }, [
     open,
     loadingSession,
     user,
-    wantsAutoCheckout,
+    wantsAutoPay,
     step,
-    startCheckout,
+    goToPayPage,
     router,
     pathname,
   ]);
@@ -339,7 +311,7 @@ export function FortunePaymentSheet({
               onClick={() => {
                 onClose();
                 router.push(
-                  `/login?callbackUrl=${encodeURIComponent(LOGIN_THEN_CHECKOUT)}`
+                  `/login?callbackUrl=${encodeURIComponent(LOGIN_THEN_PAY)}`
                 );
               }}
               className="mae-gold-cta flex w-full items-center justify-center rounded-full px-4 py-3.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
@@ -356,18 +328,11 @@ export function FortunePaymentSheet({
             ) : null}
             <button
               type="button"
-              onClick={() => void startCheckout()}
+              onClick={goToPayPage}
               disabled={step === "redirecting"}
               className="mae-gold-cta flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
             >
-              {step === "redirecting" ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  กำลังไปหน้าชำระเงิน…
-                </>
-              ) : (
-                <>ชำระ {FORTUNE_UNLOCK_PRICE} บาท</>
-              )}
+              ชำระ {FORTUNE_UNLOCK_PRICE} บาท
             </button>
           </div>
         )}
