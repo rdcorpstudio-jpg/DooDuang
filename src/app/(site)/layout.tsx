@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { FeatureOpenTracker } from "@/components/analytics/feature-open-tracker";
+import { SiteVisitTracker } from "@/components/analytics/site-visit-tracker";
 
 export default function SiteLayout({
   children,
@@ -9,6 +10,7 @@ export default function SiteLayout({
   return (
     <div className="flex h-full flex-col sacred-page-bg">
       <Suspense fallback={null}>
+        <SiteVisitTracker />
         <FeatureOpenTracker />
       </Suspense>
       <main className="flex-1 overflow-y-auto overflow-x-hidden">{children}</main>

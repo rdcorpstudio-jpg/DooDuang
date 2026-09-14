@@ -156,6 +156,36 @@ export async function GET(request: Request) {
       ])
     );
 
+    /** Unique site visitors (page_view.visitorId) → signups → paying users */
+    const [visitAgg] = await db
+      .select({
+        visitors: sql<number>`count(distinct coalesce((${analyticsEvents.props})::jsonb->>'visitorId', ${analyticsEvents.id}))::int`,
+        sessions: sql<number>`count(*)::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          eq(analyticsEvents.name, "page_view")
+        )
+      );
+
+    const [buyerAgg] = await db
+      .select({
+        buyers: sql<number>`count(distinct ${payments.userId})::int`,
+      })
+      .from(payments)
+      .where(
+        and(
+          inWindow(payments.createdAt, since, until),
+          eq(payments.status, "completed")
+        )
+      );
+
+    const visitors = Number(visitAgg?.visitors) || 0;
+    const visitSessions = Number(visitAgg?.sessions) || 0;
+    const buyers = Number(buyerAgg?.buyers) || 0;
+
     const funnel = FUNNEL_STEPS.map((step, index) => {
       const current = byName.get(step.name) || { events: 0, uniqueUsers: 0 };
       const prev =
@@ -496,6 +526,15 @@ export async function GET(request: Request) {
         payments: paymentCount,
         revenue: revenueTotal,
         featureOpens: byName.get("feature_open")?.events ?? 0,
+        visitors,
+        buyers,
+      },
+      growthFunnel: {
+        visitors,
+        visitSessions,
+        signups: signupTotal,
+        buyers,
+        payments: paymentCount,
       },
       funnel,
       features,

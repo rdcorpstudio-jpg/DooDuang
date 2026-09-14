@@ -68,6 +68,15 @@ type AnalyticsPayload = {
     payments: number;
     revenue: number;
     featureOpens: number;
+    visitors?: number;
+    buyers?: number;
+  };
+  growthFunnel?: {
+    visitors: number;
+    visitSessions: number;
+    signups: number;
+    buyers: number;
+    payments: number;
   };
   funnel: FunnelStep[];
   features: FeatureRow[];
@@ -93,6 +102,17 @@ function todayYmdBangkok() {
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
+}
+
+function shiftYmdBangkok(ymd: string, deltaDays: number) {
+  const base = new Date(`${ymd}T12:00:00+07:00`);
+  const shifted = new Date(base.getTime() + deltaDays * 24 * 60 * 60 * 1000);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(shifted);
 }
 
 function formatBaht(n: number) {
@@ -157,8 +177,111 @@ function queryLabel(q: AnalyticsQuery) {
         ? "30 วันล่าสุด"
         : "90 วันล่าสุด";
   }
+  const today = todayYmdBangkok();
+  const yesterday = shiftYmdBangkok(today, -1);
+  if (q.from === q.to && q.from === today) return "วันนี้";
+  if (q.from === q.to && q.from === yesterday) return "เมื่อวาน";
   if (q.from === q.to) return formatYmdThai(q.from);
   return `${formatYmdThai(q.from)} – ${formatYmdThai(q.to)}`;
+}
+
+function pctOf(part: number, whole: number) {
+  if (whole <= 0) return part > 0 ? 100 : 0;
+  return Math.round((part / whole) * 1000) / 10;
+}
+
+function GrowthFunnelCone({
+  visitors,
+  signups,
+  buyers,
+}: {
+  visitors: number;
+  signups: number;
+  buyers: number;
+}) {
+  const steps = [
+    {
+      id: "visit",
+      label: "คนเข้าชมเว็บ",
+      hint: "unique visitors",
+      value: visitors,
+      fill: "#7dffb3",
+      text: "#0f7a4a",
+    },
+    {
+      id: "signup",
+      label: "คนสมัคร",
+      hint: "signup",
+      value: signups,
+      fill: "#1a1d21",
+      text: "#ffffff",
+    },
+    {
+      id: "buy",
+      label: "คนซื้อ",
+      hint: "unique buyers",
+      value: buyers,
+      fill: "#b8f5d8",
+      text: "#0f7a4a",
+    },
+  ] as const;
+
+  const max = Math.max(1, ...steps.map((s) => s.value));
+  const widths = steps.map((s, i) => {
+    const byValue = 42 + (s.value / max) * 58;
+    const taper = 100 - i * 16;
+    return Math.max(36, Math.min(taper, byValue));
+  });
+
+  return (
+    <div className="mx-auto w-full max-w-lg">
+      <div className="flex flex-col items-center gap-2">
+        {steps.map((step, i) => {
+          const prev = i > 0 ? steps[i - 1].value : null;
+          const conv = prev == null ? null : pctOf(step.value, prev);
+          return (
+            <div key={step.id} className="flex w-full flex-col items-center">
+              {conv != null ? (
+                <p className="mb-1.5 text-[11px] font-semibold text-[#8b93a1]">
+                  ↓ {conv}% จากขั้นก่อน
+                </p>
+              ) : null}
+              <div
+                className="relative flex min-h-[72px] items-center justify-center px-4 py-3 text-center shadow-[0_8px_24px_rgba(26,29,33,0.08)] transition"
+                style={{
+                  width: `${widths[i]}%`,
+                  background: step.fill,
+                  color: step.text,
+                  clipPath:
+                    i === 0
+                      ? "polygon(2% 0, 98% 0, 92% 100%, 8% 100%)"
+                      : i === 1
+                        ? "polygon(6% 0, 94% 0, 86% 100%, 14% 100%)"
+                        : "polygon(10% 0, 90% 0, 78% 100%, 22% 100%)",
+                  borderRadius: i === 2 ? "0 0 18px 18px" : undefined,
+                }}
+              >
+                <div>
+                  <p className="text-[12px] font-semibold opacity-90">
+                    {step.label}
+                  </p>
+                  <p className="mt-0.5 text-[1.65rem] font-bold tabular-nums leading-none tracking-tight">
+                    {step.value.toLocaleString("th-TH")}
+                  </p>
+                  <p className="mt-1 text-[10px] opacity-70">{step.hint}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {visitors === 0 ? (
+        <p className="mt-4 text-center text-[12px] leading-relaxed text-[#8b93a1]">
+          ตัวเลขเข้าชมเริ่มนับหลัง deploy รอบนี้ · รีเฟรชช่วงใหม่หลังมีคนเข้าเว็บ
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 const PRESETS: { key: RangeKey; title: string; hint: string }[] = [
@@ -437,7 +560,43 @@ export function AdminAnalyticsPage() {
             ไม่โหลดข้อมูลอัตโนมัติ — เลือกวันหรือช่วงแล้วกดดูรายงาน
           </p>
 
-          <div className="mt-5 inline-flex rounded-2xl bg-[#f4f6f8] p-1">
+          <div className="mt-5 grid grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              onClick={() => void load({ kind: "custom", from: today, to: today })}
+              className="rounded-2xl bg-[#1a1d21] px-4 py-3.5 text-left outline-none transition hover:bg-black active:scale-[0.99]"
+            >
+              <span className="block text-[15px] font-semibold text-white">
+                วันนี้
+              </span>
+              <span className="mt-0.5 block text-[12px] text-[#9ff5c8]">
+                {formatYmdThai(today)}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const y = shiftYmdBangkok(today, -1);
+                void load({ kind: "custom", from: y, to: y });
+              }}
+              className="rounded-2xl bg-[#eafff4] px-4 py-3.5 text-left outline-none ring-1 ring-[#7dffb3] transition hover:bg-[#d8fbe9] active:scale-[0.99]"
+            >
+              <span className="block text-[15px] font-semibold text-[#1a1d21]">
+                เมื่อวาน
+              </span>
+              <span className="mt-0.5 block text-[12px] text-[#0f7a4a]">
+                {formatYmdThai(shiftYmdBangkok(today, -1))}
+              </span>
+            </button>
+          </div>
+
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-[#e5e8ee]" />
+            <span className="text-[11px] font-medium text-[#8b93a1]">หรือ</span>
+            <div className="h-px flex-1 bg-[#e5e8ee]" />
+          </div>
+
+          <div className="inline-flex rounded-2xl bg-[#f4f6f8] p-1">
             {(
               [
                 { id: "preset" as const, label: "ช่วงสำเร็จรูป" },
@@ -633,6 +792,20 @@ export function AdminAnalyticsPage() {
               </div>
             </SoftCard>
           </div>
+
+          <SoftCard>
+            <div className="mb-5 text-center sm:text-left">
+              <p className="text-[15px] font-semibold">Funnel Infographic</p>
+              <p className="mt-0.5 text-[12px] text-[#8b93a1]">
+                คนเข้าชมเว็บ → คนสมัคร → คนซื้อ
+              </p>
+            </div>
+            <GrowthFunnelCone
+              visitors={data.growthFunnel?.visitors ?? data.summary.visitors ?? 0}
+              signups={data.growthFunnel?.signups ?? data.summary.signups}
+              buyers={data.growthFunnel?.buyers ?? data.summary.buyers ?? 0}
+            />
+          </SoftCard>
 
           <div className="grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
             <SoftCard className="overflow-hidden !p-0">
@@ -893,7 +1066,10 @@ export function AdminAnalyticsPage() {
             </SoftCard>
 
             <SoftCard>
-              <p className="text-[15px] font-semibold">Funnel</p>
+              <p className="text-[15px] font-semibold">Funnel ละเอียด</p>
+              <p className="mt-0.5 text-[12px] text-[#8b93a1]">
+                ทุกขั้นในผลิตภัณฑ์ · unique users
+              </p>
               <ul className="mt-4 space-y-3">
                 {data.funnel.map((step) => {
                   const max = Math.max(

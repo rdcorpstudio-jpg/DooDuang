@@ -1,5 +1,6 @@
 /** Canonical product analytics event names */
 export const ANALYTICS_EVENT_NAMES = [
+  "page_view",
   "signup",
   "login",
   "profile_saved",
@@ -13,6 +14,7 @@ export const ANALYTICS_EVENT_NAMES = [
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];
 
 export const CLIENT_ANALYTICS_EVENT_NAMES = [
+  "page_view",
   "feature_open",
   "thanks_line_cta",
 ] as const satisfies readonly AnalyticsEventName[];
