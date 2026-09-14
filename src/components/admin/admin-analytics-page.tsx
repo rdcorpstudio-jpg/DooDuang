@@ -43,6 +43,18 @@ type DailyRow = {
   revenue: number;
 };
 
+type PurchaseRow = {
+  id: string;
+  createdAt: string;
+  amount: number;
+  userId: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  channel: string;
+  channelLabel: string;
+};
+
 type AnalyticsPayload = {
   ok: true;
   rangeDays: number;
@@ -63,6 +75,7 @@ type AnalyticsPayload = {
   revenueByAccountChannel: ChannelRevenue[];
   revenueByPaymentMethod: ChannelRevenue[];
   daily: DailyRow[];
+  purchases?: PurchaseRow[];
 };
 
 type RangeKey = "7d" | "30d" | "90d";
@@ -107,6 +120,18 @@ function formatYmdThai(ymd: string) {
     day: "numeric",
     month: "short",
     year: "numeric",
+  }).format(d);
+}
+
+function formatDateTimeThai(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return new Intl.DateTimeFormat("th-TH", {
+    timeZone: "Asia/Bangkok",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(d);
 }
 
@@ -598,6 +623,53 @@ export function AdminAnalyticsPage() {
               )}
             </Panel>
           </div>
+
+          <Panel
+            title="คนที่ชำระ"
+            subtitle={`ชื่อ · อีเมล/เบอร์ · ช่องทาง · ล่าสุดก่อน (สูงสุด 200)`}
+          >
+            {(data.purchases?.length ?? 0) === 0 ? (
+              <p className="text-[13px] text-[#7d8aa3]">ยังไม่มีรายการชำระในช่วงนี้</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px] border-collapse text-left text-[12px]">
+                  <thead>
+                    <tr className="border-b border-white/[0.08] text-[#8b97ad]">
+                      <th className="pb-2 pr-3 font-medium">เวลา</th>
+                      <th className="pb-2 pr-3 font-medium">ชื่อ</th>
+                      <th className="pb-2 pr-3 font-medium">ติดต่อ</th>
+                      <th className="pb-2 pr-3 font-medium">ช่องทาง</th>
+                      <th className="pb-2 font-medium">ยอด</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(data.purchases ?? []).map((row) => (
+                      <tr
+                        key={row.id}
+                        className="border-b border-white/[0.04] last:border-0"
+                      >
+                        <td className="py-2.5 pr-3 whitespace-nowrap text-[#c5cdd9]">
+                          {formatDateTimeThai(row.createdAt)}
+                        </td>
+                        <td className="py-2.5 pr-3 text-[#e8edf5]">
+                          {row.name || "—"}
+                        </td>
+                        <td className="py-2.5 pr-3 text-[#c5cdd9]">
+                          {row.email || row.phone || "—"}
+                        </td>
+                        <td className="py-2.5 pr-3 text-[#c5cdd9]">
+                          {row.channelLabel}
+                        </td>
+                        <td className="py-2.5 tabular-nums text-[#e8edf5]">
+                          {formatBaht(row.amount)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Panel>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <Panel title="Funnel" subtitle="unique users · % จากขั้นก่อน">

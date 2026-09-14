@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, eq, gte, lt, sql, type SQL } from "drizzle-orm";
+import { and, desc, eq, gte, lt, sql, type SQL } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin";
 import {
   ANALYTICS_FEATURES,
@@ -8,7 +8,12 @@ import {
   type AnalyticsFeature,
 } from "@/lib/analytics/events";
 import { requireDb } from "@/lib/db";
-import { analyticsEvents, payments, users } from "@/lib/db/schema";
+import {
+  analyticsEvents,
+  fortuneProfiles,
+  payments,
+  users,
+} from "@/lib/db/schema";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -427,6 +432,57 @@ export async function GET(request: Request) {
 
     const signupTotal = signupsByChannel.reduce((s, c) => s + c.count, 0);
 
+    /** Individual completed purchases with buyer identity */
+    const purchaseRows = await db
+      .select({
+        id: payments.id,
+        amount: payments.amount,
+        createdAt: payments.createdAt,
+        userId: users.id,
+        name: users.name,
+        email: users.email,
+        phone: users.phone,
+        nickname: fortuneProfiles.nickname,
+        lineUserId: users.lineUserId,
+        firebaseUid: users.firebaseUid,
+      })
+      .from(payments)
+      .innerJoin(users, eq(payments.userId, users.id))
+      .leftJoin(fortuneProfiles, eq(fortuneProfiles.userId, users.id))
+      .where(
+        and(
+          inWindow(payments.createdAt, since, until),
+          eq(payments.status, "completed")
+        )
+      )
+      .orderBy(desc(payments.createdAt))
+      .limit(200);
+
+    const purchases = purchaseRows.map((r) => {
+      const channel = r.lineUserId
+        ? "line"
+        : r.firebaseUid
+          ? "google"
+          : r.phone
+            ? "phone"
+            : "other";
+      const displayName =
+        (r.name && r.name.trim()) ||
+        (r.nickname && r.nickname.trim()) ||
+        null;
+      return {
+        id: r.id,
+        createdAt: r.createdAt.toISOString(),
+        amount: Number(r.amount) || 0,
+        userId: r.userId,
+        name: displayName,
+        email: r.email,
+        phone: r.phone,
+        channel,
+        channelLabel: channelLabel(channel),
+      };
+    });
+
     return NextResponse.json({
       ok: true,
       rangeDays: days,
@@ -447,6 +503,7 @@ export async function GET(request: Request) {
       revenueByAccountChannel,
       revenueByPaymentMethod,
       daily,
+      purchases,
     });
   } catch (err) {
     console.error("admin analytics failed:", err);
