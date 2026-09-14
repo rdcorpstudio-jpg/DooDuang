@@ -284,6 +284,146 @@ function GrowthFunnelCone({
   );
 }
 
+const PIE_COLORS = [
+  "#1a1d21",
+  "#7dffb3",
+  "#5b9fd4",
+  "#d5b16f",
+  "#8b7ec8",
+  "#ff9b7a",
+  "#94a3b8",
+] as const;
+
+function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
+  const rad = ((angleDeg - 90) * Math.PI) / 180;
+  return {
+    x: cx + r * Math.cos(rad),
+    y: cy + r * Math.sin(rad),
+  };
+}
+
+function donutSlicePath(
+  cx: number,
+  cy: number,
+  rOuter: number,
+  rInner: number,
+  startAngle: number,
+  endAngle: number
+) {
+  const large = endAngle - startAngle > 180 ? 1 : 0;
+  const o1 = polarToCartesian(cx, cy, rOuter, endAngle);
+  const o0 = polarToCartesian(cx, cy, rOuter, startAngle);
+  const i1 = polarToCartesian(cx, cy, rInner, endAngle);
+  const i0 = polarToCartesian(cx, cy, rInner, startAngle);
+  return [
+    `M ${o0.x} ${o0.y}`,
+    `A ${rOuter} ${rOuter} 0 ${large} 1 ${o1.x} ${o1.y}`,
+    `L ${i1.x} ${i1.y}`,
+    `A ${rInner} ${rInner} 0 ${large} 0 ${i0.x} ${i0.y}`,
+    "Z",
+  ].join(" ");
+}
+
+function FeatureOpenPie({ features }: { features: FeatureRow[] }) {
+  const ranked = features
+    .filter((f) => f.opens > 0)
+    .slice()
+    .sort((a, b) => b.opens - a.opens);
+
+  const top = ranked.slice(0, 6);
+  const restOpens = ranked.slice(6).reduce((s, f) => s + f.opens, 0);
+  const slices = [
+    ...top.map((f) => ({ id: f.id, label: f.label, value: f.opens })),
+    ...(restOpens > 0
+      ? [{ id: "other", label: "อื่น ๆ", value: restOpens }]
+      : []),
+  ];
+
+  const total = slices.reduce((s, x) => s + x.value, 0);
+
+  if (total === 0) {
+    return (
+      <p className="py-8 text-center text-[13px] text-[#8b93a1]">
+        ยังไม่มีข้อมูลว่าคนกดฟีเจอร์อะไรในช่วงนี้
+      </p>
+    );
+  }
+
+  const cx = 110;
+  const cy = 110;
+  const rOuter = 88;
+  const rInner = 52;
+  let angle = 0;
+  const paths = slices.map((slice, i) => {
+    const sweep = (slice.value / total) * 360;
+    // full circle single slice
+    const start = angle;
+    const end = angle + Math.max(sweep, slice.value === total ? 359.99 : 0.01);
+    angle += sweep;
+    return {
+      ...slice,
+      color: PIE_COLORS[i % PIE_COLORS.length],
+      pct: Math.round((slice.value / total) * 1000) / 10,
+      d:
+        slice.value === total
+          ? undefined
+          : donutSlicePath(cx, cy, rOuter, rInner, start, end),
+      full: slice.value === total,
+    };
+  });
+
+  return (
+    <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:justify-between">
+      <div className="relative shrink-0">
+        <svg viewBox="0 0 220 220" className="h-[200px] w-[200px] sm:h-[220px] sm:w-[220px]">
+          {paths.map((p) =>
+            p.full ? (
+              <g key={p.id}>
+                <circle cx={cx} cy={cy} r={rOuter} fill={p.color} />
+                <circle cx={cx} cy={cy} r={rInner} fill="#ffffff" />
+              </g>
+            ) : (
+              <path key={p.id} d={p.d} fill={p.color} />
+            )
+          )}
+        </svg>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <p className="text-[11px] font-medium text-[#8b93a1]">เปิดทั้งหมด</p>
+          <p className="text-[1.45rem] font-bold tabular-nums tracking-tight text-[#1a1d21]">
+            {total.toLocaleString("th-TH")}
+          </p>
+        </div>
+      </div>
+
+      <ul className="w-full min-w-0 flex-1 space-y-2.5">
+        {paths.map((p) => (
+          <li
+            key={p.id}
+            className="flex items-center justify-between gap-3 rounded-2xl bg-[#f4f6f8] px-3.5 py-2.5"
+          >
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ background: p.color }}
+                aria-hidden
+              />
+              <span className="truncate text-[13px] font-medium text-[#1a1d21]">
+                {p.label}
+              </span>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-[13px] font-semibold tabular-nums text-[#1a1d21]">
+                {p.value.toLocaleString("th-TH")}
+              </p>
+              <p className="text-[11px] tabular-nums text-[#8b93a1]">{p.pct}%</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 const PRESETS: { key: RangeKey; title: string; hint: string }[] = [
   { key: "7d", title: "7 วัน", hint: "สัปดาห์ล่าสุด" },
   { key: "30d", title: "30 วัน", hint: "เดือนล่าสุด" },
@@ -805,6 +945,16 @@ export function AdminAnalyticsPage() {
               signups={data.growthFunnel?.signups ?? data.summary.signups}
               buyers={data.growthFunnel?.buyers ?? data.summary.buyers ?? 0}
             />
+          </SoftCard>
+
+          <SoftCard>
+            <div className="mb-5">
+              <p className="text-[15px] font-semibold">คนเข้ามากดอะไรบ้าง</p>
+              <p className="mt-0.5 text-[12px] text-[#8b93a1]">
+                สัดส่วนการเปิดฟีเจอร์ (feature_open) ในช่วงที่เลือก
+              </p>
+            </div>
+            <FeatureOpenPie features={data.features} />
           </SoftCard>
 
           <div className="grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
