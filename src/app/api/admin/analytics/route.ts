@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { and, eq, gte, lt, sql, type SQL } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin";
 import {
   ANALYTICS_FEATURES,
@@ -13,10 +13,75 @@ import { analyticsEvents, payments, users } from "@/lib/db/schema";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const YMD = /^(\d{4})-(\d{2})-(\d{2})$/;
+const MAX_CUSTOM_DAYS = 366;
+
 function rangeDays(range: string | null): number {
   if (range === "90d") return 90;
   if (range === "30d") return 30;
-  return 7;
+  if (range === "7d") return 7;
+  return 0;
+}
+
+function bangkokDayStart(ymd: string): Date | null {
+  if (!YMD.test(ymd)) return null;
+  const d = new Date(`${ymd}T00:00:00+07:00`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function parseWindow(url: URL): {
+  since: Date;
+  until: Date;
+  rangeDays: number;
+  from: string | null;
+  to: string | null;
+  range: string | null;
+} | { error: string } {
+  const fromRaw = url.searchParams.get("from");
+  const toRaw = url.searchParams.get("to");
+  if (fromRaw || toRaw) {
+    if (!fromRaw || !toRaw) {
+      return { error: "ต้องระบุทั้ง from และ to (YYYY-MM-DD)" };
+    }
+    const since = bangkokDayStart(fromRaw);
+    const toStart = bangkokDayStart(toRaw);
+    if (!since || !toStart) {
+      return { error: "รูปแบบวันที่ไม่ถูกต้อง (ใช้ YYYY-MM-DD)" };
+    }
+    if (toStart.getTime() < since.getTime()) {
+      return { error: "วันสิ้นสุดต้องไม่ก่อนวันเริ่ม" };
+    }
+    const until = new Date(toStart.getTime() + 24 * 60 * 60 * 1000);
+    const days =
+      Math.round((until.getTime() - since.getTime()) / (24 * 60 * 60 * 1000));
+    if (days > MAX_CUSTOM_DAYS) {
+      return { error: `ช่วงวันที่ยาวเกิน ${MAX_CUSTOM_DAYS} วัน` };
+    }
+    return {
+      since,
+      until,
+      rangeDays: days,
+      from: fromRaw,
+      to: toRaw,
+      range: null,
+    };
+  }
+
+  const range = url.searchParams.get("range");
+  const days = rangeDays(range);
+  if (!days) {
+    return { error: "ระบุ range=7d|30d|90d หรือ from+to" };
+  }
+  const until = new Date();
+  const since = new Date(until.getTime() - days * 24 * 60 * 60 * 1000);
+  return {
+    since,
+    until,
+    rangeDays: days,
+    from: null,
+    to: null,
+    range: range === "90d" || range === "30d" || range === "7d" ? range : "7d",
+  };
 }
 
 function channelLabel(raw: string) {
@@ -46,6 +111,14 @@ function paymentMethodLabel(raw: string) {
   return raw;
 }
 
+function inWindow(
+  column: typeof analyticsEvents.createdAt | typeof payments.createdAt,
+  since: Date,
+  until: Date
+): SQL {
+  return and(gte(column, since), lt(column, until))!;
+}
+
 export async function GET(request: Request) {
   const admin = await requireAdmin();
   if (!admin) {
@@ -55,8 +128,11 @@ export async function GET(request: Request) {
   try {
     const db = requireDb();
     const url = new URL(request.url);
-    const days = rangeDays(url.searchParams.get("range"));
-    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const window = parseWindow(url);
+    if ("error" in window) {
+      return NextResponse.json({ error: window.error }, { status: 400 });
+    }
+    const { since, until, rangeDays: days, from, to, range } = window;
 
     const funnelRows = await db
       .select({
@@ -65,7 +141,7 @@ export async function GET(request: Request) {
         uniqueUsers: sql<number>`count(distinct ${analyticsEvents.userId})::int`,
       })
       .from(analyticsEvents)
-      .where(gte(analyticsEvents.createdAt, since))
+      .where(inWindow(analyticsEvents.createdAt, since, until))
       .groupBy(analyticsEvents.name);
 
     const byName = new Map(
@@ -108,7 +184,7 @@ export async function GET(request: Request) {
       .from(analyticsEvents)
       .where(
         and(
-          gte(analyticsEvents.createdAt, since),
+          inWindow(analyticsEvents.createdAt, since, until),
           sql`${analyticsEvents.feature} is not null`
         )
       )
@@ -163,7 +239,7 @@ export async function GET(request: Request) {
       .from(analyticsEvents)
       .where(
         and(
-          gte(analyticsEvents.createdAt, since),
+          inWindow(analyticsEvents.createdAt, since, until),
           eq(analyticsEvents.name, "signup")
         )
       )
@@ -186,7 +262,7 @@ export async function GET(request: Request) {
       .from(payments)
       .where(
         and(
-          gte(payments.createdAt, since),
+          inWindow(payments.createdAt, since, until),
           eq(payments.status, "completed")
         )
       );
@@ -210,7 +286,7 @@ export async function GET(request: Request) {
       .innerJoin(users, eq(payments.userId, users.id))
       .where(
         and(
-          gte(payments.createdAt, since),
+          inWindow(payments.createdAt, since, until),
           eq(payments.status, "completed")
         )
       )
@@ -240,7 +316,7 @@ export async function GET(request: Request) {
       .from(analyticsEvents)
       .where(
         and(
-          gte(analyticsEvents.createdAt, since),
+          inWindow(analyticsEvents.createdAt, since, until),
           eq(analyticsEvents.name, "payment_succeeded")
         )
       )
@@ -267,7 +343,7 @@ export async function GET(request: Request) {
       .from(analyticsEvents)
       .where(
         and(
-          gte(analyticsEvents.createdAt, since),
+          inWindow(analyticsEvents.createdAt, since, until),
           eq(analyticsEvents.name, "signup")
         )
       )
@@ -286,7 +362,7 @@ export async function GET(request: Request) {
       .from(payments)
       .where(
         and(
-          gte(payments.createdAt, since),
+          inWindow(payments.createdAt, since, until),
           eq(payments.status, "completed")
         )
       )
@@ -354,7 +430,11 @@ export async function GET(request: Request) {
     return NextResponse.json({
       ok: true,
       rangeDays: days,
+      range,
+      from,
+      to,
       since: since.toISOString(),
+      until: until.toISOString(),
       summary: {
         signups: signupTotal,
         payments: paymentCount,

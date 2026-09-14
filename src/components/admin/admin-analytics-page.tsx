@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type FunnelStep = {
@@ -46,7 +46,11 @@ type DailyRow = {
 type AnalyticsPayload = {
   ok: true;
   rangeDays: number;
+  range: string | null;
+  from: string | null;
+  to: string | null;
   since: string;
+  until: string;
   summary: {
     signups: number;
     payments: number;
@@ -62,6 +66,21 @@ type AnalyticsPayload = {
 };
 
 type RangeKey = "7d" | "30d" | "90d";
+type PickMode = "preset" | "custom";
+type Phase = "pick" | "dashboard";
+
+type AnalyticsQuery =
+  | { kind: "preset"; range: RangeKey }
+  | { kind: "custom"; from: string; to: string };
+
+function todayYmdBangkok() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
 
 function formatBaht(n: number) {
   return new Intl.NumberFormat("th-TH", {
@@ -79,6 +98,29 @@ function formatDay(day: string) {
     day: "numeric",
     month: "short",
   }).format(d);
+}
+
+function formatYmdThai(ymd: string) {
+  const d = new Date(`${ymd}T12:00:00+07:00`);
+  if (Number.isNaN(d.getTime())) return ymd;
+  return new Intl.DateTimeFormat("th-TH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(d);
+}
+
+function queryToSearch(q: AnalyticsQuery) {
+  if (q.kind === "preset") return `range=${q.range}`;
+  return `from=${encodeURIComponent(q.from)}&to=${encodeURIComponent(q.to)}`;
+}
+
+function queryLabel(q: AnalyticsQuery) {
+  if (q.kind === "preset") {
+    return q.range === "7d" ? "7 วันล่าสุด" : q.range === "30d" ? "30 วันล่าสุด" : "90 วันล่าสุด";
+  }
+  if (q.from === q.to) return formatYmdThai(q.from);
+  return `${formatYmdThai(q.from)} – ${formatYmdThai(q.to)}`;
 }
 
 function KpiCard({
@@ -192,17 +234,31 @@ function ChannelBars({
   );
 }
 
+const PRESETS: { key: RangeKey; title: string; hint: string }[] = [
+  { key: "7d", title: "7 วัน", hint: "สัปดาห์ล่าสุด" },
+  { key: "30d", title: "30 วัน", hint: "เดือนล่าสุด" },
+  { key: "90d", title: "90 วัน", hint: "ไตรมาสล่าสุด" },
+];
+
 export function AdminAnalyticsPage() {
-  const [range, setRange] = useState<RangeKey>("7d");
+  const today = useMemo(() => todayYmdBangkok(), []);
+  const [phase, setPhase] = useState<Phase>("pick");
+  const [pickMode, setPickMode] = useState<PickMode>("preset");
+  const [preset, setPreset] = useState<RangeKey>("7d");
+  const [from, setFrom] = useState(today);
+  const [to, setTo] = useState(today);
+  const [activeQuery, setActiveQuery] = useState<AnalyticsQuery | null>(null);
   const [data, setData] = useState<AnalyticsPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const load = useCallback(async (nextRange: RangeKey) => {
+  const load = useCallback(async (query: AnalyticsQuery) => {
     setLoading(true);
     setError(null);
+    setActiveQuery(query);
+    setPhase("dashboard");
     try {
-      const res = await fetch(`/api/admin/analytics?range=${nextRange}`, {
+      const res = await fetch(`/api/admin/analytics?${queryToSearch(query)}`, {
         cache: "no-store",
       });
       if (res.status === 403) {
@@ -210,13 +266,19 @@ export function AdminAnalyticsPage() {
         setData(null);
         return;
       }
+      const json = (await res.json().catch(() => ({}))) as
+        | AnalyticsPayload
+        | { error?: string };
       if (!res.ok) {
-        setError("โหลดข้อมูลไม่สำเร็จ");
+        setError(
+          "error" in json && json.error
+            ? json.error
+            : "โหลดข้อมูลไม่สำเร็จ"
+        );
         setData(null);
         return;
       }
-      const json = (await res.json()) as AnalyticsPayload;
-      setData(json);
+      setData(json as AnalyticsPayload);
     } catch {
       setError("โหลดข้อมูลไม่สำเร็จ");
       setData(null);
@@ -225,9 +287,28 @@ export function AdminAnalyticsPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void load(range);
-  }, [range, load]);
+  function backToPick() {
+    setPhase("pick");
+    setData(null);
+    setError(null);
+    setLoading(false);
+  }
+
+  function submitPick() {
+    if (pickMode === "preset") {
+      void load({ kind: "preset", range: preset });
+      return;
+    }
+    if (!from || !to) {
+      setError("กรุณาเลือกวันเริ่มและวันสิ้นสุด");
+      return;
+    }
+    if (to < from) {
+      setError("วันสิ้นสุดต้องไม่ก่อนวันเริ่ม");
+      return;
+    }
+    void load({ kind: "custom", from, to });
+  }
 
   const maxFunnelUsers = Math.max(
     1,
@@ -237,10 +318,138 @@ export function AdminAnalyticsPage() {
     1,
     ...(data?.features.map((f) => f.opens) || [1])
   );
-  const maxDailySignups = Math.max(
-    1,
-    ...(data?.daily.map((d) => d.signups) || [1])
-  );
+
+  if (phase === "pick") {
+    return (
+      <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col justify-center">
+        <div className="mb-6 text-center sm:text-left">
+          <h1 className="text-[1.7rem] font-semibold tracking-tight text-[#f3f6fb]">
+            Analytics
+          </h1>
+          <p className="mt-1 text-[13px] text-[#8b97ad]">
+            เลือกวันหรือช่วงก่อน — จะดึงข้อมูลเมื่อกดดูรายงานเท่านั้น
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-white/[0.08] bg-[#121821] p-5 sm:p-6">
+          <div className="inline-flex rounded-xl border border-white/[0.08] bg-[#0b0f14] p-1">
+            {(
+              [
+                { id: "preset" as const, label: "ช่วงสำเร็จรูป" },
+                { id: "custom" as const, label: "เลือกวันเอง" },
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setPickMode(tab.id);
+                  setError(null);
+                }}
+                className={cn(
+                  "rounded-lg px-3.5 py-1.5 text-[12px] font-semibold outline-none transition",
+                  pickMode === tab.id
+                    ? "bg-[#e8edf5] text-[#0b0f14]"
+                    : "text-[#8b97ad] hover:bg-white/[0.04] hover:text-[#e8edf5]"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {pickMode === "preset" ? (
+            <div className="mt-5 grid gap-2.5">
+              {PRESETS.map((item) => {
+                const selected = preset === item.key;
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setPreset(item.key)}
+                    className={cn(
+                      "flex items-center justify-between rounded-xl px-4 py-3.5 text-left outline-none transition",
+                      selected
+                        ? "bg-white/[0.08]"
+                        : "bg-white/[0.03] hover:bg-white/[0.05]"
+                    )}
+                    style={{
+                      boxShadow: selected
+                        ? "inset 0 0 0 1.5px rgba(45,212,191,0.55)"
+                        : "inset 0 0 0 1px rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <span>
+                      <span className="block text-[15px] font-semibold text-[#f3f6fb]">
+                        {item.title}
+                      </span>
+                      <span className="mt-0.5 block text-[12px] text-[#8b97ad]">
+                        {item.hint}
+                      </span>
+                    </span>
+                    <span
+                      className="h-[18px] w-[18px] rounded-full"
+                      style={{
+                        boxShadow: selected
+                          ? "inset 0 0 0 5px #2dd4bf"
+                          : "inset 0 0 0 1.5px rgba(139,151,173,0.55)",
+                      }}
+                      aria-hidden
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-5 space-y-4">
+              <p className="text-[12px] leading-relaxed text-[#8b97ad]">
+                เลือกวันเดียว (เริ่ม = สิ้นสุด) หรือช่วงวันที่ · เวลาตาม Asia/Bangkok
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#8b97ad]">
+                    วันเริ่ม
+                  </span>
+                  <input
+                    type="date"
+                    value={from}
+                    max={to || today}
+                    onChange={(e) => setFrom(e.target.value)}
+                    className="mt-1.5 w-full rounded-xl border border-white/[0.08] bg-[#0b0f14] px-3 py-2.5 text-[14px] text-[#f3f6fb] outline-none focus:border-[#2dd4bf]/50"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#8b97ad]">
+                    วันสิ้นสุด
+                  </span>
+                  <input
+                    type="date"
+                    value={to}
+                    min={from}
+                    max={today}
+                    onChange={(e) => setTo(e.target.value)}
+                    className="mt-1.5 w-full rounded-xl border border-white/[0.08] bg-[#0b0f14] px-3 py-2.5 text-[14px] text-[#f3f6fb] outline-none focus:border-[#2dd4bf]/50"
+                  />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {error ? (
+            <p className="mt-4 text-[13px] text-rose-300">{error}</p>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={submitPick}
+            className="mt-6 w-full rounded-xl bg-[#e8edf5] px-4 py-3 text-[14px] font-semibold text-[#0b0f14] outline-none transition hover:bg-white active:scale-[0.99]"
+          >
+            ดูรายงาน
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -250,33 +459,33 @@ export function AdminAnalyticsPage() {
             Dashboard
           </h1>
           <p className="mt-1 text-[13px] text-[#8b97ad]">
-            สมัคร · ชำระเงิน · การใช้ฟีเจอร์
+            {activeQuery ? queryLabel(activeQuery) : "—"}
+            <span className="text-[#8b97ad]/70"> · สมัคร · ชำระเงิน · ฟีเจอร์</span>
           </p>
         </div>
-        <div className="inline-flex rounded-xl border border-white/[0.08] bg-[#121821] p-1">
-          {(["7d", "30d", "90d"] as RangeKey[]).map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setRange(key)}
-              className={cn(
-                "rounded-lg px-3.5 py-1.5 text-[12px] font-semibold outline-none transition",
-                range === key
-                  ? "bg-[#e8edf5] text-[#0b0f14]"
-                  : "text-[#8b97ad] hover:bg-white/[0.04] hover:text-[#e8edf5]"
-              )}
-            >
-              {key === "7d" ? "7 วัน" : key === "30d" ? "30 วัน" : "90 วัน"}
-            </button>
-          ))}
-        </div>
+        <button
+          type="button"
+          onClick={backToPick}
+          className="inline-flex self-start rounded-xl border border-white/[0.1] bg-[#121821] px-3.5 py-2 text-[12px] font-semibold text-[#e8edf5] outline-none transition hover:bg-white/[0.04]"
+        >
+          เปลี่ยนช่วง
+        </button>
       </div>
 
       {loading ? (
         <p className="text-[14px] text-[#8b97ad]">กำลังโหลด…</p>
       ) : error ? (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-[14px] text-rose-200">
-          {error}
+        <div className="space-y-3">
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-[14px] text-rose-200">
+            {error}
+          </div>
+          <button
+            type="button"
+            onClick={backToPick}
+            className="text-[13px] font-medium text-[#8b97ad] underline-offset-2 hover:text-[#e8edf5] hover:underline"
+          >
+            กลับไปเลือกช่วงใหม่
+          </button>
         </div>
       ) : data ? (
         <>
@@ -317,7 +526,7 @@ export function AdminAnalyticsPage() {
 
             <Panel
               title="รายได้ตามช่องทางบัญชี"
-              subtitle="จัดกลุ่มจากบัญชีที่จ่าย (LINE / Google / เบอร์)"
+              subtitle="จัดกลุ่มจากช่องทาง login ของบัญชี"
             >
               <ChannelBars
                 items={data.revenueByAccountChannel}
@@ -326,83 +535,69 @@ export function AdminAnalyticsPage() {
             </Panel>
           </div>
 
-          <Panel
-            title="ช่องทางชำระ (Stripe)"
-            subtitle="PromptPay / บัตร — จาก payment ที่ track หลังชำระ (ข้อมูลใหม่หลังอัปเดตนี้)"
-          >
-            <ChannelBars
-              items={data.revenueByPaymentMethod}
-              mode="revenue"
-            />
-          </Panel>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Panel
+              title="ช่องทางชำระ (Stripe)"
+              subtitle="จาก payment_succeeded · อาจไม่ครบทุกรายการเก่า"
+            >
+              <ChannelBars
+                items={data.revenueByPaymentMethod}
+                mode="revenue"
+              />
+            </Panel>
 
-          <Panel
-            title="รายวัน"
-            subtitle="จำนวนสมัครแยกช่องทาง · จำนวนชำระ · ยอดเงิน"
-          >
-            {data.daily.length === 0 ? (
-              <p className="text-[13px] text-[#7d8aa3]">ยังไม่มีข้อมูลในช่วงนี้</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] border-collapse text-left text-[12px]">
-                  <thead>
-                    <tr className="border-b border-white/[0.08] text-[#8b97ad]">
-                      <th className="pb-2.5 pr-3 font-medium">วัน</th>
-                      <th className="pb-2.5 pr-3 font-medium">สมัคร</th>
-                      <th className="pb-2.5 pr-3 font-medium">Google</th>
-                      <th className="pb-2.5 pr-3 font-medium">LINE</th>
-                      <th className="pb-2.5 pr-3 font-medium">เบอร์</th>
-                      <th className="pb-2.5 pr-3 font-medium">ชำระ</th>
-                      <th className="pb-2.5 font-medium">รายได้</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...data.daily].reverse().map((d) => (
-                      <tr
-                        key={d.day}
-                        className="border-b border-white/[0.04] last:border-0"
-                      >
-                        <td className="py-3 pr-3">
-                          <div className="font-medium tabular-nums text-[#e8edf5]">
-                            {formatDay(d.day)}
-                          </div>
-                          <div className="mt-1.5 h-1 max-w-[88px] overflow-hidden rounded-full bg-white/[0.06]">
-                            <div
-                              className="h-full rounded-full bg-[#2dd4bf]"
-                              style={{
-                                width: `${Math.max(
-                                  d.signups > 0 ? 6 : 0,
-                                  (d.signups / maxDailySignups) * 100
-                                )}%`,
-                              }}
-                            />
-                          </div>
-                        </td>
-                        <td className="py-3 pr-3 tabular-nums text-[#e8edf5]">
-                          {d.signups}
-                        </td>
-                        <td className="py-3 pr-3 tabular-nums text-[#8b97ad]">
-                          {d.signupsGoogle}
-                        </td>
-                        <td className="py-3 pr-3 tabular-nums text-[#8b97ad]">
-                          {d.signupsLine}
-                        </td>
-                        <td className="py-3 pr-3 tabular-nums text-[#8b97ad]">
-                          {d.signupsPhone}
-                        </td>
-                        <td className="py-3 pr-3 tabular-nums text-[#e8edf5]">
-                          {d.payments}
-                        </td>
-                        <td className="py-3 tabular-nums font-medium text-[#e8d19a]">
-                          {d.revenue > 0 ? formatBaht(d.revenue) : "—"}
-                        </td>
+            <Panel title="รายวัน" subtitle="สมัคร · ชำระ · รายได้">
+              {data.daily.length === 0 ? (
+                <p className="text-[13px] text-[#7d8aa3]">ยังไม่มีข้อมูล</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[520px] border-collapse text-left text-[12px]">
+                    <thead>
+                      <tr className="border-b border-white/[0.08] text-[#8b97ad]">
+                        <th className="pb-2 pr-3 font-medium">วัน</th>
+                        <th className="pb-2 pr-3 font-medium">สมัคร</th>
+                        <th className="pb-2 pr-3 font-medium">Google</th>
+                        <th className="pb-2 pr-3 font-medium">LINE</th>
+                        <th className="pb-2 pr-3 font-medium">เบอร์</th>
+                        <th className="pb-2 pr-3 font-medium">ชำระ</th>
+                        <th className="pb-2 font-medium">รายได้</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Panel>
+                    </thead>
+                    <tbody>
+                      {[...data.daily].reverse().map((row) => (
+                        <tr
+                          key={row.day}
+                          className="border-b border-white/[0.04] last:border-0"
+                        >
+                          <td className="py-2 pr-3 text-[#e8edf5]">
+                            {formatDay(row.day)}
+                          </td>
+                          <td className="py-2 pr-3 tabular-nums text-[#c5cdd9]">
+                            {row.signups}
+                          </td>
+                          <td className="py-2 pr-3 tabular-nums text-[#c5cdd9]">
+                            {row.signupsGoogle}
+                          </td>
+                          <td className="py-2 pr-3 tabular-nums text-[#c5cdd9]">
+                            {row.signupsLine}
+                          </td>
+                          <td className="py-2 pr-3 tabular-nums text-[#c5cdd9]">
+                            {row.signupsPhone}
+                          </td>
+                          <td className="py-2 pr-3 tabular-nums text-[#c5cdd9]">
+                            {row.payments}
+                          </td>
+                          <td className="py-2 tabular-nums text-[#c5cdd9]">
+                            {formatBaht(row.revenue)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Panel>
+          </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <Panel title="Funnel" subtitle="unique users · % จากขั้นก่อน">
