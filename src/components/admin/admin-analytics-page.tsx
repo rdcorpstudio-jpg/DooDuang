@@ -797,43 +797,53 @@ export function AdminAnalyticsPage() {
             </div>
           </div>
 
-          <Panel
-            title="คนที่ชำระ"
-            subtitle={`ชื่อ · อีเมล/เบอร์ · ช่องทาง · ล่าสุดก่อน (สูงสุด 200)`}
-          >
+          <SoftCard className="overflow-hidden !p-0">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#eef1f4] px-5 py-4 sm:px-6">
+              <div>
+                <p className="text-[15px] font-semibold">คนที่ชำระ</p>
+                <p className="text-[12px] text-[#8b93a1]">
+                  ชื่อ · อีเมล/เบอร์ · ช่องทาง · ล่าสุดก่อน (สูงสุด 200)
+                </p>
+              </div>
+              <span className="rounded-full bg-[#f4f6f8] px-3 py-1.5 text-[11px] font-medium text-[#5c6573]">
+                {data.purchases?.length ?? 0} ราย
+              </span>
+            </div>
             {(data.purchases?.length ?? 0) === 0 ? (
-              <p className="text-[13px] text-[#7d8aa3]">ยังไม่มีรายการชำระในช่วงนี้</p>
+              <p className="px-5 py-8 text-[13px] text-[#8b93a1] sm:px-6">
+                ยังไม่มีรายการชำระในช่วงนี้
+              </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px] border-collapse text-left text-[12px]">
                   <thead>
-                    <tr className="border-b border-white/[0.08] text-[#8b97ad]">
-                      <th className="pb-2 pr-3 font-medium">เวลา</th>
-                      <th className="pb-2 pr-3 font-medium">ชื่อ</th>
-                      <th className="pb-2 pr-3 font-medium">ติดต่อ</th>
-                      <th className="pb-2 pr-3 font-medium">ช่องทาง</th>
-                      <th className="pb-2 font-medium">ยอด</th>
+                    <tr className="border-b border-[#eef1f4] text-[#8b93a1]">
+                      <th className="px-5 py-3 font-medium sm:px-6">เวลา</th>
+                      <th className="px-3 py-3 font-medium">ชื่อ</th>
+                      <th className="px-3 py-3 font-medium">ติดต่อ</th>
+                      <th className="px-3 py-3 font-medium">ช่องทาง</th>
+                      <th className="px-5 py-3 font-medium sm:px-6">ยอด</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(data.purchases ?? []).map((row) => (
                       <tr
                         key={row.id}
-                        className="border-b border-white/[0.04] last:border-0"
+                        className="border-b border-[#f4f6f8] last:border-0"
                       >
-                        <td className="py-2.5 pr-3 whitespace-nowrap text-[#c5cdd9]">
+                        <td className="px-5 py-3.5 whitespace-nowrap text-[#5c6573] sm:px-6">
                           {formatDateTimeThai(row.createdAt)}
                         </td>
-                        <td className="py-2.5 pr-3 text-[#e8edf5]">
+                        <td className="px-3 py-3.5 font-medium text-[#1a1d21]">
                           {row.name || "—"}
                         </td>
-                        <td className="py-2.5 pr-3 text-[#c5cdd9]">
+                        <td className="px-3 py-3.5 text-[#5c6573]">
                           {row.email || row.phone || "—"}
                         </td>
-                        <td className="py-2.5 pr-3 text-[#c5cdd9]">
+                        <td className="px-3 py-3.5 text-[#5c6573]">
                           {row.channelLabel}
                         </td>
-                        <td className="py-2.5 tabular-nums text-[#e8edf5]">
+                        <td className="px-5 py-3.5 font-medium tabular-nums text-[#1a1d21] sm:px-6">
                           {formatBaht(row.amount)}
                         </td>
                       </tr>
@@ -842,7 +852,7 @@ export function AdminAnalyticsPage() {
                 </table>
               </div>
             )}
-          </Panel>
+          </SoftCard>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <SoftCard>
