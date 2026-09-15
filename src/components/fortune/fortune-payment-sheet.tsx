@@ -3,14 +3,11 @@
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
-import { Check, ChevronLeft, Loader2, Lock, X } from "lucide-react";
-import { FortuneIcon } from "@/components/fortune/fortune-icon";
-import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
-import { PREMIUM_LIST_PRICE } from "@/lib/fortune/premium-offer-countdown";
+import { Check, ChevronLeft, ChevronRight, Loader2, Lock, X } from "lucide-react";
 import {
   FORTUNE_PACKAGE_LABEL,
+  FORTUNE_UNLOCK_LIST_PRICE,
   FORTUNE_UNLOCK_PRICE,
-  PREMIUM_PERKS,
 } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -22,47 +19,68 @@ type SessionUser = {
   email?: string | null;
 };
 
-const PERKS = PREMIUM_PERKS;
-
 const IS_LOCAL_DEV =
   process.env.NODE_ENV === "development" ||
   process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
 
 const LOGIN_THEN_PAY = "/premium/pay";
 
-const MAE_PANEL: CSSProperties = {
-  background: "#101827",
-  boxShadow:
-    "inset 0 0 0 1px rgba(213,177,111,0.42), 0 24px 56px rgba(0,0,0,0.4)",
+const GOLD_FOIL =
+  "linear-gradient(180deg, #fffef8 0%, #ffe9b0 22%, #f0d078 48%, #d5b16f 72%, #b8924f 88%, #8f6e38 100%)";
+
+const goldTextStyle: CSSProperties = {
+  backgroundImage: GOLD_FOIL,
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  color: "transparent",
+  WebkitTextFillColor: "transparent",
+  filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
 };
 
-function GoldRule({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn("mx-auto flex h-[1px] w-full max-w-[11rem] items-center", className)}
-      aria-hidden
-    >
-      <span
-        className="h-px flex-1"
+const COMPARE_ROWS: {
+  label: string;
+  free: boolean;
+  premium: boolean;
+}[] = [
+  { label: "ดวงรายวันเบื้องต้น", free: true, premium: true },
+  { label: "ไพ่ทาโรต์", free: true, premium: true },
+  { label: "ดวงรายสัปดาห์ · แนวโน้มเดือน", free: false, premium: true },
+  { label: "ปฏิทินฤกษ์มงคลเต็ม", free: false, premium: true },
+  { label: "แผนที่ตัวตน · ราศีเชิงลึก", free: false, premium: true },
+  { label: "รายงานดวงปีเต็ม", free: false, premium: true },
+  { label: "โหงวเฮ้ง · ลายมือ · ดวงคู่", free: false, premium: true },
+  { label: "จังหวะงาน เงิน ความรัก", free: false, premium: true },
+  { label: "บันทึกโปรไฟล์ดูซ้ำได้ทั้งปี", free: false, premium: true },
+  { label: "อัปเดตคำแนะนำตามจังหวะชีวิต", free: false, premium: true },
+  { label: "ดูดวงไม่จำกัดตลอดปี", free: false, premium: true },
+  { label: "สิทธิ์ใหม่ก่อนใคร", free: false, premium: true },
+];
+
+function CellMark({ on, tone }: { on: boolean; tone: "free" | "premium" }) {
+  if (!on) {
+    return <span className="text-[13px] text-white/25">—</span>;
+  }
+  if (tone === "premium") {
+    return (
+      <Check
+        className="h-4 w-4"
+        strokeWidth={2.8}
         style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(213,177,111,0.55))",
+          color: "#d5b16f",
+          filter: "drop-shadow(0 0 4px rgba(213,177,111,0.55))",
         }}
       />
-      <span
-        className="mx-2 h-1 w-1 rotate-45"
-        style={{ background: "#d5b16f" }}
-      />
-      <span
-        className="h-px flex-1"
-        style={{
-          background:
-            "linear-gradient(90deg, rgba(213,177,111,0.55), transparent)",
-        }}
-      />
-    </div>
-  );
+    );
+  }
+  return <Check className="h-4 w-4 text-[#7dcea0]" strokeWidth={2.6} />;
 }
+
+const MAE_PANEL: CSSProperties = {
+  background:
+    "linear-gradient(165deg, rgba(24,34,52,0.98) 0%, rgba(16,24,39,0.98) 100%)",
+  boxShadow:
+    "inset 0 0 0 1.5px rgba(232,209,154,0.55), 0 24px 56px rgba(0,0,0,0.45)",
+};
 
 /** Stripe checkout — sheet modal, full page, or inline card on free result */
 export function FortunePaymentSheet({
@@ -166,7 +184,6 @@ export function FortunePaymentSheet({
     router.push(path);
   }, [isInline, isPage, onClose, resolvedReturn, router]);
 
-  // Logged in + ?checkout=1 → in-app pay page (pick method, then Stripe)
   useEffect(() => {
     if (!open || loadingSession || !user) return;
     if (!wantsAutoPay) return;
@@ -199,94 +216,122 @@ export function FortunePaymentSheet({
   if (!open) return null;
   if (!isPage && !isInline && !host) return null;
 
-  const monthly = Math.round(FORTUNE_UNLOCK_PRICE / 12);
+  const saved = FORTUNE_UNLOCK_LIST_PRICE - FORTUNE_UNLOCK_PRICE;
 
-  const saveBaht = PREMIUM_LIST_PRICE - FORTUNE_UNLOCK_PRICE;
   const body = (
     <div
       className={cn(
         "relative z-[1] mx-auto w-full",
-        isPage || isInline ? "px-6 pb-6 pt-6" : "px-6 pb-6 pt-8"
+        isPage || isInline ? "px-4 pb-5 pt-4" : "px-4 pb-5 pt-5"
       )}
     >
-      <div className="flex flex-col items-center text-center">
-        <span
-          className="flex h-12 w-12 items-center justify-center rounded-full"
-          style={{
-            background: "rgba(213,177,111,0.08)",
-            boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
-          }}
-        >
-          <FortuneIcon name="sparkle" size={22} plain />
-        </span>
-
-        <p className="mt-4 text-[10px] font-medium tracking-[0.32em] text-[#e8d19a]/70">
-          PREMIUM
-        </p>
-
+      <div className={cn(!isPage && !isInline && "pr-7")}>
         <h2
           id={titleId}
-          className="mae-gold-text mt-2.5 max-w-[14rem] font-sans text-[1.45rem] font-bold leading-[1.25] tracking-tight"
+          className="text-[1.55rem] font-bold leading-none tracking-tight"
+          style={goldTextStyle}
         >
-          ปลดล็อกดวงพรีเมียม
+          พรีเมียม {FORTUNE_PACKAGE_LABEL}
         </h2>
-        <p className="mt-2 text-[12px] leading-relaxed text-[#9aa3b2]">
-          แพ็ก {FORTUNE_PACKAGE_LABEL} · เนื้อหาเต็มทุกบท
+        <p className="mt-1.5 text-[14px] font-medium leading-snug text-white">
+          ดูดวงได้เต็มที่ ตลอดทั้งปี
         </p>
       </div>
 
-      <GoldRule className="mt-5" />
-
-      <div className="mt-5 text-center">
-        <p className="text-[11px] tracking-[0.08em] text-[#9aa3b2]">
-          <span className="line-through">{PREMIUM_LIST_PRICE} บาท</span>
-          <span className="mx-2 text-[#d5b16f]/55">·</span>
-          <span className="mae-gold-text font-semibold">
-            ประหยัด {saveBaht}
-          </span>
-        </p>
-        <p className="mt-2 text-[2.35rem] font-bold leading-none tracking-tight text-[#f7f4ec]">
-          {FORTUNE_UNLOCK_PRICE}
-          <span className="mae-gold-text ml-1.5 align-baseline text-[1rem] font-semibold tracking-normal">
-            บาท
-          </span>
-        </p>
-        <p className="mt-2 text-[11px] text-[#9aa3b2]">
-          ใช้งานได้ {FORTUNE_PACKAGE_LABEL}
-          <span className="text-[#9aa3b2]/70"> · เฉลี่ย ~{monthly} บาท/เดือน</span>
-        </p>
-        <PremiumOfferCountdown compact className="mt-3.5" />
-      </div>
-
-      <GoldRule className="mt-5" />
-
-      <ul className="mx-auto mt-5 w-full max-w-[17rem] space-y-2.5">
-        {PERKS.map((line) => (
-          <li key={line} className="flex items-center gap-2.5">
+      {/* Offer card — same language as /premium/pay */}
+      <div
+        className="mt-3.5 overflow-hidden rounded-[20px]"
+        style={{
+          background:
+            "linear-gradient(165deg, rgba(24,34,52,0.88) 0%, rgba(16,24,39,0.82) 100%)",
+          boxShadow:
+            "inset 0 0 0 1.5px rgba(232,209,154,0.75), 0 0 24px rgba(213,177,111,0.12)",
+        }}
+      >
+        <div className="shrink-0 px-3.5 pb-2.5 pt-3.5">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[12px] font-medium text-[#f0d078]/95">
+              สิทธิ์ดูดวงแม่มั่งมี · จ่ายครั้งเดียวใช้ได้ทั้งปี
+            </p>
             <span
-              className="flex h-[15px] w-[15px] shrink-0 items-center justify-center rounded-full"
+              className="shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold text-[#101827]"
               style={{
-                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.55)",
+                background: GOLD_FOIL,
+                boxShadow: "0 2px 8px rgba(213,177,111,0.35)",
               }}
             >
-              <Check className="h-2 w-2 text-[#d5b16f]" strokeWidth={3} />
+              รายปี
             </span>
-            <span className="text-[12.5px] leading-snug text-[#e8ecf2]">
-              {line}
-            </span>
-          </li>
-        ))}
-      </ul>
+          </div>
 
-      <div className="mt-6 space-y-3">
+          <p
+            className="mt-2 text-[1.75rem] font-bold leading-none tracking-tight"
+            style={goldTextStyle}
+          >
+            ฿{FORTUNE_UNLOCK_PRICE}
+            <span
+              className="ml-1.5 text-[14px] font-semibold tracking-wide"
+              style={goldTextStyle}
+            >
+              / ปี
+            </span>
+          </p>
+
+          <div className="mt-2 flex items-center gap-2 border-b border-[rgba(232,209,154,0.32)] pb-2.5 text-[12px]">
+            <span className="text-white/40 line-through">
+              จาก ฿{FORTUNE_UNLOCK_LIST_PRICE.toLocaleString("th-TH")}
+            </span>
+            <span className="font-bold" style={goldTextStyle}>
+              ประหยัด ฿{saved.toLocaleString("th-TH")}
+            </span>
+          </div>
+        </div>
+
+        <div className="max-h-[11.5rem] overflow-y-auto overscroll-contain px-3.5 pb-2">
+          <div className="sticky top-0 z-[1] grid grid-cols-[1fr_2.6rem_3.6rem] items-center gap-1 border-b border-[rgba(232,209,154,0.22)] bg-[rgba(18,28,44,0.96)] py-2 backdrop-blur-sm">
+            <p className="text-[12px] font-medium text-white/85">
+              สิทธิ์การใช้งาน
+            </p>
+            <p className="text-center text-[11px] font-semibold text-white/55">
+              ฟรี
+            </p>
+            <p
+              className="text-center text-[11px] font-bold"
+              style={goldTextStyle}
+            >
+              พรีเมียม
+            </p>
+          </div>
+
+          {COMPARE_ROWS.map((row) => (
+            <div
+              key={row.label}
+              className="grid grid-cols-[1fr_2.6rem_3.6rem] items-center gap-1 border-b border-white/[0.07] py-2 last:border-b-0"
+            >
+              <p className="pr-1 text-[12px] leading-snug text-white/88">
+                {row.label}
+              </p>
+              <span className="flex justify-center">
+                <CellMark on={row.free} tone="free" />
+              </span>
+              <span className="flex justify-center">
+                <CellMark on={row.premium} tone="premium" />
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-2.5">
         {IS_LOCAL_DEV ? (
           <div className="space-y-2">
             <button
               type="button"
               onClick={() => onPaid()}
-              className="mae-gold-cta flex w-full items-center justify-center rounded-full px-4 py-3.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              className="mae-gold-cta flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
             >
-              ปลดล็อกพรีเมียม
+              ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
+              <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
             </button>
             <p className="text-center text-[10px] tracking-wide text-[#6b7380]">
               โหมดทดลอง · จำลองชำระสำเร็จ
@@ -298,10 +343,7 @@ export function FortunePaymentSheet({
             กำลังตรวจสอบสถานะ…
           </div>
         ) : !user ? (
-          <div className="space-y-3">
-            <p className="mx-auto max-w-[16rem] text-center text-[11px] leading-relaxed text-[#9aa3b2]">
-              เข้าสู่ระบบเพื่อยืนยันสิทธิ์พรีเมียมหลังชำระ
-            </p>
+          <div className="space-y-2">
             <button
               type="button"
               onClick={() => {
@@ -310,10 +352,14 @@ export function FortunePaymentSheet({
                   `/login?callbackUrl=${encodeURIComponent(LOGIN_THEN_PAY)}`
                 );
               }}
-              className="mae-gold-cta flex w-full items-center justify-center rounded-full px-4 py-3.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              className="mae-gold-cta flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
             >
-              เข้าสู่ระบบ
+              ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
+              <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
             </button>
+            <p className="text-center text-[11px] text-[#e8d19a]/80">
+              เข้าสู่ระบบแล้วชำระ · เหลือ 3 สิทธิ์
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -326,9 +372,10 @@ export function FortunePaymentSheet({
               type="button"
               onClick={goToPayPage}
               disabled={step === "redirecting"}
-              className="mae-gold-cta flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
+              className="mae-gold-cta flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
             >
-              ชำระ {FORTUNE_UNLOCK_PRICE} บาท
+              ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
+              <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
             </button>
           </div>
         )}
@@ -339,7 +386,7 @@ export function FortunePaymentSheet({
 
         <p className="flex items-center justify-center gap-1.5 pt-0.5 text-[10px] text-[#6b7380]">
           <Lock className="h-3 w-3 shrink-0 text-[#d5b16f]/80" strokeWidth={2.2} />
-          ชำระแล้วปลดล็อกอัตโนมัติ
+          ตรวจสอบรายการก่อนดำเนินการต่อ · ชำระผ่าน Stripe โดยตรง
         </p>
       </div>
     </div>
@@ -361,7 +408,7 @@ export function FortunePaymentSheet({
   if (isPage) {
     return (
       <div
-        className="mx-auto flex min-h-full w-full max-w-[400px] flex-col justify-center px-4 py-6"
+        className="mx-auto flex min-h-full w-full max-w-[430px] flex-col justify-center px-4 py-6"
         role="main"
         aria-labelledby={titleId}
       >
@@ -380,7 +427,7 @@ export function FortunePaymentSheet({
         </div>
 
         <div
-          className="relative mx-auto w-full max-w-[340px] overflow-hidden rounded-[22px]"
+          className="relative mx-auto w-full overflow-hidden rounded-[22px]"
           style={MAE_PANEL}
         >
           {body}
@@ -393,20 +440,20 @@ export function FortunePaymentSheet({
 
   return createPortal(
     <div
-      className="no-sky-lift absolute inset-0 z-[80] flex items-center justify-center px-3.5"
+      className="no-sky-lift absolute inset-0 z-[80] flex items-end justify-center px-3 pb-3 pt-8 sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
     >
       <button
         type="button"
-        className="dd-sheet-backdrop absolute inset-0 bg-black/50 backdrop-blur-[4px]"
+        className="dd-sheet-backdrop absolute inset-0 bg-black/55 backdrop-blur-[4px]"
         aria-label="ปิด"
         onClick={step === "redirecting" ? undefined : onClose}
       />
 
       <div
-        className="dd-sheet-panel relative z-[1] w-full max-w-[340px] overflow-hidden rounded-[22px]"
+        className="dd-sheet-panel relative z-[1] max-h-[min(92vh,720px)] w-full max-w-[400px] overflow-y-auto overflow-x-hidden rounded-[22px]"
         style={MAE_PANEL}
       >
         <button
@@ -441,7 +488,6 @@ export async function confirmStripePremiumUnlock(sessionId: string) {
     error?: string;
     code?: string;
   };
-  // Paid but logged-out (cookie lost after Stripe) — still OK for Purchase pixel
   if (res.status === 401 && data.paid) {
     return { ...data, ok: true, paid: true, premiumUnlocked: false };
   }
