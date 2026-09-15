@@ -12,7 +12,6 @@ import {
 import { AstroHeroOrb } from "@/components/home/astro-hero-orb";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import {
-  APP_BRAND_MARK,
   APP_NAME_ACCENT,
   APP_NAME_PRIMARY,
   APP_TAGLINE,
@@ -72,9 +71,6 @@ export function IntroScreen() {
       <Reveal visible={mounted} delay={0} className="relative z-20 shrink-0">
         <div className="flex flex-col items-center">
           <FortuneIcon name="sparkle" size={18} className="mb-0.5" />
-          <p className="font-sacred text-[13px] tracking-[0.18em] text-[#C9A227]">
-            {APP_BRAND_MARK}
-          </p>
         </div>
       </Reveal>
 

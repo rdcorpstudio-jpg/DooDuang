@@ -167,12 +167,13 @@
 .phone-frame--mae .glass-frame h2,
 .phone-frame--mae .glass-frame h3 {
   background-image: linear-gradient(
-    165deg,
-    #fff8e4 0%,
-    #f3e2b8 22%,
-    #e2c787 48%,
+    180deg,
+    #fffef8 0%,
+    #ffe9b0 22%,
+    #f0d078 48%,
     #d5b16f 72%,
-    #b8924f 100%
+    #b8924f 88%,
+    #8f6e38 100%
   ) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -209,12 +210,13 @@
 .phone-frame--mae .glass-frame .text-\[\#2C2458\],
 .phone-frame--mae .glass-frame .text-\[\#1E1744\] {
   background-image: linear-gradient(
-    165deg,
-    #fff8e4 0%,
-    #f3e2b8 22%,
-    #e2c787 48%,
+    180deg,
+    #fffef8 0%,
+    #ffe9b0 22%,
+    #f0d078 48%,
     #d5b16f 72%,
-    #b8924f 100%
+    #b8924f 88%,
+    #8f6e38 100%
   ) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -241,6 +243,49 @@
 .phone-frame--mae .bg-white\/80,
 .phone-frame--mae .bg-white\/85 {
   background-color: rgba(16, 24, 39, 0.92) !important;
+}
+
+/* Keep Google sign-in truly white on Mae navy pages */
+.phone-frame--mae .google-white-btn,
+.phone-frame--mae button.google-white-btn {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #3c4043 !important;
+  -webkit-text-fill-color: #3c4043 !important;
+  border-color: #dadce0 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
+}
+
+.phone-frame--mae .google-white-btn:hover,
+.phone-frame--mae button.google-white-btn:hover {
+  background-color: #f8f9fa !important;
+  color: #3c4043 !important;
+  -webkit-text-fill-color: #3c4043 !important;
+}
+
+.phone-frame--mae .google-white-btn span {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  color: #3c4043 !important;
+  -webkit-text-fill-color: #3c4043 !important;
+}
+
+/* Login — room for gate arch at top (image 2 has empty mid for UI) */
+.login-screen-sky {
+  height: clamp(7.5rem, 38dvh, 17rem);
+}
+
+@media (max-height: 720px) {
+  .login-screen-sky {
+    height: clamp(5rem, 28dvh, 11rem);
+  }
+}
+
+@media (min-height: 860px) {
+  .login-screen-sky {
+    height: clamp(11rem, 40dvh, 18.5rem);
+  }
 }
 
 .phone-frame--mae .ring-\[\#9B7FE8\]\/12,
@@ -288,22 +333,87 @@
   border-color: rgba(213, 177, 111, 0.4) !important;
 }
 
-/* Gold headings → champagne foil (not chips / icons / pill labels) */
+/* Gold text → champagne foil (headings + copy; skip svg icons / icon wrappers) */
 .phone-frame--mae :is(h1, h2, h3, h4).text-\[\#d5b16f\],
 .phone-frame--mae :is(h1, h2, h3, h4).text-\[\#e8d19a\],
-.phone-frame--mae .mae-gold-text {
+.phone-frame--mae :is(h1, h2, h3, h4).text-\[\#f0d078\],
+.phone-frame--mae :is(h1, h2, h3, h4).text-\[\#f3e2b8\],
+.phone-frame--mae .mae-gold-text,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#d5b16f\],
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#e8d19a\],
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#f0d078\],
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#d5b16f\]\/70,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#d5b16f\]\/75,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#d5b16f\]\/80,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#d5b16f\]\/85,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#d5b16f\]\/90,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#d5b16f\]\/95,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#e8d19a\]\/70,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#e8d19a\]\/75,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#e8d19a\]\/80,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#e8d19a\]\/85,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#e8d19a\]\/90,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#e8d19a\]\/95,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#f0d078\]\/90,
+.phone-frame--mae :is(p, a, label, strong, em, li, td, th).text-\[\#f0d078\]\/95 {
   background-image: linear-gradient(
-    165deg,
-    #fff8e4 0%,
-    #f3e2b8 22%,
-    #e2c787 48%,
+    180deg,
+    #fffef8 0%,
+    #ffe9b0 22%,
+    #f0d078 48%,
     #d5b16f 72%,
+    #b8924f 88%,
+    #8f6e38 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Inline gold labels (span) that are text-only — not icon wrappers */
+.phone-frame--mae span.mae-gold-text,
+.phone-frame--mae span.text-\[\#d5b16f\]:not(:has(svg)),
+.phone-frame--mae span.text-\[\#e8d19a\]:not(:has(svg)),
+.phone-frame--mae span.text-\[\#f0d078\]:not(:has(svg)),
+.phone-frame--mae span.text-\[\#e8d19a\]\/75:not(:has(svg)),
+.phone-frame--mae span.text-\[\#e8d19a\]\/80:not(:has(svg)),
+.phone-frame--mae span.text-\[\#e8d19a\]\/85:not(:has(svg)),
+.phone-frame--mae span.text-\[\#e8d19a\]\/90:not(:has(svg)),
+.phone-frame--mae span.text-\[\#d5b16f\]\/70:not(:has(svg)),
+.phone-frame--mae span.text-\[\#d5b16f\]\/75:not(:has(svg)),
+.phone-frame--mae span.text-\[\#d5b16f\]\/80:not(:has(svg)),
+.phone-frame--mae span.text-\[\#d5b16f\]\/85:not(:has(svg)),
+.phone-frame--mae span.text-\[\#d5b16f\]\/90:not(:has(svg)) {
+  background-image: linear-gradient(
+    180deg,
+    #fffef8 0%,
+    #ffe9b0 22%,
+    #f0d078 48%,
+    #d5b16f 72%,
+    #b8924f 88%,
+    #8f6e38 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Soft foil for secondary gold (slightly muted peak) */
+.phone-frame--mae .mae-gold-text-soft {
+  background-image: linear-gradient(
+    180deg,
+    #fff6d8 0%,
+    #f0d078 40%,
+    #d5b16f 78%,
     #b8924f 100%
   ) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
+  opacity: 0.92;
 }
 
 /* Free daily result — Mae tokens (was lilac-on-light) */
@@ -318,12 +428,13 @@
 
 .phone-frame--mae .dd-section-title {
   background-image: linear-gradient(
-    165deg,
-    #fff8e4 0%,
-    #f3e2b8 22%,
-    #e2c787 48%,
+    180deg,
+    #fffef8 0%,
+    #ffe9b0 22%,
+    #f0d078 48%,
     #d5b16f 72%,
-    #b8924f 100%
+    #b8924f 88%,
+    #8f6e38 100%
   ) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -454,9 +565,9 @@
   border: 1px solid rgba(255, 236, 186, 0.78);
   background: linear-gradient(
     165deg,
-    #fff8e4 0%,
-    #f6e7bc 18%,
-    #e8d08a 38%,
+    #fffef8 0%,
+    #ffe9b0 16%,
+    #f0d078 36%,
     #d5b16f 58%,
     #c49a52 78%,
     #a87d3a 100%
@@ -1126,16 +1237,17 @@ details[open] > .mae-faq-body {
     drop-shadow(0 0 18px rgba(213, 177, 111, 0.22));
 }
 
-/* Champagne gold foil — use on titles / gold copy (not icons) */
+/* Champagne gold foil — titles / gold copy (vertical so short lines still look foil) */
 .mae-gold-text {
   display: inline;
   background-image: linear-gradient(
-    165deg,
-    #fff8e4 0%,
-    #f3e2b8 22%,
-    #e2c787 48%,
+    180deg,
+    #fffef8 0%,
+    #ffe9b0 22%,
+    #f0d078 48%,
     #d5b16f 72%,
-    #b8924f 100%
+    #b8924f 88%,
+    #8f6e38 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -1156,12 +1268,13 @@ details[open] > .mae-faq-body {
   overflow: visible;
   padding-bottom: 0.08em;
   background-image: linear-gradient(
-    165deg,
-    #fff8e4 0%,
-    #f3e2b8 22%,
-    #e2c787 48%,
+    180deg,
+    #fffef8 0%,
+    #ffe9b0 22%,
+    #f0d078 48%,
     #d5b16f 72%,
-    #b8924f 100%
+    #b8924f 88%,
+    #8f6e38 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -1272,30 +1385,20 @@ details[open] > .mae-faq-body {
   z-index: 1;
 }
 
-/* Solid Mae navy #101827 + champagne gold gradient rim */
+/* Solid Mae navy #101827 + gold rim */
 .mae-aspect-card {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   opacity: 1;
   border-radius: 20px;
-  border: 1.5px solid transparent;
-  background:
-    linear-gradient(#101827, #101827) padding-box,
-    linear-gradient(
-      145deg,
-      #fff8e4 0%,
-      #f3e2b8 18%,
-      #e2c787 38%,
-      #d5b16f 55%,
-      #b8924f 72%,
-      #e8d19a 88%,
-      #fff1c8 100%
-    )
-      border-box;
+  border: 1px solid rgba(213, 177, 111, 0.58);
+  background: #101827;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  box-shadow: inset 0 1px 0 rgba(255, 248, 228, 0.06);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 248, 228, 0.08),
+    0 8px 22px rgba(0, 0, 0, 0.22);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -1359,22 +1462,9 @@ details[open] > .mae-faq-body {
 
 a.mae-aspect-card:hover,
 button.mae-aspect-card:hover {
-  background:
-    linear-gradient(#101827, #101827) padding-box,
-    linear-gradient(
-      145deg,
-      #fffef5 0%,
-      #f7e9c0 22%,
-      #e8d19a 42%,
-      #d5b16f 58%,
-      #c4a05a 75%,
-      #f0dc9e 100%
-    )
-      border-box;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 248, 228, 0.12),
-    0 8px 20px rgba(0, 0, 0, 0.22),
-    0 0 18px rgba(213, 177, 111, 0.16);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: #121a2a;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
   transform: translateY(-1px);
 }
 
@@ -1393,6 +1483,11 @@ button.mae-aspect-card:active {
 
 .phone-frame--mae .mae-aspect-card {
   opacity: 1 !important;
+  border: 1px solid rgba(213, 177, 111, 0.58) !important;
+  background: #101827 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 248, 228, 0.08),
+    0 8px 22px rgba(0, 0, 0, 0.22) !important;
 }
 
 .phone-frame--mae .mae-aspect-card .mae-aspect-title {
@@ -1647,6 +1742,50 @@ html[data-keyboard-open="true"] .phone-comfort {
   touch-action: manipulation;
 }
 
+.topic-aspect-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.topic-aspect-scroll::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent;
+}
+
+.topic-aspect-scroll .mae-aspect-card {
+  touch-action: manipulation;
+}
+
+/* Promo split banner — hide gold horizontal scrollbar chrome */
+.promo-split-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scrollbar-color: transparent transparent !important;
+}
+
+.promo-split-scroll::-webkit-scrollbar,
+.phone-frame--mae .promo-split-scroll::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+.promo-split-scroll::-webkit-scrollbar-thumb,
+.phone-frame--mae .promo-split-scroll::-webkit-scrollbar-thumb {
+  background: transparent !important;
+}
+
 .extra-readings-scroll::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
@@ -1690,7 +1829,9 @@ html[data-keyboard-open="true"] .phone-comfort {
 .phone-frame .no-tap,
 .phone-frame .no-tap:active,
 .phone-frame .extra-readings-scroll,
-.phone-frame .extra-readings-scroll:active {
+.phone-frame .extra-readings-scroll:active,
+.phone-frame .topic-aspect-scroll,
+.phone-frame .topic-aspect-scroll:active {
   transform: none;
 }
 
@@ -1814,6 +1955,13 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   .dd-result-hero {
     filter: none !important;
     outline: none !important;
+  }
+
+  /* Hero glass — allow blur through night sky */
+  .phone-frame--mae .dd-result-hero.dd-hero-glass,
+  .dd-result-hero.dd-hero-glass {
+    backdrop-filter: blur(22px) saturate(1.25) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(1.25) !important;
   }
 
   /* Hero copy — sharp, no halo */
@@ -2459,15 +2607,16 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
     opacity: 0.22;
   }
 
-  /* Wizard step title — champagne gold like mae hero */
+  /* Wizard step title — champagne gold foil */
   .wizard-step-title {
     background: linear-gradient(
       180deg,
-      #fff8e8 0%,
-      #f3e2b8 22%,
-      #e4c787 48%,
+      #fffef8 0%,
+      #ffe9b0 22%,
+      #f0d078 48%,
       #d5b16f 72%,
-      #b8924f 100%
+      #b8924f 88%,
+      #8f6e38 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -4170,6 +4319,85 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   animation-delay: var(--twinkle-delay, 0s);
 }
 
+/* Soft tiny round stars — ice / white / warm (coded night sky) */
+@keyframes pay-sky-twinkle {
+  0%, 100% { opacity: 0.12; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes sky-star-twinkle {
+  0%, 100% { opacity: var(--sky-star-lo, 0.2); }
+  50% { opacity: var(--sky-star-hi, 0.85); }
+}
+
+.pay-sky-star {
+  position: absolute;
+  display: block;
+  border-radius: 9999px;
+  background: rgba(255, 250, 235, 0.9);
+  box-shadow: none;
+  animation: pay-sky-twinkle var(--pay-star-dur, 4.2s) ease-in-out infinite;
+  animation-delay: var(--pay-star-delay, 0s);
+  will-change: opacity;
+}
+
+.sky-star {
+  position: absolute;
+  display: block;
+  border-radius: 9999px;
+  animation: sky-star-twinkle var(--sky-star-dur, 4.2s) ease-in-out infinite;
+  animation-delay: var(--sky-star-delay, 0s);
+  will-change: opacity;
+}
+
+.sky-star[data-tone="white"] {
+  background: rgba(255, 252, 245, 0.95);
+  --sky-star-lo: 0.22;
+  --sky-star-hi: 0.9;
+}
+
+.sky-star[data-tone="ice"] {
+  background: rgba(210, 232, 255, 0.95);
+  --sky-star-lo: 0.18;
+  --sky-star-hi: 0.82;
+}
+
+.sky-star[data-tone="warm"] {
+  background: rgba(255, 220, 160, 0.95);
+  --sky-star-lo: 0.2;
+  --sky-star-hi: 0.88;
+}
+
+.sky-star[data-tone="amber"] {
+  background: rgba(255, 170, 110, 0.95);
+  --sky-star-lo: 0.16;
+  --sky-star-hi: 0.8;
+}
+
+.sky-star--glow[data-tone="white"] {
+  box-shadow: 0 0 4px 1px rgba(255, 250, 240, 0.45);
+}
+
+.sky-star--glow[data-tone="ice"] {
+  box-shadow: 0 0 5px 1px rgba(170, 210, 255, 0.4);
+}
+
+.sky-star--glow[data-tone="warm"] {
+  box-shadow: 0 0 5px 1px rgba(255, 200, 120, 0.42);
+}
+
+.sky-star--glow[data-tone="amber"] {
+  box-shadow: 0 0 5px 1px rgba(255, 150, 90, 0.38);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pay-sky-star,
+  .sky-star {
+    animation: none;
+    opacity: 0.55;
+  }
+}
+
 @keyframes sacred-burst-flash {
   0% { opacity: 0.85; transform: scale(0); }
   40% { opacity: 0.45; }
@@ -4932,6 +5160,7 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   }
 
   .animate-twinkle,
+  .pay-sky-star,
   .animate-glow-pulse,
   .sacred-burst-flash,
   .sacred-burst-core,

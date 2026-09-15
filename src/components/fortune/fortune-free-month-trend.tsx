@@ -7,7 +7,12 @@ import { MONTH_LABELS_TH, MONTH_NAMES_TH } from "@/components/fortune/life-cycle
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortuneUnlockBanner } from "@/components/fortune/fortune-unlock-banner";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
+import { analyzeFortune } from "@/lib/fortune/analyze";
 import { monthScoreForDate, yearScoreForCe } from "@/lib/fortune/build-daily-pack";
+import {
+  dayMonthBridgeCopy,
+  dayToneLabelTh,
+} from "@/lib/fortune/day-month-bridge";
 import { YEAR_DETAILS, scoreBand } from "@/lib/fortune/year-rhythm";
 import { cn } from "@/lib/utils";
 
@@ -622,6 +627,22 @@ function UnlockedTwelveYearTrend({
   const monthBand = scoreBand(activeMonth.score);
   const yearBand = scoreBand(activeYear.score);
 
+  const todayTone = useMemo(() => {
+    return analyzeFortune({
+      birthDate,
+      nickname,
+      birthTime,
+      birthPlace,
+      focus,
+      gender,
+    }).dayTone;
+  }, [birthDate, nickname, birthTime, birthPlace, focus, gender]);
+
+  const monthBridge =
+    activeMonth.isNow
+      ? dayMonthBridgeCopy(todayTone, activeMonth.score)
+      : null;
+
   return (
     <section className={cn("space-y-3", className)}>
       <div className="space-y-1">
@@ -700,6 +721,20 @@ function UnlockedTwelveYearTrend({
             <p className="mt-2 text-[15px] leading-relaxed text-[#f7f4ec]/80">
               {monthBand.meaning}
             </p>
+            {monthBridge ? (
+              <p className="mt-2 rounded-[12px] px-2.5 py-2 text-[13px] leading-relaxed text-[#e8d19a]/90"
+                style={{
+                  background: "rgba(213,177,111,0.08)",
+                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.22)",
+                }}
+              >
+                วันนี้ ({dayToneLabelTh(todayTone)}) · {monthBridge}
+              </p>
+            ) : activeMonth.isNow ? (
+              <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/55">
+                วันนี้ ({dayToneLabelTh(todayTone)}) สอดคล้องกับจังหวะเดือนนี้
+              </p>
+            ) : null}
             <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/70">
               {activeMonth.isNow
                 ? "แตะจุดเดือนอื่นบนกราฟเพื่อเทียบจังหวะก่อน–หลัง"
@@ -954,6 +989,19 @@ function FreeMonthTrendTeaser({
   const band = scoreBand(active.score);
   const hasData = months.length > 0;
 
+  const todayTone = useMemo(() => {
+    return analyzeFortune({
+      birthDate,
+      nickname,
+      birthTime,
+      birthPlace,
+      focus,
+      gender,
+    }).dayTone;
+  }, [birthDate, nickname, birthTime, birthPlace, focus, gender]);
+
+  const monthBridge = dayMonthBridgeCopy(todayTone, active.score);
+
   return (
     <section className={cn("space-y-3", className)}>
       <div className="px-0.5">
@@ -1006,15 +1054,30 @@ function FreeMonthTrendTeaser({
             >
               พลัง {active.score} · {band.label}
             </span>
-          </div>
+        </div>
           <p className="mt-2 text-[15px] leading-relaxed text-[#f7f4ec]/80">
             {band.meaning}
           </p>
+          {monthBridge ? (
+            <p
+              className="mt-2 rounded-[12px] px-2.5 py-2 text-[13px] leading-relaxed text-[#e8d19a]/90"
+              style={{
+                background: "rgba(213,177,111,0.08)",
+                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.22)",
+              }}
+            >
+              วันนี้ ({dayToneLabelTh(todayTone)}) · {monthBridge}
+            </p>
+          ) : (
+            <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/55">
+              วันนี้ ({dayToneLabelTh(todayTone)}) สอดคล้องกับจังหวะเดือนนี้
+            </p>
+          )}
           <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/55">
             <span className="font-semibold text-[#d5b16f]">ใช้ยังไง · </span>
             {band.use}
-                  </p>
-                </div>
+          </p>
+        </div>
       ) : null}
 
       <div className="flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 text-[12px] text-[#f7f4ec]/55">

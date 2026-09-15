@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import {
-  APP_BRAND_MARK,
+  APP_NAME,
   FORTUNE_PACKAGE_LABEL,
   LINE_OA_ADD_URL,
   LINE_OA_HANDLE,
@@ -119,7 +119,7 @@ export function PremiumThanksPage() {
         >
           <Image
             src="/images/brand/mae-wordmark-sm.webp?v=clear1"
-            alt={APP_BRAND_MARK}
+            alt={APP_NAME}
             width={400}
             height={200}
             priority

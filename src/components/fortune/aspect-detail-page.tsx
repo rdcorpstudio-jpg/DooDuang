@@ -77,7 +77,9 @@ export function AspectDetailPage({
       ? "/premium"
       : from === "menu"
         ? "/menu"
-        : backHrefProp;
+        : from === "reading"
+          ? "/premium"
+          : backHrefProp;
   const [ready, setReady] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -279,7 +281,7 @@ export function AspectDetailPage({
         open={payOpen}
         onClose={() => setPayOpen(false)}
         onPaid={handlePaid}
-        returnPath={`/reading/aspect?id=${domainId}&from=reading`}
+        returnPath={`/reading/aspect?id=${domainId}&from=${from === "menu" || from === "premium" ? from : "reading"}`}
       />
     </PremiumDetailShell>
   );

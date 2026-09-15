@@ -70,7 +70,7 @@ export function buildPalmShareText(pack: PalmReadingPack) {
   ].join("\n");
 }
 
-async function shareOrCopy(title: string, text: string) {
+export async function shareOrCopy(title: string, text: string) {
   try {
     if (typeof navigator !== "undefined" && navigator.share) {
       await navigator.share({ title, text });

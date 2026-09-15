@@ -6,6 +6,18 @@ export const PREMIUM_UNLOCK_KEY = "dooduang-premium-unlocked";
 /** ISO ms timestamp — premium valid until (localStorage, survives refresh) */
 export const PREMIUM_UNLOCK_UNTIL_KEY = "dooduang-premium-until";
 
+/**
+ * Local QA only — unlock premium UI without payment.
+ * Active in `next dev`, or when NEXT_PUBLIC_ALLOW_PREMIUM_SIM=1.
+ * Production builds stay locked unless that env is set (do not set on Railway).
+ */
+export function isLocalPremiumBypass(): boolean {
+  return (
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1"
+  );
+}
+
 function legacyUnlockKey(birthDate: string, nickname: string) {
   return `lukkana-unlock-overall-${birthDate}-${nickname}`;
 }
@@ -76,6 +88,8 @@ export function isPremiumUnlocked(profile?: {
   birthDate: string;
   nickname: string;
 } | null): boolean {
+  if (isLocalPremiumBypass()) return true;
+
   try {
     const until = readUntilMs();
     if (until !== null) {
@@ -157,6 +171,10 @@ export async function requirePremiumFromServer(profile?: {
   ok: boolean;
   authenticated: boolean;
 }> {
+  if (isLocalPremiumBypass()) {
+    return { ok: true, authenticated: true };
+  }
+
   try {
     const res = await fetch("/api/premium/status", { cache: "no-store" });
     if (!res.ok) {
@@ -185,6 +203,8 @@ export async function syncPremiumFromServer(profile?: {
   birthDate: string;
   nickname: string;
 } | null): Promise<boolean> {
+  if (isLocalPremiumBypass()) return true;
+
   try {
     const res = await fetch("/api/premium/status", { cache: "no-store" });
     if (!res.ok) return isPremiumUnlocked(profile);

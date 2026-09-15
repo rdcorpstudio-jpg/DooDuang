@@ -1,22 +1,136 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
   Check,
   ChevronDown,
   ChevronRight,
+  Leaf,
   Lock,
   Sparkles,
 } from "lucide-react";
-import { ZodiacSignImage } from "@/components/fortune/zodiac-sign-image";
-import { analyzeFortune, type FortuneFocus } from "@/lib/fortune/analyze";
-import { pickZodiacDaily } from "@/lib/fortune/content/zodiac-daily";
+import type { FortuneFocus } from "@/lib/fortune/analyze";
+import { buildDailyReadingPack } from "@/lib/fortune/build-daily-pack";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-/** Free: today's vibe — compact navy + gold */
+/** Split tip copy into short bullets (max 2) — keep full wording, wrap in UI */
+function toBullets(text: string, max = 2): string[] {
+  const raw = text.trim();
+  if (!raw) return [];
+
+  let parts = raw
+    .split(/\s*[·•|/]\s*/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (parts.length < 2) {
+    parts = raw
+      .split(
+        /(?<=[ก-๙า-์])\s+(?=เมื่อ|เพื่อ|แล้ว|อย่า|ไม่ควร|ควร|ค่อย|แยก|กำหนด|จัด|เลือก|หยุด)/
+      )
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  if (parts.length < 2) {
+    parts = raw
+      .split(/\s+และ\s+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  if (parts.length < 2 && raw.length > 56) {
+    const mid = Math.floor(raw.length / 2);
+    let cut = raw.lastIndexOf(" ", mid);
+    if (cut < 18) cut = raw.indexOf(" ", mid);
+    if (cut > 18) {
+      parts = [raw.slice(0, cut).trim(), raw.slice(cut).trim()];
+    } else {
+      parts = [raw];
+    }
+  }
+
+  if (parts.length < 2) parts = [raw];
+
+  return parts.slice(0, max);
+}
+
+function TipCard({
+  tone,
+  title,
+  icon,
+  items,
+  bulletIcon,
+}: {
+  tone: "do" | "watch";
+  title: string;
+  icon: ReactNode;
+  items: string[];
+  bulletIcon: ReactNode;
+}) {
+  const isDo = tone === "do";
+  return (
+    <div
+      className="flex min-w-0 flex-1 flex-col rounded-[16px] px-2.5 py-2.5"
+      style={
+        isDo
+          ? {
+              background: "rgba(18,42,40,0.72)",
+              boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.14)",
+            }
+          : {
+              background: "rgba(42,32,18,0.72)",
+              boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.14)",
+            }
+      }
+    >
+      <div className="flex items-center gap-1.5">
+        <span
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+          style={
+            isDo
+              ? {
+                  background: "rgba(94,186,160,0.18)",
+                  boxShadow: "inset 0 0 0 1px rgba(94,186,160,0.45)",
+                }
+              : {
+                  background: "rgba(213,177,111,0.14)",
+                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
+                }
+          }
+          aria-hidden
+        >
+          {icon}
+        </span>
+        <p
+          className={cn(
+            "text-[12.5px] font-semibold tracking-wide",
+            isDo ? "text-[#9fe0cb]" : "text-[#e8d19a]"
+          )}
+        >
+          {title}
+        </p>
+      </div>
+      <ul className="mt-2 space-y-1.5">
+        {items.map((item) => (
+          <li key={item} className="flex items-start gap-1.5">
+            <span className="mt-0.5 shrink-0" aria-hidden>
+              {bulletIcon}
+            </span>
+            <span className="min-w-0 flex-1 break-words text-[12px] leading-[1.55] text-[#f7f4ec]/85">
+              {item}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Free: today's vibe — Type 2 rhythm + do/watch cards */
 export function FortuneFreeZodiacToday({
   birthDate,
   nickname,
@@ -40,9 +154,9 @@ export function FortuneFreeZodiacToday({
   onUnlock?: () => void;
   className?: string;
 }) {
-  const analysis = useMemo(
+  const pack = useMemo(
     () =>
-      analyzeFortune({
+      buildDailyReadingPack({
         birthDate,
         nickname,
         birthTime,
@@ -53,101 +167,52 @@ export function FortuneFreeZodiacToday({
     [birthDate, nickname, birthTime, birthPlace, focus, gender]
   );
 
+  const analysis = pack.analysis;
   const zodiac = analysis.zodiac;
-
-  const today = useMemo(
-    () => pickZodiacDaily(zodiac.id, analysis.dayTone),
-    [zodiac.id, analysis.dayTone]
-  );
+  const today = pack.zodiacDaily;
 
   const [dailyMore, setDailyMore] = useState(false);
 
-  const dateLabel = useMemo(
-    () =>
-      new Intl.DateTimeFormat("th-TH", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      }).format(new Date()),
-    []
-  );
-
-  const displayName = nickname.replace(/^คุณ\s*/, "").trim();
+  const doItems = useMemo(() => toBullets(today.doToday), [today.doToday]);
+  const watchItems = useMemo(() => toBullets(today.watch), [today.watch]);
 
   return (
-    <section className={cn("mae-aspect-card relative px-3.5 py-3", className)}>
-      <div className="flex items-center justify-between gap-2">
-        <p className="mae-aspect-title truncate text-[13px] font-semibold tracking-wide">
-          {deep ? "เจาะลึกราศี · พรีเมียม" : "ดวงของคุณวันนี้"}
-        </p>
-        <span className="shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-medium text-[#f7f4ec]/65 shadow-[inset_0_0_0_1px_rgba(213,177,111,0.22)]">
-          {dateLabel}
-        </span>
-      </div>
+    <section className={cn("mae-aspect-card relative px-3.5 py-3.5", className)}>
+      <h2 className="mae-gold-text text-[1.05rem] font-bold tracking-tight">
+        จังหวะของคุณวันนี้
+      </h2>
 
-      <div className="mt-2.5 flex items-center gap-3">
-        <ZodiacSignImage
-          sign={zodiac.id}
-          variant="orb"
-          size={56}
-          alt={`ราศี${zodiac.thaiName}`}
-          className="shrink-0"
-          priority
+      <div className="mt-3 flex flex-col gap-2.5">
+        <TipCard
+          tone="do"
+          title="ควรทำ"
+          icon={<Leaf className="h-3.5 w-3.5 text-[#9fe0cb]" strokeWidth={2} />}
+          items={doItems}
+          bulletIcon={
+            <Check className="h-3 w-3 text-[#7dcdb4]" strokeWidth={2.6} />
+          }
         />
-        <div className="min-w-0">
-          <h2
-            className="mae-gold-text text-[1.15rem] font-bold tracking-tight"
-            style={{
-              filter:
-                "drop-shadow(0 1px 1px rgba(0,0,0,0.85)) drop-shadow(0 2px 6px rgba(0,0,0,0.45))",
-            }}
-          >
-            ราศี{zodiac.thaiName}
-          </h2>
-          <p className="mt-0.5 text-[12px] font-medium text-[#e8d19a]/85">
-            {zodiac.dateRange}
-          </p>
-        </div>
+        <TipCard
+          tone="watch"
+          title="ควรระวัง"
+          icon={
+            <AlertCircle
+              className="h-3.5 w-3.5 text-[#e8d19a]"
+              strokeWidth={2}
+            />
+          }
+          items={watchItems}
+          bulletIcon={
+            <AlertCircle
+              className="h-3 w-3 text-[#d5b16f]"
+              strokeWidth={2.2}
+            />
+          }
+        />
       </div>
-
-      <p
-        className="mt-2.5 text-[13.5px] leading-[1.55] text-[#f7f4ec]"
-        style={{
-          textShadow: "0 1px 2px rgba(0,0,0,0.55)",
-        }}
-      >
-        {displayName ? (
-          <span className="font-semibold text-[#fff8e4]">คุณ{displayName} — </span>
-        ) : null}
-        {today.vibe}
-      </p>
-
-      <ul className="mt-2.5 space-y-0 border-t border-[rgba(213,177,111,0.16)]">
-        <li className="flex items-start gap-2.5 border-b border-[rgba(213,177,111,0.16)] py-2">
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.14)]">
-            <Check className="h-3 w-3 text-[#d5b16f]" strokeWidth={2.6} />
-          </span>
-          <p className="min-w-0 text-[13px] leading-[1.5] text-[#f7f4ec]/80">
-            <span className="font-semibold text-[#f7f4ec]">ทำ</span>
-            <span className="mx-1.5 text-[#d5b16f]/55">·</span>
-            {today.doToday}
-          </p>
-        </li>
-        <li className="flex items-start gap-2.5 py-2">
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.1)]">
-            <AlertCircle className="h-3 w-3 text-[#d5b16f]" strokeWidth={2.2} />
-          </span>
-          <p className="min-w-0 text-[13px] leading-[1.5] text-[#f7f4ec]/80">
-            <span className="font-semibold text-[#f7f4ec]">ระวัง</span>
-            <span className="mx-1.5 text-[#d5b16f]/55">·</span>
-            {today.watch}
-          </p>
-        </li>
-      </ul>
 
       {!deep && unlocked && dailyMore ? (
-        <div className="mt-2 space-y-2 border-t border-[rgba(213,177,111,0.16)] pt-2 text-[13px] leading-[1.5] text-[#f7f4ec]/80">
+        <div className="mt-3 space-y-2 border-t border-[rgba(213,177,111,0.16)] pt-2.5 text-[13px] leading-[1.5] text-[#f7f4ec]/80">
           <p>
             <span className="font-semibold text-[#f7f4ec]">มุมลึก</span>
             <span className="mx-1.5 text-[#d5b16f]/55">·</span>
@@ -176,7 +241,7 @@ export function FortuneFreeZodiacToday({
           }}
           aria-expanded={unlocked ? dailyMore : false}
           disabled={!unlocked && !onUnlock}
-          className="mt-0.5 inline-flex w-full items-center justify-center gap-1 py-1.5 text-[12.5px] font-medium text-[#d5b16f] outline-none transition hover:text-[#e8d19a] active:opacity-80 disabled:opacity-55"
+          className="mt-1 inline-flex w-full items-center justify-center gap-1 py-1.5 text-[12.5px] font-medium text-[#d5b16f] outline-none transition hover:text-[#e8d19a] active:opacity-80 disabled:opacity-55"
         >
           {!unlocked ? (
             <>
@@ -198,7 +263,7 @@ export function FortuneFreeZodiacToday({
       ) : null}
 
       {deep ? (
-        <div className="mt-2 border-t border-[rgba(213,177,111,0.16)] pt-2.5">
+        <div className="mt-2.5 border-t border-[rgba(213,177,111,0.16)] pt-2.5">
           <Link
             href="/premium/self-map"
             className="mae-gold-cta inline-flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13.5px] font-semibold outline-none transition active:scale-[0.99]"

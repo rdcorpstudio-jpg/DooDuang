@@ -9,7 +9,9 @@ import {
   getDayProfile,
   toIsoDate,
 } from "@/lib/fortune/auspicious-calendar";
+import { dayEnergyFromTone } from "@/lib/fortune/auspicious-tone-align";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
+import { analyzeFortune } from "@/lib/fortune/analyze";
 import { buildDailyReadingPack } from "@/lib/fortune/build-daily-pack";
 import { cn } from "@/lib/utils";
 
@@ -51,16 +53,21 @@ export function FortuneCalendarShirtPreview({
   /** Default closed — less scroll; tap to expand shirt picks */
   const [openShirts, setOpenShirts] = useState(false);
 
-  const todayShirt = useMemo(() => {
-    return buildDailyReadingPack({
+  const analyzeInput = useMemo(
+    () => ({
       birthDate,
       nickname,
       birthTime,
       birthPlace,
       focus,
       gender,
-    }).shirt;
-  }, [birthDate, nickname, birthTime, birthPlace, focus, gender]);
+    }),
+    [birthDate, nickname, birthTime, birthPlace, focus, gender]
+  );
+
+  const todayShirt = useMemo(() => {
+    return buildDailyReadingPack(analyzeInput).shirt;
+  }, [analyzeInput]);
 
   const previewDays = useMemo(() => {
     const today = new Date();
@@ -68,9 +75,14 @@ export function FortuneCalendarShirtPreview({
     return Array.from({ length: 3 }, (_, i) => {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
-      return { date: d, profile: getDayProfile(seed, d) };
+      const profile = getDayProfile(seed, d);
+      const dayTone = analyzeFortune({ ...analyzeInput, asOf: d }).dayTone;
+      return {
+        date: d,
+        profile: { ...profile, energy: dayEnergyFromTone(dayTone) },
+      };
     });
-  }, [seed]);
+  }, [seed, analyzeInput]);
 
   function toggleShirts() {
     setOpenShirts((v) => !v);
@@ -225,7 +237,7 @@ export function FortuneCalendarShirtPreview({
         <section className="fortune-glass overflow-hidden rounded-[20px] px-3.5 py-3.5">
           <div className="mb-3 flex items-center justify-between gap-2">
             <p className="text-[13px] font-semibold text-[#2C2458]">
-              เลือกสีให้ตรงกับสิ่งที่อยากเสริม
+              วันนี้ใช้สี{todayShirt.name} · สีอื่นเก็บไว้ดูเผื่อวันอื่น
             </p>
             <button
               type="button"
@@ -244,23 +256,32 @@ export function FortuneCalendarShirtPreview({
             </button>
           </div>
           <div className="grid grid-cols-5 gap-2">
-            {SHIRT_DETAILS.map((s) => (
-              <div key={s.id} className="flex flex-col items-center gap-1.5">
-                <span className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-white/70">
-                  <Image
-                    src={s.src}
-                    alt={s.name}
-                    width={80}
-                    height={80}
-                    unoptimized
-                    className="h-10 w-10 object-contain"
-                  />
-                </span>
-                <span className="text-center text-[11px] font-medium leading-tight text-[#2C2458]">
-                  {s.meaning}
-                </span>
-              </div>
-            ))}
+            {SHIRT_DETAILS.map((s) => {
+              const isToday = s.id === todayShirt.id;
+              return (
+                <div
+                  key={s.id}
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 rounded-xl p-1",
+                    isToday && "bg-[#d5b16f]/25"
+                  )}
+                >
+                  <span className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-white/70">
+                    <Image
+                      src={s.src}
+                      alt={s.name}
+                      width={80}
+                      height={80}
+                      unoptimized
+                      className="h-10 w-10 object-contain"
+                    />
+                  </span>
+                  <span className="text-center text-[11px] font-medium leading-tight text-[#2C2458]">
+                    {isToday ? `วันนี้ · ${s.name}` : s.meaning}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </section>
       ) : null}

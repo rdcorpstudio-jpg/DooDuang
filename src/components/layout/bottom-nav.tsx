@@ -30,7 +30,7 @@ const HOME_TAB: NavTab = {
 /** After profile — home = daily fortune (marketing landing skipped) */
 const APP_HOME_FREE_TAB: NavTab = {
   href: "/premium",
-  label: "หน้าแรก",
+  label: "ดวงวันนี้",
   src: "/images/icons/nav/home.webp",
   match: (p) => p === "/" || p === "/premium",
 };

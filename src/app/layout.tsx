@@ -4,7 +4,11 @@ import { LineTag } from "@/components/analytics/line-tag";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { StripePurchaseReturnListener } from "@/components/analytics/stripe-purchase-return-listener";
 import { PhoneFrame } from "@/components/layout/phone-frame";
-import { APP_NAME } from "@/lib/site";
+import {
+  LAYOUT_META_DESCRIPTION,
+  LAYOUT_META_KEYWORDS,
+  LAYOUT_META_TITLE,
+} from "@/lib/site";
 import "./globals.css";
 
 const sarabun = Sarabun({
@@ -20,18 +24,9 @@ const srisakdi = Srisakdi({
 });
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} — ดูดวงออนไลน์ ไพ่ทาโรต์ ดวงความรัก`,
-  description:
-    "แม่มั่งมี พามู เป็นเว็บดูดวงออนไลน์ เปิดไพ่ทาโรต์ ดวงความรัก การงาน การเงิน และสุขภาพได้ทันทีโดยไม่ต้องเข้าสู่ระบบ กรอกอีเมลเพื่อรับลิงก์ดูผลซ้ำ",
-  keywords: [
-    "แม่มั่งมี",
-    "พามู",
-    "ดูดวง",
-    "ไพ่ทาโรต์",
-    "ดวงความรัก",
-    "ดวงการงาน",
-    "ทำนาย",
-  ],
+  title: LAYOUT_META_TITLE,
+  description: LAYOUT_META_DESCRIPTION,
+  keywords: [...LAYOUT_META_KEYWORDS],
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },

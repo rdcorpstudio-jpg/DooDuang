@@ -7,7 +7,11 @@ import { Check, ChevronLeft, Loader2, Lock, X } from "lucide-react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { PremiumOfferCountdown } from "@/components/fortune/premium-offer-countdown";
 import { PREMIUM_LIST_PRICE } from "@/lib/fortune/premium-offer-countdown";
-import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE, APP_BRAND_MARK } from "@/lib/site";
+import {
+  FORTUNE_PACKAGE_LABEL,
+  FORTUNE_UNLOCK_PRICE,
+  PREMIUM_PERKS,
+} from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type CheckoutStep = "ready" | "redirecting";
@@ -18,12 +22,7 @@ type SessionUser = {
   email?: string | null;
 };
 
-const PERKS = [
-  `สิทธิ์พรีเมียมครบ ${FORTUNE_PACKAGE_LABEL}`,
-  "ปฏิทินฤกษ์ 12 ปี",
-  "แผนที่ตัวตน · ราศีเชิงลึก",
-  "โหงวเฮ้ง · ลายมือ · ดวงคู่",
-] as const;
+const PERKS = PREMIUM_PERKS;
 
 const IS_LOCAL_DEV =
   process.env.NODE_ENV === "development" ||
@@ -221,16 +220,13 @@ export function FortunePaymentSheet({
           <FortuneIcon name="sparkle" size={22} plain />
         </span>
 
-        <p className="mae-gold-text mt-4 text-[10px] font-semibold tracking-[0.28em]">
-          {APP_BRAND_MARK}
-        </p>
-        <p className="mt-1 text-[10px] font-medium tracking-[0.32em] text-[#e8d19a]/70">
+        <p className="mt-4 text-[10px] font-medium tracking-[0.32em] text-[#e8d19a]/70">
           PREMIUM
         </p>
 
         <h2
           id={titleId}
-          className="mae-gold-text mt-3 max-w-[14rem] font-sans text-[1.45rem] font-bold leading-[1.25] tracking-tight"
+          className="mae-gold-text mt-2.5 max-w-[14rem] font-sans text-[1.45rem] font-bold leading-[1.25] tracking-tight"
         >
           ปลดล็อกดวงพรีเมียม
         </h2>

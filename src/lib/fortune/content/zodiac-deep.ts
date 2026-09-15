@@ -1,7 +1,11 @@
 import type { FortuneTone } from "@/lib/fortune/analyze";
 import type { ZodiacSign } from "@/lib/fortune/zodiac";
 import library from "@/lib/fortune/content/fortune-library-th.json";
-import { getLuckyShirtById } from "@/lib/fortune/content/lucky-shirts";
+import {
+  getLuckyShirtById,
+  shirtIdForDayTone,
+  type LuckyShirtId,
+} from "@/lib/fortune/content/lucky-shirts";
 
 export type ZodiacDeepCopy = {
   personality: string;
@@ -23,19 +27,9 @@ export function pickZodiacDeep(sign: ZodiacSign): ZodiacDeepCopy {
   return ZODIAC_DEEP_BANK[sign];
 }
 
-/** Shirt pick by day tone + score — same bands as lucky-shirts catalog */
+/** Shirt pick by day tone + score — same id as pickLuckyShirtForDay */
 export function pickShirtForTone(tone: FortuneTone, dayScore = 6) {
-  const id =
-    tone === "high"
-      ? dayScore >= 10
-        ? "purple"
-        : "orange"
-      : tone === "mid"
-        ? dayScore >= 7
-          ? "green"
-          : "red"
-        : "black";
-  const shirt = getLuckyShirtById(id);
+  const shirt = getLuckyShirtById(shirtIdForDayTone(tone, dayScore));
   return {
     id: shirt.id,
     name: shirt.name,
@@ -44,26 +38,40 @@ export function pickShirtForTone(tone: FortuneTone, dayScore = 6) {
   };
 }
 
-const COLOR_BY_TONE: Record<
-  FortuneTone,
+/** Chip colors must match today's shirt — one story on the whole page */
+const COLORS_BY_SHIRT: Record<
+  LuckyShirtId,
   Array<{ name: string; hex: string }>
 > = {
-  high: [
-    { name: "ทอง", hex: "#E4C56A" },
+  purple: [
     { name: "ม่วง", hex: "#B9A4F0" },
+    { name: "ทอง", hex: "#E4C56A" },
   ],
-  mid: [
+  orange: [
+    { name: "ส้ม", hex: "#F0A05A" },
+    { name: "ทอง", hex: "#E4C56A" },
+  ],
+  green: [
     { name: "เขียว", hex: "#7ED9A8" },
-    { name: "ฟ้า", hex: "#8EC5F5" },
-  ],
-  low: [
     { name: "ครีม", hex: "#F3E6C8" },
-    { name: "ชมพู", hex: "#F2A8C8" },
+  ],
+  red: [
+    { name: "แดง", hex: "#E87878" },
+    { name: "ครีม", hex: "#F3E6C8" },
+  ],
+  black: [
+    { name: "ดำ", hex: "#3A4050" },
+    { name: "เทาอ่อน", hex: "#C5CBD6" },
   ],
 };
 
-export function pickLuckyColors(tone: FortuneTone) {
-  return COLOR_BY_TONE[tone];
+export function pickLuckyColorsForShirt(shirtId: LuckyShirtId) {
+  return COLORS_BY_SHIRT[shirtId];
+}
+
+/** @deprecated prefer pickLuckyColorsForShirt — kept for call sites that only have tone */
+export function pickLuckyColors(tone: FortuneTone, dayScore = 6) {
+  return pickLuckyColorsForShirt(shirtIdForDayTone(tone, dayScore));
 }
 
 export function pickLuckyNumbers(seed: string, count = 3): number[] {

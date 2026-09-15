@@ -5,7 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const BACK_CLASS =
-  "inline-flex min-h-10 items-center gap-1 rounded-full px-3.5 py-2 text-[14px] font-semibold tracking-wide text-[#e8d19a] outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45";
+  "inline-flex min-h-10 items-center gap-1 rounded-full px-3.5 py-2 text-[14px] font-semibold tracking-wide outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45";
 
 const BACK_STYLE = {
   background: "rgba(213,177,111,0.14)",
@@ -35,8 +35,12 @@ export function PageBackButton({
 
   const inner = (
     <>
-      <ChevronLeft className="h-5 w-5 shrink-0" strokeWidth={2.4} aria-hidden />
-      <span>{label}</span>
+      <ChevronLeft
+        className="h-5 w-5 shrink-0 text-[#e8d19a]"
+        strokeWidth={2.4}
+        aria-hidden
+      />
+      <span className="mae-gold-text">{label}</span>
     </>
   );
 

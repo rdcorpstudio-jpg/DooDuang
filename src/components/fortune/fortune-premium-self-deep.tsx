@@ -10,6 +10,7 @@ import {
 } from "react";
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
+import { FortuneFreeSelfIntro } from "@/components/fortune/fortune-free-self-intro";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { analyzeFortune, type FortuneFocus } from "@/lib/fortune/analyze";
 import { cn } from "@/lib/utils";
@@ -1116,11 +1117,33 @@ export function FortunePremiumSelfDeep({
   }, [seed, birthDate, nickname, birthTime, birthPlace, focus, gender]);
 
   const [axisIndex, setAxisIndex] = useState(data.topIdx);
+  const [panel, setPanel] = useState<"self" | "axes" | "spectrum">("self");
   const name = nickname.trim() || "คุณ";
 
   useEffect(() => {
     setAxisIndex(data.topIdx);
   }, [data.topIdx]);
+
+  const panels = [
+    {
+      id: "self" as const,
+      label: "ตัวตน",
+      hint: "รู้จักตัวเอง",
+      icon: "profile" as const,
+    },
+    {
+      id: "axes" as const,
+      label: "6 มุม",
+      hint: "กราฟตัวตน",
+      icon: "sparkle" as const,
+    },
+    {
+      id: "spectrum" as const,
+      label: "สเปกตรัม",
+      hint: "อุปนิสัย·ธาตุ",
+      icon: "compass" as const,
+    },
+  ];
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -1130,56 +1153,151 @@ export function FortunePremiumSelfDeep({
             <Sparkles className="h-3.5 w-3.5" strokeWidth={1.8} />
             เจาะลึกตัวตน
           </p>
-          <h2 className="mt-1.5 text-[1.35rem] font-semibold leading-snug text-[#d5b16f]">
-            ตัวตนของคุณ ใน 6 มุม
+          <h2 className="mt-1.5 text-[1.25rem] font-semibold leading-snug text-[#d5b16f]">
+            เลือกมุมที่อยากอ่าน
           </h2>
           <p className="mt-1 text-[13px] leading-relaxed text-[#f7f4ec]/70">
-            คุณ{name} · อ่านละเอียดกว่าเบื้องต้น กราฟและธาตุเฉพาะตัว
+            คุณ{name} · กดปุ่มแล้วดูรายละเอียดเพิ่มได้
           </p>
         </div>
 
-        <div className="mt-4">
-          <RadarChart
-            values={data.axes}
-            selectedIndex={axisIndex}
-            onSelect={setAxisIndex}
-          />
-          <p className="mt-2 px-2 text-center text-[12px] leading-relaxed text-[#f7f4ec]/65">
-            แตะจุดบนกราฟ เพื่ออ่านแต่ละมุมของคุณ
-          </p>
-          <AxisSwipeReader
-            axes={data.axes}
-            index={axisIndex}
-            onIndexChange={setAxisIndex}
-          />
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {panels.map((p) => {
+            const active = panel === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setPanel(p.id)}
+                aria-pressed={active}
+                className={cn(
+                  "flex flex-col items-center gap-1.5 rounded-[16px] px-1.5 py-3 text-center outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/40",
+                  active ? "opacity-100" : "opacity-80 hover:opacity-100"
+                )}
+                style={
+                  active
+                    ? {
+                        background:
+                          "linear-gradient(165deg, rgba(213,177,111,0.18) 0%, rgba(16,24,39,0.9) 100%)",
+                        boxShadow:
+                          "inset 0 0 0 1.5px rgba(213,177,111,0.7), 0 8px 20px rgba(0,0,0,0.25)",
+                      }
+                    : {
+                        background: "rgba(16,24,39,0.65)",
+                        boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                      }
+                }
+              >
+                <span
+                  className="flex h-11 w-11 items-center justify-center rounded-full"
+                  style={{
+                    background: active
+                      ? "radial-gradient(circle at 35% 30%, rgba(255,248,228,0.28), rgba(213,177,111,0.12) 60%, transparent)"
+                      : "rgba(213,177,111,0.08)",
+                    boxShadow: active
+                      ? "inset 0 0 0 1px rgba(213,177,111,0.55)"
+                      : "inset 0 0 0 1px rgba(213,177,111,0.25)",
+                  }}
+                >
+                  <FortuneIcon name={p.icon} size={22} plain />
+                </span>
+                <span className="text-[12px] font-semibold leading-none text-[#f7f4ec]">
+                  {p.label}
+                </span>
+                <span
+                  className={cn(
+                    "text-[10px] font-medium leading-none",
+                    active ? "text-[#e8d19a]" : "text-[#f7f4ec]/50"
+                  )}
+                >
+                  {active ? "กำลังดู" : "ดูเพิ่ม"}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      <section className="fortune-glass rounded-[20px] px-4 py-4">
-        <p className="text-[13px] font-semibold tracking-[0.1em] text-[#d5b16f]">
-          สเปกตรัมอุปนิสัย
-        </p>
-        <SpectrumSwipeReader items={data.spectra} />
-      </section>
-
-      <section className="fortune-glass rounded-[20px] px-4 py-4">
-        <p className="text-[13px] font-semibold tracking-[0.1em] text-[#d5b16f]">
-          ห้าธาตุในตัวคุณ
-        </p>
-        <h3 className="mt-1 text-[16px] font-semibold text-[#f7f4ec]">
-          การกระจายห้าธาตุ
-        </h3>
-
-        <ElementSwipeReader
-          elements={data.elements}
-          initialKey={data.strongest.key}
+      {panel === "self" ? (
+        <FortuneFreeSelfIntro
+          seed={seed}
+          nickname={nickname}
+          birthDate={birthDate}
+          birthTime={birthTime}
+          birthPlace={birthPlace}
+          focus={focus}
+          gender={gender}
+          premium
         />
+      ) : null}
 
-        <div className="mt-4 flex items-center justify-center gap-1.5 border-t border-[rgba(213,177,111,0.22)] pt-3 text-[12px] text-[#f7f4ec]/55">
-          <Sparkles className="h-3.5 w-3.5 text-[#d5b16f]" strokeWidth={1.8} />
-          ส่วนพรีเมียมท้ายรายงาน · วิเคราะห์เฉพาะคุณ
+      {panel === "axes" ? (
+        <section className="fortune-glass rounded-[20px] px-4 py-4">
+          <div className="text-center">
+            <h3 className="text-[1.2rem] font-semibold leading-snug text-[#d5b16f]">
+              ตัวตนของคุณ ใน 6 มุม
+            </h3>
+            <p className="mt-1 text-[12px] leading-relaxed text-[#f7f4ec]/65">
+              กราฟและคำอ่านเฉพาะคุณ
+            </p>
+          </div>
+
+          <div className="mt-3">
+            <RadarChart
+              values={data.axes}
+              selectedIndex={axisIndex}
+              onSelect={setAxisIndex}
+            />
+            <p className="mt-2 px-2 text-center text-[12px] leading-relaxed text-[#f7f4ec]/65">
+              แตะจุดบนกราฟ เพื่ออ่านแต่ละมุมของคุณ
+            </p>
+            <AxisSwipeReader
+              axes={data.axes}
+              index={axisIndex}
+              onIndexChange={setAxisIndex}
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {panel === "spectrum" ? (
+        <div className="space-y-3">
+          <section className="fortune-glass rounded-[20px] px-4 py-4">
+            <p className="text-[13px] font-semibold tracking-[0.1em] text-[#d5b16f]">
+              สเปกตรัมอุปนิสัย
+            </p>
+            <p className="mt-1 text-[12px] text-[#f7f4ec]/65">
+              กดแถบ หรือปัดการ์ดด้านล่างเพื่ออ่านเพิ่ม
+            </p>
+            <SpectrumSwipeReader items={data.spectra} />
+          </section>
+
+          <section className="fortune-glass rounded-[20px] px-4 py-4">
+            <p className="text-[13px] font-semibold tracking-[0.1em] text-[#d5b16f]">
+              ห้าธาตุในตัวคุณ
+            </p>
+            <h3 className="mt-1 text-[16px] font-semibold text-[#f7f4ec]">
+              การกระจายห้าธาตุ
+            </h3>
+            <p className="mt-1 text-[12px] text-[#f7f4ec]/65">
+              กดธาตุ หรือปัดการ์ดเพื่ออ่านเพิ่ม
+            </p>
+
+            <ElementSwipeReader
+              elements={data.elements}
+              initialKey={data.strongest.key}
+            />
+
+            <div className="mt-4 flex items-center justify-center gap-1.5 border-t border-[rgba(213,177,111,0.22)] pt-3 text-[12px] text-[#f7f4ec]/55">
+              <Sparkles
+                className="h-3.5 w-3.5 text-[#d5b16f]"
+                strokeWidth={1.8}
+              />
+              ส่วนพรีเมียมท้ายรายงาน · วิเคราะห์เฉพาะคุณ
+            </div>
+          </section>
         </div>
-      </section>
+      ) : null}
     </div>
   );
 }

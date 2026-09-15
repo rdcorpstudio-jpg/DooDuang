@@ -5,6 +5,7 @@ import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { FortuneResultHero } from "@/components/fortune/fortune-result-hero";
+import { FortunePromoSplitBanner } from "@/components/fortune/fortune-promo-split-banner";
 import { FortuneTopicGrid } from "@/components/fortune/fortune-topic-grid";
 import { FortuneLuckyStrip } from "@/components/fortune/fortune-lucky-strip";
 import { FortuneFreeMonthTrend } from "@/components/fortune/fortune-free-month-trend";
@@ -124,8 +125,6 @@ export function LifeInsightMockup({
     [analyzeInput]
   );
 
-  const dailyDescription = pack.zodiacDaily.vibe;
-
   const monthPoints = useMemo(() => {
     const now = new Date();
     const curIdx = now.getMonth();
@@ -151,14 +150,21 @@ export function LifeInsightMockup({
     >
       <div
         className="fortune-reveal"
+        style={{ "--fortune-delay": "20ms" } as CSSProperties}
+      >
+        <FortunePromoSplitBanner unlocked={contentUnlocked} />
+      </div>
+
+      <div
+        className="fortune-reveal"
         style={{ "--fortune-delay": "40ms" } as CSSProperties}
       >
         <FortuneResultHero
           realName={displayName}
           nickname={nickname}
           gender={gender}
+          zodiac={pack.analysis.zodiac}
           headline={hero.headline}
-          subline={dailyDescription}
           quote={hero.quote}
           tip={hero.tip}
         />
@@ -326,23 +332,7 @@ export function LifeInsightMockup({
         className="fortune-reveal scroll-mt-4 px-3"
         style={{ "--fortune-delay": "380ms" } as CSSProperties}
       >
-        <FortuneFreeSelfIntro
-          seed={seed}
-          nickname={nickname}
-          birthDate={birthDate}
-          birthTime={deepTime}
-          birthPlace={deepPlace}
-          focus={typedFocus}
-          gender={gender}
-          premium={contentUnlocked}
-        />
-      </div>
-
-      {isPremiumPage ? (
-        <div
-          className="fortune-reveal px-3"
-          style={{ "--fortune-delay": "500ms" } as CSSProperties}
-        >
+        {isPremiumPage ? (
           <FortunePremiumSelfDeep
             seed={seed}
             nickname={nickname}
@@ -352,8 +342,19 @@ export function LifeInsightMockup({
             focus={typedFocus}
             gender={gender}
           />
-        </div>
-      ) : null}
+        ) : (
+          <FortuneFreeSelfIntro
+            seed={seed}
+            nickname={nickname}
+            birthDate={birthDate}
+            birthTime={deepTime}
+            birthPlace={deepPlace}
+            focus={typedFocus}
+            gender={gender}
+            premium={contentUnlocked}
+          />
+        )}
+      </div>
 
       {isPremiumPage ? (
         <div

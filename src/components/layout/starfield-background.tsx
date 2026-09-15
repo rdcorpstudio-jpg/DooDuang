@@ -5,7 +5,8 @@ import { isMaeCelestialPath } from "@/lib/mae-shell";
 
 /**
  * App sky — crisp on top, light clear blur down the page (no white wash).
- * Main `/` Mae landing owns its video; `/mae` Guanyin uses hero video; else celestial/Guanyin plate.
+ * Main `/` Mae landing owns its video; `/mae` Guanyin uses hero video;
+ * premium / menu / tarot use night-sky photo plate.
  */
 
 const GUANYIN_SKY = {
@@ -15,21 +16,22 @@ const GUANYIN_SKY = {
   backgroundRepeat: "no-repeat" as const,
 };
 
-/** Free + premium shell — mountain night plate (dark sky / gold horizon) */
-const CELESTIAL_SKY = {
-  backgroundImage: "url(/images/bg/mae-mountain-night.webp?v=mtn1)",
+const NIGHT_SKY_PLATE = {
+  backgroundColor: "#050b14",
+  backgroundImage: "url(/images/brand/night-sky-plate.png?v=sky1)",
   backgroundSize: "cover" as const,
-  backgroundPosition: "50% 18%",
+  backgroundPosition: "center center",
   backgroundRepeat: "no-repeat" as const,
 };
 
-/** Same plate as reading wizard gender step (page 1) */
-const WIZARD_SKY = {
-  backgroundImage: "url(/images/bg/mae-app-bg.webp?v=gate4)",
-  backgroundSize: "cover" as const,
-  backgroundPosition: "50% 30%",
-  backgroundRepeat: "no-repeat" as const,
-};
+/** Photo night sky plate — deep navy + soft stars */
+function NightSkyPlate() {
+  return (
+    <div className="absolute inset-0 overflow-hidden" aria-hidden>
+      <div className="absolute inset-0" style={NIGHT_SKY_PLATE} />
+    </div>
+  );
+}
 
 export function StarfieldBackground() {
   const pathname = usePathname() || "/";
@@ -38,19 +40,62 @@ export function StarfieldBackground() {
     pathname === "/mae" || pathname.startsWith("/mae/");
   const isLoginAuth =
     pathname.startsWith("/login") || pathname.startsWith("/auth");
-  /** เมนูใช้พื้นหลังซุ้มทอง/พระจันทร์ แบบเดียวกับหน้าล็อกอิน */
   const isMenuGate = pathname === "/menu" || pathname.startsWith("/menu/");
-  const useGateSky = isLoginAuth || isMenuGate;
+  const isPayPage = pathname.startsWith("/premium/pay");
+  const isTarotPage =
+    pathname === "/reading/tarot" || pathname.startsWith("/reading/tarot/");
+  const isReadingWizard =
+    pathname === "/reading" || pathname === "/reading/";
+  const isPremiumShell =
+    pathname.startsWith("/premium") && !pathname.startsWith("/premium/pay");
 
-  // Mae main landing renders its own full-bleed video
   if (isMaeHome) return null;
 
   const celestial = isMaeCelestialPath(pathname);
-  const sky = useGateSky
-    ? WIZARD_SKY
-    : celestial
-      ? CELESTIAL_SKY
-      : GUANYIN_SKY;
+  /** Premium / menu / reading wizard — night sky (never Guanyin flash) */
+  const useCodedNight =
+    isMenuGate ||
+    isPremiumShell ||
+    isPayPage ||
+    isReadingWizard ||
+    (celestial &&
+      !isLoginAuth &&
+      !isTarotPage &&
+      !isGuanyinHome);
+
+  // Daily tarot — night sky plate
+  if (isTarotPage) {
+    return (
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] overflow-hidden [&_*]:pointer-events-none"
+        aria-hidden
+      >
+        <NightSkyPlate />
+      </div>
+    );
+  }
+
+  // Premium / menu / celestial shell — night sky plate
+  if (useCodedNight) {
+    return (
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] overflow-hidden [&_*]:pointer-events-none"
+        aria-hidden
+      >
+        <NightSkyPlate />
+      </div>
+    );
+  }
+
+  // Login / auth — page owns its own hero art
+  if (isLoginAuth) {
+    return (
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] overflow-hidden bg-[#02060c] [&_*]:pointer-events-none"
+        aria-hidden
+      />
+    );
+  }
 
   return (
     <div
@@ -71,36 +116,25 @@ export function StarfieldBackground() {
           <source src="/videos/home-hero.mp4?v=wind0908" type="video/mp4" />
         </video>
       ) : (
-        <div className="absolute inset-0" style={sky} />
+        <div className="absolute inset-0" style={GUANYIN_SKY} />
       )}
 
-      {useGateSky ? (
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `
-              linear-gradient(180deg,
-                rgba(10,14,24,0.12) 0%,
-                rgba(10,14,24,0.22) 40%,
-                rgba(10,14,24,0.45) 70%,
-                rgba(10,14,24,0.62) 100%)
-            `,
-          }}
-        />
-      ) : (
-        /* Clear soft blur only — fades in from top → bottom, no white veil */
-        <div
-          className="absolute inset-0 origin-center scale-[1.1]"
-          style={{
-            ...(isGuanyinHome ? GUANYIN_SKY : sky),
-            filter: "blur(10px) saturate(1.02)",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
-            maskImage:
-              "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
-          }}
-        />
-      )}
+      <div
+        className="absolute inset-0 origin-center scale-[1.1]"
+        style={{
+          ...(isGuanyinHome ? GUANYIN_SKY : GUANYIN_SKY),
+          filter: "blur(10px) saturate(1.02)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0.75) 68%, #000 100%)",
+        }}
+      />
     </div>
   );
+}
+
+/** Soft stars off when night-sky photo plate already has stars */
+export function SoftSkyStarsOverlay() {
+  return null;
 }

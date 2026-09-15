@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isAdminPath, isMaeShellPath } from "@/lib/mae-shell";
-import { StarfieldBackground } from "@/components/layout/starfield-background";
+import { StarfieldBackground, SoftSkyStarsOverlay } from "@/components/layout/starfield-background";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { syncPremiumFromServer } from "@/lib/fortune/premium-unlock";
 import { syncFortuneProfileWithServer } from "@/lib/fortune/profile-storage";
@@ -27,6 +27,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     isAuthPath ||
     pathname === "/" ||
     pathname === "" ||
+    pathname.startsWith("/premium/pay") ||
     keyboardOpen;
   /* CSS zoom on ancestors breaks iOS caret / focus for phone OTP fields.
      Home hero is a tight 1-screen composition — comfort zoom crushes it on real phones. */
@@ -80,6 +81,12 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     };
   }, []);
 
+  const allowPageScroll =
+    adminShell ||
+    pathname.startsWith("/premium/pay") ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/auth");
+
   return (
     <div className={cn("phone-shell", adminShell && "phone-shell--admin")}>
       <div
@@ -101,13 +108,14 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
           <div
             className={cn(
               "min-h-0 min-w-0 w-full max-w-full flex-1 overflow-x-hidden",
-              adminShell ? "overflow-y-auto" : "overflow-y-hidden"
+              allowPageScroll ? "overflow-y-auto" : "overflow-y-hidden"
             )}
           >
             {children}
           </div>
           {hideNav ? null : <BottomNav />}
         </div>
+        {adminShell ? null : <SoftSkyStarsOverlay />}
       </div>
     </div>
   );

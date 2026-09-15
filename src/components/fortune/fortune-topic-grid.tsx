@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import {
   FortuneIcon,
   type FortuneIconName,
@@ -12,13 +11,35 @@ import type { FortuneFocus } from "@/lib/fortune/analyze";
 import { cn } from "@/lib/utils";
 
 const DOMAIN_META = [
-  { aspectId: "work" as const, domainId: "career" as const, icon: "career" as FortuneIconName },
-  { aspectId: "money" as const, domainId: "money" as const, icon: "finance" as FortuneIconName },
-  { aspectId: "love" as const, domainId: "love" as const, icon: "love" as FortuneIconName },
-  { aspectId: "health" as const, domainId: "health" as const, icon: "health" as FortuneIconName },
+  {
+    aspectId: "work" as const,
+    domainId: "career" as const,
+    icon: "career" as FortuneIconName,
+  },
+  {
+    aspectId: "money" as const,
+    domainId: "money" as const,
+    icon: "finance" as FortuneIconName,
+  },
+  {
+    aspectId: "love" as const,
+    domainId: "love" as const,
+    icon: "love" as FortuneIconName,
+  },
+  {
+    aspectId: "health" as const,
+    domainId: "health" as const,
+    icon: "health" as FortuneIconName,
+  },
 ] as const;
 
-/** 2×2 daily aspect cards — dark navy + gold rim */
+const CARD_SHELL: CSSProperties = {
+  background: "linear-gradient(165deg, #1a2234 0%, #121826 100%)",
+  border: "1px solid rgba(213, 177, 111, 0.45)",
+  boxShadow: "0 10px 28px rgba(0,0,0,0.35)",
+};
+
+/** ดวงแต่ละด้าน — center-snap carousel matching mock */
 export function FortuneTopicGrid({
   birthDate = "2000-01-01",
   nickname = "",
@@ -55,73 +76,110 @@ export function FortuneTopicGrid({
     [birthDate, nickname, birthTime, birthPlace, focus, gender]
   );
 
-  const domains = DOMAIN_META.map((m) => {
-    const row = pack.aspects.find((a) => a.id === m.aspectId)!;
-    return {
-      ...m,
-      name: row.name,
-      blurb: row.blurb,
-    };
-  });
+  const domains = useMemo(
+    () =>
+      DOMAIN_META.map((m) => {
+        const row = pack.aspects.find((a) => a.id === m.aspectId)!;
+        return {
+          ...m,
+          name: row.name,
+          blurb: (row.blurb || row.title || "").trim(),
+        };
+      }),
+    [pack.aspects]
+  );
 
   const aspectHref = (id: string) =>
     `/reading/aspect?id=${id}&from=${from}`;
 
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const sync = () => {
+      const cards = Array.from(el.children) as HTMLElement[];
+      if (!cards.length) return;
+      const mid = el.scrollLeft + el.clientWidth / 2;
+      let best = 0;
+      let bestDist = Number.POSITIVE_INFINITY;
+      cards.forEach((card, i) => {
+        const center = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(center - mid);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      });
+      setActive((prev) => (prev === best ? prev : best));
+    };
+
+    sync();
+    el.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", sync);
+    return () => {
+      el.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+    };
+  }, [domains.length]);
+
   return (
     <section className={cn("space-y-3", className)}>
-      <div className="flex items-end justify-between gap-3 px-0.5">
-        <div>
-          <h2 className="text-[15px] font-semibold tracking-wide text-[#d5b16f]">
-            ดวงรายวัน 4 ด้าน
-          </h2>
-          <div
-            className="mt-1.5 h-px w-8 rounded-full"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(213,177,111,0.9), transparent)",
-            }}
-            aria-hidden
-          />
-        </div>
-        <Link
-          href={aspectHref("career")}
-          className="mb-0.5 inline-flex items-center gap-0.5 text-[12px] font-medium text-[#d5b16f] outline-none transition hover:text-[#e8d19a] active:opacity-70 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
-        >
-          ดูทั้งหมด
-          <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
-        </Link>
-      </div>
+      <h2 className="mae-gold-text px-0.5 text-[15px] font-semibold tracking-wide">
+        ดวงแต่ละด้าน
+      </h2>
 
-      <div className="grid grid-cols-2 gap-2.5">
+      <div
+        ref={scrollerRef}
+        className="topic-aspect-scroll no-tap -mx-3 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{
+          touchAction: "pan-x pan-y",
+          WebkitOverflowScrolling: "touch",
+          paddingLeft: "7%",
+          paddingRight: "7%",
+          scrollPaddingLeft: "7%",
+          scrollPaddingRight: "7%",
+        }}
+      >
         {domains.map((d) => (
           <Link
             key={d.domainId}
             href={aspectHref(d.domainId)}
-            className="mae-aspect-card group relative flex min-h-[108px] flex-col gap-2 px-3 pb-3 pt-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
+            className="relative flex h-[112px] w-[82%] max-w-[340px] shrink-0 snap-center items-center gap-2.5 rounded-[20px] px-3.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/40"
+            style={{ ...CARD_SHELL, scrollSnapStop: "always" }}
             aria-label={`อ่านดวง${d.name}`}
           >
-            <span className="flex items-start justify-between gap-2">
-              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center">
-                <FortuneIcon
-                  name={d.icon}
-                  size={44}
-                  plain
-                  className="relative"
-                />
-              </span>
-              <span className="mae-aspect-chevron !h-7 !w-7">
-                <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.4} />
-              </span>
+            <span className="relative flex h-[64px] w-[58px] shrink-0 items-center justify-center">
+              <FortuneIcon name={d.icon} size={52} plain className="relative" />
             </span>
-            <div className="min-w-0 w-full">
-              <p className="mae-aspect-title text-[14px] font-semibold tracking-tight">
+
+            <span className="flex min-w-0 flex-1 flex-col justify-center py-2.5">
+              <p className="text-[1.05rem] font-bold leading-none tracking-tight text-white">
                 {d.name}
               </p>
-              <p className="mae-aspect-body mt-1 line-clamp-2 text-[11.5px] leading-[1.45]">
+              <p className="mt-1.5 line-clamp-2 text-[12px] leading-snug text-white/82">
                 {d.blurb}
               </p>
-            </div>
+              <span className="mt-2 inline-flex items-center gap-1 whitespace-nowrap text-[12px] font-semibold tracking-wide text-[#e8d19a]">
+                อ่านคำทำนาย
+                <span aria-hidden>→</span>
+              </span>
+            </span>
           </Link>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-center gap-1.5" aria-hidden>
+        {domains.map((d, i) => (
+          <span
+            key={d.domainId}
+            className={cn(
+              "h-[6px] w-[6px] rounded-full transition-colors duration-200",
+              i === active ? "bg-[#f0d078]" : "bg-white/22"
+            )}
+          />
         ))}
       </div>
     </section>

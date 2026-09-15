@@ -1,5 +1,11 @@
 import nodemailer from "nodemailer";
-import { APP_NAME } from "@/lib/site";
+import {
+  APP_NAME,
+  MAIL_BODY_CTA,
+  MAIL_BODY_FOOTER,
+  MAIL_BODY_INTRO,
+  MAIL_SUBJECT,
+} from "@/lib/site";
 
 function smtpPort() {
   return Number(process.env.SMTP_PORT || 587);
@@ -65,22 +71,28 @@ export async function sendReadingLinkEmail({
     },
     to,
     bcc: mailbox,
-    subject: `ลิงก์ดูดวงของคุณจาก ${APP_NAME}`,
+    subject: MAIL_SUBJECT,
     text: [
       `สวัสดี ${nickname}`,
       "",
-      `บันทึกผลดูดวงหมวด${readingTitle}ไว้แล้ว`,
-      "เปิดลิงก์นี้เมื่ออยากดูผลอีกครั้ง:",
+      MAIL_BODY_INTRO,
+      "",
+      `หมวดที่บันทึกไว้: ${readingTitle}`,
+      `${MAIL_BODY_CTA}:`,
       url,
+      "",
+      MAIL_BODY_FOOTER,
       "",
       "อย่าแชร์ลิงก์นี้กับคนอื่น เพราะใครมีลิงก์นี้จะเปิดผลได้",
     ].join("\n"),
     html: `
-      <div style="font-family:sans-serif;line-height:1.6;color:#2e1065">
+      <div style="font-family:sans-serif;line-height:1.6;color:#101827">
         <p>สวัสดี ${nickname}</p>
-        <p>บันทึกผลดูดวงหมวด<strong>${readingTitle}</strong>ไว้แล้ว</p>
-        <p><a href="${url}" style="color:#7e22ce">เปิดดูผลอีกครั้ง</a></p>
-        <p style="font-size:12px;color:#6b21a8">อย่าแชร์ลิงก์นี้กับคนอื่น เพราะใครมีลิงก์นี้จะเปิดผลได้</p>
+        <p>${MAIL_BODY_INTRO}</p>
+        <p>หมวดที่บันทึกไว้: <strong>${readingTitle}</strong></p>
+        <p><a href="${url}" style="color:#d5b16f">${MAIL_BODY_CTA}</a></p>
+        <p>${MAIL_BODY_FOOTER}</p>
+        <p style="font-size:12px;color:#64748b">อย่าแชร์ลิงก์นี้กับคนอื่น เพราะใครมีลิงก์นี้จะเปิดผลได้</p>
       </div>
     `,
   });

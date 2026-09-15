@@ -109,20 +109,20 @@ export function getLuckyShirtByName(name: string): LuckyShirtInfo {
  * สีแนะนำของวัน — จาก dayTone + dayScore ของ analyzeFortune
  * (ไม่สุ่ม: คนวันเกิดเดียวกัน ในวันเดียวกัน ได้สีเดียวกัน)
  */
+export function shirtIdForDayTone(
+  dayTone: FortuneTone,
+  dayScore = 6
+): LuckyShirtId {
+  if (dayTone === "high") return dayScore >= 10 ? "purple" : "orange";
+  if (dayTone === "mid") return dayScore >= 7 ? "green" : "red";
+  return "black";
+}
+
 export function pickLuckyShirtForDay(input: FortuneAnalyzeInput): LuckyShirtInfo {
   const analysis = analyzeFortune(input);
-  const { dayTone, dayScore } = analysis;
-  const id =
-    dayTone === "high"
-      ? dayScore >= 10
-        ? "purple"
-        : "orange"
-      : dayTone === "mid"
-        ? dayScore >= 7
-          ? "green"
-          : "red"
-        : "black";
-  return getLuckyShirtById(id);
+  return getLuckyShirtById(
+    shirtIdForDayTone(analysis.dayTone, analysis.dayScore)
+  );
 }
 
 /** สีแนะนำรายวันถัดไป n วัน (พรีเมียม) */

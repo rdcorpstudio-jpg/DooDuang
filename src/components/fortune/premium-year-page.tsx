@@ -6,7 +6,6 @@ import {
   usePremiumProfileGate,
   useAnalyzeInputFromProfile,
 } from "@/components/fortune/premium-detail-shell";
-import { APP_BRAND_MARK } from "@/lib/site";
 
 /**
  * หน้าแยกจังหวะชีวิตรายปี/รายเดือน — จากเมนู “ดวงรายปี”
@@ -30,9 +29,6 @@ export function PremiumYearPage() {
       <header className="relative flex min-h-11 items-center justify-center py-2">
         <PageBackButton href="/menu" absolute />
         <div className="min-w-0 px-20 text-center">
-          <p className="text-[11px] tracking-[0.18em] text-[#d5b16f]/75">
-            {APP_BRAND_MARK}
-          </p>
           <h1 className="text-[1.2rem] font-bold tracking-wide text-[#f7f4ec]">
             ดวงรายปี
           </h1>

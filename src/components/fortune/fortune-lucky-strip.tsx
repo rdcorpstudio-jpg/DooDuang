@@ -53,6 +53,7 @@ export function FortuneLuckyStrip({
         <p className="mae-aspect-title text-[11px] font-medium tracking-wide">
           สีมงคลวันนี้
         </p>
+        <p className="mt-0.5 text-[10px] text-[#f7f4ec]/45">สีหลัก · สีเสริม</p>
         <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1.5">
           {[c0, c1].map((c) => (
             <span key={c!.name} className="inline-flex items-center gap-1.5">

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { AstroHeroOrb } from "@/components/home/astro-hero-orb";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
-import { APP_BRAND_MARK } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
@@ -51,14 +50,31 @@ export function FortuneLoading({
 
   return (
     <div className="fortune-loading no-sky-lift absolute inset-0 z-50 overflow-x-hidden overflow-y-auto overscroll-contain px-5 pb-[calc(6.25rem+env(safe-area-inset-bottom,0px))] pt-4">
+      {/* Own night plate — never inherit Guanyin sky flash */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundColor: "#050b14",
+            backgroundImage: "url(/images/brand/night-sky-plate.png?v=sky1)",
+            backgroundSize: "cover",
+            backgroundPosition: "center center",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(5,11,20,0.15) 0%, rgba(5,11,20,0.45) 100%)",
+          }}
+        />
+      </div>
+
       <div className="relative z-10 mx-auto flex min-h-full w-full max-w-[340px] flex-col">
         <div className="flex items-start justify-between gap-3">
           <div className="w-[6.5rem]" aria-hidden />
           <div className="flex flex-col items-center pt-0.5">
             <FortuneIcon name="sparkle" size={16} className="mb-0.5" />
-            <p className="text-[13px] font-bold tracking-[0.28em] text-[#d5b16f]">
-              {APP_BRAND_MARK}
-            </p>
           </div>
           <span className="fortune-loading-pill fortune-loading-pill-status mt-0.5">
             <span className="fortune-loading-pulse-dot" />

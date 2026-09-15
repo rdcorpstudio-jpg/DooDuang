@@ -41,7 +41,7 @@ const MENU_GROUPS: MenuGroup[] = [
     apps: [
       {
         id: "daily",
-        title: "ดวงรายวัน",
+        title: "ดวงวันนี้",
         blurb: "จังหวะวัน",
         href: "/premium",
         iconSrc: "/images/icons/calendar-gold.webp?v=1",
@@ -65,8 +65,8 @@ const MENU_GROUPS: MenuGroup[] = [
       },
       {
         id: "reading",
-        title: "ดูดวงเบื้องต้น",
-        blurb: "รู้จักตัวเอง",
+        title: "รู้จักตัวเอง",
+        blurb: "บุคลิกราศี",
         href: "/premium#self-intro",
         iconSrc: "/images/icons/crystal-ball.webp",
         badge: "ฟรี",
@@ -422,7 +422,7 @@ function FeatureMenuPageInner({
             เลือกเรื่องที่อยากรู้
           </h1>
           <p className="mt-1.5 text-[14px] font-medium leading-snug text-[#f7f4ec]/90">
-            ค้นหาคำแนะนำในแบบของคุณ
+            ลองดูได้ก่อน · เจาะลึกค่อยเปิดพรีเมียม
           </p>
         </div>
       </header>

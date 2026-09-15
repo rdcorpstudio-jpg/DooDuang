@@ -5,8 +5,9 @@ import {
 } from "@/lib/fortune/analyze";
 import { pickAspectCopy } from "@/lib/fortune/content/aspects-daily";
 import { pickZodiacDaily } from "@/lib/fortune/content/zodiac-daily";
+import { getLuckyShirtById } from "@/lib/fortune/content/lucky-shirts";
 import {
-  pickLuckyColors,
+  pickLuckyColorsForShirt,
   pickLuckyNumbers,
   pickShirtForTone,
   pickZodiacDeep,
@@ -25,11 +26,22 @@ const ASPECT_UI: Record<
 /** One call → analysis + copy packs for the result page. */
 export function buildDailyReadingPack(input: FortuneAnalyzeInput) {
   const analysis = analyzeFortune(input);
-  const zodiacDaily = pickZodiacDaily(analysis.zodiac.id, analysis.dayTone);
-  const zodiacDeep = pickZodiacDeep(analysis.zodiac.id);
-  const colors = pickLuckyColors(analysis.dayTone);
+  const shirtPick = pickShirtForTone(analysis.dayTone, analysis.dayScore);
+  const shirtFull = getLuckyShirtById(shirtPick.id);
+  const colors = pickLuckyColorsForShirt(shirtPick.id);
   const numbers = pickLuckyNumbers(analysis.seed);
-  const shirt = pickShirtForTone(analysis.dayTone, analysis.dayScore);
+  const zodiacDeep = pickZodiacDeep(analysis.zodiac.id);
+
+  const bankDaily = pickZodiacDaily(
+    analysis.zodiac.id,
+    analysis.dayTone,
+    analysis.variant
+  );
+  /** Align luckyHint with the same shirt/color story shown on the page */
+  const zodiacDaily = {
+    ...bankDaily,
+    luckyHint: `วันนี้สีหลักคือ${shirtFull.name} (${shirtFull.meaning}) — ${shirtFull.tip}`,
+  };
 
   const aspects = analysis.aspects.map((a) => {
     const copy = pickAspectCopy(a.id, a.tone);
@@ -47,7 +59,7 @@ export function buildDailyReadingPack(input: FortuneAnalyzeInput) {
     zodiacDeep,
     aspects,
     lucky: { colors, numbers },
-    shirt,
+    shirt: shirtPick,
   };
 }
 

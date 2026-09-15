@@ -242,7 +242,7 @@ export async function startGooglePopup(callbackUrl: string) {
 }
 
 export const GOOGLE_WHITE_BUTTON_CLASS =
-  "!flex h-11 w-full min-w-0 flex-row flex-nowrap items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full border border-[#dadce0] bg-white px-3 py-0 text-[14px] font-semibold leading-none text-[#3c4043] shadow-none outline-none transition hover:bg-[#f8f9fa] hover:text-[#3c4043] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.99]";
+  "google-white-btn !flex h-11 w-full min-w-0 flex-row flex-nowrap items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[14px] border border-[#dadce0] !bg-white px-3 py-0 text-[14px] font-semibold leading-none !text-[#3c4043] shadow-none outline-none transition hover:!bg-[#f8f9fa] hover:!text-[#3c4043] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.99]";
 
 export function GoogleSignInButton({
   callbackUrl = DEFAULT_LOGIN_CALLBACK,

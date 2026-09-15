@@ -1,6 +1,8 @@
 "use client";
 
-import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { Sparkles } from "lucide-react";
+import { ZodiacSignImage } from "@/components/fortune/zodiac-sign-image";
+import type { ZodiacInfo } from "@/lib/fortune/zodiac";
 import { cn } from "@/lib/utils";
 
 function formatHeroDate(date = new Date()) {
@@ -12,13 +14,13 @@ function formatHeroDate(date = new Date()) {
   }).format(date);
 }
 
-/** Hero banner — wide landscape tarot plate */
+/** Daily hero — clean Type-1: greeting · framed insight · tip line */
 export function FortuneResultHero({
   realName,
   nickname,
   gender: _gender,
+  zodiac,
   headline = "อย่ารีบเกิน จังหวะตัวเอง",
-  subline,
   quote,
   tip,
   className,
@@ -28,6 +30,7 @@ export function FortuneResultHero({
   gender?: string;
   birthDate?: string;
   powerScore?: number;
+  zodiac?: ZodiacInfo;
   headline?: string;
   subline?: string;
   quote?: string;
@@ -38,114 +41,102 @@ export function FortuneResultHero({
     (nickname || "").trim() || (realName || "").trim() || "สมาชิก";
   const dateLabel = formatHeroDate();
   const support =
-    (quote || "").trim() || "ค่อย ๆ ก้าว ในจังหวะที่ใช่สำหรับคุณ";
-  const footerTip =
-    (tip || "").trim() ||
-    (subline || "").trim() ||
-    "วันนี้ ให้เวลากับตัวเองอีกนิด";
-
-  const heroSrc = "/images/bg/hero-tarot-celestial.webp?v=tarot1";
+    (quote || "").trim() || "ค่อย ๆ ก้าวในจังหวะของคุณ";
+  const tipLine =
+    (tip || "").trim() || "วันนี้ ให้เวลากับตัวเองอีกนิด";
+  const initial = displayName.slice(0, 1) || "ม";
 
   return (
     <section
       className={cn(
-        "dd-result-hero no-sky-lift relative mx-3 mt-3 aspect-[2.15/1] min-h-[188px] w-[calc(100%-1.5rem)] overflow-hidden rounded-[20px]",
+        "dd-result-hero no-sky-lift relative mx-3 mt-3 space-y-2.5",
         className
       )}
-      style={{
-        border: "1.5px solid transparent",
-        background:
-          "linear-gradient(#101827, #101827) padding-box, linear-gradient(145deg, #fff8e4 0%, #e2c787 40%, #d5b16f 65%, #b8924f 100%) border-box",
-        boxShadow: "0 14px 36px rgba(0,0,0,0.32)",
-      }}
     >
-      <div className="pointer-events-none absolute inset-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          key={heroSrc}
-          src={heroSrc}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover dd-hero-drift"
-          style={{ objectPosition: "88% 52%" }}
-          draggable={false}
-        />
-        <div
-          className="absolute inset-0"
+      {/* Header */}
+      <div className="flex items-center gap-2.5 px-0.5">
+        <span
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[14px] font-bold text-[#101827]"
           style={{
-            background: `
-              linear-gradient(90deg,
-                rgba(8,12,22,0.86) 0%,
-                rgba(10,16,28,0.62) 38%,
-                rgba(12,18,32,0.22) 62%,
-                transparent 82%
-              ),
-              linear-gradient(180deg,
-                rgba(8,12,22,0.22) 0%,
-                transparent 32%,
-                transparent 68%,
-                rgba(8,12,22,0.42) 100%
-              )
-            `,
+            background:
+              "linear-gradient(145deg, #fff8e4 0%, #e8d19a 40%, #d5b16f 100%)",
+            boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
           }}
-        />
-      </div>
-
-      <div className="relative z-10 flex h-full min-h-[188px] flex-col justify-between px-3.5 py-3">
-        {/* Top: badge + date | greeting */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-            <span
-              className="rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#e8d19a]"
-              style={{
-                background: "rgba(16,24,39,0.55)",
-                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.45)",
-              }}
-            >
-              ดวงประจำวัน
-            </span>
-            <span
-              className="hidden h-2.5 w-px shrink-0 bg-[rgba(213,177,111,0.4)] xs:block sm:block"
-              aria-hidden
-            />
-            <span className="dd-hero-shadow text-[11px] font-medium text-[#f7f4ec]/85">
-              {dateLabel}
-            </span>
-          </div>
-          <p className="dd-hero-shadow shrink-0 text-right text-[11px] font-medium text-[#f7f4ec]/85">
+          aria-hidden
+        >
+          {initial}
+        </span>
+        <div className="min-w-0 flex-1 text-left">
+          <p className="truncate text-[13px] font-semibold tracking-wide text-white">
             สวัสดี คุณ{displayName}
           </p>
-        </div>
-
-        {/* Middle: headline + support — left column clear of art */}
-        <div className="mt-2 max-w-[64%] flex-1">
-          <h2 className="mae-gold-text font-sans text-[1.22rem] font-bold leading-[1.28] tracking-tight sm:text-[1.28rem]">
-            {headline}
-          </h2>
-          <p className="dd-hero-shadow mt-1.5 text-[12.5px] font-medium leading-snug text-[#f7f4ec]/92">
-            {support}
+          <p className="dd-hero-shadow mt-0.5 text-[11px] text-[#f7f4ec]/55">
+            {dateLabel}
           </p>
         </div>
-
-        {/* Bottom tip */}
-        <div
-          className="max-w-[68%] pt-2"
-          style={{
-            borderTop: "1px solid rgba(213,177,111,0.28)",
-          }}
-        >
-          <div className="flex items-start gap-1.5 pt-1.5">
-            <FortuneIcon
-              name="sparkle"
-              size={13}
-              plain
-              className="fortune-spark mt-0.5 shrink-0"
-            />
-            <p className="dd-hero-shadow text-[11px] font-semibold leading-snug text-[#e8d19a]">
-              {footerTip}
-            </p>
-          </div>
-        </div>
+        <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium text-white/90">
+          <Sparkles className="h-3.5 w-3.5 text-[#d5b16f]" strokeWidth={2} />
+          วันนี้
+        </span>
       </div>
+
+      {/* Insight card — compact widget size */}
+      <div
+        className="relative flex items-center gap-2 overflow-hidden rounded-[16px] px-3 py-2.5"
+        style={{
+          background:
+            "linear-gradient(165deg, #1a2438 0%, #121a2c 55%, #0e1524 100%)",
+          boxShadow:
+            "inset 0 0 0 1px rgba(213,177,111,0.58), inset 0 0 0 2px rgba(255,248,228,0.08), 0 8px 20px rgba(0,0,0,0.24)",
+        }}
+      >
+        <div className="min-w-0 flex-1 py-0.5">
+          <p className="text-[10.5px] font-medium tracking-wide text-white/68">
+            ดวงวันนี้
+            {zodiac ? (
+              <>
+                <span className="mx-1 text-white/28">•</span>
+                ราศี{zodiac.thaiName}
+              </>
+            ) : null}
+          </p>
+
+          <h2 className="mae-gold-text mt-1 font-sans text-[1.05rem] font-bold leading-[1.25] tracking-tight sm:text-[1.1rem]">
+            {headline}
+          </h2>
+
+          <p className="dd-hero-shadow mt-1 text-[12px] font-medium leading-snug text-white/82">
+            {support}
+          </p>
+
+          {zodiac?.dateRange ? (
+            <p className="mt-1.5 text-[10px] leading-snug text-white/42">
+              {zodiac.dateRange}
+            </p>
+          ) : null}
+        </div>
+
+        {zodiac ? (
+          <div className="relative flex w-[96px] shrink-0 items-center justify-center self-center">
+            <ZodiacSignImage
+              sign={zodiac.id}
+              variant="orb"
+              size={88}
+              alt={`ราศี${zodiac.thaiName}`}
+              className="relative drop-shadow-[0_6px_14px_rgba(0,0,0,0.4)]"
+              priority
+            />
+          </div>
+        ) : null}
+      </div>
+
+      {/* Tip line */}
+      <p className="flex items-center gap-1.5 px-0.5 text-[12.5px] leading-snug text-white/88">
+        <span className="text-[#d5b16f]" aria-hidden>
+          ✦
+        </span>
+        {tipLine}
+      </p>
     </section>
   );
 }

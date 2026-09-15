@@ -128,7 +128,6 @@ export async function sendSms(input: SmsSendInput) {
   throw new Error("SMS is not configured");
 }
 
-export function otpSmsMessage(code: string, expiresInSec: number) {
-  const minutes = Math.max(1, Math.round(expiresInSec / 60));
-  return `รหัสยืนยันดูดวง: ${code} หมดอายุใน ${minutes} นาที ห้ามบอกรหัสนี้กับใคร`;
+export function otpSmsMessage(code: string, _expiresInSec: number) {
+  return `รหัสยืนยันแม่มั่งมี พามู: ${code} ใช้ยืนยันการเข้าใช้งานของคุณ อย่าบอกรหัสนี้กับใครนะ`;
 }

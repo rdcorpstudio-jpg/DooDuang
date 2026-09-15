@@ -238,7 +238,7 @@ function GenderSelectList({
   onSelect: (gender: Gender) => void;
 }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 px-0.5">
       {GENDER_OPTIONS.map((option, index) => {
         const meta = GENDER_ICONS[option.id];
         const selected = value === option.id;
@@ -248,11 +248,11 @@ function GenderSelectList({
             type="button"
             onClick={() => onSelect(option.id)}
             className={cn(
-              "wizard-anim-item flex w-full items-center gap-3.5 rounded-[20px] px-4 py-3.5 text-left outline-none transition duration-200",
+              "wizard-anim-item flex w-full items-center gap-3.5 rounded-[20px] px-3.5 py-3.5 text-left outline-none transition duration-200",
               "active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
               selected
-                ? "bg-[rgba(16,24,39,0.55)] shadow-[0_0_0_1.5px_rgba(213,177,111,0.75),0_8px_28px_rgba(0,0,0,0.28)]"
-                : "bg-[rgba(16,24,39,0.38)] shadow-[inset_0_0_0_1px_rgba(213,177,111,0.22)] hover:bg-[rgba(16,24,39,0.48)]"
+                ? "bg-[rgba(16,24,39,0.42)] shadow-[0_0_0_1.5px_rgba(213,177,111,0.75),0_8px_28px_rgba(0,0,0,0.22)]"
+                : "bg-[rgba(16,24,39,0.28)] shadow-[inset_0_0_0_1px_rgba(213,177,111,0.28)] hover:bg-[rgba(16,24,39,0.36)]"
             )}
             style={
               {
@@ -403,7 +403,7 @@ function PrivacyNote({
   return (
     <p
       className={cn(
-        "wizard-keyboard-hide wizard-anim-item flex items-center justify-center gap-1.5 text-[12px]",
+        "wizard-keyboard-hide wizard-anim-item mx-auto max-w-[17.5rem] px-1 text-center text-[11.5px] leading-snug",
         className
       )}
       style={
@@ -414,7 +414,7 @@ function PrivacyNote({
       }
     >
       <span style={{ color: MAE.gold }} aria-hidden>
-        ✦
+        ✦{" "}
       </span>
       ข้อมูลของคุณจะถูกเก็บเป็นความลับ เพื่อการทำนายเท่านั้น
     </p>
@@ -687,12 +687,45 @@ export function ReadingWizard() {
   const stepNumber = step === "gender" ? 1 : step === "birth" ? 2 : 3;
 
   if (!ready) {
-    return <div className="relative h-full" aria-hidden />;
+    return (
+      <div
+        className="relative h-full overflow-hidden"
+        style={{ background: "#0a0e18" }}
+        aria-hidden
+      >
+        <div
+          className="absolute inset-0 bg-cover bg-no-repeat"
+          style={{
+            backgroundImage: "url(/images/bg/mae-app-bg.webp?v=gate4)",
+            backgroundPosition: "50% 30%",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(10,14,24,0.2) 0%, rgba(10,14,24,0.45) 100%)",
+          }}
+        />
+      </div>
+    );
   }
 
   if (step === "result" && result) {
     return (
-      <div className="relative h-full overflow-y-auto">
+      <div
+        className="relative h-full overflow-y-auto"
+        style={{ background: "#050b14" }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden
+          style={{
+            backgroundImage: "url(/images/brand/night-sky-plate.png?v=sky1)",
+            backgroundSize: "cover",
+            backgroundPosition: "center center",
+          }}
+        />
         <div className="relative z-10 min-h-full px-1.5 pb-10 pt-3">
           <FortuneResultView
             result={result}
@@ -719,7 +752,7 @@ export function ReadingWizard() {
 
   if (step === "loading") {
     return (
-      <div className="relative h-full">
+      <div className="relative h-full overflow-hidden" style={{ background: "#050b14" }}>
         <FortuneLoading
           nickname={profile.nickname}
           categoryTitle={readingOption.title}
@@ -748,16 +781,16 @@ export function ReadingWizard() {
           style={{
             background: `
               linear-gradient(180deg,
-                rgba(10,14,24,0.12) 0%,
-                rgba(10,14,24,0.22) 40%,
-                rgba(10,14,24,0.45) 70%,
-                rgba(10,14,24,0.62) 100%)
+                rgba(10,14,24,0.08) 0%,
+                rgba(10,14,24,0.12) 45%,
+                rgba(10,14,24,0.28) 78%,
+                rgba(10,14,24,0.42) 100%)
             `,
           }}
         />
       </div>
 
-      <div className="wizard-keyboard-compact relative z-10 flex min-h-0 flex-1 flex-col px-5 pt-3">
+      <div className="wizard-keyboard-compact relative z-10 flex min-h-0 flex-1 flex-col px-7 pt-3">
         <div className="relative z-20 mb-2 grid shrink-0 grid-cols-[minmax(4.5rem,1fr)_auto_minmax(4.5rem,1fr)] items-center gap-2">
           {step === "gender" ? (
             <span aria-hidden className="justify-self-start" />
@@ -793,7 +826,7 @@ export function ReadingWizard() {
         <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
           <div
             className={cn(
-              "relative mx-auto flex w-full max-w-[340px] flex-col pb-3",
+              "relative mx-auto flex w-full max-w-[300px] flex-col pb-3",
               step === "name"
                 ? "wizard-name-stage justify-start pt-4 sm:pt-8"
                 : "justify-start pt-2"
@@ -923,15 +956,9 @@ export function ReadingWizard() {
           </div>
         </div>
 
-        {/* Always-visible CTA — survives Large Text / short viewports */}
-        <div
-          className="relative z-20 shrink-0 px-0 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(10,14,24,0) 0%, rgba(10,14,24,0.82) 28%, rgba(10,14,24,0.96) 100%)",
-          }}
-        >
-          <div className="mx-auto w-full max-w-[340px]">
+        {/* Always-visible CTA — no solid black wash over the sky */}
+        <div className="relative z-20 shrink-0 px-0 pb-[max(0.65rem,env(safe-area-inset-bottom))] pt-2">
+          <div className="mx-auto w-full max-w-[300px]">
             {step === "gender" ? (
               <FormContinueButton
                 label="ไปต่อ"

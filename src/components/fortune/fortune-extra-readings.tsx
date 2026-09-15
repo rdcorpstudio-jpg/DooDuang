@@ -31,14 +31,14 @@ const READINGS: ReadingItem[] = [
   },
   {
     id: "face",
-    title: "ดูโหงวเฮ้ง",
+    title: "โหงวเฮ้ง",
     badge: "พรีเมียม",
     locked: true,
     icon: "/images/extra/face.webp?v=mae6",
   },
   {
     id: "palm",
-    title: "ดูลายมือ",
+    title: "ลายมือ",
     badge: "พรีเมียม",
     locked: true,
     icon: "/images/extra/palm.webp?v=mae6",
