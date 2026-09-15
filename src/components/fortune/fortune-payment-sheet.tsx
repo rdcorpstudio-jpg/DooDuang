@@ -287,7 +287,7 @@ export function FortunePaymentSheet({
           </div>
         </div>
 
-        <div className="max-h-[11.5rem] overflow-y-auto overscroll-contain px-3.5 pb-2">
+        <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-3.5 pb-2">
           <div className="sticky top-0 z-[1] grid grid-cols-[1fr_2.6rem_3.6rem] items-center gap-1 border-b border-[rgba(232,209,154,0.22)] bg-[rgba(18,28,44,0.96)] py-2 backdrop-blur-sm">
             <p className="text-[12px] font-medium text-white/85">
               สิทธิ์การใช้งาน
@@ -453,7 +453,7 @@ export function FortunePaymentSheet({
       />
 
       <div
-        className="dd-sheet-panel relative z-[1] max-h-[min(92vh,720px)] w-full max-w-[400px] overflow-y-auto overflow-x-hidden rounded-[22px]"
+        className="dd-sheet-panel relative z-[1] max-h-[min(96vh,820px)] w-full max-w-[400px] overflow-y-auto overflow-x-hidden rounded-[22px]"
         style={MAE_PANEL}
       >
         <button
