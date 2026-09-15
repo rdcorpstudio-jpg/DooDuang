@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { LifeInsightMockup } from "@/components/fortune/life-insight-mockup";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 
@@ -8,7 +8,7 @@ import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet"
  * Dev preview: open /preview/result to edit the free result UI
  * without walking through the reading wizard every refresh.
  */
-export default function PreviewResultPage() {
+function PreviewResultContent() {
   const [unlocked, setUnlocked] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
 
@@ -52,5 +52,17 @@ export default function PreviewResultPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function PreviewResultPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="relative h-full bg-[#0a0e18]" aria-hidden />
+      }
+    >
+      <PreviewResultContent />
+    </Suspense>
   );
 }
