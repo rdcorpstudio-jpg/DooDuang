@@ -15,9 +15,11 @@ export const FORTUNE_PACKAGE_DAYS = 365;
 export const FORTUNE_PACKAGE_LABEL = "1 ปี";
 /** @deprecated use FORTUNE_PACKAGE_DAYS / FORTUNE_PACKAGE_LABEL — kept as ~12 months */
 export const FORTUNE_PACKAGE_MONTHS = 12;
-/** LINE Official Account — add friend after purchase (CRM) */
-export const LINE_OA_ADD_URL = "https://line.me/R/ti/p/@maemangmee";
+/** LINE Official Account — add friend / chat Mae (CRM + pay-via-chat) */
+export const LINE_OA_ADD_URL = "https://lin.ee/UhtSkiM";
 export const LINE_OA_HANDLE = "@maemangmee";
+/** CTA label for pay / consult via LINE chat with Mae */
+export const LINE_OA_PAY_CHAT_LABEL = "ชำระผ่านแชทแม่มั่งมี";
 export const FORTUNE_DISCLAIMER =
   "คำทำนายเป็นความเชื่อส่วนบุคคลและมีไว้เพื่อความบันเทิง อ่านไว้ทบทวนตัวเอง ไม่ใช่คำยืนยันอนาคต เรื่องสุขภาพ กฎหมาย หรือการเงิน ควรใช้ข้อมูลจริงและคำแนะนำจากผู้เชี่ยวชาญประกอบด้วยนะ";
 /** Paywall / unlock CTA label */
