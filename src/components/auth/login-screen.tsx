@@ -199,6 +199,22 @@ export function LoginScreen({
               callbackUrl={callbackUrl}
               buttonClassName="h-11 rounded-[14px] text-[13.5px] whitespace-nowrap"
             />
+
+            {forCheckout ? (
+              <a
+                href={LINE_OA_ADD_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[14px] bg-[#0a0a0a] text-[13.5px] font-semibold tracking-wide text-white outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-white/30"
+                style={{
+                  boxShadow:
+                    "inset 0 0 0 1px rgba(255,255,255,0.14), 0 6px 16px rgba(0,0,0,0.28)",
+                }}
+              >
+                <LineMark className="h-[18px] w-[18px]" />
+                {LINE_OA_PAY_CHAT_LABEL}
+              </a>
+            ) : null}
           </div>
 
           <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[11px] text-white/55">
@@ -216,30 +232,15 @@ export function LoginScreen({
               <PhoneLoginForm callbackUrl={callbackUrl} compact />
             </div>
           </>
-        ) : null}
-
-        <div className="w-full">
-          <AuthDivider label={forCheckout ? "หรือชำระกับแม่" : "หรือ"} />
-        </div>
-
-        <a
-          href={LINE_OA_ADD_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[14px] text-[13.5px] font-semibold tracking-wide text-white outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
-          style={{
-            background: "#06C755",
-            boxShadow:
-              "0 8px 20px rgba(6,199,85,0.28), 0 0 0 1px rgba(255,255,255,0.06)",
-          }}
-        >
-          <LineMark className="h-[18px] w-[18px]" />
-          {LINE_OA_PAY_CHAT_LABEL}
-        </a>
+        ) : (
+          <div className="w-full">
+            <AuthDivider />
+          </div>
+        )}
 
         <Link
           href="/reading"
-          className="group mt-2.5 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[14px] text-[13.5px] font-semibold tracking-wide text-[#f7f4ec] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+          className="group mt-0.5 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[14px] text-[13.5px] font-semibold tracking-wide text-[#f7f4ec] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           style={{
             boxShadow: "inset 0 0 0 1.5px rgba(213,177,111,0.65)",
             background: "rgba(16,24,39,0.35)",
