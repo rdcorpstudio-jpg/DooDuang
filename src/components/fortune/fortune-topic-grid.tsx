@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import {
   FortuneIcon,
@@ -8,6 +8,7 @@ import {
 } from "@/components/fortune/fortune-icon";
 import { buildDailyReadingPack } from "@/lib/fortune/build-daily-pack";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
+import { useDragScroll } from "@/hooks/use-drag-scroll";
 import { cn } from "@/lib/utils";
 
 const DOMAIN_META = [
@@ -92,7 +93,7 @@ export function FortuneTopicGrid({
   const aspectHref = (id: string) =>
     `/reading/aspect?id=${id}&from=${from}`;
 
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const { ref: scrollerRef } = useDragScroll();
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -133,7 +134,7 @@ export function FortuneTopicGrid({
 
       <div
         ref={scrollerRef}
-        className="topic-aspect-scroll no-tap -mx-3 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="topic-aspect-scroll no-tap -mx-3 flex cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain py-1 active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{
           touchAction: "pan-x pan-y",
           WebkitOverflowScrolling: "touch",

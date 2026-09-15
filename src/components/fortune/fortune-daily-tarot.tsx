@@ -217,7 +217,7 @@ export function FortuneDailyTarot({
   seed: string;
   className?: string;
 }) {
-  const { card, upright, brief } = drawTarotCard(
+  const { card, upright, side } = drawTarotCard(
     `${seed}-tarot-${todayKey()}`
   );
 
@@ -236,10 +236,11 @@ export function FortuneDailyTarot({
   const originRef = useRef({ x: 0, y: 0 });
   const openedByHoldRef = useRef(false);
 
-  const mainLine = brief;
-  const shortReading = card.deep;
-  const doToday = card.affirmation;
-  const watchOut = upright ? card.reversed : card.upright;
+  const keywordsLine = side.keywords.join(" · ");
+  const summary = side.summary;
+  const doToday = side.do;
+  const watchOut = side.watch;
+  const cardMessage = side.message;
 
   useEffect(() => {
     try {
@@ -306,11 +307,13 @@ export function FortuneDailyTarot({
       `${card.nameTh}${upright ? "" : " • กลับหัว"}`,
       card.nameEn.toUpperCase() + (upright ? "" : " • REVERSED"),
       "",
-      mainLine,
-      shortReading,
+      keywordsLine,
+      summary,
       "",
-      `วันนี้ลองทำ: ${doToday}`,
-      `สิ่งที่ควรระวัง: ${watchOut}`,
+      `ควรทำ: ${doToday}`,
+      `ควรระวัง: ${watchOut}`,
+      "",
+      `ข้อความจากไพ่: “${cardMessage}”`,
     ].join("\n");
 
     const result = await shareOrCopy("ไพ่ประจำวัน", text);
@@ -469,11 +472,14 @@ export function FortuneDailyTarot({
                 boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.2)",
               }}
             >
-              <p className="mae-gold-text text-[14.5px] font-semibold leading-snug tracking-wide">
-                {mainLine}
+              <p className="mae-gold-text text-[13px] font-semibold leading-snug tracking-wide">
+                {keywordsLine}
               </p>
-              <p className="mt-2 text-[13px] leading-[1.65] text-white/72">
-                {shortReading}
+              <p className="mt-1 text-[11px] font-medium tracking-wide text-white/45">
+                คำทำนายวันนี้
+              </p>
+              <p className="mt-1.5 text-[13px] leading-[1.65] text-white/82">
+                {summary}
               </p>
 
               <div
@@ -489,7 +495,7 @@ export function FortuneDailyTarot({
                       strokeWidth={2}
                     />
                   }
-                  label="วันนี้ลองทำ"
+                  label="ควรทำ"
                   body={doToday}
                 />
                 <TipRow
@@ -499,10 +505,22 @@ export function FortuneDailyTarot({
                       strokeWidth={1.9}
                     />
                   }
-                  label="สิ่งที่ควรระวัง"
+                  label="ควรระวัง"
                   body={watchOut}
                 />
               </div>
+
+              <div
+                className="my-3.5 h-px"
+                style={{ background: "rgba(213,177,111,0.2)" }}
+              />
+
+              <p className="text-[11px] font-medium tracking-wide text-[#e8d19a]/85">
+                ข้อความจากไพ่
+              </p>
+              <p className="mt-1.5 text-[14px] font-medium leading-snug text-white/90">
+                “{cardMessage}”
+              </p>
             </div>
           </div>
         )}

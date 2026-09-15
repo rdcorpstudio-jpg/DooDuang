@@ -242,11 +242,11 @@ export function generateFortune(
       const positions = ["อดีต", "ปัจจุบัน", "อนาคต"];
       const content = cards
         .map((card, i) => {
-          const orient =
+          const side =
             hashString(`${seed}-orient-${i}`) % 2 === 0
               ? card.upright
               : card.reversed;
-          return `${positions[i]} — ${card.nameTh} (${card.nameEn}): ${orient}`;
+          return `${positions[i]} — ${card.nameTh} (${card.nameEn}): ${side.summary}`;
         })
         .join("\n\n");
       return {

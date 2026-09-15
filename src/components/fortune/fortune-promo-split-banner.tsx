@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
+import { useDragScroll } from "@/hooks/use-drag-scroll";
 import {
   requirePremiumFromServer,
   setPremiumUnlocked,
@@ -80,7 +81,7 @@ export function FortunePromoSplitBanner({
   unlocked?: boolean;
   className?: string;
 }) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const { ref: scrollerRef, didDrag } = useDragScroll();
   const activeRef = useRef(0);
   const pauseUntilRef = useRef(0);
   const [active, setActive] = useState(0);
@@ -194,6 +195,7 @@ export function FortunePromoSplitBanner({
   useStripePaymentReturn(handlePaid);
 
   function onLockedClick(href: string) {
+    if (didDrag()) return;
     pauseAutoplay(12000);
     setPendingHref(href);
     setPayOpen(true);
@@ -203,7 +205,7 @@ export function FortunePromoSplitBanner({
     <section className={cn("relative mx-3 mt-3", className)}>
       <div
         ref={scrollerRef}
-        className="promo-split-scroll no-tap flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-px py-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="promo-split-scroll no-tap flex cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-px py-px active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{
           touchAction: "pan-x pan-y",
           WebkitOverflowScrolling: "touch",
@@ -236,6 +238,7 @@ export function FortunePromoSplitBanner({
                 alt={slide.artAlt}
                 fill
                 unoptimized
+                draggable={false}
                 sizes="1024px"
                 quality={100}
                 className={cn(
@@ -266,7 +269,7 @@ export function FortunePromoSplitBanner({
                 aria-hidden
               />
 
-              <div className="absolute inset-0 z-10 flex flex-col justify-center py-3 pl-3.5 pr-[42%] sm:pl-4 sm:pr-[40%]">
+              <div className="absolute inset-0 z-10 flex select-none flex-col justify-center py-3 pl-3.5 pr-[42%] sm:pl-4 sm:pr-[40%]">
                 <p className="flex items-center gap-1 text-[9.5px] font-semibold tracking-[0.12em] text-[#e8d19a]/92">
                   <span aria-hidden className="text-[8px] text-[#d5b16f]">
                     ✦
@@ -302,6 +305,9 @@ export function FortunePromoSplitBanner({
                 ) : (
                   <Link
                     href={slide.href}
+                    onClick={(e) => {
+                      if (didDrag()) e.preventDefault();
+                    }}
                     className={ctaClass}
                     style={ctaStyle}
                   >
