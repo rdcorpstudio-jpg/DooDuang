@@ -1,158 +1,169 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
-import { Check, ChevronRight, Heart, Briefcase, Quote, UserRound } from "lucide-react";
+import { useMemo, type ReactNode } from "react";
+import Image from "next/image";
+import { Check, ChevronRight } from "lucide-react";
 import {
   PremiumDetailShell,
   usePremiumProfileGate,
   useAnalyzeInputFromProfile,
 } from "@/components/fortune/premium-detail-shell";
-import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { analyzeFortune } from "@/lib/fortune/analyze";
 import { pickZodiacDeep } from "@/lib/fortune/content/zodiac-deep";
 import { buildPremiumValuePack } from "@/lib/fortune/build-premium-value-pack";
 import { cn } from "@/lib/utils";
 
-function splitBullets(text: string, max = 3): string[] {
-  if (/[·•]/.test(text)) {
-    return text
+const ADVICE_STEPS = ["เลือกสิ่งสำคัญ", "ลงมือทำ", "พักให้พอ"] as const;
+
+/** ภาพแผนที่ตัวตน — เก็บความละเอียดต้นฉบับ ไม่ย่อไฟล์ */
+const SELF_MAP_ART = {
+  identity: {
+    src: "/images/premium/self-map/identity.jpg",
+    w: 1024,
+    h: 256,
+  },
+  strength: {
+    src: "/images/premium/self-map/strength.jpg",
+    w: 600,
+    h: 300,
+  },
+  shadow: {
+    src: "/images/premium/self-map/shadow.jpg",
+    w: 600,
+    h: 300,
+  },
+  turning: {
+    src: "/images/premium/self-map/turning.jpg",
+    w: 1024,
+    h: 256,
+  },
+  love: {
+    src: "/images/premium/self-map/love.jpg",
+    w: 600,
+    h: 300,
+  },
+  work: {
+    src: "/images/premium/self-map/career.jpg",
+    w: 600,
+    h: 300,
+  },
+  advice: {
+    src: "/images/premium/self-map/advice.jpg",
+    w: 1024,
+    h: 256,
+  },
+} as const;
+
+type SelfMapArtSlot = keyof typeof SELF_MAP_ART;
+
+/** แยก bullet โดยไม่ตัดคำกลางประโยค */
+function splitBullets(text: string, max = 2): string[] {
+  const trimmed = text.trim().replace(/\s+/g, " ");
+  if (!trimmed) return [];
+
+  if (/[·•]/.test(trimmed)) {
+    return trimmed
       .split(/[·•]/)
       .map((s) => s.trim())
       .filter(Boolean)
       .slice(0, max);
   }
-  const parts = text
+
+  const parts = trimmed
     .split(/(?=\s(?:การ|และ|จึง|ข้อ|ถ้า|เมื่อ|บาง))/)
     .map((s) => s.trim())
-    .filter((s) => s.length >= 10);
-  if (parts.length >= 2) return parts.slice(0, max);
-  const out: string[] = [];
-  let rest = text.trim();
-  while (rest && out.length < max) {
-    if (rest.length <= 42) {
-      out.push(rest);
-      break;
-    }
-    let cut = rest.lastIndexOf(" ", 40);
-    if (cut < 18) cut = 40;
-    out.push(rest.slice(0, cut).trim());
-    rest = rest.slice(cut).trim();
+    .filter((s) => s.length >= 8);
+
+  if (parts.length >= 2) {
+    return parts.slice(0, max);
   }
-  return out.length ? out : [text];
+
+  return [trimmed];
 }
 
-const ADVICE_STEPS = ["เลือกสิ่งสำคัญ", "ลงมือทำ", "พักให้พอ"] as const;
-
-/** Short personal quote — avoid dumping the full advice block */
-function pickPersonalQuote(advice: string): string {
-  const fallback = "ไม่ต้องสมบูรณ์แบบทุกวัน ก็ยังมีคุณค่า";
-  const trimmed = advice.trim();
-  if (!trimmed) return fallback;
-
-  const byPeriod = trimmed
-    .split(/[.。]/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (byPeriod.length > 1 && byPeriod[0]!.length <= 90) return byPeriod[0]!;
-
-  // Thai copy often separates clauses with spaces
-  const clauses = trimmed
-    .split(/\s+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length >= 12);
-  if (clauses.length >= 2) return clauses[0]!;
-
-  if (trimmed.length <= 72) return trimmed;
-  return clauses[0] ?? fallback;
-}
-
-function StyleExpandCard({
-  title,
-  body,
-  open,
-  onToggle,
-  icon,
-  iconClassName,
+function ArtSlot({
+  slot,
   className,
 }: {
-  title: string;
-  body: string;
-  open: boolean;
-  onToggle: () => void;
-  icon: ReactNode;
-  iconClassName: string;
+  slot: SelfMapArtSlot;
   className?: string;
 }) {
+  const art = SELF_MAP_ART[slot];
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-expanded={open}
-      className={cn(
-        "mae-aspect-card w-full rounded-[18px] px-3 py-3 text-left outline-none transition active:scale-[0.99]",
-        open && "col-span-2 rounded-[20px] px-4 py-4",
-        className
-      )}
+    <div
+      data-art-slot={slot}
+      className={cn("relative w-full overflow-hidden", className)}
+      style={{ aspectRatio: `${art.w} / ${art.h}` }}
+      aria-hidden
     >
-      {open ? (
-        <>
-          <div className="flex items-start justify-between gap-2">
-            <p className="mae-aspect-title text-[15px] font-semibold tracking-[0.06em]">
-              {title}
-            </p>
-            <ChevronRight
-              className="mt-0.5 h-4 w-4 shrink-0 rotate-90 text-[#d5b16f] transition"
-              strokeWidth={2.2}
-            />
-          </div>
-          <p className="mae-aspect-body mt-2 text-[15px] leading-[1.75]">{body}</p>
-        </>
-      ) : (
-        <>
-          <span
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full",
-              iconClassName
-            )}
-          >
-            {icon}
-          </span>
-          <p className="mae-aspect-title mt-2 text-[15px] font-semibold">{title}</p>
-          <p className="mae-aspect-body mt-1 line-clamp-2 text-[13px] leading-snug">
-            {body}
-          </p>
-          <span className="mt-2 inline-flex text-[#d5b16f]">
-            <ChevronRight className="h-4 w-4 transition" strokeWidth={2.2} />
-          </span>
-        </>
-      )}
-    </button>
+      <Image
+        src={art.src}
+        alt=""
+        width={art.w}
+        height={art.h}
+        unoptimized
+        quality={100}
+        sizes="100vw"
+        className="h-full w-full object-cover object-center"
+        draggable={false}
+      />
+    </div>
   );
 }
 
-/** Full-page self map — Mae navy–gold */
+function InfographicCard({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={cn("overflow-hidden rounded-[20px]", className)}
+      style={{
+        background:
+          "linear-gradient(165deg, rgba(24,34,52,0.92) 0%, rgba(16,24,39,0.96) 100%)",
+        border: "1.5px solid rgba(213, 177, 111, 0.55)",
+        boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
+      }}
+    >
+      {children}
+    </section>
+  );
+}
+
+/** Full-page self map — illustration cards + short copy */
 export function PremiumSelfMapPage() {
   const { ready, profile } = usePremiumProfileGate();
   const input = useAnalyzeInputFromProfile(profile);
-  const [loveOpen, setLoveOpen] = useState(false);
-  const [workOpen, setWorkOpen] = useState(false);
 
   const data = useMemo(() => {
     if (!input) return null;
     const analysis = analyzeFortune(input);
     const deep = pickZodiacDeep(analysis.zodiac.id);
     const value = buildPremiumValuePack(input);
+    const map = value.selfMap.copy;
     const chips =
-      value.selfMap.copy.chips.length > 0
-        ? value.selfMap.copy.chips
-        : (deep.strength.split("·").map((s) => s.trim()).filter(Boolean).slice(0, 3) as string[]);
+      map.chips.length > 0
+        ? map.chips.slice(0, 3)
+        : deep.strength
+            .split("·")
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .slice(0, 3);
+
     return {
       zodiacName: analysis.zodiac.thaiName,
-      deep,
-      chips: chips.slice(0, 3),
-      strengths: splitBullets(deep.strength),
-      shadows: splitBullets(deep.shadow),
-      quote: pickPersonalQuote(deep.advice),
+      chips,
+      identity: deep.personality.trim(),
+      strengths: splitBullets(deep.strength, 2),
+      shadows: splitBullets(deep.shadow, 2),
+      turning: deep.turning.trim(),
+      love: (map.love || deep.loveStyle).trim(),
+      work: (map.work || deep.workStyle).trim(),
+      quote: deep.advice.trim(),
+      advice: (map.advice || deep.advice).trim(),
     };
   }, [input]);
 
@@ -164,7 +175,18 @@ export function PremiumSelfMapPage() {
     );
   }
 
-  const { zodiacName, deep, chips, strengths, shadows, quote } = data;
+  const {
+    zodiacName,
+    chips,
+    identity,
+    strengths,
+    shadows,
+    turning,
+    love,
+    work,
+    quote,
+    advice,
+  } = data;
 
   return (
     <PremiumDetailShell>
@@ -172,14 +194,14 @@ export function PremiumSelfMapPage() {
         <h1 className="text-[1.55rem] font-bold tracking-tight text-[#d5b16f]">
           แผนที่ตัวเอง
         </h1>
-        <p className="mt-1 text-[15px] text-[#f7f4ec]/65">
-          เจาะลึกตัวตน · ราศี{zodiacName}
+        <p className="mt-1 text-[14px] text-[#f7f4ec]/65">
+          ราศี{zodiacName} · ใจความสำคัญ
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {chips.map((c) => (
             <span
               key={c}
-              className="rounded-full px-2.5 py-1.5 text-[13px] font-medium text-[#e8d19a]"
+              className="rounded-full px-2.5 py-1 text-[12px] font-medium text-[#e8d19a]"
               style={{
                 background: "rgba(213,177,111,0.12)",
                 boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.32)",
@@ -191,94 +213,142 @@ export function PremiumSelfMapPage() {
         </div>
       </header>
 
-      <section className="mae-aspect-card mt-4 flex gap-3 rounded-[20px] px-3.5 py-3.5">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.14)] text-[#d5b16f]">
-          <UserRound className="h-5 w-5" strokeWidth={1.8} />
-        </span>
-        <div className="min-w-0">
-          <p className="mae-aspect-title text-[16px] font-semibold">ตัวตนของคุณ</p>
-          <p className="mae-aspect-body mt-1.5 text-[15px] leading-[1.75]">
-            {deep.personality}
+      {/* Identity — art + short line */}
+      <InfographicCard className="mt-4">
+        <ArtSlot slot="identity" className="rounded-none rounded-t-[20px]" />
+        <div className="px-3.5 py-3.5">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
+            ตัวตนของคุณ
+          </p>
+          <p className="mt-1.5 text-[14px] font-medium leading-[1.55] text-white">
+            {identity}
           </p>
         </div>
-      </section>
+      </InfographicCard>
 
+      {/* Strength / Shadow */}
       <div className="mt-3 grid grid-cols-2 gap-2.5">
-        <section className="mae-aspect-card rounded-[18px] px-3 py-3">
-          <p className="mae-aspect-title text-[15px] font-semibold">จุดแข็ง</p>
-          <ul className="mt-2.5 space-y-2.5">
-            {strengths.map((s) => (
-              <li key={s} className="mae-aspect-body flex items-start gap-1.5 text-[13px] leading-snug">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#d5b16f]" strokeWidth={2.4} />
-                <span>{s}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-        <section className="mae-aspect-card rounded-[18px] px-3 py-3">
-          <p className="mae-aspect-title text-[15px] font-semibold">เงาที่ควรรู้</p>
-          <ul className="mt-2.5 space-y-2.5">
-            {shadows.map((s) => (
-              <li key={s} className="mae-aspect-body flex items-start gap-1.5 text-[13px] leading-snug">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#d5b16f]" />
-                <span>{s}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <InfographicCard>
+          <ArtSlot
+            slot="strength"
+            className="rounded-none rounded-t-[20px]"
+          />
+          <div className="px-2.5 py-3">
+            <p className="text-[12px] font-semibold text-[#d5b16f]">จุดแข็ง</p>
+            <ul className="mt-2 space-y-2">
+              {strengths.map((s) => (
+                <li
+                  key={s}
+                  className="flex items-start gap-1.5 text-[12.5px] leading-[1.5] text-white/90"
+                >
+                  <Check
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d5b16f]"
+                    strokeWidth={2.6}
+                  />
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </InfographicCard>
+
+        <InfographicCard>
+          <ArtSlot
+            slot="shadow"
+            className="rounded-none rounded-t-[20px]"
+          />
+          <div className="px-2.5 py-3">
+            <p className="text-[12px] font-semibold text-[#d5b16f]">เงาที่ควรรู้</p>
+            <ul className="mt-2 space-y-2">
+              {shadows.map((s) => (
+                <li
+                  key={s}
+                  className="flex items-start gap-1.5 text-[12.5px] leading-[1.5] text-white/90"
+                >
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#d5b16f]" />
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </InfographicCard>
       </div>
 
-      <section className="mae-aspect-card mt-3 rounded-[18px] px-3.5 py-3.5">
-        <p className="mae-aspect-title text-[15px] font-semibold">จุดเปลี่ยน</p>
-        <p className="mae-aspect-body mt-1.5 text-[15px] leading-[1.75]">
-          {deep.turning}
-        </p>
-      </section>
+      {/* Turning — ภาพบน ข้อความเต็มด้านล่าง อ่านง่ายกว่าแยกซ้ายขวา */}
+      <InfographicCard className="mt-3">
+        <ArtSlot
+          slot="turning"
+          className="rounded-none rounded-t-[20px]"
+        />
+        <div className="px-3.5 py-3.5">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
+            จุดเปลี่ยน
+          </p>
+          <p className="mt-1.5 text-[14px] font-medium leading-[1.55] text-white">
+            {turning}
+          </p>
+        </div>
+      </InfographicCard>
 
+      {/* Love / Work */}
       <div className="mt-3 grid grid-cols-2 gap-2.5">
-        <StyleExpandCard
-          title="สไตล์ความรัก"
-          body={deep.loveStyle}
-          open={loveOpen}
-          onToggle={() => setLoveOpen((v) => !v)}
-          iconClassName="bg-[rgba(213,177,111,0.16)] text-[#d5b16f]"
-          icon={<Heart className="h-4 w-4" strokeWidth={1.9} />}
-        />
-        <StyleExpandCard
-          title="สไตล์การทำงาน"
-          body={deep.workStyle}
-          open={workOpen}
-          onToggle={() => setWorkOpen((v) => !v)}
-          iconClassName="bg-[rgba(213,177,111,0.16)] text-[#d5b16f]"
-          icon={<Briefcase className="h-4 w-4" strokeWidth={1.9} />}
-        />
+        <InfographicCard>
+          <ArtSlot
+            slot="love"
+            className="rounded-none rounded-t-[20px]"
+          />
+          <div className="px-2.5 py-3">
+            <p className="text-[12px] font-semibold text-[#d5b16f]">
+              สไตล์ความรัก
+            </p>
+            <p className="mt-1.5 text-[12.5px] leading-[1.5] text-white/90">
+              {love}
+            </p>
+          </div>
+        </InfographicCard>
+        <InfographicCard>
+          <ArtSlot
+            slot="work"
+            className="rounded-none rounded-t-[20px]"
+          />
+          <div className="px-2.5 py-3">
+            <p className="text-[12px] font-semibold text-[#d5b16f]">
+              สไตล์การทำงาน
+            </p>
+            <p className="mt-1.5 text-[12.5px] leading-[1.5] text-white/90">
+              {work}
+            </p>
+          </div>
+        </InfographicCard>
       </div>
 
-      <section className="mae-aspect-card relative mt-3 rounded-[20px] px-4 pb-4 pt-3.5">
-        <Quote
-          className="pointer-events-none absolute left-3 top-3 h-7 w-7 -scale-x-100 text-[#d5b16f]/35"
-          strokeWidth={1.6}
-          aria-hidden
-        />
-        <p className="relative pl-8 text-[11px] font-semibold tracking-[0.18em] text-[#d5b16f]">
+      {/* Quote */}
+      <InfographicCard className="mt-3 px-4 py-4 text-center">
+        <p className="text-[11px] font-semibold tracking-[0.16em] text-[#d5b16f]">
           คำคมประจำตัว
         </p>
-        <p className="relative mt-2 text-[15px] font-medium leading-[1.75] text-[#f7f4ec]">
-          {quote}
+        <p className="mt-2 text-[15px] font-medium leading-snug text-white">
+          “{quote}”
         </p>
-      </section>
+      </InfographicCard>
 
-      <section className="mae-aspect-card mt-3 rounded-[20px] px-4 py-4">
-        <div className="flex items-center gap-2">
-          <FortuneIcon name="sparkle" size={28} />
-          <p className="mae-aspect-title text-[16px] font-semibold">คำแนะนำประจำตัว</p>
-        </div>
-        <p className="mae-aspect-body mt-2 text-[15px] leading-[1.75]">{deep.advice}</p>
-        <div className="mt-3.5 flex items-center justify-center gap-1.5">
+      {/* Advice */}
+      <InfographicCard className="mt-3 px-3.5 py-4">
+        <ArtSlot
+          slot="advice"
+          className="rounded-[14px]"
+        />
+        <p className="mt-3 text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
+          คำแนะนำประจำตัว
+        </p>
+        <p className="mt-1.5 text-[14px] font-medium leading-[1.55] text-white">
+          {advice}
+        </p>
+        <div className="mt-3.5 flex flex-wrap items-center justify-center gap-1.5">
           {ADVICE_STEPS.map((step, i) => (
             <div key={step} className="flex items-center gap-1.5">
               <span
-                className="whitespace-nowrap rounded-full px-2.5 py-1.5 text-center text-[12px] font-semibold leading-snug text-[#e8d19a]"
+                className="whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold text-[#e8d19a]"
                 style={{
                   background: "rgba(213,177,111,0.12)",
                   boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.32)",
@@ -287,12 +357,15 @@ export function PremiumSelfMapPage() {
                 {step}
               </span>
               {i < ADVICE_STEPS.length - 1 ? (
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[#d5b16f]" />
+                <ChevronRight
+                  className="h-3.5 w-3.5 shrink-0 text-[#d5b16f]"
+                  strokeWidth={2.2}
+                />
               ) : null}
             </div>
           ))}
         </div>
-      </section>
+      </InfographicCard>
     </PremiumDetailShell>
   );
 }
