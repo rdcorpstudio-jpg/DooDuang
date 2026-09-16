@@ -15,40 +15,40 @@ import { cn } from "@/lib/utils";
 
 const ADVICE_STEPS = ["เลือกสิ่งสำคัญ", "ลงมือทำ", "พักให้พอ"] as const;
 
-/** ภาพแผนที่ตัวตน — เก็บความละเอียดต้นฉบับ ไม่ย่อไฟล์ */
+/** ภาพแผนที่ตัวตน — WebP ความละเอียดต้นฉบับ ไม่ย่อพิกเซล */
 const SELF_MAP_ART = {
   identity: {
-    src: "/images/premium/self-map/identity.jpg",
+    src: "/images/premium/self-map/identity.webp",
     w: 1024,
     h: 256,
   },
   strength: {
-    src: "/images/premium/self-map/strength.jpg",
+    src: "/images/premium/self-map/strength.webp",
     w: 600,
     h: 300,
   },
   shadow: {
-    src: "/images/premium/self-map/shadow.jpg",
+    src: "/images/premium/self-map/shadow.webp",
     w: 600,
     h: 300,
   },
   turning: {
-    src: "/images/premium/self-map/turning.jpg",
+    src: "/images/premium/self-map/turning.webp",
     w: 1024,
     h: 256,
   },
   love: {
-    src: "/images/premium/self-map/love.jpg",
+    src: "/images/premium/self-map/love.webp",
     w: 600,
     h: 300,
   },
   work: {
-    src: "/images/premium/self-map/career.jpg",
+    src: "/images/premium/self-map/career.webp",
     w: 600,
     h: 300,
   },
   advice: {
-    src: "/images/premium/self-map/advice.jpg",
+    src: "/images/premium/self-map/advice.webp",
     w: 1024,
     h: 256,
   },
@@ -93,7 +93,10 @@ function ArtSlot({
     <div
       data-art-slot={slot}
       className={cn("relative w-full overflow-hidden", className)}
-      style={{ aspectRatio: `${art.w} / ${art.h}` }}
+      style={{
+        aspectRatio: `${art.w} / ${art.h}`,
+        borderBottom: "1.5px solid rgba(213, 177, 111, 0.55)",
+      }}
       aria-hidden
     >
       <Image
