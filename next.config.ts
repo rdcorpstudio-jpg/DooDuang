@@ -28,6 +28,11 @@ const nextConfig: NextConfig = {
       { source: "/loout", destination: "/logout", permanent: false },
       { source: "/logut", destination: "/logout", permanent: false },
       { source: "/signout", destination: "/logout", permanent: false },
+      // Common /home2 typos
+      { source: "/hone2", destination: "/home2", permanent: false },
+      { source: "/hom2", destination: "/home2", permanent: false },
+      { source: "/homee2", destination: "/home2", permanent: false },
+      { source: "/hmoe2", destination: "/home2", permanent: false },
     ];
   },
   async rewrites() {

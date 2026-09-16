@@ -10,12 +10,9 @@ if marker in css:
 polish = """
 /* === polish vertical === */
 .site-header{
-  position:sticky;
-  top:0;
-  z-index:40;
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  background:rgba(16,29,53,0.96);
+  position:relative;
+  z-index:10;
+  background:var(--navy);
   border-bottom:1px solid rgba(245,206,126,0.18);
 }
 .header-inner{
