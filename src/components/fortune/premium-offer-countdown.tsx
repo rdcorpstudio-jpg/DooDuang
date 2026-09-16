@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import {
   pad2,
@@ -8,6 +9,39 @@ import {
 } from "@/lib/fortune/premium-offer-countdown";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
+
+const GOLD_FOIL =
+  "linear-gradient(180deg, #fffef8 0%, #ffe9b0 22%, #f0d078 48%, #d5b16f 72%, #b8924f 88%, #8f6e38 100%)";
+
+const goldTextStyle: CSSProperties = {
+  backgroundImage: GOLD_FOIL,
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  color: "transparent",
+  WebkitTextFillColor: "transparent",
+  filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
+};
+
+/** Compact urgency line for pay card header */
+export function PremiumOfferUrgencyLine({ className }: { className?: string }) {
+  const offer = usePersonalOfferCountdown();
+  const time =
+    offer.hours > 0
+      ? `${pad2(offer.hours)}:${pad2(offer.minutes)}:${pad2(offer.seconds)}`
+      : `${pad2(offer.minutes)}:${pad2(offer.seconds)}`;
+
+  return (
+    <p
+      className={cn(
+        "text-[15px] font-bold leading-snug tracking-wide tabular-nums",
+        className,
+      )}
+      style={goldTextStyle}
+    >
+      เหลือเวลา {time} · เหลือ 3 สิทธิ์
+    </p>
+  );
+}
 
 /** Shared personal flash-discount countdown for premium upsell */
 export function PremiumOfferCountdown({
@@ -45,7 +79,8 @@ export function PremiumOfferCountdown({
         <div className="mt-1.5 flex items-center justify-center gap-1 tabular-nums">
           {units.map((unit, i) => (
             <div key={unit.label} className="flex items-center gap-1">
-              <span className="min-w-[2.6rem] rounded-md px-1.5 py-1 text-[12px] font-semibold text-[#f4f1ea]"
+              <span
+                className="min-w-[2.6rem] rounded-md px-1.5 py-1 text-[12px] font-semibold text-[#f4f1ea]"
                 style={{
                   background: "rgba(16,24,39,0.85)",
                   boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.32)",

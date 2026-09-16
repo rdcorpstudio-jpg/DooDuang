@@ -16,14 +16,14 @@
 @layer base {
   html {
     @apply scroll-smooth;
-    background: #101827;
+    background: #fff;
     width: 100%;
     overflow-x: hidden;
   }
 
   body {
     @apply antialiased overflow-hidden;
-    background: #101827;
+    background: #fff;
     width: 100%;
     min-width: 100%;
     max-width: 100%;
@@ -54,7 +54,7 @@
   display: flex;
   justify-content: center;
   align-items: stretch;
-  background: #101827;
+  background: #fff;
   overflow-x: hidden;
 }
 
@@ -96,18 +96,20 @@
    Require fine pointer so tablets / phones never letterbox. */
 @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .phone-shell {
-    background: #070b14;
+    background: #fff;
   }
 
   .phone-frame {
     width: min(100vw, 480px);
     max-width: 480px;
     height: 100dvh;
-    box-shadow: 0 0 0 1px rgba(213, 177, 111, 0.12);
+    box-shadow:
+      0 0 0 1px rgba(16, 24, 39, 0.08),
+      0 24px 64px rgba(16, 24, 39, 0.12);
   }
 
   .phone-shell--admin {
-    background: #0b0f14;
+    background: #eef1f4;
   }
 
   .phone-frame--admin {

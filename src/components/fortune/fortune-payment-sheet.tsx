@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } f
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { Check, ChevronLeft, ChevronRight, Loader2, Lock, X } from "lucide-react";
+import { PremiumOfferUrgencyLine } from "@/components/fortune/premium-offer-countdown";
 import {
   FORTUNE_PACKAGE_LABEL,
   FORTUNE_UNLOCK_LIST_PRICE,
@@ -247,41 +248,45 @@ export function FortunePaymentSheet({
         }}
       >
         <div className="shrink-0 px-3.5 pb-2.5 pt-3.5">
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-[12px] font-medium text-[#f0d078]/95">
-              สิทธิ์ดูดวงแม่มั่งมี · จ่ายครั้งเดียวใช้ได้ทั้งปี
+          <PremiumOfferUrgencyLine />
+
+          <div className="mt-3.5 border-b border-[rgba(232,209,154,0.32)] pb-3">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
+              <p className="flex items-baseline gap-1.5 leading-none">
+                <span
+                  className="flex items-baseline text-[2.35rem] font-bold tracking-tight"
+                  style={goldTextStyle}
+                >
+                  <span className="mr-0.5 text-[1.35rem] font-bold">฿</span>
+                  {FORTUNE_UNLOCK_PRICE}
+                </span>
+                <span className="text-[14px] font-medium tracking-wide text-white/90">
+                  / 1 ปี
+                </span>
+              </p>
+              <span className="text-[18px] font-semibold text-white/50 line-through decoration-white/50">
+                ฿{FORTUNE_UNLOCK_LIST_PRICE.toLocaleString("th-TH")}
+              </span>
+              <span
+                className="ml-auto inline-flex rounded-full p-[1.5px]"
+                style={{ backgroundImage: GOLD_FOIL }}
+              >
+                <span className="inline-flex items-center rounded-full bg-[#121c2c] px-3 py-1">
+                  <span
+                    className="text-[13px] font-bold tracking-wide"
+                    style={goldTextStyle}
+                  >
+                    ประหยัด ฿{saved.toLocaleString("th-TH")}
+                  </span>
+                </span>
+              </span>
+            </div>
+            <p className="mt-2.5 flex items-center gap-1.5 text-[12px] font-medium text-white/70">
+              <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#5b9bd5]">
+                <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+              </span>
+              จ่ายครั้งเดียว · ไม่มีต่ออายุอัตโนมัติ
             </p>
-            <span
-              className="shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold text-[#101827]"
-              style={{
-                background: GOLD_FOIL,
-                boxShadow: "0 2px 8px rgba(213,177,111,0.35)",
-              }}
-            >
-              รายปี
-            </span>
-          </div>
-
-          <p
-            className="mt-2 text-[1.75rem] font-bold leading-none tracking-tight"
-            style={goldTextStyle}
-          >
-            ฿{FORTUNE_UNLOCK_PRICE}
-            <span
-              className="ml-1.5 text-[14px] font-semibold tracking-wide"
-              style={goldTextStyle}
-            >
-              / ปี
-            </span>
-          </p>
-
-          <div className="mt-2 flex items-center gap-2 border-b border-[rgba(232,209,154,0.32)] pb-2.5 text-[12px]">
-            <span className="text-white/40 line-through">
-              จาก ฿{FORTUNE_UNLOCK_LIST_PRICE.toLocaleString("th-TH")}
-            </span>
-            <span className="font-bold" style={goldTextStyle}>
-              ประหยัด ฿{saved.toLocaleString("th-TH")}
-            </span>
           </div>
         </div>
 
@@ -384,7 +389,7 @@ export function FortunePaymentSheet({
 
         <p className="flex items-center justify-center gap-1.5 pt-0.5 text-[10px] text-[#6b7380]">
           <Lock className="h-3 w-3 shrink-0 text-[#d5b16f]/80" strokeWidth={2.2} />
-          ตรวจสอบรายการก่อนดำเนินการต่อ · ชำระผ่าน Stripe โดยตรง
+          ตรวจสอบรายการก่อนดำเนินการต่อ
         </p>
       </div>
     </div>

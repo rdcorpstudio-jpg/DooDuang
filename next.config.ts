@@ -31,8 +31,13 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    if (!firebaseAuthProxyHost) return [];
+    const home2 = [
+      { source: "/home2", destination: "/home2/index.html" },
+      { source: "/home2/", destination: "/home2/index.html" },
+    ];
+    if (!firebaseAuthProxyHost) return home2;
     return [
+      ...home2,
       {
         source: "/__/auth/:path*",
         destination: `https://${firebaseAuthProxyHost}/__/auth/:path*`,
