@@ -25,6 +25,9 @@ const nextConfig: NextConfig = {
       // Old static-hosting habit / ads typos — no real index.html in Next.js
       { source: "/index.html", destination: "/", permanent: true },
       { source: "/index.htm", destination: "/", permanent: true },
+      { source: "/loout", destination: "/logout", permanent: false },
+      { source: "/logut", destination: "/logout", permanent: false },
+      { source: "/signout", destination: "/logout", permanent: false },
     ];
   },
   async rewrites() {

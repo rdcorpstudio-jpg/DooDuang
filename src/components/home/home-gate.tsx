@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MaeLanding } from "@/components/home/mae-landing";
+import { clearPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import {
   hasFreeReadingBasics,
   hydrateFortuneProfileFromWizard,
@@ -21,6 +22,7 @@ export function HomeGate() {
     hydrateFortuneProfileFromWizard();
     const fromLogout =
       new URLSearchParams(window.location.search).get("from") === "logout";
+    if (fromLogout) clearPremiumUnlocked();
     if (!fromLogout && hasFreeReadingBasics(readFortuneProfile())) {
       router.replace("/premium");
       return;
