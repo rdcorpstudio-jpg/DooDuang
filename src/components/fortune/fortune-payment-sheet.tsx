@@ -281,9 +281,9 @@ export function FortunePaymentSheet({
                 </span>
               </span>
             </div>
-            <p className="mt-2.5 flex items-center gap-1.5 text-[12px] font-medium text-white/70">
-              <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#5b9bd5]">
-                <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+            <p className="mt-2.5 flex items-center gap-1.5 text-[14px] font-medium text-white/75">
+              <span className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[#5b9bd5]">
+                <Check className="h-3 w-3 text-white" strokeWidth={3} />
               </span>
               จ่ายครั้งเดียว · ไม่มีต่ออายุอัตโนมัติ
             </p>
@@ -291,15 +291,15 @@ export function FortunePaymentSheet({
         </div>
 
         <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-3.5 pb-2">
-          <div className="sticky top-0 z-[1] grid grid-cols-[1fr_2.6rem_3.6rem] items-center gap-1 border-b border-[rgba(232,209,154,0.22)] bg-[rgba(18,28,44,0.96)] py-2 backdrop-blur-sm">
-            <p className="text-[12px] font-medium text-white/85">
+          <div className="sticky top-0 z-[1] grid grid-cols-[1fr_2.8rem_4rem] items-center gap-1 border-b border-[rgba(232,209,154,0.22)] bg-[rgba(18,28,44,0.96)] py-2 backdrop-blur-sm">
+            <p className="text-[14px] font-medium text-white/90">
               สิทธิ์การใช้งาน
             </p>
-            <p className="text-center text-[11px] font-semibold text-white/55">
+            <p className="text-center text-[13px] font-semibold text-white/60">
               ฟรี
             </p>
             <p
-              className="text-center text-[11px] font-bold"
+              className="text-center text-[13px] font-bold"
               style={goldTextStyle}
             >
               พรีเมียม
@@ -309,9 +309,9 @@ export function FortunePaymentSheet({
           {COMPARE_ROWS.map((row) => (
             <div
               key={row.label}
-              className="grid grid-cols-[1fr_2.6rem_3.6rem] items-center gap-1 border-b border-white/[0.07] py-2 last:border-b-0"
+              className="grid grid-cols-[1fr_2.8rem_4rem] items-center gap-1 border-b border-white/[0.07] py-2 last:border-b-0"
             >
-              <p className="pr-1 text-[12px] leading-snug text-white/88">
+              <p className="pr-1 text-[14px] leading-snug text-white/90">
                 {row.label}
               </p>
               <span className="flex justify-center">

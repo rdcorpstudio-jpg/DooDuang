@@ -21,6 +21,7 @@ html{scroll-padding-top:24px}.wrap{width:calc(100% - 40px)}body{font-size:1.125r
 html{
   background:#ffffff !important;
   min-height:100%;
+  overflow-x:hidden; /* keep sticky working — do not put overflow on body */
 }
 body{
   max-width:430px;
@@ -31,7 +32,6 @@ body{
   min-height:100dvh;
   position:relative;
   box-shadow:0 0 0 1px rgba(16,29,53,0.08);
-  overflow-x:hidden;
 }
 .section,
 .topics,
@@ -53,14 +53,14 @@ body{
 .site-header{
   position:sticky;
   top:0;
-  z-index:30;
+  z-index:40;
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
-  background:rgba(16,29,53,0.92);
+  background:rgba(16,29,53,0.96);
   border-bottom:1px solid rgba(245,206,126,0.18);
 }
 .header-inner{
-  min-height:64px;
+  min-height:60px;
   padding:6px 0;
 }
 .brand{width:108px}
