@@ -19,9 +19,7 @@ type SessionUser = {
   email?: string | null;
 };
 
-const IS_LOCAL_DEV =
-  process.env.NODE_ENV === "development" ||
-  process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
+const IS_LOCAL_DEV = process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
 
 const LOGIN_THEN_PAY = "/premium/pay";
 

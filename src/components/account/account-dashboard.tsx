@@ -40,6 +40,7 @@ import {
   type FortuneUserProfile,
 } from "@/lib/fortune/profile-storage";
 import {
+  clearPremiumUnlocked,
   getPremiumUnlockedUntil,
   setPremiumUnlocked,
   syncPremiumFromServer,
@@ -264,6 +265,7 @@ export function AccountDashboard({
     setSigningOut(true);
     try {
       await fetch("/api/auth/signout", { method: "POST" });
+      clearPremiumUnlocked();
       router.replace("/?from=logout");
       router.refresh();
     } catch {

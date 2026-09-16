@@ -85,15 +85,15 @@ export function LifeInsightMockup({
   className,
 }: LifeInsightMockupProps) {
   const isPremiumPage = variant === "premium";
-  /** Premium tab OR paid unlock on free result */
-  const contentUnlocked = isPremiumPage || unlocked;
+  /** Paid unlock only — /premium is the daily home, not a membership pass */
+  const contentUnlocked = unlocked;
   const hero = HERO_SETS[hashSeed(`${seed}-hero`) % HERO_SETS.length]!;
-  /** Free = birth date only; premium extras only on premium page */
-  const typedFocus = isPremiumPage
+  /** Free = birth date only; paid extras only after unlock */
+  const typedFocus = contentUnlocked
     ? (focus as FortuneFocus | undefined)
     : undefined;
-  const deepTime = isPremiumPage ? birthTime : undefined;
-  const deepPlace = isPremiumPage ? birthPlace : undefined;
+  const deepTime = contentUnlocked ? birthTime : undefined;
+  const deepPlace = contentUnlocked ? birthPlace : undefined;
   const displayName = (nickname || "").trim() || (realName || "").trim() || "สมาชิก";
 
   useEffect(() => {
@@ -170,7 +170,7 @@ export function LifeInsightMockup({
         />
       </div>
 
-      {isPremiumPage ? (
+      {contentUnlocked ? (
         <div
           className="fortune-reveal px-3"
           style={{ "--fortune-delay": "95ms" } as CSSProperties}
@@ -246,8 +246,8 @@ export function LifeInsightMockup({
           focus={typedFocus}
           gender={gender}
           unlocked={unlocked}
-          deep={isPremiumPage}
-          onUnlock={isPremiumPage ? undefined : onUnlock}
+          deep={contentUnlocked}
+          onUnlock={onUnlock}
         />
       </div>
 
@@ -263,7 +263,7 @@ export function LifeInsightMockup({
           focus={typedFocus}
           gender={gender}
           from={isPremiumPage ? "premium" : "reading"}
-          unlocked={contentUnlocked || unlocked}
+          unlocked={contentUnlocked}
         />
       </div>
 
@@ -287,8 +287,8 @@ export function LifeInsightMockup({
       >
         <FortuneExtraReadings
           seed={seed}
-          unlocked={contentUnlocked || unlocked}
-          onUnlock={isPremiumPage ? undefined : onUnlock}
+          unlocked={contentUnlocked}
+          onUnlock={onUnlock}
         />
       </div>
 
@@ -305,7 +305,7 @@ export function LifeInsightMockup({
           focus={typedFocus}
           gender={gender}
           unlocked={contentUnlocked}
-          onUnlock={isPremiumPage ? undefined : onUnlock}
+          onUnlock={onUnlock}
         />
       </div>
 
@@ -323,7 +323,7 @@ export function LifeInsightMockup({
           gender={gender}
           points={monthPoints}
           unlocked={contentUnlocked}
-          onUnlock={isPremiumPage ? undefined : onUnlock}
+          onUnlock={onUnlock}
         />
       </div>
 
@@ -332,7 +332,7 @@ export function LifeInsightMockup({
         className="fortune-reveal scroll-mt-4 px-3"
         style={{ "--fortune-delay": "380ms" } as CSSProperties}
       >
-        {isPremiumPage ? (
+        {contentUnlocked ? (
           <FortunePremiumSelfDeep
             seed={seed}
             nickname={nickname}
@@ -356,7 +356,7 @@ export function LifeInsightMockup({
         )}
       </div>
 
-      {isPremiumPage ? (
+      {contentUnlocked ? (
         <div
           className="fortune-reveal px-3 pb-2"
           style={{ "--fortune-delay": "560ms" } as CSSProperties}

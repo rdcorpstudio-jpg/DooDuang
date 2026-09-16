@@ -24,7 +24,7 @@ import {
   readFortuneProfile,
 } from "@/lib/fortune/profile-storage";
 import {
-  isPremiumUnlocked,
+  requirePremiumFromServer,
   setPremiumUnlocked,
 } from "@/lib/fortune/premium-unlock";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
@@ -95,28 +95,34 @@ export function AspectDetailPage({
   });
 
   useEffect(() => {
-    hydrateFortuneProfileFromWizard();
-    const next = readFortuneProfile();
-    if (!next?.birthDate) {
-      router.replace("/reading");
-      return;
-    }
-    setProfile({
-      birthDate: next.birthDate,
-      nickname: next.nickname,
-      birthTime: next.birthTime,
-      focus: next.focus,
-      gender: next.gender,
-    });
-    setUnlocked(
-      from === "premium" ||
-        isPremiumUnlocked({
-          birthDate: next.birthDate,
-          nickname: next.nickname,
-        })
-    );
-    setReady(true);
-  }, [router, from]);
+    let cancelled = false;
+    void (async () => {
+      hydrateFortuneProfileFromWizard();
+      const next = readFortuneProfile();
+      if (!next?.birthDate) {
+        router.replace("/reading");
+        return;
+      }
+      if (cancelled) return;
+      setProfile({
+        birthDate: next.birthDate,
+        nickname: next.nickname,
+        birthTime: next.birthTime,
+        focus: next.focus,
+        gender: next.gender,
+      });
+      const access = await requirePremiumFromServer({
+        birthDate: next.birthDate,
+        nickname: next.nickname,
+      });
+      if (cancelled) return;
+      setUnlocked(access.ok);
+      setReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   function handlePaid() {
     setPremiumUnlocked({

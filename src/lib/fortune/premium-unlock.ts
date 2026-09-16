@@ -7,15 +7,11 @@ export const PREMIUM_UNLOCK_KEY = "dooduang-premium-unlocked";
 export const PREMIUM_UNLOCK_UNTIL_KEY = "dooduang-premium-until";
 
 /**
- * Local QA only — unlock premium UI without payment.
- * Active in `next dev`, or when NEXT_PUBLIC_ALLOW_PREMIUM_SIM=1.
- * Production builds stay locked unless that env is set (do not set on Railway).
+ * QA only — unlock premium UI without payment.
+ * Set NEXT_PUBLIC_ALLOW_PREMIUM_SIM=1. Never set this on Railway/production.
  */
 export function isLocalPremiumBypass(): boolean {
-  return (
-    process.env.NODE_ENV === "development" ||
-    process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1"
-  );
+  return process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
 }
 
 function legacyUnlockKey(birthDate: string, nickname: string) {
@@ -186,6 +182,7 @@ export async function requirePremiumFromServer(profile?: {
       untilMs?: number | null;
     };
     if (!data.authenticated) {
+      clearPremiumUnlocked();
       return { ok: false, authenticated: false };
     }
     const ok = applyPremiumUntil(
@@ -213,7 +210,10 @@ export async function syncPremiumFromServer(profile?: {
       premium?: boolean;
       untilMs?: number | null;
     };
-    if (!data.authenticated) return isPremiumUnlocked(profile);
+    if (!data.authenticated) {
+      clearPremiumUnlocked();
+      return false;
+    }
     return applyPremiumUntil(data.premium ? data.untilMs ?? null : null, profile);
   } catch {
     return isPremiumUnlocked(profile);
