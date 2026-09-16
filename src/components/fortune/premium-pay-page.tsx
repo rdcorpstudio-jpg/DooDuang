@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Check,
@@ -23,6 +23,10 @@ import {
   PREMIUM_UNLOCK,
   type CheckoutPaymentMethod,
 } from "@/lib/stripe-catalog";
+import { featureFromPath } from "@/lib/analytics/events";
+import { trackClientEvent } from "@/lib/analytics/client";
+import { readLastFeature } from "@/lib/analytics/last-feature";
+import { getOrCreateVisitorId } from "@/lib/analytics/visitor-id";
 import { cn } from "@/lib/utils";
 
 type SessionUser = {
@@ -125,8 +129,25 @@ export function PremiumPayPage() {
   const [error, setError] = useState<string | null>(
     cancelled ? "ยกเลิกการชำระแล้ว เลือกวิธีชำระอีกครั้งได้" : null
   );
+  const payViewTracked = useRef(false);
 
   useStripePaymentReturn();
+
+  useEffect(() => {
+    if (payViewTracked.current) return;
+    payViewTracked.current = true;
+    const fromReturn = featureFromPath(returnPath);
+    const feature = fromReturn || readLastFeature();
+    trackClientEvent({
+      name: "pay_view",
+      feature,
+      path: "/premium/pay",
+      props: {
+        visitorId: getOrCreateVisitorId(),
+        returnPath,
+      },
+    });
+  }, [returnPath]);
 
   const refreshSession = useCallback(async () => {
     setLoadingSession(true);

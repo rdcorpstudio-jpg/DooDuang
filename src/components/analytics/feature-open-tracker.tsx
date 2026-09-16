@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { featureFromPath } from "@/lib/analytics/events";
 import { trackClientEvent } from "@/lib/analytics/client";
+import { rememberLastFeature } from "@/lib/analytics/last-feature";
 
 /**
  * Fires feature_open once per path+search when the route maps to a known feature.
@@ -17,6 +18,8 @@ export function FeatureOpenTracker() {
     const search = searchParams?.toString() ? `?${searchParams.toString()}` : "";
     const feature = featureFromPath(pathname || "/", search);
     if (!feature) return;
+
+    rememberLastFeature(feature);
 
     const key = `${pathname}${search}::${feature}`;
     if (lastKey.current === key) return;

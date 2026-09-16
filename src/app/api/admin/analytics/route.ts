@@ -186,6 +186,55 @@ export async function GET(request: Request) {
     const visitSessions = Number(visitAgg?.sessions) || 0;
     const buyers = Number(buyerAgg?.buyers) || 0;
 
+    const [payViewAgg] = await db
+      .select({
+        people: sql<number>`count(distinct coalesce(
+          (${analyticsEvents.props})::jsonb->>'visitorId',
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
+        events: sql<number>`count(*)::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          eq(analyticsEvents.name, "pay_view")
+        )
+      );
+
+    const payViews = Number(payViewAgg?.people) || 0;
+
+    const paySourceRows = await db
+      .select({
+        feature: analyticsEvents.feature,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          eq(analyticsEvents.name, "pay_view")
+        )
+      )
+      .groupBy(analyticsEvents.feature);
+
+    const payViewsByFeature = paySourceRows
+      .map((r) => {
+        const id = r.feature || "unknown";
+        return {
+          id,
+          label:
+            id !== "unknown" && id in ANALYTICS_FEATURE_LABELS
+              ? ANALYTICS_FEATURE_LABELS[id as AnalyticsFeature]
+              : id === "unknown" || !r.feature
+                ? "ไม่ระบุ / ตรงจากเมนูอื่น"
+                : id,
+          count: Number(r.count) || 0,
+        };
+      })
+      .sort((a, b) => b.count - a.count);
+
     const funnel = FUNNEL_STEPS.map((step, index) => {
       const current = byName.get(step.name) || { events: 0, uniqueUsers: 0 };
       const prev =
@@ -536,6 +585,13 @@ export async function GET(request: Request) {
         buyers,
         payments: paymentCount,
       },
+      payFunnel: {
+        visitors,
+        payViews,
+        signups: signupTotal,
+        buyers,
+      },
+      payViewsByFeature,
       funnel,
       features,
       signupsByChannel,

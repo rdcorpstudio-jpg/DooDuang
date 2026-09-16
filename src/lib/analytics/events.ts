@@ -1,6 +1,7 @@
 /** Canonical product analytics event names */
 export const ANALYTICS_EVENT_NAMES = [
   "page_view",
+  "pay_view",
   "signup",
   "login",
   "profile_saved",
@@ -15,6 +16,7 @@ export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];
 
 export const CLIENT_ANALYTICS_EVENT_NAMES = [
   "page_view",
+  "pay_view",
   "feature_open",
   "thanks_line_cta",
 ] as const satisfies readonly AnalyticsEventName[];
@@ -72,6 +74,7 @@ export const FUNNEL_STEPS: {
   { name: "profile_saved", label: "บันทึกโปรไฟล์" },
   { name: "feature_open", label: "เปิดฟีเจอร์" },
   { name: "feature_complete", label: "ใช้ฟีเจอร์สำเร็จ" },
+  { name: "pay_view", label: "เปิดหน้าชำระเงิน" },
   { name: "checkout_started", label: "เริ่มชำระเงิน" },
   { name: "payment_succeeded", label: "ชำระสำเร็จ" },
   { name: "thanks_line_cta", label: "กดเพิ่มเพื่อน LINE" },

@@ -78,6 +78,13 @@ type AnalyticsPayload = {
     buyers: number;
     payments: number;
   };
+  payFunnel?: {
+    visitors: number;
+    payViews: number;
+    signups: number;
+    buyers: number;
+  };
+  payViewsByFeature?: ChannelCount[];
   funnel: FunnelStep[];
   features: FeatureRow[];
   signupsByChannel: ChannelCount[];
@@ -190,48 +197,34 @@ function pctOf(part: number, whole: number) {
   return Math.round((part / whole) * 1000) / 10;
 }
 
-function GrowthFunnelCone({
-  visitors,
-  signups,
-  buyers,
+function FunnelCone({
+  steps,
+  emptyNote,
 }: {
-  visitors: number;
-  signups: number;
-  buyers: number;
+  steps: Array<{
+    id: string;
+    label: string;
+    hint: string;
+    value: number;
+    fill: string;
+    text: string;
+  }>;
+  emptyNote?: string;
 }) {
-  const steps = [
-    {
-      id: "visit",
-      label: "คนเข้าชมเว็บ",
-      hint: "unique visitors",
-      value: visitors,
-      fill: "#7dffb3",
-      text: "#0f7a4a",
-    },
-    {
-      id: "signup",
-      label: "คนสมัคร",
-      hint: "signup",
-      value: signups,
-      fill: "#1a1d21",
-      text: "#ffffff",
-    },
-    {
-      id: "buy",
-      label: "คนซื้อ",
-      hint: "unique buyers",
-      value: buyers,
-      fill: "#b8f5d8",
-      text: "#0f7a4a",
-    },
-  ] as const;
-
   const max = Math.max(1, ...steps.map((s) => s.value));
+  const n = Math.max(1, steps.length - 1);
   const widths = steps.map((s, i) => {
     const byValue = 42 + (s.value / max) * 58;
-    const taper = 100 - i * 16;
-    return Math.max(36, Math.min(taper, byValue));
+    const taper = 100 - (i / n) * 48;
+    return Math.max(34, Math.min(taper, byValue));
   });
+
+  const clipFor = (i: number, last: number) => {
+    if (i === 0) return "polygon(2% 0, 98% 0, 92% 100%, 8% 100%)";
+    if (i === last) return "polygon(12% 0, 88% 0, 76% 100%, 24% 100%)";
+    if (i === 1 && last >= 2) return "polygon(6% 0, 94% 0, 88% 100%, 12% 100%)";
+    return "polygon(9% 0, 91% 0, 84% 100%, 16% 100%)";
+  };
 
   return (
     <div className="mx-auto w-full max-w-lg">
@@ -247,25 +240,21 @@ function GrowthFunnelCone({
                 </p>
               ) : null}
               <div
-                className="relative flex min-h-[72px] items-center justify-center px-4 py-3 text-center shadow-[0_8px_24px_rgba(26,29,33,0.08)] transition"
+                className="relative flex min-h-[64px] items-center justify-center px-3 py-2.5 text-center shadow-[0_8px_24px_rgba(26,29,33,0.08)] transition sm:min-h-[72px] sm:px-4 sm:py-3"
                 style={{
                   width: `${widths[i]}%`,
                   background: step.fill,
                   color: step.text,
-                  clipPath:
-                    i === 0
-                      ? "polygon(2% 0, 98% 0, 92% 100%, 8% 100%)"
-                      : i === 1
-                        ? "polygon(6% 0, 94% 0, 86% 100%, 14% 100%)"
-                        : "polygon(10% 0, 90% 0, 78% 100%, 22% 100%)",
-                  borderRadius: i === 2 ? "0 0 18px 18px" : undefined,
+                  clipPath: clipFor(i, steps.length - 1),
+                  borderRadius:
+                    i === steps.length - 1 ? "0 0 18px 18px" : undefined,
                 }}
               >
                 <div>
-                  <p className="text-[12px] font-semibold opacity-90">
+                  <p className="text-[11px] font-semibold opacity-90 sm:text-[12px]">
                     {step.label}
                   </p>
-                  <p className="mt-0.5 text-[1.65rem] font-bold tabular-nums leading-none tracking-tight">
+                  <p className="mt-0.5 text-[1.35rem] font-bold tabular-nums leading-none tracking-tight sm:text-[1.65rem]">
                     {step.value.toLocaleString("th-TH")}
                   </p>
                   <p className="mt-1 text-[10px] opacity-70">{step.hint}</p>
@@ -275,9 +264,9 @@ function GrowthFunnelCone({
           );
         })}
       </div>
-      {visitors === 0 ? (
+      {emptyNote ? (
         <p className="mt-4 text-center text-[12px] leading-relaxed text-[#8b93a1]">
-          ตัวเลขเข้าชมเริ่มนับหลัง deploy รอบนี้ · รีเฟรชช่วงใหม่หลังมีคนเข้าเว็บ
+          {emptyNote}
         </p>
       ) : null}
     </div>
@@ -324,18 +313,26 @@ function donutSlicePath(
   ].join(" ");
 }
 
-function FeatureOpenPie({ features }: { features: FeatureRow[] }) {
-  const ranked = features
-    .filter((f) => f.opens > 0)
+function FeatureOpenPie({
+  items,
+  emptyText = "ยังไม่มีข้อมูลว่าคนกดฟีเจอร์อะไรในช่วงนี้",
+  centerLabel = "เปิดทั้งหมด",
+}: {
+  items: Array<{ id: string; label: string; value: number }>;
+  emptyText?: string;
+  centerLabel?: string;
+}) {
+  const ranked = items
+    .filter((f) => f.value > 0)
     .slice()
-    .sort((a, b) => b.opens - a.opens);
+    .sort((a, b) => b.value - a.value);
 
   const top = ranked.slice(0, 6);
-  const restOpens = ranked.slice(6).reduce((s, f) => s + f.opens, 0);
+  const restValue = ranked.slice(6).reduce((s, f) => s + f.value, 0);
   const slices = [
-    ...top.map((f) => ({ id: f.id, label: f.label, value: f.opens })),
-    ...(restOpens > 0
-      ? [{ id: "other", label: "อื่น ๆ", value: restOpens }]
+    ...top.map((f) => ({ id: f.id, label: f.label, value: f.value })),
+    ...(restValue > 0
+      ? [{ id: "other", label: "อื่น ๆ", value: restValue }]
       : []),
   ];
 
@@ -343,9 +340,7 @@ function FeatureOpenPie({ features }: { features: FeatureRow[] }) {
 
   if (total === 0) {
     return (
-      <p className="py-8 text-center text-[13px] text-[#8b93a1]">
-        ยังไม่มีข้อมูลว่าคนกดฟีเจอร์อะไรในช่วงนี้
-      </p>
+      <p className="py-8 text-center text-[13px] text-[#8b93a1]">{emptyText}</p>
     );
   }
 
@@ -356,7 +351,6 @@ function FeatureOpenPie({ features }: { features: FeatureRow[] }) {
   let angle = 0;
   const paths = slices.map((slice, i) => {
     const sweep = (slice.value / total) * 360;
-    // full circle single slice
     const start = angle;
     const end = angle + Math.max(sweep, slice.value === total ? 359.99 : 0.01);
     angle += sweep;
@@ -388,7 +382,7 @@ function FeatureOpenPie({ features }: { features: FeatureRow[] }) {
           )}
         </svg>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-[11px] font-medium text-[#8b93a1]">เปิดทั้งหมด</p>
+          <p className="text-[11px] font-medium text-[#8b93a1]">{centerLabel}</p>
           <p className="text-[1.45rem] font-bold tabular-nums tracking-tight text-[#1a1d21]">
             {total.toLocaleString("th-TH")}
           </p>
@@ -933,29 +927,139 @@ export function AdminAnalyticsPage() {
             </SoftCard>
           </div>
 
-          <SoftCard>
-            <div className="mb-5 text-center sm:text-left">
-              <p className="text-[15px] font-semibold">Funnel Infographic</p>
-              <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                คนเข้าชมเว็บ → คนสมัคร → คนซื้อ
-              </p>
-            </div>
-            <GrowthFunnelCone
-              visitors={data.growthFunnel?.visitors ?? data.summary.visitors ?? 0}
-              signups={data.growthFunnel?.signups ?? data.summary.signups}
-              buyers={data.growthFunnel?.buyers ?? data.summary.buyers ?? 0}
-            />
-          </SoftCard>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <SoftCard>
+              <div className="mb-5 text-center sm:text-left">
+                <p className="text-[15px] font-semibold">Funnel Infographic</p>
+                <p className="mt-0.5 text-[12px] text-[#8b93a1]">
+                  คนเข้าชมเว็บ → คนสมัคร → คนซื้อ
+                </p>
+              </div>
+              <FunnelCone
+                steps={[
+                  {
+                    id: "visit",
+                    label: "คนเข้าชมเว็บ",
+                    hint: "unique visitors",
+                    value:
+                      data.growthFunnel?.visitors ?? data.summary.visitors ?? 0,
+                    fill: "#7dffb3",
+                    text: "#0f7a4a",
+                  },
+                  {
+                    id: "signup",
+                    label: "คนสมัคร",
+                    hint: "signup",
+                    value: data.growthFunnel?.signups ?? data.summary.signups,
+                    fill: "#1a1d21",
+                    text: "#ffffff",
+                  },
+                  {
+                    id: "buy",
+                    label: "คนซื้อ",
+                    hint: "unique buyers",
+                    value: data.growthFunnel?.buyers ?? data.summary.buyers ?? 0,
+                    fill: "#b8f5d8",
+                    text: "#0f7a4a",
+                  },
+                ]}
+                emptyNote={
+                  (data.growthFunnel?.visitors ?? data.summary.visitors ?? 0) ===
+                  0
+                    ? "ตัวเลขเข้าชมเริ่มนับหลังเปิด track · รีเฟรชช่วงใหม่หลังมีคนเข้าเว็บ"
+                    : undefined
+                }
+              />
+            </SoftCard>
 
-          <SoftCard>
-            <div className="mb-5">
-              <p className="text-[15px] font-semibold">คนเข้ามากดอะไรบ้าง</p>
-              <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                สัดส่วนการเปิดฟีเจอร์ (feature_open) ในช่วงที่เลือก
-              </p>
-            </div>
-            <FeatureOpenPie features={data.features} />
-          </SoftCard>
+            <SoftCard>
+              <div className="mb-5 text-center sm:text-left">
+                <p className="text-[15px] font-semibold">Funnel ชำระเงิน</p>
+                <p className="mt-0.5 text-[12px] text-[#8b93a1]">
+                  เข้าชม → ดูหน้าชำระ → สมัคร → ซื้อ
+                </p>
+              </div>
+              <FunnelCone
+                steps={[
+                  {
+                    id: "visit",
+                    label: "คนเข้าชมเว็บ",
+                    hint: "unique visitors",
+                    value: data.payFunnel?.visitors ?? data.summary.visitors ?? 0,
+                    fill: "#7dffb3",
+                    text: "#0f7a4a",
+                  },
+                  {
+                    id: "pay",
+                    label: "ดูหน้าชำระเงิน",
+                    hint: "pay_view",
+                    value: data.payFunnel?.payViews ?? 0,
+                    fill: "#5b9fd4",
+                    text: "#ffffff",
+                  },
+                  {
+                    id: "signup",
+                    label: "คนสมัคร",
+                    hint: "signup",
+                    value: data.payFunnel?.signups ?? data.summary.signups,
+                    fill: "#1a1d21",
+                    text: "#ffffff",
+                  },
+                  {
+                    id: "buy",
+                    label: "คนซื้อ",
+                    hint: "unique buyers",
+                    value: data.payFunnel?.buyers ?? data.summary.buyers ?? 0,
+                    fill: "#b8f5d8",
+                    text: "#0f7a4a",
+                  },
+                ]}
+                emptyNote={
+                  (data.payFunnel?.payViews ?? 0) === 0
+                    ? "ตัวเลขดูหน้าชำระเริ่มนับหลัง deploy รอบนี้"
+                    : undefined
+                }
+              />
+            </SoftCard>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <SoftCard>
+              <div className="mb-5">
+                <p className="text-[15px] font-semibold">คนเข้ามากดอะไรบ้าง</p>
+                <p className="mt-0.5 text-[12px] text-[#8b93a1]">
+                  สัดส่วนการเปิดฟีเจอร์ (feature_open)
+                </p>
+              </div>
+              <FeatureOpenPie
+                items={data.features.map((f) => ({
+                  id: f.id,
+                  label: f.label,
+                  value: f.opens,
+                }))}
+              />
+            </SoftCard>
+
+            <SoftCard>
+              <div className="mb-5">
+                <p className="text-[15px] font-semibold">
+                  กดเข้าหน้าชำระจากเมนูไหน
+                </p>
+                <p className="mt-0.5 text-[12px] text-[#8b93a1]">
+                  เช่น โหงวเฮ้ง · ลายมือ · จากเส้นทางก่อนเปิด /premium/pay
+                </p>
+              </div>
+              <FeatureOpenPie
+                items={(data.payViewsByFeature || []).map((f) => ({
+                  id: f.id,
+                  label: f.label,
+                  value: f.count,
+                }))}
+                emptyText="ยังไม่มีข้อมูลแหล่งที่มาของหน้าชำระในช่วงนี้"
+                centerLabel="ครั้งทั้งหมด"
+              />
+            </SoftCard>
+          </div>
 
           <div className="grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
             <SoftCard className="overflow-hidden !p-0">
