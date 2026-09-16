@@ -21,6 +21,7 @@ export function isMaeShellPath(pathname: string) {
     pathname.startsWith("/pricing") ||
     pathname.startsWith("/privacy") ||
     pathname.startsWith("/terms") ||
+    pathname.startsWith("/reviews") ||
     pathname.startsWith("/auth")
   );
 }
