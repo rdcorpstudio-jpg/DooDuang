@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { trackLinePurchaseConversions } from "@/components/analytics/line-tag";
 import { trackMetaPurchase } from "@/components/analytics/meta-pixel";
 import { confirmStripePremiumUnlock } from "@/components/fortune/fortune-payment-sheet";
-import { applyPremiumUntil, setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import { applyPremiumUntil, invalidatePremiumStatusCache, setPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import { readFortuneProfile } from "@/lib/fortune/profile-storage";
 
 const THANKS_PATH = "/premium/thanks";
@@ -59,6 +59,7 @@ export function useStripePaymentReturn(onUnlocked?: () => void) {
 
         if (result.premiumUnlocked) {
           unlockedOk = true;
+          invalidatePremiumStatusCache();
           const profile = readFortuneProfile();
           const untilMs = result.premiumUntil
             ? Date.parse(result.premiumUntil)

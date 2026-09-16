@@ -28,6 +28,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     pathname === "/" ||
     pathname === "" ||
     pathname.startsWith("/premium/pay") ||
+    pathname.startsWith("/preview/home") ||
     keyboardOpen;
   /* CSS zoom on ancestors breaks iOS caret / focus for phone OTP fields.
      Home hero is a tight 1-screen composition — comfort zoom crushes it on real phones. */
@@ -36,10 +37,12 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     isAuthPath ||
     keyboardOpen ||
     pathname === "/" ||
-    pathname === "";
+    pathname === "" ||
+    pathname.startsWith("/preview/home");
 
   useEffect(() => {
     if (adminShell) return;
+    // Throttled inside syncPremiumFromServer — once per navigation is enough
     void syncPremiumFromServer();
     void syncFortuneProfileWithServer();
   }, [pathname, adminShell]);
@@ -85,7 +88,10 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     adminShell ||
     pathname.startsWith("/premium/pay") ||
     pathname.startsWith("/login") ||
-    pathname.startsWith("/auth");
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/preview/home");
+
+  const useCustomHomeBg = pathname.startsWith("/preview/home");
 
   return (
     <div className={cn("phone-shell", adminShell && "phone-shell--admin")}>
@@ -98,7 +104,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
           className
         )}
       >
-        {adminShell ? null : <StarfieldBackground />}
+        {adminShell || useCustomHomeBg ? null : <StarfieldBackground />}
         <div
           className={cn(
             "phone-comfort relative z-[2] flex h-full min-w-0 w-full max-w-full flex-col overflow-x-hidden",
@@ -115,7 +121,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
           </div>
           {hideNav ? null : <BottomNav />}
         </div>
-        {adminShell ? null : <SoftSkyStarsOverlay />}
+        {adminShell || useCustomHomeBg ? null : <SoftSkyStarsOverlay />}
       </div>
     </div>
   );

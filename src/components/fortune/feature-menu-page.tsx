@@ -353,10 +353,9 @@ function FeatureMenuPageInner({
       void syncPremium();
     };
     window.addEventListener("dooduang-premium-changed", onChange);
-    window.addEventListener("focus", onChange);
+    // Do not refetch on every window focus — that + event loops caused request storms
     return () => {
       window.removeEventListener("dooduang-premium-changed", onChange);
-      window.removeEventListener("focus", onChange);
     };
   }, []);
 

@@ -6,6 +6,19 @@ export const PREMIUM_UNLOCK_KEY = "dooduang-premium-unlocked";
 /** ISO ms timestamp — premium valid until (localStorage, survives refresh) */
 export const PREMIUM_UNLOCK_UNTIL_KEY = "dooduang-premium-until";
 
+/** Min gap between /api/premium/status network calls (stops event loops / bots). */
+const STATUS_FETCH_MIN_MS = 30_000;
+
+type PremiumStatusPayload = {
+  authenticated?: boolean;
+  premium?: boolean;
+  untilMs?: number | null;
+};
+
+let statusInflight: Promise<PremiumStatusPayload | null> | null = null;
+let statusFetchedAt = 0;
+let statusCache: PremiumStatusPayload | null = null;
+
 /**
  * QA only — unlock premium UI without payment.
  * Set NEXT_PUBLIC_ALLOW_PREMIUM_SIM=1. Never set this on Railway/production.
@@ -50,6 +63,23 @@ function clearExpiredFlags() {
   }
 }
 
+function emitPremiumChanged() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("dooduang-premium-changed"));
+  }
+}
+
+function hasLocalPremiumFlags(): boolean {
+  try {
+    return (
+      localStorage.getItem(PREMIUM_UNLOCK_UNTIL_KEY) !== null ||
+      sessionStorage.getItem(PREMIUM_UNLOCK_KEY) !== null
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** Grant / extend premium for FORTUNE_PACKAGE_DAYS from now (or from current until if still active). */
 export function setPremiumUnlocked(profile?: {
   birthDate: string;
@@ -73,11 +103,9 @@ export function setPremiumUnlocked(profile?: {
   } catch {
     /* ignore */
   }
-  // One random HQ wallpaper per premium unlock (kept stable after first assign)
   assignPremiumWallpaperIfNeeded();
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("dooduang-premium-changed"));
-  }
+  invalidatePremiumStatusCache();
+  emitPremiumChanged();
 }
 
 export function isPremiumUnlocked(profile?: {
@@ -117,15 +145,15 @@ export function isPremiumUnlocked(profile?: {
 }
 
 export function clearPremiumUnlocked(): void {
+  const hadFlags = hasLocalPremiumFlags();
   try {
     localStorage.removeItem(PREMIUM_UNLOCK_UNTIL_KEY);
     sessionStorage.removeItem(PREMIUM_UNLOCK_KEY);
   } catch {
     /* ignore */
   }
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("dooduang-premium-changed"));
-  }
+  // Only notify when something actually changed — avoids refetch loops
+  if (hadFlags) emitPremiumChanged();
 }
 
 export function applyPremiumUntil(
@@ -140,6 +168,8 @@ export function applyPremiumUntil(
     return false;
   }
 
+  const prev = readUntilMs();
+  const sameUntil = prev === untilMs;
   writeUntilMs(untilMs);
   try {
     sessionStorage.setItem(PREMIUM_UNLOCK_KEY, "1");
@@ -153,10 +183,43 @@ export function applyPremiumUntil(
     /* ignore */
   }
   assignPremiumWallpaperIfNeeded();
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("dooduang-premium-changed"));
-  }
+  if (!sameUntil) emitPremiumChanged();
   return true;
+}
+
+async function fetchPremiumStatus(): Promise<PremiumStatusPayload | null> {
+  const now = Date.now();
+  if (statusCache && now - statusFetchedAt < STATUS_FETCH_MIN_MS) {
+    return statusCache;
+  }
+  if (statusInflight) return statusInflight;
+
+  statusInflight = (async () => {
+    try {
+      const res = await fetch("/api/premium/status", {
+        cache: "no-store",
+        credentials: "same-origin",
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) return statusCache;
+      const data = (await res.json()) as PremiumStatusPayload;
+      statusCache = data;
+      statusFetchedAt = Date.now();
+      return data;
+    } catch {
+      return statusCache;
+    } finally {
+      statusInflight = null;
+    }
+  })();
+
+  return statusInflight;
+}
+
+/** Drop client status cache after pay / login so the next sync is fresh. */
+export function invalidatePremiumStatusCache(): void {
+  statusCache = null;
+  statusFetchedAt = 0;
 }
 
 /** Require logged-in premium from server. Does not fall back to local unlock. */
@@ -171,28 +234,19 @@ export async function requirePremiumFromServer(profile?: {
     return { ok: true, authenticated: true };
   }
 
-  try {
-    const res = await fetch("/api/premium/status", { cache: "no-store" });
-    if (!res.ok) {
-      return { ok: false, authenticated: false };
-    }
-    const data = (await res.json()) as {
-      authenticated?: boolean;
-      premium?: boolean;
-      untilMs?: number | null;
-    };
-    if (!data.authenticated) {
-      clearPremiumUnlocked();
-      return { ok: false, authenticated: false };
-    }
-    const ok = applyPremiumUntil(
-      data.premium ? data.untilMs ?? null : null,
-      profile
-    );
-    return { ok, authenticated: true };
-  } catch {
+  const data = await fetchPremiumStatus();
+  if (!data) {
     return { ok: false, authenticated: false };
   }
+  if (!data.authenticated) {
+    clearPremiumUnlocked();
+    return { ok: false, authenticated: false };
+  }
+  const ok = applyPremiumUntil(
+    data.premium ? data.untilMs ?? null : null,
+    profile
+  );
+  return { ok, authenticated: true };
 }
 
 /** Pull entitlement from the logged-in account. Falls back to local when logged out. */
@@ -202,22 +256,13 @@ export async function syncPremiumFromServer(profile?: {
 } | null): Promise<boolean> {
   if (isLocalPremiumBypass()) return true;
 
-  try {
-    const res = await fetch("/api/premium/status", { cache: "no-store" });
-    if (!res.ok) return isPremiumUnlocked(profile);
-    const data = (await res.json()) as {
-      authenticated?: boolean;
-      premium?: boolean;
-      untilMs?: number | null;
-    };
-    if (!data.authenticated) {
-      clearPremiumUnlocked();
-      return false;
-    }
-    return applyPremiumUntil(data.premium ? data.untilMs ?? null : null, profile);
-  } catch {
-    return isPremiumUnlocked(profile);
+  const data = await fetchPremiumStatus();
+  if (!data) return isPremiumUnlocked(profile);
+  if (!data.authenticated) {
+    clearPremiumUnlocked();
+    return false;
   }
+  return applyPremiumUntil(data.premium ? data.untilMs ?? null : null, profile);
 }
 
 export function getPremiumUnlockedUntil(): Date | null {
