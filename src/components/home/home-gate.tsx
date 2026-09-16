@@ -19,7 +19,9 @@ export function HomeGate() {
 
   useEffect(() => {
     hydrateFortuneProfileFromWizard();
-    if (hasFreeReadingBasics(readFortuneProfile())) {
+    const fromLogout =
+      new URLSearchParams(window.location.search).get("from") === "logout";
+    if (!fromLogout && hasFreeReadingBasics(readFortuneProfile())) {
       router.replace("/premium");
       return;
     }

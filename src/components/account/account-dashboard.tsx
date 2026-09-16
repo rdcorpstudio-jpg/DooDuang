@@ -264,7 +264,7 @@ export function AccountDashboard({
     setSigningOut(true);
     try {
       await fetch("/api/auth/signout", { method: "POST" });
-      router.replace("/login");
+      router.replace("/?from=logout");
       router.refresh();
     } catch {
       setSigningOut(false);
