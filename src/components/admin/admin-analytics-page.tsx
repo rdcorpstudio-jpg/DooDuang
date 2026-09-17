@@ -85,6 +85,7 @@ type AnalyticsPayload = {
     buyers: number;
   };
   payViewsByFeature?: ChannelCount[];
+  topScreens?: ChannelCount[];
   funnel: FunnelStep[];
   features: FeatureRow[];
   signupsByChannel: ChannelCount[];
@@ -1028,7 +1029,7 @@ export function AdminAnalyticsPage() {
               <div className="mb-5">
                 <p className="text-[15px] font-semibold">คนเข้ามากดอะไรบ้าง</p>
                 <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                  สัดส่วนการเปิดฟีเจอร์ (feature_open)
+                  สัดส่วนการเปิดฟีเจอร์ (feature_open) · รวมหน้าแรก / เมนู / ดวงรายวัน
                 </p>
               </div>
               <FeatureOpenPie
@@ -1060,6 +1061,24 @@ export function AdminAnalyticsPage() {
               />
             </SoftCard>
           </div>
+
+          <SoftCard>
+            <div className="mb-5">
+              <p className="text-[15px] font-semibold">หน้าที่คนเข้า (หน้าจอ)</p>
+              <p className="mt-0.5 text-[12px] text-[#8b93a1]">
+                screen_view ตาม path — ดูว่าคนตกหล่นที่หน้าไหนก่อนถึงดวงรายวัน
+              </p>
+            </div>
+            <FeatureOpenPie
+              items={(data.topScreens || []).map((s) => ({
+                id: s.id,
+                label: s.label,
+                value: s.count,
+              }))}
+              emptyText="ยังไม่มี screen_view ในช่วงนี้ (เริ่มนับหลัง deploy รอบนี้)"
+              centerLabel="ครั้งทั้งหมด"
+            />
+          </SoftCard>
 
           <div className="grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
             <SoftCard className="overflow-hidden !p-0">

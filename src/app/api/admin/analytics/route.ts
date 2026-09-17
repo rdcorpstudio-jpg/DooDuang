@@ -5,6 +5,7 @@ import {
   ANALYTICS_FEATURES,
   ANALYTICS_FEATURE_LABELS,
   FUNNEL_STEPS,
+  screenLabelFromPath,
   type AnalyticsFeature,
 } from "@/lib/analytics/events";
 import { requireDb } from "@/lib/db";
@@ -234,6 +235,32 @@ export async function GET(request: Request) {
         };
       })
       .sort((a, b) => b.count - a.count);
+
+    const screenRows = await db
+      .select({
+        path: analyticsEvents.path,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          eq(analyticsEvents.name, "screen_view")
+        )
+      )
+      .groupBy(analyticsEvents.path);
+
+    const topScreens = screenRows
+      .map((r) => {
+        const path = r.path || "/";
+        return {
+          id: path,
+          label: screenLabelFromPath(path),
+          count: Number(r.count) || 0,
+        };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 12);
 
     const funnel = FUNNEL_STEPS.map((step, index) => {
       const current = byName.get(step.name) || { events: 0, uniqueUsers: 0 };
@@ -592,6 +619,7 @@ export async function GET(request: Request) {
         buyers,
       },
       payViewsByFeature,
+      topScreens,
       funnel,
       features,
       signupsByChannel,

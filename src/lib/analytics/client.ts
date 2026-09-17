@@ -6,6 +6,7 @@ import {
   type ClientAnalyticsEventName,
   type AnalyticsFeature,
 } from "@/lib/analytics/events";
+import { rememberLastFeature } from "@/lib/analytics/last-feature";
 
 export function trackClientEvent(opts: {
   name: ClientAnalyticsEventName;
@@ -23,11 +24,16 @@ export function trackClientEvent(opts: {
     const body = JSON.stringify({
       name: opts.name,
       feature: feature ?? null,
-      path: opts.path ?? (typeof window !== "undefined" ? window.location.pathname : null),
+      path:
+        opts.path ??
+        (typeof window !== "undefined" ? window.location.pathname : null),
       props: opts.props ?? null,
     });
 
-    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.sendBeacon === "function"
+    ) {
       const blob = new Blob([body], { type: "application/json" });
       navigator.sendBeacon("/api/analytics/event", blob);
       return;
@@ -42,4 +48,26 @@ export function trackClientEvent(opts: {
   } catch {
     // fail-open
   }
+}
+
+/** Open / focus a product feature — also remembers last feature for pay attribution. */
+export function trackFeatureOpen(
+  feature: AnalyticsFeature | string,
+  opts?: {
+    path?: string | null;
+    source?: string;
+    props?: Record<string, unknown> | null;
+  }
+): void {
+  if (!isAnalyticsFeature(feature)) return;
+  rememberLastFeature(feature);
+  trackClientEvent({
+    name: "feature_open",
+    feature,
+    path: opts?.path,
+    props: {
+      ...(opts?.props || {}),
+      ...(opts?.source ? { source: opts.source } : {}),
+    },
+  });
 }

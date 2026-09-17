@@ -1,6 +1,7 @@
 /** Canonical product analytics event names */
 export const ANALYTICS_EVENT_NAMES = [
   "page_view",
+  "screen_view",
   "pay_view",
   "signup",
   "login",
@@ -16,6 +17,7 @@ export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];
 
 export const CLIENT_ANALYTICS_EVENT_NAMES = [
   "page_view",
+  "screen_view",
   "pay_view",
   "feature_open",
   "thanks_line_cta",
@@ -24,8 +26,10 @@ export const CLIENT_ANALYTICS_EVENT_NAMES = [
 export type ClientAnalyticsEventName =
   (typeof CLIENT_ANALYTICS_EVENT_NAMES)[number];
 
-/** Menu / product feature ids (align with feature-menu-page) */
+/** Menu / product feature ids (align with feature-menu-page + key screens) */
 export const ANALYTICS_FEATURES = [
+  "home",
+  "menu",
   "daily",
   "tarot",
   "shirt",
@@ -39,6 +43,8 @@ export const ANALYTICS_FEATURES = [
   "couple",
   "self-map",
   "year",
+  "week",
+  "outlook",
   "report",
   "wallpaper",
   "reading",
@@ -47,6 +53,8 @@ export const ANALYTICS_FEATURES = [
 export type AnalyticsFeature = (typeof ANALYTICS_FEATURES)[number];
 
 export const ANALYTICS_FEATURE_LABELS: Record<AnalyticsFeature, string> = {
+  home: "หน้าแรก / Landing",
+  menu: "เมนูเลือกเรื่อง",
   daily: "ดวงรายวัน",
   tarot: "ไพ่รายวัน",
   shirt: "สีเสื้อมงคล",
@@ -60,9 +68,11 @@ export const ANALYTICS_FEATURE_LABELS: Record<AnalyticsFeature, string> = {
   couple: "ดวงคู่",
   "self-map": "แผนที่ตัวเอง",
   year: "ดวงรายปี",
+  week: "ดวงรายสัปดาห์",
+  outlook: "แนวโน้ม",
   report: "รายงาน",
   wallpaper: "วอลเปเปอร์",
-  reading: "ดูดวงเบื้องต้น",
+  reading: "ดูดวงเบื้องต้น / Wizard",
 };
 
 export const FUNNEL_STEPS: {
@@ -125,15 +135,28 @@ export function readingTypeToFeature(
 /** Resolve feature from pathname + search (client page views) */
 export function featureFromPath(
   pathname: string,
-  search = ""
+  search = "",
+  hash = ""
 ): AnalyticsFeature | undefined {
   const path = pathname.replace(/\/$/, "") || "/";
-  const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
+  const params = new URLSearchParams(
+    search.startsWith("?") ? search : search ? `?${search}` : ""
+  );
+  const hashPart = hash.startsWith("#") ? hash.slice(1) : hash;
 
-  if (path === "/premium") return "daily";
+  if (path === "/") return "home";
+  if (path === "/menu" || path.startsWith("/preview/menu")) return "menu";
+  if (path === "/reading") return "reading";
+
+  if (path === "/premium") {
+    if (hashPart.includes("self-intro")) return "reading";
+    return "daily";
+  }
   if (path === "/premium/couple") return "couple";
   if (path === "/premium/self-map") return "self-map";
   if (path === "/premium/year" || path.startsWith("/premium/year/")) return "year";
+  if (path === "/premium/week") return "week";
+  if (path === "/premium/outlook") return "outlook";
   if (path === "/premium/report") return "report";
 
   if (path === "/reading/tarot") return "tarot";
@@ -155,4 +178,17 @@ export function featureFromPath(
   }
 
   return undefined;
+}
+
+/** Friendly label for raw path (screen_view breakdown) */
+export function screenLabelFromPath(pathname: string): string {
+  const path = pathname.replace(/\/$/, "") || "/";
+  const feature = featureFromPath(path);
+  if (feature) return ANALYTICS_FEATURE_LABELS[feature];
+  if (path === "/premium/pay") return "หน้าชำระเงิน";
+  if (path === "/premium/thanks") return "ขอบคุณหลังชำระ";
+  if (path === "/login") return "เข้าสู่ระบบ";
+  if (path === "/dashboard") return "บัญชี";
+  if (path.startsWith("/admin")) return "Admin";
+  return path;
 }

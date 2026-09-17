@@ -125,6 +125,14 @@ src/
 │   └── stripe.ts
 ```
 
+## Analytics (สำคัญตอนแก้ UI)
+
+เมื่อเปลี่ยนหน้า / เมนู / ปุ่มชำระเงิน ให้อ่านและทำตาม checklist ใน:
+
+**[docs/analytics-tracking.md](./docs/analytics-tracking.md)**
+
+ไม่งั้นตัวเลขใน `/admin/analytics` (funnel, pie ฟีเจอร์, แหล่งหน้าชำระ) จะตกหล่นได้
+
 ## ฟีเจอร์
 
 - ดวงรายวัน 12 ราศี — **ฟรี**

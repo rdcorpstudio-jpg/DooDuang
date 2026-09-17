@@ -17,6 +17,8 @@ import {
   readFortuneProfile,
   WIZARD_CACHE_KEY,
 } from "@/lib/fortune/profile-storage";
+import { trackFeatureOpen } from "@/lib/analytics/client";
+import { rememberLastFeature } from "@/lib/analytics/last-feature";
 import { cn } from "@/lib/utils";
 
 type MenuApp = {
@@ -391,6 +393,10 @@ function FeatureMenuPageInner({
   function openApp(app: MenuApp) {
     const locked = app.badge === "พรีเมียม" && !premium;
     if (locked) {
+      trackFeatureOpen(app.id, {
+        path: app.href,
+        source: "menu_paywall",
+      });
       setPendingHref(app.href);
       setPayOpen(true);
       return;
@@ -398,12 +404,18 @@ function FeatureMenuPageInner({
 
     // ยังไม่กรอกข้อมูล → ไปหน้ากรอก แล้วกลับมาฟีเจอร์นั้น
     if (!hasBasics) {
+      trackFeatureOpen(app.id, {
+        path: app.href,
+        source: "menu_onboard",
+      });
       router.push(
         `${ONBOARD_HREF}?next=${encodeURIComponent(app.href)}`
       );
       return;
     }
 
+    // Route FeatureOpenTracker will record the open after navigation.
+    rememberLastFeature(app.id);
     router.push(app.href);
   }
 

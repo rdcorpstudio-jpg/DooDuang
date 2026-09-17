@@ -2,34 +2,86 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { featureFromPath } from "@/lib/analytics/events";
-import { trackClientEvent } from "@/lib/analytics/client";
-import { rememberLastFeature } from "@/lib/analytics/last-feature";
+import {
+  featureFromPath,
+  type AnalyticsFeature,
+} from "@/lib/analytics/events";
+import { trackClientEvent, trackFeatureOpen } from "@/lib/analytics/client";
+import { getOrCreateVisitorId } from "@/lib/analytics/visitor-id";
 
 /**
- * Fires feature_open once per path+search when the route maps to a known feature.
+ * Tracks every screen (screen_view) + mapped product features (feature_open).
+ * Dedupes consecutive identical path/search/hash keys.
  */
 export function FeatureOpenTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const lastKey = useRef<string | null>(null);
+  const lastScreenKey = useRef<string | null>(null);
+  const lastFeatureKey = useRef<string | null>(null);
 
   useEffect(() => {
-    const search = searchParams?.toString() ? `?${searchParams.toString()}` : "";
-    const feature = featureFromPath(pathname || "/", search);
+    if (!pathname || pathname.startsWith("/admin")) return;
+
+    const search = searchParams?.toString()
+      ? `?${searchParams.toString()}`
+      : "";
+    const hash =
+      typeof window !== "undefined" ? window.location.hash || "" : "";
+    const fullPath = `${pathname}${search}${hash}`;
+    const visitorId = getOrCreateVisitorId();
+
+    if (lastScreenKey.current !== fullPath) {
+      lastScreenKey.current = fullPath;
+      trackClientEvent({
+        name: "screen_view",
+        path: pathname,
+        props: {
+          visitorId,
+          search: search || null,
+          hash: hash || null,
+        },
+      });
+    }
+
+    const feature: AnalyticsFeature | undefined = featureFromPath(
+      pathname,
+      search,
+      hash
+    );
     if (!feature) return;
 
-    rememberLastFeature(feature);
+    const featureKey = `${fullPath}::${feature}`;
+    if (lastFeatureKey.current === featureKey) return;
+    lastFeatureKey.current = featureKey;
 
-    const key = `${pathname}${search}::${feature}`;
-    if (lastKey.current === key) return;
-    lastKey.current = key;
-
-    trackClientEvent({
-      name: "feature_open",
-      feature,
-      path: `${pathname}${search}`,
+    trackFeatureOpen(feature, {
+      path: fullPath,
+      source: "route",
+      props: { visitorId },
     });
+  }, [pathname, searchParams]);
+
+  useEffect(() => {
+    function onHashChange() {
+      if (!pathname || pathname.startsWith("/admin")) return;
+      const search = searchParams?.toString()
+        ? `?${searchParams.toString()}`
+        : "";
+      const hash = window.location.hash || "";
+      const feature = featureFromPath(pathname, search, hash);
+      if (!feature) return;
+      const fullPath = `${pathname}${search}${hash}`;
+      const featureKey = `${fullPath}::${feature}`;
+      if (lastFeatureKey.current === featureKey) return;
+      lastFeatureKey.current = featureKey;
+      trackFeatureOpen(feature, {
+        path: fullPath,
+        source: "hash",
+        props: { visitorId: getOrCreateVisitorId() },
+      });
+    }
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
   }, [pathname, searchParams]);
 
   return null;
