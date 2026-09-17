@@ -125,6 +125,30 @@ src/
 │   └── stripe.ts
 ```
 
+## UX คู่ขนาน (v2 / v3)
+
+กำลังออกแบบ UI สองเวอร์ชันพร้อมกันบน **origin เดิม** ห้ามแยก GitHub repo
+
+| Branch | ใครใช้ | หมายเหตุ |
+| --- | --- | --- |
+| `main` | production | ห้าม push ตรง — งาน shared มาที่นี่ก่อน |
+| `feat/ui-v2` | น้อง | UX v2 เท่านั้น ห้าม merge เข้า `feat/ui-v3` |
+| `feat/ui-v3` | คุณ | UX v3 เท่านั้น ห้าม merge เข้า `feat/ui-v2` |
+
+กติกา:
+
+1. Bugfix / API / DB / analytics / `next.config.ts` ทำบน `main` แล้ว `git merge origin/main` เข้าทั้งสอง UI branch
+2. อย่าแก้หน้าเดิมบน `main` ระหว่างแข่ง UX
+3. อย่า cherry-pick UI commit ข้าม branch
+4. ถ้าต้องแตะไฟล์ shared บน UI branch ให้บอกอีกฝ่ายทันที
+5. ตอนจบเลือกฝั่งเดียว merge เข้า `main` แล้วลบอีก branch — ไม่รวมสองดีไซน์เข้าด้วยกัน
+
+เปิด `main` กับ v3 พร้อมกันโดยไม่สลับ branch:
+
+```bash
+git worktree add ../DooDuang-v3 feat/ui-v3
+```
+
 ## Analytics (สำคัญตอนแก้ UI)
 
 เมื่อเปลี่ยนหน้า / เมนู / ปุ่มชำระเงิน ให้อ่านและทำตาม checklist ใน:
