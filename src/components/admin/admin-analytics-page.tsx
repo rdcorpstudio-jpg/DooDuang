@@ -317,7 +317,7 @@ function donutSlicePath(
 function FeatureOpenPie({
   items,
   emptyText = "ยังไม่มีข้อมูลว่าคนกดฟีเจอร์อะไรในช่วงนี้",
-  centerLabel = "เปิดทั้งหมด",
+  centerLabel = "คน (unique)",
 }: {
   items: Array<{ id: string; label: string; value: number }>;
   emptyText?: string;
@@ -1029,15 +1029,17 @@ export function AdminAnalyticsPage() {
               <div className="mb-5">
                 <p className="text-[15px] font-semibold">คนเข้ามากดอะไรบ้าง</p>
                 <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                  สัดส่วนการเปิดฟีเจอร์ (feature_open) · รวมหน้าแรก / เมนู / ดวงรายวัน
+                  unique visitors ต่อฟีเจอร์ (feature_open) · รวมหน้าแรก / เมนู / ดวงรายวัน
                 </p>
               </div>
               <FeatureOpenPie
                 items={data.features.map((f) => ({
                   id: f.id,
                   label: f.label,
-                  value: f.opens,
+                  value: f.uniqueUsers,
                 }))}
+                emptyText="ยังไม่มีข้อมูลว่าคนกดฟีเจอร์อะไรในช่วงนี้"
+                centerLabel="คน (unique)"
               />
             </SoftCard>
 
@@ -1047,7 +1049,7 @@ export function AdminAnalyticsPage() {
                   กดเข้าหน้าชำระจากเมนูไหน
                 </p>
                 <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                  เช่น โหงวเฮ้ง · ลายมือ · จากเส้นทางก่อนเปิด /premium/pay
+                  unique visitors ต่อแหล่งเมนูก่อนเปิด /premium/pay
                 </p>
               </div>
               <FeatureOpenPie
@@ -1057,7 +1059,7 @@ export function AdminAnalyticsPage() {
                   value: f.count,
                 }))}
                 emptyText="ยังไม่มีข้อมูลแหล่งที่มาของหน้าชำระในช่วงนี้"
-                centerLabel="ครั้งทั้งหมด"
+                centerLabel="คน (unique)"
               />
             </SoftCard>
           </div>
@@ -1066,7 +1068,7 @@ export function AdminAnalyticsPage() {
             <div className="mb-5">
               <p className="text-[15px] font-semibold">หน้าที่คนเข้า (หน้าจอ)</p>
               <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                screen_view ตาม path — ดูว่าคนตกหล่นที่หน้าไหนก่อนถึงดวงรายวัน
+                unique visitors ต่อ path (screen_view)
               </p>
             </div>
             <FeatureOpenPie
@@ -1076,7 +1078,7 @@ export function AdminAnalyticsPage() {
                 value: s.count,
               }))}
               emptyText="ยังไม่มี screen_view ในช่วงนี้ (เริ่มนับหลัง deploy รอบนี้)"
-              centerLabel="ครั้งทั้งหมด"
+              centerLabel="คน (unique)"
             />
           </SoftCard>
 

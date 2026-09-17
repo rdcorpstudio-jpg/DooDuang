@@ -209,7 +209,11 @@ export async function GET(request: Request) {
     const paySourceRows = await db
       .select({
         feature: analyticsEvents.feature,
-        count: sql<number>`count(*)::int`,
+        count: sql<number>`count(distinct coalesce(
+          (${analyticsEvents.props})::jsonb->>'visitorId',
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
       })
       .from(analyticsEvents)
       .where(
@@ -239,7 +243,11 @@ export async function GET(request: Request) {
     const screenRows = await db
       .select({
         path: analyticsEvents.path,
-        count: sql<number>`count(*)::int`,
+        count: sql<number>`count(distinct coalesce(
+          (${analyticsEvents.props})::jsonb->>'visitorId',
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
       })
       .from(analyticsEvents)
       .where(
@@ -290,7 +298,11 @@ export async function GET(request: Request) {
         feature: analyticsEvents.feature,
         name: analyticsEvents.name,
         events: sql<number>`count(*)::int`,
-        uniqueUsers: sql<number>`count(distinct ${analyticsEvents.userId})::int`,
+        uniqueUsers: sql<number>`count(distinct coalesce(
+          (${analyticsEvents.props})::jsonb->>'visitorId',
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
       })
       .from(analyticsEvents)
       .where(
@@ -339,7 +351,7 @@ export async function GET(request: Request) {
         completes: stats.completes,
         uniqueUsers: stats.uniqueUsers,
       };
-    }).sort((a, b) => b.opens + b.completes - (a.opens + a.completes));
+    }).sort((a, b) => b.uniqueUsers - a.uniqueUsers || b.opens - a.opens);
 
     /** Signups by auth channel (from event props.channel) */
     const signupChannelRows = await db
