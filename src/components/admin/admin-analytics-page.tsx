@@ -80,6 +80,7 @@ type AnalyticsPayload = {
   };
   payFunnel?: {
     visitors: number;
+    offerViews?: number;
     payViews: number;
     signups: number;
     buyers: number;
@@ -977,7 +978,7 @@ export function AdminAnalyticsPage() {
               <div className="mb-5 text-center sm:text-left">
                 <p className="text-[15px] font-semibold">Funnel ชำระเงิน</p>
                 <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                  เข้าชม → ดูหน้าชำระ → สมัคร → ซื้อ
+                  เข้าชม → เห็นข้อเสนอ/ราคา → สมัคร → ซื้อ
                 </p>
               </div>
               <FunnelCone
@@ -992,9 +993,12 @@ export function AdminAnalyticsPage() {
                   },
                   {
                     id: "pay",
-                    label: "ดูหน้าชำระเงิน",
-                    hint: "pay_view",
-                    value: data.payFunnel?.payViews ?? 0,
+                    label: "เห็นข้อเสนอ/ราคา",
+                    hint: "offer_view",
+                    value:
+                      data.payFunnel?.offerViews ??
+                      data.payFunnel?.payViews ??
+                      0,
                     fill: "#5b9fd4",
                     text: "#ffffff",
                   },
@@ -1016,8 +1020,10 @@ export function AdminAnalyticsPage() {
                   },
                 ]}
                 emptyNote={
-                  (data.payFunnel?.payViews ?? 0) === 0
-                    ? "ตัวเลขดูหน้าชำระเริ่มนับหลัง deploy รอบนี้"
+                  (data.payFunnel?.offerViews ??
+                    data.payFunnel?.payViews ??
+                    0) === 0
+                    ? "ตัวเลขเห็นข้อเสนอเริ่มนับหลัง deploy รอบนี้ (รวม pay_view เดิม)"
                     : undefined
                 }
               />

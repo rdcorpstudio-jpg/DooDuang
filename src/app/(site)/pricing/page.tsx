@@ -1,3 +1,4 @@
+import { OfferViewTracker } from "@/components/analytics/offer-view-tracker";
 import { PricingCard } from "@/components/fortune/pricing-card";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { PageHero } from "@/components/ui/page-hero";
@@ -12,6 +13,7 @@ export const metadata = {
 export default function PricingPage() {
   return (
     <AnimatedPage className="flex flex-col gap-3.5 px-4 py-6 pb-10">
+      <OfferViewTracker path="/pricing" />
       <PageHero
         align="center"
         title="แพ็กเกจ"

@@ -7,6 +7,30 @@ import {
   type AnalyticsFeature,
 } from "@/lib/analytics/events";
 import { rememberLastFeature } from "@/lib/analytics/last-feature";
+import { getOrCreateVisitorId } from "@/lib/analytics/visitor-id";
+
+const OFFER_VIEW_SESSION_KEY = "dd-offer-view";
+
+/** Saw the premium price / offer card (once per browser session). */
+export function trackOfferView(opts?: {
+  path?: string | null;
+  feature?: AnalyticsFeature | string | null;
+}): void {
+  try {
+    if (typeof sessionStorage !== "undefined") {
+      if (sessionStorage.getItem(OFFER_VIEW_SESSION_KEY)) return;
+      sessionStorage.setItem(OFFER_VIEW_SESSION_KEY, "1");
+    }
+  } catch {
+    // still send if storage is blocked
+  }
+  trackClientEvent({
+    name: "offer_view",
+    feature: opts?.feature,
+    path: opts?.path,
+    props: { visitorId: getOrCreateVisitorId() },
+  });
+}
 
 export function trackClientEvent(opts: {
   name: ClientAnalyticsEventName;

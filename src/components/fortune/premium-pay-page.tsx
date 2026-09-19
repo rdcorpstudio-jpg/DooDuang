@@ -34,7 +34,7 @@ import {
   type CheckoutPaymentMethod,
 } from "@/lib/stripe-catalog";
 import { featureFromPath } from "@/lib/analytics/events";
-import { trackClientEvent } from "@/lib/analytics/client";
+import { trackClientEvent, trackOfferView } from "@/lib/analytics/client";
 import { readLastFeature } from "@/lib/analytics/last-feature";
 import { getOrCreateVisitorId } from "@/lib/analytics/visitor-id";
 import { MAE_GLASS } from "@/lib/mae-glass";
@@ -144,6 +144,10 @@ export function PremiumPayPage() {
     payViewTracked.current = true;
     const fromReturn = featureFromPath(returnPath);
     const feature = fromReturn || readLastFeature();
+    trackOfferView({
+      path: "/premium/pay",
+      feature,
+    });
     trackClientEvent({
       name: "pay_view",
       feature,

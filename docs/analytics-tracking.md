@@ -11,7 +11,8 @@ Pie ฟีเจอร์ / หน้าจอ / แหล่งหน้าช�
 | `page_view` | คนเข้าชมเว็บ (unique `visitorId` / session) | `SiteVisitTracker` |
 | `screen_view` | เปิดแต่ละ path (ดูว่าคนอยู่หน้าไหน) | `FeatureOpenTracker` |
 | `feature_open` | เปิดฟีเจอร์/หน้าผลิตภัณฑ์ | route map + กดเมนู (paywall/onboard) |
-| `pay_view` | เปิด `/premium/pay` | `PremiumPayPage` |
+| `offer_view` | เห็นข้อเสนอ / ราคาพรีเมียม | `FortunePaymentSheet` (ตอนเปิด), `/premium/pay`, `/pricing` |
+| `pay_view` | เปิด `/premium/pay` (เลือกวิธีชำระ) | `PremiumPayPage` |
 | `checkout_started` | สร้าง Stripe Checkout | `createPremiumCheckoutUrl` |
 | `payment_succeeded` | ชำระสำเร็จ | webhook / confirm |
 | `signup` / `login` | สมัคร / เข้าสู่ระบบ | auth routes |
@@ -35,8 +36,9 @@ Pie ฟีเจอร์ / หน้าจอ / แหล่งหน้าช�
    - ถ้ากดแล้วไป paywall / onboard โดยยังไม่เปลี่ยน path → เรียก `trackFeatureOpen(id, { source: "…" })`  
    - ถ้า navigate ไปหน้าฟีเจอร์แล้ว → route tracker จะนับให้ (อย่า double-count)
 
-3. **ย้ายหน้าชำระเงิน?**  
-   - ให้ยังยิง `pay_view` ตอนเข้าหน้าเลือกวิธีชำระ  
+3. **ย้ายหน้าชำระเงิน / หน้าราคา?**  
+   - ให้ยังยิง `offer_view` ตอนเห็นการ์ดราคาหรือข้อเสนอ  
+   - ให้ยังยิง `pay_view` ตอนเข้าหน้าเลือกวิธีชำระ (`/premium/pay`)  
    - ส่ง `?return=` หรือ `rememberLastFeature` เพื่อ pie “กดจากเมนูไหน”
 
 4. **Landing / Home เวอร์ชันใหม่?**  

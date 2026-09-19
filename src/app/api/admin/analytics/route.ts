@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, desc, eq, gte, lt, sql, type SQL } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lt, sql, type SQL } from "drizzle-orm";
 import { requireAdmin } from "@/lib/admin";
 import {
   ANALYTICS_FEATURES,
@@ -205,6 +205,24 @@ export async function GET(request: Request) {
       );
 
     const payViews = Number(payViewAgg?.people) || 0;
+
+    const [offerViewAgg] = await db
+      .select({
+        people: sql<number>`count(distinct coalesce(
+          (${analyticsEvents.props})::jsonb->>'visitorId',
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          inArray(analyticsEvents.name, ["offer_view", "pay_view"])
+        )
+      );
+
+    const offerViews = Number(offerViewAgg?.people) || 0;
 
     const paySourceRows = await db
       .select({
@@ -626,6 +644,7 @@ export async function GET(request: Request) {
       },
       payFunnel: {
         visitors,
+        offerViews,
         payViews,
         signups: signupTotal,
         buyers,
