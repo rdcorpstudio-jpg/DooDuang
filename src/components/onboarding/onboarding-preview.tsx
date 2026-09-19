@@ -22,34 +22,54 @@ const GOLD_BTN =
 /** แผ่นพรีเมียมจากดีไซน์ — ปัดดูทีละรูป */
 const SHOWCASE = [
   {
-    id: "overview",
-    src: "/images/onboarding/premium-showcase/01-overview.webp",
-    label: "ภาพรวม",
+    id: "year",
+    src: "/images/onboarding/premium-showcase/01-year.webp",
+    label: "ดวงรายปี",
   },
   {
-    id: "year-bazi",
-    src: "/images/onboarding/premium-showcase/02-year-bazi.webp",
-    label: "ดวงรายปี · ปาจื้อ",
+    id: "bazi",
+    src: "/images/onboarding/premium-showcase/02-bazi.webp",
+    label: "ปาจื้อ",
   },
   {
-    id: "self-couple",
-    src: "/images/onboarding/premium-showcase/03-self-couple.webp",
-    label: "ตัวตน · ดวงคู่",
+    id: "self-map",
+    src: "/images/onboarding/premium-showcase/03-self-map.webp",
+    label: "แผนที่ตัวตน",
   },
   {
-    id: "face-palm",
-    src: "/images/onboarding/premium-showcase/04-face-palm.webp",
-    label: "โหงวเฮ้ง · ลายมือ",
+    id: "couple",
+    src: "/images/onboarding/premium-showcase/04-couple.webp",
+    label: "ดวงคู่",
   },
   {
-    id: "calendar-daily",
-    src: "/images/onboarding/premium-showcase/05-calendar-daily.webp",
-    label: "ปฏิทิน · คำทำนาย",
+    id: "face",
+    src: "/images/onboarding/premium-showcase/05-face.webp",
+    label: "โหงวเฮ้ง",
   },
   {
-    id: "color-wallpaper",
-    src: "/images/onboarding/premium-showcase/06-color-wallpaper.webp",
-    label: "สีมงคล · วอลเปเปอร์",
+    id: "palm",
+    src: "/images/onboarding/premium-showcase/06-palm.webp",
+    label: "ลายมือ",
+  },
+  {
+    id: "calendar",
+    src: "/images/onboarding/premium-showcase/07-calendar.webp",
+    label: "ปฏิทินมงคล",
+  },
+  {
+    id: "tarot",
+    src: "/images/onboarding/premium-showcase/08-tarot.webp",
+    label: "ดูไพ่",
+  },
+  {
+    id: "wallpaper",
+    src: "/images/onboarding/premium-showcase/09-wallpaper.webp",
+    label: "วอลเปเปอร์",
+  },
+  {
+    id: "shirt",
+    src: "/images/onboarding/premium-showcase/10-shirt.webp",
+    label: "สีเสื้อ",
   },
 ] as const;
 
@@ -104,8 +124,8 @@ function ShowcaseStackCarousel({
       const vw = el.clientWidth || 360;
       const vh =
         typeof window !== "undefined" ? window.innerHeight : 700;
-      /* รูปจริง 576×1024 — กรอบสัดส่วนเดียวกับรูปเสมอ */
-      const ASPECT = 1024 / 576;
+      /* รูปจริง 941×1672 — กรอบสัดส่วนเดียวกับรูปเสมอ */
+      const ASPECT = 1672 / 941;
       const maxH = Math.round(vh * 0.72);
       const cardW = Math.round(
         Math.min(vw * 0.99, 480, maxH / ASPECT),
