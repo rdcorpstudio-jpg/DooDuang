@@ -687,7 +687,7 @@
   background-color: rgba(16, 24, 39, 0.92) !important;
 }
 
-/* Keep Google sign-in truly white on Mae navy pages */
+/* Keep Google sign-in truly white on Mae navy pages (except login outline) */
 .phone-frame--mae .google-white-btn,
 .phone-frame--mae button.google-white-btn {
   background-color: #ffffff !important;
@@ -713,21 +713,39 @@
   -webkit-text-fill-color: #3c4043 !important;
 }
 
-/* Login — room for gate arch at top (image 2 has empty mid for UI) */
+/* Login — atmosphere only; outline buttons match v3 */
 .login-screen-sky {
-  height: clamp(7.5rem, 38dvh, 17rem);
+  height: 0;
 }
 
-@media (max-height: 720px) {
-  .login-screen-sky {
-    height: clamp(5rem, 28dvh, 11rem);
-  }
+.login-outline-btn {
+  box-shadow: inset 0 0 0 1.5px rgba(247, 244, 236, 0.82);
+  background: transparent;
 }
 
-@media (min-height: 860px) {
-  .login-screen-sky {
-    height: clamp(11rem, 40dvh, 18.5rem);
-  }
+.login-screen .google-white-btn,
+.phone-frame--mae .login-screen .google-white-btn,
+.phone-frame--mae .login-screen button.google-white-btn {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #f7f4ec !important;
+  -webkit-text-fill-color: #f7f4ec !important;
+  border-color: transparent !important;
+  box-shadow: inset 0 0 0 1.5px rgba(247, 244, 236, 0.82) !important;
+}
+
+.login-screen .google-white-btn:hover,
+.phone-frame--mae .login-screen .google-white-btn:hover,
+.phone-frame--mae .login-screen button.google-white-btn:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #f7f4ec !important;
+  -webkit-text-fill-color: #f7f4ec !important;
+}
+
+.login-screen .google-white-btn span,
+.phone-frame--mae .login-screen .google-white-btn span {
+  color: #f7f4ec !important;
+  -webkit-text-fill-color: #f7f4ec !important;
 }
 
 .phone-frame--mae .ring-\[\#9B7FE8\]\/12,

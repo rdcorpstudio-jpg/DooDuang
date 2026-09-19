@@ -30,10 +30,14 @@ export function LineSignInButton({
   callbackUrl = DEFAULT_LOGIN_CALLBACK,
   className,
   buttonClassName,
+  label = "เข้าสู่ระบบด้วย LINE",
+  variant = "brand",
 }: {
   callbackUrl?: string;
   className?: string;
   buttonClassName?: string;
+  label?: string;
+  variant?: "brand" | "outline";
 }) {
   const [loading, setLoading] = useState(false);
 
@@ -52,21 +56,24 @@ export function LineSignInButton({
         disabled={loading}
         className={cn(
           "inline-flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13.5px] font-semibold text-white outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#06C755]/45 disabled:opacity-60",
-          buttonClassName
+          variant === "outline" && "login-outline-btn text-[#f7f4ec]",
+          buttonClassName,
         )}
-        style={{
-          background: "#06C755",
-          boxShadow: "0 6px 14px rgba(6,199,85,0.2)",
-        }}
+        style={
+          variant === "brand"
+            ? {
+                background: "#06C755",
+                boxShadow: "0 6px 14px rgba(6,199,85,0.2)",
+              }
+            : undefined
+        }
       >
         {loading ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2.2} />
         ) : (
           <LineMark className="h-4 w-4" />
         )}
-        <span className="dd-btn-label">
-          {loading ? "กำลังเปิด LINE…" : "เข้าสู่ระบบด้วย LINE"}
-        </span>
+        {loading ? "กำลังเปิด LINE…" : label}
       </button>
     </div>
   );
