@@ -855,7 +855,7 @@ export function CalendarDraft() {
           open={payOpen}
           onClose={() => setPayOpen(false)}
           onPaid={() => {
-            setPremiumUnlocked(true);
+            setPremiumUnlocked({ birthDate, nickname });
             setPremium(true);
             setPayOpen(false);
           }}

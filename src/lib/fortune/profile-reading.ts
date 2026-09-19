@@ -3,6 +3,32 @@ import type { BaziInput } from "@/lib/fortune/bazi";
 import { resolveBirthPlace, timezoneFromBirthPlace } from "@/lib/fortune/birth-place";
 import type { FortuneUserProfile } from "@/lib/fortune/profile-storage";
 
+/** Loose profile shape from UI state / localStorage slices. */
+type ProfileAnalyzeSource = {
+  birthDate: string;
+  nickname: string;
+  gender?: FortuneUserProfile["gender"] | string | null;
+  genderNote?: string | null;
+  birthTime?: string | null;
+  birthPlace?: string | null;
+  focus?: FortuneFocus | string | null;
+};
+
+function normalizeGender(
+  value: ProfileAnalyzeSource["gender"],
+): FortuneUserProfile["gender"] | undefined {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (
+    raw === "female" ||
+    raw === "male" ||
+    raw === "other" ||
+    raw === "unspecified"
+  ) {
+    return raw;
+  }
+  return undefined;
+}
+
 /** Stable deep seed for calendar / auspicious grids (profile + local day). */
 export function profileDeepSeed(
   profile: Pick<
@@ -25,27 +51,29 @@ export function profileDeepSeed(
 }
 
 export function profileToAnalyzeInput(
-  profile: Pick<
-    FortuneUserProfile,
-    | "birthDate"
-    | "nickname"
-    | "gender"
-    | "genderNote"
-    | "birthTime"
-    | "birthPlace"
-    | "focus"
-  >,
+  profile: ProfileAnalyzeSource,
   asOf?: Date,
 ): FortuneAnalyzeInput {
+  const gender = normalizeGender(profile.gender);
+  const focusRaw = typeof profile.focus === "string" ? profile.focus.trim() : "";
+  const focus: FortuneFocus =
+    focusRaw === "work" ||
+    focusRaw === "money" ||
+    focusRaw === "love" ||
+    focusRaw === "health" ||
+    focusRaw === "life"
+      ? focusRaw
+      : "life";
+
   return {
     birthDate: profile.birthDate,
     nickname: profile.nickname,
-    gender: profile.gender || undefined,
+    gender,
     genderNote:
-      profile.gender === "other" ? profile.genderNote?.trim() || undefined : undefined,
+      gender === "other" ? profile.genderNote?.trim() || undefined : undefined,
     birthTime: profile.birthTime?.trim() || undefined,
     birthPlace: profile.birthPlace?.trim() || undefined,
-    focus: (profile.focus as FortuneFocus | undefined) ?? "life",
+    focus,
     asOf,
   };
 }
