@@ -137,7 +137,7 @@ export function OnboardingIntakeForm() {
       className="mae-wizard relative mx-auto min-h-full w-full max-w-[480px] text-white"
       style={{ background: "transparent" }}
     >
-      <MaePageBackground />
+      <MaePageBackground blur={14} scrollBlur={false} />
 
       <div className="relative z-[2] flex min-h-full flex-col px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
         <div

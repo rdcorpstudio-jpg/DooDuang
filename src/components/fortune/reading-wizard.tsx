@@ -62,14 +62,14 @@ const STEP_META: Record<
     subtitle: "บอกชื่อที่อยากให้เรียก แล้วเลือกเพศ",
   },
   birth: {
-    eyebrow: "ขั้นที่ 2 · พรีเมียมลึก",
+    eyebrow: "ขั้นที่ 2",
     title: "วันและเวลาเกิด",
-    subtitle: "เวลาเกิดใช้คำนวณเสาชั่วโมง — ถ้าไม่ทราบแม่จะประมาณเที่ยงวัน",
+    subtitle: "ใส่วันเกิดก่อน แล้วใส่เวลาเกิดถ้าทราบ",
   },
   place: {
-    eyebrow: "ขั้นที่ 3 · พรีเมียมลึก",
+    eyebrow: "ขั้นที่ 3",
     title: "ที่เกิดและเรื่องที่อยากดู",
-    subtitle: "จังหวัด/เมืองเกิดช่วยจูน timezone · เลือก 1 เรื่องที่อยากโฟกัส",
+    subtitle: "บอกจังหวัดหรือเมืองเกิด แล้วเลือก 1 เรื่อง",
   },
 };
 
@@ -459,7 +459,7 @@ export function ReadingWizard() {
       className="mae-wizard relative mx-auto flex h-full min-h-full w-full max-w-[480px] flex-col overflow-hidden text-white"
       style={{ background: "transparent" }}
     >
-      <MaePageBackground />
+      <MaePageBackground blur={14} scrollBlur={false} />
 
       <div className="relative z-[2] flex min-h-0 flex-1 flex-col px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
         {/* Top bar */}
@@ -619,14 +619,6 @@ export function ReadingWizard() {
                       setProfile((p) => ({ ...p, birthTime }))
                     }
                   />
-                  <p
-                    className="mt-2.5 text-[14.5px] font-medium leading-snug"
-                    style={{ color: MAE.muted }}
-                  >
-                    {profile.birthTime.trim()
-                      ? "มีเวลาเกิดแล้ว — แม่จะอ่านเสาชั่วโมงได้ละเอียด"
-                      : "ยังไม่มีเวลา · ระบบจะใช้ 12:00 เป็นค่าประมาณ (ความละเอียดลดลง)"}
-                  </p>
                 </div>
               </div>
             ) : null}
@@ -651,9 +643,7 @@ export function ReadingWizard() {
                     className="mt-2 block text-[15px] font-medium leading-snug"
                     style={{ color: MAE.muted }}
                   >
-                    {profile.birthPlace.trim().length >= 2
-                      ? "ใช้จูน timezone และโทนฤกษ์ตามภูมิภาค"
-                      : "แนะนำให้ใส่จังหวัดหรือเมืองเกิด — ข้ามได้แต่ดวงจะหยาบกว่า"}
+                    ไม่ทราบจังหวัด ข้ามได้
                   </span>
                 </label>
 

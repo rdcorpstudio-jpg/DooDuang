@@ -40,12 +40,15 @@ export function MaePageBackground({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [blurPx, setBlurPx] = useState(blur);
-  const [dim, setDim] = useState(blur > 0 ? 0.1 : 0);
+  const [dim, setDim] = useState(
+    blur > 0 ? Math.min(0.32, 0.1 + blur * 0.012) : 0,
+  );
 
   useEffect(() => {
     if (!scrollBlur) {
       setBlurPx(blur);
-      setDim(blur > 0 ? 0.1 : 0);
+      // Constant blur pages (forms) need a stronger veil so UI doesn't sink into the art.
+      setDim(blur > 0 ? Math.min(0.32, 0.1 + blur * 0.012) : 0);
       return;
     }
     const root = rootRef.current;
