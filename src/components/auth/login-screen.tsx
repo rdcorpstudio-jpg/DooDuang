@@ -139,13 +139,13 @@ export function LoginScreen({
         />
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[22rem] min-h-0 flex-1 flex-col">
+      <div className="relative z-10 mx-auto flex w-full max-w-[22rem] min-h-0 flex-1 flex-col items-center text-center">
         <div className="h-11 w-full shrink-0" aria-hidden />
 
-        <h1 className="max-w-[16rem] shrink-0 text-left text-[1.55rem] font-semibold leading-[1.45] tracking-wide text-[#f7f4ec]">
+        <h1 className="max-w-[16rem] shrink-0 text-[1.55rem] font-semibold leading-[1.45] tracking-wide text-[#f7f4ec]">
           {forCheckout ? "เข้าสู่ระบบเพื่อชำระ" : "เก็บคำทำนายไว้กับคุณ"}
         </h1>
-        <p className="mt-3 shrink-0 text-left text-[15px] leading-[1.7] text-[#9aa3b2]">
+        <p className="mt-3 shrink-0 text-[15px] leading-[1.7] text-[#9aa3b2]">
           {forCheckout ? (
             <>
               เข้าสู่ระบบเพื่อยืนยันสิทธิ์หลังชำระ
@@ -162,12 +162,12 @@ export function LoginScreen({
         </p>
 
         {lineErrorMessage ? (
-          <p className="mt-3 text-left text-[12px] leading-snug text-[#ff8fa3]">
+          <p className="mt-3 text-[12px] leading-snug text-[#ff8fa3]">
             {lineErrorMessage}
           </p>
         ) : null}
 
-        <div className="mt-6 shrink-0 space-y-2.5">
+        <div className="mt-6 w-full shrink-0 space-y-2.5">
           <GoogleSignInButton
             callbackUrl={callbackUrl}
             coloredIcon
@@ -201,17 +201,17 @@ export function LoginScreen({
         </div>
 
         {PHONE_AUTH_ENABLED ? (
-          <div className="login-keyboard-hide mt-5 shrink-0">
+          <div className="login-keyboard-hide mt-5 w-full shrink-0">
             <AuthDivider />
             {showPhone ? (
-              <div className="mt-3 text-left">
+              <div className="mt-3">
                 <p className="text-[15px] font-medium leading-snug text-[#f7f4ec]">
                   ใช้เบอร์มือถือ
                 </p>
                 <p className="mt-1 text-[13px] leading-[1.65] text-[#9aa3b2]">
                   เราจะส่งรหัส OTP เพื่อยืนยันเบอร์ของคุณ
                 </p>
-                <div className="mt-3">
+                <div className="mt-3 text-left">
                   <PhoneLoginForm callbackUrl={callbackUrl} compact />
                 </div>
               </div>
@@ -228,19 +228,12 @@ export function LoginScreen({
           </div>
         ) : null}
 
-        <p className="mt-5 flex items-center gap-1.5 text-left text-[12px] leading-snug text-white/45">
+        <p className="mt-5 flex items-center justify-center gap-1.5 text-[12px] leading-snug text-white/45">
           <Lock className="h-3 w-3 shrink-0" strokeWidth={2.2} />
           ใช้สำหรับเก็บคำทำนายของคุณ
         </p>
 
-        <Link
-          href="/welcome"
-          className="mt-4 text-left text-[13px] font-medium text-white/50 outline-none transition hover:text-white/75 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
-        >
-          ดูดวงฟรีโดยไม่เข้าสู่ระบบ
-        </Link>
-
-        <p className="mt-4 text-left text-[11px] leading-[1.65] text-white/40">
+        <p className="mt-4 text-[11px] leading-[1.65] text-white/40">
           การเข้าสู่ระบบถือว่าคุณยอมรับ
           <br />
           <Link
