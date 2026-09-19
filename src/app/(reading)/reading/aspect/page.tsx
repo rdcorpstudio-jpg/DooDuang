@@ -15,7 +15,7 @@ export default function Page() {
         </div>
       }
     >
-      <AspectDetailPage backHref="/reading" />
+      <AspectDetailPage backHref="/home" />
     </Suspense>
   );
 }

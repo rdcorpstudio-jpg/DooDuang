@@ -15,7 +15,7 @@ declare global {
 export const META_PIXEL_ID = "27463772329963641";
 
 /** Purchase value from Meta event snippet (THB) */
-export const META_PURCHASE_VALUE = 390;
+export const META_PURCHASE_VALUE = 290;
 export const META_PURCHASE_CURRENCY = "THB";
 
 function MetaPixelRoutePv() {

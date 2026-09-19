@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     if (!birthDate) {
       return NextResponse.json({ error: "กรุณาเลือกวันเดือนปีเกิด" }, { status: 400 });
     }
-    if (!gender || !["female", "male", "other"].includes(gender)) {
+    if (!gender || !["female", "male", "unspecified", "other"].includes(gender)) {
       return NextResponse.json({ error: "กรุณาเลือกเพศ" }, { status: 400 });
     }
 

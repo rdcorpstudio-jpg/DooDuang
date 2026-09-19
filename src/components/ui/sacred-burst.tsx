@@ -51,7 +51,7 @@ export function useSacredBurst() {
               style={{ left: burst.x, top: burst.y }}
             />
             <span
-              className="sacred-burst-ring sacred-burst-ring-delay absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-purple-light/70"
+              className="sacred-burst-ring sacred-burst-ring-delay absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d5b16f]/70"
               style={{ left: burst.x, top: burst.y }}
             />
             <span

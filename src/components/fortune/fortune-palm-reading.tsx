@@ -7,7 +7,9 @@ import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { GuidedScanCapture } from "@/components/fortune/guided-scan-capture";
 import { ScanAnalyzingPanel } from "@/components/fortune/scan-analyzing-panel";
-import { PageBackButton } from "@/components/ui/page-back-button";
+import { MaeBrandLink } from "@/components/layout/mae-brand-link";
+import { MaePageBackground } from "@/components/layout/mae-page-background";
+import { AnimatedPage } from "@/components/ui/reveal";
 import {
   LockedPreviewTile,
   UnlockDetailBanner,
@@ -216,28 +218,58 @@ export function FortunePalmReading({
 
   if (!unlocked) {
     return (
-      <div className={cn("sky-copy relative h-full overflow-y-auto", className)}>
-        <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
-          <Header onBack={() => router.back()} />
-          <div className="fortune-glass mt-8 rounded-[22px] px-4 py-6 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(213,177,111,0.12)] ring-1 ring-[#d5b16f]/35">
-              <Lock className="h-5 w-5 text-[#d5b16f]" strokeWidth={1.9} />
+      <div className={cn("relative h-full overflow-y-auto text-white", className)}>
+        <MaePageBackground />
+        <AnimatedPage className="relative z-[1] mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-12 pt-3 sm:px-5">
+          <Header />
+          <div
+            className="mt-8 overflow-hidden rounded-[26px] px-5 py-8 text-center"
+            style={{
+              background:
+                "linear-gradient(160deg, rgba(12,28,52,0.78) 0%, rgba(5,14,30,0.72) 100%)",
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 48px rgba(0,0,0,0.28)",
+              backdropFilter: "blur(22px)",
+              WebkitBackdropFilter: "blur(22px)",
+            }}
+          >
+            <span
+              className="mx-auto flex h-14 w-14 items-center justify-center rounded-full"
+              style={{
+                background:
+                  "linear-gradient(155deg, rgba(232,209,154,0.2), rgba(184,146,79,0.12))",
+                boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.45)",
+              }}
+            >
+              <Lock className="h-6 w-6" style={{ color: "#e8d19a" }} strokeWidth={1.9} />
             </span>
-            <h1 className="mt-3 text-[1.4rem] font-bold tracking-tight text-[#f7f4ec]">
-              ดูลายมือ · พรีเมียม
+            <h1
+              className="mae-gold-text mt-4 text-[1.65rem] font-bold tracking-tight"
+              style={{ paddingTop: "0.12em", paddingBottom: "0.06em" }}
+            >
+              อ่านลายมือ
             </h1>
-            <p className="mt-2 text-[13px] leading-relaxed text-[#c5cdd9]/80">
-              ถ่ายฝ่ามือตามกรอบนำทาง เพื่ออ่านธาตุมือและเส้นหลัก
+            <p
+              className="mx-auto mt-2 max-w-[18rem] text-[16px] font-medium leading-[1.55]"
+              style={{ color: "rgba(220,230,245,0.82)" }}
+            >
+              ถ่ายฝ่ามือตามกรอบ แล้วให้แม่ช่วยอ่านธาตุมือและเส้นหลัก
             </p>
             <button
               type="button"
               onClick={() => setPayOpen(true)}
-              className="mae-gold-cta no-sky-lift mt-5 w-full rounded-full py-3 text-[15px] font-semibold outline-none transition active:scale-[0.99]"
+              className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full text-[16.5px] font-semibold outline-none transition active:scale-[0.99]"
+              style={{
+                color: "#1a1408",
+                background:
+                  "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.28)",
+              }}
             >
               ปลดล็อก · {FORTUNE_UNLOCK_PRICE} บาท
             </button>
           </div>
-        </div>
+        </AnimatedPage>
         <FortunePaymentSheet
           open={payOpen}
           onClose={() => setPayOpen(false)}
@@ -249,28 +281,36 @@ export function FortunePalmReading({
   }
 
   return (
-    <div className={cn("sky-copy relative h-full overflow-y-auto", className)}>
-      <div className="mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-10 pt-3">
-        <Header
-          onBack={() => {
-            if (step === "result" || step === "analyzing") goReady();
-            else router.back();
-          }}
-        />
+    <div className={cn("relative h-full overflow-y-auto text-white", className)}>
+      <MaePageBackground />
+      <AnimatedPage
+        key={step}
+        className="relative z-[1] mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-12 pt-3 sm:px-5"
+      >
+        <Header />
 
         {step === "ready" ? (
           <>
-            <header className="mt-5">
-              <h1 className="text-[1.55rem] font-bold tracking-tight text-[#f7f4ec]">
+            <header className="mt-4 text-center">
+              <h1
+                className="mae-gold-text text-[1.7rem] font-bold tracking-tight"
+                style={{ paddingTop: "0.14em", paddingBottom: "0.06em" }}
+              >
                 อ่านลายมือ
               </h1>
-              <p className="mt-1 text-[14px] font-medium text-[#d5b16f]">
-                ถ่ายฝ่ามือแล้ววิเคราะห์ด้วย AI
+              <p
+                className="mt-1.5 text-[16px] font-medium"
+                style={{ color: "rgba(232,209,154,0.92)" }}
+              >
+                ถ่ายฝ่ามือ แล้ววิเคราะห์ด้วย AI
               </p>
-              <p className="mt-1 text-[12px] leading-relaxed text-[#c5cdd9]/75">
+              <p
+                className="mx-auto mt-2 max-w-[20rem] text-[14.5px] font-medium leading-snug"
+                style={{ color: "rgba(186,204,230,0.72)" }}
+              >
                 {canRescan
-                  ? "อัปโหลดรูปดูพรีวิวก่อน หรือถ่ายด้วยกล้อง · สแกนได้ 1 ครั้ง / 7 วัน"
-                  : `สแกนรอบถัดไปในอีก ${cooldownDays} วัน — กดดูผลล่าสุดได้`}
+                  ? "เปิดกล้องตามกรอบ หรืออัปโหลดรูป · สแกนได้ 1 ครั้ง / 7 วัน"
+                  : `สแกนรอบถัดไปในอีก ${cooldownDays} วัน — ดูผลล่าสุดได้ตลอด`}
               </p>
             </header>
 
@@ -278,7 +318,12 @@ export function FortunePalmReading({
               <button
                 type="button"
                 onClick={viewSaved}
-                className="mae-gold-cta no-sky-lift mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-[15px] font-semibold outline-none transition active:scale-[0.99]"
+                className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full text-[15px] font-semibold outline-none transition active:scale-[0.99]"
+                style={{
+                  color: "#e8d19a",
+                  background: "rgba(232,209,154,0.1)",
+                  boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.35)",
+                }}
               >
                 ดูผลล่าสุดอีกครั้ง
               </button>
@@ -286,57 +331,121 @@ export function FortunePalmReading({
 
             {canRescan ? (
               <>
-            <div className="mt-5">
-              <PalmPhotoSlot
-                label="ฝ่ามือ"
-                url={livePhotoUrl}
-                onPick={() => uploadRef.current?.click()}
-                onClear={() => setPhoto(null)}
-              />
-            </div>
-            <input
-              ref={uploadRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                pickPhoto(e.target.files?.[0]);
-                e.target.value = "";
-              }}
-            />
+                <div className="mt-5">
+                  <PalmPhotoSlot
+                    label="ฝ่ามือ"
+                    url={livePhotoUrl}
+                    onPick={() => uploadRef.current?.click()}
+                    onClear={() => setPhoto(null)}
+                  />
+                </div>
+                <input
+                  ref={uploadRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    pickPhoto(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
 
-            {error ? (
-              <p className="mt-3 text-center text-[12px] text-[#E11D48]">{error}</p>
-            ) : null}
+                {error ? (
+                  <p className="mt-3 text-center text-[13.5px] text-[#ff8a9a]">
+                    {error}
+                  </p>
+                ) : null}
 
-            <button
-              type="button"
-              disabled={!photo}
-              onClick={analyzeDraft}
-              className="no-sky-lift dd-gold-glass-btn mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[15px] font-semibold text-[#5C4810] outline-none transition enabled:active:scale-[0.99] disabled:opacity-45"
-            >
-              วิเคราะห์ลายมือ
-            </button>
-            <button
-              type="button"
-              onClick={() => setScanOpen(true)}
-              className="no-sky-lift mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/70 py-3.5 text-[15px] font-semibold text-[#d5b16f] ring-1 ring-[#d5b16f]/35 outline-none transition active:scale-[0.99]"
-            >
-              <Camera className="h-4 w-4" strokeWidth={2} />
-              เปิดกล้องสแกน
-            </button>
-            <p className="mt-3 text-center text-[11px] leading-relaxed text-[#9aa3b2]">
-              ใช้วิเคราะห์ผลลัพธ์เท่านั้น — ไม่เก็บรูปถาวร
-            </p>
+                {photo ? (
+                  <button
+                    type="button"
+                    onClick={analyzeDraft}
+                    className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-[16px] font-semibold outline-none transition active:scale-[0.99]"
+                    style={{
+                      color: "#1a1408",
+                      background:
+                        "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)",
+                      boxShadow:
+                        "inset 0 1px 0 rgba(255,255,255,0.28), 0 10px 24px rgba(143,110,56,0.28)",
+                    }}
+                  >
+                    วิเคราะห์ลายมือ
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setScanOpen(true)}
+                    className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-[16px] font-semibold outline-none transition active:scale-[0.99]"
+                    style={{
+                      color: "#1a1408",
+                      background:
+                        "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)",
+                      boxShadow:
+                        "inset 0 1px 0 rgba(255,255,255,0.28), 0 10px 24px rgba(143,110,56,0.28)",
+                    }}
+                  >
+                    <Camera className="h-5 w-5" strokeWidth={2} />
+                    เปิดกล้องสแกน
+                  </button>
+                )}
+                {photo ? (
+                  <button
+                    type="button"
+                    onClick={() => setScanOpen(true)}
+                    className="mt-2.5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-[15.5px] font-semibold outline-none transition active:scale-[0.99]"
+                    style={{
+                      color: "#e8d19a",
+                      background: "rgba(8,16,32,0.45)",
+                      boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.32)",
+                    }}
+                  >
+                    <Camera className="h-4 w-4" strokeWidth={2} />
+                    ถ่ายใหม่ด้วยกล้อง
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => uploadRef.current?.click()}
+                    className="mt-2.5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-[15.5px] font-semibold outline-none transition active:scale-[0.99]"
+                    style={{
+                      color: "#e8d19a",
+                      background: "rgba(8,16,32,0.45)",
+                      boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.32)",
+                    }}
+                  >
+                    <ImageIcon className="h-4 w-4" strokeWidth={2} />
+                    อัปโหลดจากแกลเลอรี
+                  </button>
+                )}
+                <p
+                  className="mt-4 text-center text-[12.5px] leading-relaxed"
+                  style={{ color: "rgba(186,204,230,0.5)" }}
+                >
+                  ใช้วิเคราะห์ผลเท่านั้น — ไม่เก็บรูปถาวร
+                </p>
               </>
             ) : (
               <>
                 {error ? (
-                  <p className="mt-3 text-center text-[12px] text-[#E11D48]">{error}</p>
+                  <p className="mt-3 text-center text-[13.5px] text-[#ff8a9a]">
+                    {error}
+                  </p>
                 ) : null}
-                <p className="mt-4 rounded-[16px] bg-white/65 px-3.5 py-3 text-center text-[12px] leading-relaxed text-[#c5cdd9]/80 ring-1 ring-[#d5b16f]/18">
-                  คูลดาวน์ 7 วัน · ดูผลเดิมได้ตลอดจนกว่าจะสแกนรอบใหม่
-                </p>
+                <div
+                  className="mt-5 rounded-[20px] px-4 py-4 text-center"
+                  style={{
+                    background:
+                      "linear-gradient(160deg, rgba(12,28,52,0.72), rgba(5,14,30,0.68))",
+                    boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.2)",
+                  }}
+                >
+                  <p
+                    className="text-[15px] font-medium leading-snug"
+                    style={{ color: "rgba(220,230,245,0.82)" }}
+                  >
+                    คูลดาวน์ 7 วัน · ดูผลเดิมได้ตลอดจนกว่าจะสแกนรอบใหม่
+                  </p>
+                </div>
               </>
             )}
           </>
@@ -356,7 +465,7 @@ export function FortunePalmReading({
             onRescan={startNewScan}
           />
         ) : null}
-      </div>
+      </AnimatedPage>
 
       <GuidedScanCapture
         open={scanOpen}
@@ -374,12 +483,10 @@ export function FortunePalmReading({
   );
 }
 
-function Header({ onBack }: { onBack: () => void }) {
+function Header() {
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-      <PageBackButton onClick={onBack} className="justify-self-start" />
-      <span className="justify-self-center" aria-hidden />
-      <span aria-hidden className="justify-self-end" />
+    <div className="flex items-center justify-between gap-3">
+      <MaeBrandLink />
     </div>
   );
 }
@@ -396,26 +503,47 @@ function PalmPhotoSlot({
   onClear: () => void;
 }) {
   return (
-    <div className="fortune-glass mx-auto w-full max-w-[220px] overflow-hidden rounded-[18px]">
-      <div className="flex items-center justify-between px-3 pt-2.5">
-        <p className="text-[11px] font-semibold tracking-[0.12em] text-[#d5b16f]">
+    <div
+      className="relative mx-auto w-full overflow-hidden rounded-[24px]"
+      style={{
+        background:
+          "linear-gradient(160deg, rgba(12,28,52,0.78) 0%, rgba(5,14,30,0.72) 100%)",
+        boxShadow:
+          "inset 0 1px 0 rgba(255,255,255,0.06), 0 18px 40px rgba(0,0,0,0.28)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+      }}
+    >
+      <div className="flex items-center justify-between px-4 pt-3.5">
+        <p
+          className="text-[13px] font-semibold tracking-[0.14em]"
+          style={{ color: "#e8d19a" }}
+        >
           {label}
         </p>
         {url ? (
           <button
             type="button"
             onClick={onClear}
-            className="rounded-full p-1 text-[#9aa3b2] outline-none transition active:opacity-60"
+            className="rounded-full p-1.5 outline-none transition active:opacity-60"
+            style={{ color: "rgba(186,204,230,0.7)" }}
             aria-label={`ลบรูป${label}`}
           >
-            <X className="h-3.5 w-3.5" strokeWidth={2.2} />
+            <X className="h-4 w-4" strokeWidth={2.2} />
           </button>
         ) : null}
       </div>
+
       <button
         type="button"
         onClick={onPick}
-        className="relative mt-1.5 flex aspect-[3/4] w-full flex-col items-center justify-center gap-1.5 bg-[rgba(213,177,111,0.08)] outline-none transition active:opacity-85"
+        className="relative mx-4 mb-4 mt-2 flex aspect-[4/5] w-[calc(100%-2rem)] flex-col items-center justify-center gap-2 overflow-hidden rounded-[18px] outline-none transition active:opacity-90"
+        style={{
+          background: url
+            ? "#0b1220"
+            : "radial-gradient(ellipse 70% 60% at 50% 40%, rgba(232,209,154,0.12) 0%, rgba(8,16,32,0.5) 70%)",
+          boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.22)",
+        }}
       >
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -426,11 +554,38 @@ function PalmPhotoSlot({
           />
         ) : (
           <>
-            <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/70 ring-1 ring-[#d5b16f]/30">
-              <ImageIcon className="h-4 w-4 text-[#d5b16f]" strokeWidth={1.9} />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-4 rounded-[14px]"
+              style={{
+                boxShadow:
+                  "inset 18px 18px 0 -16px rgba(232,209,154,0.45), inset -18px 18px 0 -16px rgba(232,209,154,0.45), inset 18px -18px 0 -16px rgba(232,209,154,0.45), inset -18px -18px 0 -16px rgba(232,209,154,0.45)",
+              }}
+            />
+            <span
+              className="relative z-[1] flex h-14 w-14 items-center justify-center rounded-full"
+              style={{
+                background: "rgba(8,16,32,0.72)",
+                boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.35)",
+              }}
+            >
+              <Camera
+                className="h-6 w-6"
+                style={{ color: "#e8d19a" }}
+                strokeWidth={1.8}
+              />
             </span>
-            <span className="text-[12px] font-medium text-[#d5b16f]">
-              อัปโหลด
+            <span
+              className="relative z-[1] text-[15px] font-semibold"
+              style={{ color: "#e8d19a" }}
+            >
+              วางฝ่ามือในกรอบ
+            </span>
+            <span
+              className="relative z-[1] max-w-[14rem] text-center text-[13px] font-medium leading-snug"
+              style={{ color: "rgba(186,204,230,0.55)" }}
+            >
+              เปิดกล้องด้านล่าง หรือแตะที่นี่เพื่ออัปโหลด
             </span>
           </>
         )}
@@ -485,7 +640,7 @@ function PalmResult({
           <button
             type="button"
             onClick={onRescan}
-            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/70 px-2.5 py-1.5 text-[11px] font-medium text-[#d5b16f] ring-1 ring-[#d5b16f]/30"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[rgba(16,24,39,0.72)] px-2.5 py-1.5 text-[11px] font-medium text-[#d5b16f] ring-1 ring-[#d5b16f]/30"
           >
             <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
             สแกนใหม่

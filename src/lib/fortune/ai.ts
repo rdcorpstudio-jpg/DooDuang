@@ -20,7 +20,8 @@ const TAB_LABELS: Record<ReadingType, [string, string, string]> = {
 const GENDER_TH: Record<string, string> = {
   female: "ผู้หญิง",
   male: "ผู้ชาย",
-  other: "ไม่ระบุ",
+  unspecified: "ไม่ระบุ",
+  other: "อื่นๆ",
 };
 
 export function isOpenAIConfigured() {
@@ -141,7 +142,16 @@ export async function generateFortuneWithOpenAI(
               profile: {
                 nickname: profile.nickname,
                 birthDate: profile.birthDate,
-                gender: GENDER_TH[profile.gender] ?? profile.gender,
+                gender: (() => {
+                  const base = GENDER_TH[profile.gender] ?? profile.gender;
+                  const note =
+                    "genderNote" in profile &&
+                    typeof (profile as { genderNote?: string }).genderNote ===
+                      "string"
+                      ? (profile as { genderNote?: string }).genderNote?.trim()
+                      : "";
+                  return note ? `${base} (${note})` : base;
+                })(),
               },
               tabLabels: labels,
               schema: {

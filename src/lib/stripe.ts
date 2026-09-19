@@ -122,7 +122,7 @@ export async function createPremiumCheckoutUrl(opts: {
     opts.returnPath.startsWith("/") &&
     !opts.returnPath.startsWith("//")
       ? opts.returnPath
-      : "/premium";
+      : "/premium/pay";
 
   const existing = await getUserSubscription(opts.userId);
   if (

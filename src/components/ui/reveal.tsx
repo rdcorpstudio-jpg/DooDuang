@@ -49,16 +49,21 @@ export function Reveal({
 export function AnimatedPage({
   children,
   className,
-  delayMs = 40,
+  delayMs = 28,
+  style,
 }: {
   children: ReactNode;
   className?: string;
   delayMs?: number;
+  style?: CSSProperties;
 }) {
   const mounted = useRevealMounted(delayMs);
 
   return (
-    <div className={cn("stagger-in", mounted && "is-visible", className)}>
+    <div
+      className={cn("stagger-in", mounted && "is-visible", className)}
+      style={style}
+    >
       {children}
     </div>
   );

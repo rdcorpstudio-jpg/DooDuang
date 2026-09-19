@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 export const GENDER_OPTIONS = [
   { id: "female", label: "หญิง" },
   { id: "male", label: "ชาย" },
+  { id: "unspecified", label: "ไม่ระบุ" },
   { id: "other", label: "อื่นๆ" },
 ] as const;
 
@@ -25,7 +26,7 @@ export function SacredField({
     <div className={className}>
       <label
         htmlFor={htmlFor}
-        className="mb-2 block text-[14px] font-medium tracking-wide text-white/70"
+        className="mb-2 block text-[15.5px] font-medium tracking-wide text-[#e8d19a]"
       >
         {label}
       </label>
@@ -35,7 +36,7 @@ export function SacredField({
 }
 
 export const sacredInputClassName =
-  "w-full rounded-xl border-0 bg-[#0f0a24]/55 px-4 py-3.5 text-[16px] text-white placeholder:text-white/32 outline-none transition-all duration-200 ring-1 ring-inset ring-[#c9a8ff]/18 focus:bg-[#0f0a24]/75 focus:ring-2 focus:ring-[#a967f5]/55 focus:shadow-[0_0_16px_rgba(169,103,245,0.18)]";
+  "w-full rounded-xl border-0 bg-[rgba(16,24,39,0.72)] px-4 py-3.5 text-[15.5px] text-[#f7f4ec] placeholder:text-[#bacce6]/55 outline-none transition-all duration-200 ring-1 ring-inset ring-[rgba(232,209,154,0.28)] focus:bg-[rgba(16,24,39,0.88)] focus:ring-2 focus:ring-[#d5b16f]/45";
 
 interface SacredGenderPickerProps {
   value: Gender | "";
@@ -45,7 +46,7 @@ interface SacredGenderPickerProps {
 export function SacredGenderPicker({ value, onChange }: SacredGenderPickerProps) {
   return (
     <div
-      className="grid grid-cols-3 gap-1.5 rounded-xl bg-[#0f0a24]/45 p-1.5 ring-1 ring-inset ring-[#c9a8ff]/18"
+      className="grid grid-cols-2 gap-1.5 rounded-xl bg-[rgba(16,24,39,0.55)] p-1.5 ring-1 ring-inset ring-[rgba(232,209,154,0.28)]"
       role="group"
       aria-label="เพศ"
     >
@@ -58,13 +59,13 @@ export function SacredGenderPicker({ value, onChange }: SacredGenderPickerProps)
             aria-pressed={selected}
             onClick={() => onChange(option.id)}
             className={cn(
-              "rounded-lg py-3 text-[15px] font-medium transition-all duration-200 active:scale-[0.98]",
+              "rounded-lg px-2 py-2.5 text-[15.5px] font-semibold outline-none transition",
               selected
-                ? "bg-gradient-to-b from-[#b66bff] to-[#8b3fd9] text-white shadow-[0_4px_14px_rgba(169,103,245,0.4)]"
-                : "text-white/50 hover:bg-white/[0.04] hover:text-white/80"
+                ? "bg-[#d5b16f] text-[#101827]"
+                : "text-[#e8d19a]/75 hover:bg-[rgba(213,177,111,0.1)] hover:text-[#e8d19a]"
             )}
           >
-            {option.label}
+            <span className="dd-btn-label">{option.label}</span>
           </button>
         );
       })}

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MaeLanding } from "@/components/home/mae-landing";
+import { MaePageLoading } from "@/components/layout/mae-page-loading";
+import { startMaeNavigation } from "@/components/layout/navigation-loading";
 import { clearPremiumUnlocked } from "@/lib/fortune/premium-unlock";
 import {
   hasFreeReadingBasics,
@@ -12,6 +14,7 @@ import {
 
 /**
  * `/` — marketing landing for new users.
+ * CTA → /welcome (ฟอร์มสั้น) → preview → pay.
  * After birth/name basics are saved, skip landing → daily fortune home.
  */
 export function HomeGate() {
@@ -24,18 +27,15 @@ export function HomeGate() {
       new URLSearchParams(window.location.search).get("from") === "logout";
     if (fromLogout) clearPremiumUnlocked();
     if (!fromLogout && hasFreeReadingBasics(readFortuneProfile())) {
-      router.replace("/premium");
+      startMaeNavigation();
+      router.replace("/home");
       return;
     }
     setShowLanding(true);
   }, [router]);
 
   if (!showLanding) {
-    return (
-      <div className="flex h-full items-center justify-center px-4 text-[14px] text-[#9AB8DC]">
-        กำลังเปิด…
-      </div>
-    );
+    return <MaePageLoading label="กำลังเปิด…" hint="กำลังเช็กโปรไฟล์ของคุณ" />;
   }
 
   return <MaeLanding />;

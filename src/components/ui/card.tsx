@@ -12,7 +12,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           "glass-frame ui-lift rounded-2xl p-5",
-          glow && "shadow-[0_0_28px_rgba(169,103,245,0.35)]",
+          glow && "shadow-[0_0_28px_rgba(213,177,111,0.28)]",
           className
         )}
         {...props}

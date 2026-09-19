@@ -26,7 +26,7 @@ export const CLIENT_ANALYTICS_EVENT_NAMES = [
 export type ClientAnalyticsEventName =
   (typeof CLIENT_ANALYTICS_EVENT_NAMES)[number];
 
-/** Menu / product feature ids (align with feature-menu-page + key screens) */
+/** Menu / product feature ids (align with predict hub + key screens) */
 export const ANALYTICS_FEATURES = [
   "home",
   "menu",
@@ -145,7 +145,8 @@ export function featureFromPath(
   const hashPart = hash.startsWith("#") ? hash.slice(1) : hash;
 
   if (path === "/") return "home";
-  if (path === "/menu" || path.startsWith("/preview/menu")) return "menu";
+  if (path === "/menu" || path.startsWith("/preview/menu")) return "home";
+  if (path === "/predict" || path.startsWith("/preview/predict")) return "home";
   if (path === "/reading") return "reading";
 
   if (path === "/premium") {

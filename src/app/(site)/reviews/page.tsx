@@ -33,7 +33,7 @@ export default function ReviewsPage() {
       </div>
 
       <Link
-        href="/reading"
+        href="/welcome"
         className="mae-gold-cta group relative mx-auto mt-8 flex h-12 w-full max-w-[280px] items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98]"
       >
         <span className="text-[15px] font-semibold tracking-wide">

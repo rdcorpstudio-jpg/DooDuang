@@ -128,7 +128,7 @@ async function exchangeIdToken(
     body: JSON.stringify({
       idToken,
       checkout: Boolean(opts?.checkout),
-      returnPath: opts?.returnPath || "/premium",
+      returnPath: opts?.returnPath || "/home",
     }),
   });
   const text = await res.text();
@@ -183,9 +183,9 @@ export function wantsCheckoutAfterLogin(callbackUrl: string) {
 }
 
 /** @deprecated Prefer /premium/pay — kept for rare callers */
-export async function goToStripeCheckout(returnPath = "/premium") {
+export async function goToStripeCheckout(returnPath = "/home") {
   window.location.replace(
-    returnPath === "/premium" || returnPath === "/premium/pay"
+    returnPath === "/home" || returnPath === "/premium/pay"
       ? "/premium/pay"
       : `/premium/pay?return=${encodeURIComponent(returnPath)}`
   );
@@ -202,7 +202,7 @@ export async function completeAppLogin(
   // Login only (fast) — then browser navigates to in-app pay page
   const data = await exchangeIdToken(idToken, {
     checkout: false,
-    returnPath: "/premium",
+    returnPath: "/home",
   });
   clearOAuthPending();
   clearCallback();
@@ -242,7 +242,7 @@ export async function startGooglePopup(callbackUrl: string) {
 }
 
 export const GOOGLE_WHITE_BUTTON_CLASS =
-  "google-white-btn !flex h-11 w-full min-w-0 flex-row flex-nowrap items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[14px] border border-[#dadce0] !bg-white px-3 py-0 text-[14px] font-semibold leading-none !text-[#3c4043] shadow-none outline-none transition hover:!bg-[#f8f9fa] hover:!text-[#3c4043] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.99]";
+  "google-white-btn !flex h-11 w-full min-w-0 flex-row flex-nowrap items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[14px] border border-[#dadce0] !bg-white px-3 py-0 text-[14px] font-semibold !leading-[1.25] !text-[#3c4043] shadow-none outline-none transition hover:!bg-[#f8f9fa] hover:!text-[#3c4043] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:scale-[0.99]";
 
 export function GoogleSignInButton({
   callbackUrl = DEFAULT_LOGIN_CALLBACK,
@@ -429,7 +429,7 @@ export function GoogleSignInButton({
             aria-hidden
           />
         ) : null}
-        <span className="min-w-0 shrink truncate text-center">
+        <span className="dd-btn-label min-w-0 shrink truncate text-center">
           {loading ? "กำลังเข้าสู่ระบบ..." : label}
         </span>
       </Button>

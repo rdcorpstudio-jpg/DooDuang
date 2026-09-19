@@ -11,10 +11,10 @@ interface ZodiacPickerProps {
 }
 
 const ELEMENT_STYLE: Record<string, string> = {
-  ไฟ: "text-orange-300/70 bg-orange-500/10 border-orange-400/20",
-  ดิน: "text-amber-300/70 bg-amber-500/10 border-amber-400/20",
-  ลม: "text-sky-300/70 bg-sky-500/10 border-sky-400/20",
-  น้ำ: "text-cyan-300/70 bg-cyan-500/10 border-cyan-400/20",
+  ไฟ: "text-[#f0a070] bg-[rgba(240,160,112,0.12)] border-[rgba(240,160,112,0.35)]",
+  ดิน: "text-[#e8d19a] bg-[rgba(213,177,111,0.12)] border-[rgba(232,209,154,0.35)]",
+  ลม: "text-[#bacce6] bg-[rgba(186,204,230,0.12)] border-[rgba(186,204,230,0.35)]",
+  น้ำ: "text-[#8ec5e8] bg-[rgba(142,197,232,0.12)] border-[rgba(142,197,232,0.35)]",
 };
 
 function RevealItem({
@@ -59,13 +59,13 @@ export function ZodiacPicker({ selected, onSelect }: ZodiacPickerProps) {
               className={cn(
                 "glass-frame relative w-full overflow-hidden rounded-2xl p-3 text-center transition-all duration-300",
                 isSelected
-                  ? "scale-[1.03] shadow-[0_0_24px_rgba(168,85,247,0.4)]"
+                  ? "scale-[1.03] shadow-[0_0_24px_rgba(213,177,111,0.35)]"
                   : "active:scale-[0.98]"
               )}
             >
               {isSelected ? (
                 <span
-                  className="pointer-events-none absolute inset-0 bg-[#a967f5]/18"
+                  className="pointer-events-none absolute inset-0 bg-[rgba(213,177,111,0.16)]"
                   aria-hidden
                 />
               ) : null}
@@ -78,15 +78,15 @@ export function ZodiacPicker({ selected, onSelect }: ZodiacPickerProps) {
                   alt={zodiac.thaiName}
                 />
               </div>
-              <div className="relative z-[1] text-xs font-semibold text-white/90">
+              <div className="relative z-[1] text-[15.5px] font-semibold text-[#f7f4ec]">
                 {zodiac.thaiName}
               </div>
-              <div className="relative z-[1] mt-1 text-[9px] leading-tight text-[#d5b16f]/50">
+              <div className="relative z-[1] mt-1 text-[15.5px] font-medium leading-tight text-[#e8d19a]/75">
                 {zodiac.dateRange}
               </div>
               <span
                 className={cn(
-                  "relative z-[1] mt-2 inline-block rounded-full border px-1.5 py-0.5 text-[8px]",
+                  "relative z-[1] mt-2 inline-block rounded-full border px-2 py-0.5 text-[15.5px] font-medium",
                   ELEMENT_STYLE[zodiac.element]
                 )}
               >

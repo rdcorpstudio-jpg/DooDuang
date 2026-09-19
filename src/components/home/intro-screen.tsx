@@ -9,7 +9,6 @@ import {
   Lock,
   UserRound,
 } from "lucide-react";
-import { AstroHeroOrb } from "@/components/home/astro-hero-orb";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import {
   APP_NAME_ACCENT,
@@ -77,29 +76,18 @@ export function IntroScreen() {
       <div className="relative z-10 flex w-full max-w-full flex-1 flex-col items-center justify-center overflow-x-hidden py-2">
         <Reveal
           visible={mounted}
-          delay={40}
-          variant="scale"
-          className="w-full"
-        >
-          <div className="intro-orb-halo mx-auto w-full max-w-[280px] sm:max-w-[300px]">
-            <AstroHeroOrb />
-          </div>
-        </Reveal>
-
-        <Reveal
-          visible={mounted}
           delay={120}
           variant="glow"
-          className="-mt-1 w-full max-w-[320px] text-center"
+          className="w-full max-w-[320px] text-center"
         >
-          <h1 className="font-sacred text-[2.15rem] font-bold leading-[1.15] tracking-wide text-[#2C2458] sm:text-[2.35rem]">
+          <h1 className="font-sacred text-[2.15rem] font-bold leading-[1.4] tracking-wide text-[#f7f4ec] sm:text-[2.35rem]">
             <span>{APP_NAME_PRIMARY}</span>{" "}
-            <span className="text-[#5B45B8]">{APP_NAME_ACCENT}</span>
+            <span className="mae-gold-text">{APP_NAME_ACCENT}</span>
           </h1>
-          <p className="mt-2.5 text-[14px] font-medium leading-snug text-[#3A3270]">
+          <p className="mt-2.5 text-[14px] font-medium leading-snug text-[#e8d19a]/90">
             {APP_TAGLINE}
           </p>
-          <p className="mt-1.5 text-[13px] leading-snug text-[#6B6490]">
+          <p className="mt-1.5 text-[13px] leading-snug text-[#bacce6]/75">
             ค้นพบแนวทางเรื่องงาน เงิน และความรัก
           </p>
         </Reveal>
@@ -110,24 +98,24 @@ export function IntroScreen() {
           className="mt-5 w-full max-w-[320px]"
         >
           <Link
-            href="/reading"
-            className="group relative flex w-full items-center justify-between overflow-hidden rounded-full px-6 py-3.5 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#9B7FE8]/45"
+            href="/welcome"
+            className="group relative flex w-full items-center justify-between overflow-hidden rounded-full px-6 py-3.5 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
             style={{
               background:
-                "linear-gradient(90deg, #7B5FD4 0%, #9B7FE8 48%, #C4B0F5 100%)",
-              boxShadow: "0 10px 28px rgba(123,95,212,0.32)",
+                "linear-gradient(100deg, #ffe999 0%, #e5b84d 50%, #cda451 100%)",
+              boxShadow: "0 10px 28px rgba(143,110,56,0.32)",
             }}
           >
-            <span className="text-[16px] font-bold tracking-wide text-white">
+            <span className="text-[16px] font-bold tracking-wide text-[#1a1408]">
               เริ่มดูดวง
             </span>
             <ArrowRight
-              className="h-[18px] w-[18px] text-white transition-transform duration-200 group-hover:translate-x-0.5"
+              className="h-[18px] w-[18px] text-[#1a1408] transition-transform duration-200 group-hover:translate-x-0.5"
               strokeWidth={2.4}
             />
           </Link>
 
-          <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[#6B6490]">
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-[#bacce6]/70">
             <FortuneIcon name="lock" size={16} />
             ข้อมูลของคุณจะถูกเก็บเป็นความลับ เพื่อการทำนายเท่านั้น
           </p>
@@ -144,29 +132,27 @@ export function IntroScreen() {
                 key={label}
                 className={cn(
                   "flex flex-col items-center gap-2 px-1 text-center",
-                  i > 0 && "border-l border-[#7B6BB0]/22"
+                  i > 0 && "border-l border-[#d5b16f]/22"
                 )}
               >
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#B9A4F0]/28 ring-1 ring-[#9B7FE8]/25">
-                  <Icon className="h-5 w-5 text-[#5B45B8]" strokeWidth={1.9} />
-                </span>
-                <p className="text-[12px] font-medium leading-snug text-[#3A3270]">
+                <Icon className="h-6 w-6 text-[#d5b16f]" strokeWidth={1.9} />
+                <p className="text-[12px] font-medium leading-snug text-[#e8d19a]/90">
                   {label}
                 </p>
               </div>
             ))}
           </div>
           <p
-            className="no-sky-lift mt-3.5 flex items-center justify-center gap-1.5 text-[11px] font-medium tracking-wide text-[#6B6490]"
+            className="no-sky-lift mt-3.5 flex items-center justify-center gap-1.5 text-[11px] font-medium tracking-wide text-[#bacce6]/70"
             aria-label={`คะแนน ${HOME_RATING.toFixed(1)} จำนวนรีวิวสะสม ${HOME_REVIEW_COUNT.toLocaleString("th-TH")} รายการ`}
           >
             <span className="tracking-[0.08em] text-[#C9A227]" aria-hidden>
               ★★★★★
             </span>
-            <span className="font-semibold tabular-nums text-[#5B45B8]">
+            <span className="font-semibold tabular-nums text-[#e8d19a]">
               {HOME_RATING.toFixed(1)}
             </span>
-            <span className="text-[#B0A8C8]" aria-hidden>
+            <span className="text-[#bacce6]/50" aria-hidden>
               ·
             </span>
             <span>

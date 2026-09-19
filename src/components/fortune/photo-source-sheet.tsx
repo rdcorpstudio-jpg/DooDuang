@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Camera, ImageIcon, SwitchCamera, X } from "lucide-react";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { cn } from "@/lib/utils";
 
 /** Pick camera capture or gallery upload */
@@ -195,17 +196,14 @@ export function PhotoSourceSheet({
       ) : (
         <div className="dd-sheet-panel relative z-[1] flex h-[min(90dvh,640px)] w-full max-w-[420px] flex-col overflow-hidden rounded-t-[22px] border border-white/10 bg-[#0A1020] sm:rounded-[22px]">
           <div className="flex items-center justify-between gap-2 px-3 py-2.5">
-            <button
-              type="button"
+            <PageBackButton
               onClick={() => {
                 stopCamera();
                 setMode("pick");
                 setCamError(null);
               }}
-              className="rounded-full px-2 py-1 text-[13px] text-white/70"
-            >
-              กลับ
-            </button>
+              className="h-9 min-h-9 px-3 text-[15px]"
+            />
             <p className="text-[14px] font-semibold text-white">ถ่ายรูป</p>
             <button
               type="button"
@@ -309,10 +307,10 @@ export function PhotoSlot({
         className="relative block w-full overflow-hidden rounded-[16px] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
         style={{
           aspectRatio: "1 / 1",
-          border: "1.5px dashed rgba(123,95,212,0.45)",
-          background: "rgba(255,255,255,0.78)",
+          border: "1.5px dashed rgba(213,177,111,0.45)",
+          background: "rgba(16,24,39,0.72)",
           boxShadow:
-            "0 8px 22px rgba(80,55,150,0.12), inset 0 1px 0 rgba(255,255,255,0.95)",
+            "0 8px 22px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.06)",
         }}
       >
         {previewUrl ? (
@@ -327,8 +325,8 @@ export function PhotoSlot({
             <span
               className="flex h-12 w-12 items-center justify-center rounded-full text-[24px] font-light text-[#d5b16f]"
               style={{
-                border: "1.5px dashed rgba(123,95,212,0.4)",
-                background: "rgba(155,127,232,0.12)",
+                border: "1.5px dashed rgba(213,177,111,0.4)",
+                background: "rgba(213,177,111,0.12)",
               }}
             >
               +
@@ -343,7 +341,7 @@ export function PhotoSlot({
             "absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold",
             badgeTone === "required"
               ? "bg-[#E11D48] text-white"
-              : "bg-white text-[#c5cdd9]/80 ring-1 ring-[rgba(213,177,111,0.28)]"
+              : "bg-[rgba(16,24,39,0.9)] text-[#e8d19a] ring-1 ring-[rgba(213,177,111,0.4)]"
           )}
         >
           {badge}

@@ -286,21 +286,6 @@ export function MaeLanding() {
           />
         </div>
 
-        {/* Brand mark — centered under hands */}
-        <div className="mae-hero-wordmark pointer-events-none absolute left-1/2 z-10 w-[min(68%,13.5rem)] -translate-x-1/2 -translate-y-1/2">
-          <Reveal visible={mounted} delay={60} variant="glow">
-            <Image
-              src="/images/brand/mae-wordmark-sm.webp?v=clear1"
-              alt="แม่มั่งมี พามู"
-              width={400}
-              height={200}
-              priority
-              unoptimized
-              className="mae-logo-breathe h-auto w-full object-contain"
-            />
-          </Reveal>
-        </div>
-
         <div className="mae-hero-spacer relative z-0 w-full shrink-0" aria-hidden />
 
         <div
@@ -329,7 +314,7 @@ export function MaeLanding() {
           </p>
 
           <Link
-            href="/reading"
+            href="/welcome"
             className="mae-gold-cta group relative mx-auto mt-5 flex h-11 w-full max-w-[240px] items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           >
             <span className="text-[14px] font-bold tracking-wide">
@@ -663,7 +648,7 @@ export function MaeLanding() {
             </div>
 
             <Link
-              href="/reading"
+              href="/welcome"
               className="mae-gold-cta group relative mx-auto mt-5 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98]"
             >
               <span className="text-[15px] font-semibold tracking-wide">
@@ -868,7 +853,7 @@ export function MaeLanding() {
             เริ่มจากเรื่องที่อยู่ในใจ แล้วค่อย ๆ มองทางข้างหน้าไปด้วยกัน
           </p>
           <Link
-            href="/reading"
+            href="/welcome"
             className="mae-gold-cta group relative mx-auto mt-6 flex h-12 w-full max-w-[280px] items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98]"
           >
             <span className="text-[14px] font-semibold tracking-wide">

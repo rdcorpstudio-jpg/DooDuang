@@ -6,11 +6,13 @@
 
 // Generated from src/ by scripts/make-single.mjs; runtime dependency: lunar-typescript@1.8.6.
 
+import { buildCycleNarrative } from "@/lib/fortune/bazi/cycle-narrative";
+
 // ---- types.ts ----
 export type BaziInput = {
   birthDate: string;
   birthTime?: string;
-  gender: "female" | "male" | "other";
+  gender: "female" | "male" | "other" | "unspecified";
   timezone?: string;
   birthPlace?: string;
 };
@@ -788,7 +790,7 @@ function referenceMs(iso:string):number {
  * pure function of unchanging birth data alone. Does not mutate the input. */
 export function buildBaziChartAt(input:BaziInput,referenceInstant:string):BaziChart {
   const birth=parseBirth(input);
-  if(!['male','female','other'].includes(input.gender)) throw new TypeError('gender must be male, female, or other');
+  if(!['male','female','other','unspecified'].includes(input.gender)) throw new TypeError('gender must be male, female, other, or unspecified');
   const now=referenceMs(referenceInstant), currentYear=localDateParts(now,birth.timezone).year;
   if(currentYear<1900||currentYear>2192) throw new RangeError('Reference year must be 1900–2192');
   const calc=fourPillars(birth), ps=calc.pillars, dm=ps[2].stem;
@@ -817,45 +819,38 @@ export function buildBaziChartAt(input:BaziInput,referenceInstant:string):BaziCh
     `วัยจร ${activeLuck.top}${activeLuck.bottom} ช่วงอายุ ${activeLuck.age.toFixed(2)}–${(activeLuck.age+10).toFixed(2)} ปี · ปีจรปัจจุบัน ${currentAnnual.pillar} (เริ่มที่立春)`:
     currentAge<luck.details.startAgeYears?`ยังไม่เริ่มวัยจรแรก เริ่มประมาณอายุ ${luck.details.startAgeYears.toFixed(2)} ปี · ปีจรปัจจุบัน ${currentAnnual.pillar}`:
     `อายุปัจจุบันอยู่นอก 10 วัยจรที่แสดง · ปีจรปัจจุบัน ${currentAnnual.pillar}`;
-  const presentGods=new Set(pillars.flatMap(p=>p.gods.map(g=>g.label)));
+  const favorLabels=analysis.strength.favor.map(f=>f.label).join(' · ');
   const annualJiazi=fromJiazi(mod(activeYear-4,60));
   const annualStemGod=tenGod(dm,annualJiazi.stem);
   const annualBranchGod=tenGod(dm,BRANCHES[annualJiazi.branch].hidden[0]);
-  const favorLabels=analysis.strength.favor.map(f=>f.label).join(' · ');
-  const strengthHint=favorLabels
-    ?`กำลังเจ้าชะตาอยู่ในกลุ่ม「${analysis.strength.status}」— ธาตุที่แบบจำลอง扶抑ชี้ให้เกื้อคือ ${favorLabels}`
-    :`กำลังเจ้าชะตาอยู่ในกลุ่ม「${analysis.strength.status}」— ช่วงนี้ควรอ่านสมดุลธาตุทั้งดวงควบคู่กับสิบเทพจร`;
-  const luckMeaning=(()=>{
-    if(!activeLuck?.stem||!activeLuck.branch) return null;
-    const stemIdx=STEMS.findIndex(s=>s.char===activeLuck.stem!.char);
-    const branchIdx=BRANCHES.findIndex(b=>b.char===activeLuck.branch!.char);
-    if(stemIdx<0||branchIdx<0) return null;
-    const sg=tenGod(dm,stemIdx);
-    const bg=tenGod(dm,BRANCHES[branchIdx].hidden[0]);
-    const pillar=`${activeLuck.top}${activeLuck.bottom}`;
+  const presentGods=new Set(pillars.flatMap(p=>p.gods.map(g=>g.label)));
+  const luckMeaning = (() => {
+    if (!activeLuck?.stem || !activeLuck.branch) return null;
+    const stemIdx = STEMS.findIndex((s) => s.char === activeLuck.stem!.char);
+    const branchIdx = BRANCHES.findIndex((b) => b.char === activeLuck.branch!.char);
+    if (stemIdx < 0 || branchIdx < 0) return null;
+    const sg = tenGod(dm, stemIdx);
+    const bg = tenGod(dm, BRANCHES[branchIdx].hidden[0]);
     return {
-      pillar,
-      ageFrom:activeLuck.age,
-      ageTo:activeLuck.age+10,
-      stemGod:sg.label,
-      title:`วัยจร ${pillar} · ${sg.label} (${sg.zh})`,
-      body:`รอบโชค 10 ปีนี้ก้านนำเป็น「${sg.label}」— ${sg.meaning} พลังพื้นกิ่ง${activeLuck.bottom} เน้น「${bg.label}」— ${bg.meaning} ${strengthHint}`,
+      pillar: `${activeLuck.top}${activeLuck.bottom}`,
+      ageFrom: activeLuck.age,
+      ageTo: activeLuck.age + 10,
+      stemGod: sg.label,
+      branchGod: bg.label,
     };
   })();
-  const annualMeaning={
-    pillar:currentAnnual.pillar,
-    year:activeYear,
-    stemGod:annualStemGod.label,
-    title:`ปีจร ${currentAnnual.pillar} · ${annualStemGod.label} (${annualStemGod.zh})`,
-    body:`ปีจรนี้ (立春 ${activeYear}) ก้านปีเป็น「${annualStemGod.label}」— ${annualStemGod.meaning} พลังพื้นกิ่ง${BRANCHES[annualJiazi.branch].char} เน้น「${annualBranchGod.label}」— ${annualBranchGod.meaning}`,
+  const annualMeaningInput = {
+    pillar: currentAnnual.pillar,
+    year: activeYear,
+    stemGod: annualStemGod.label,
+    branchGod: annualBranchGod.label,
   };
-  const currentCycleMeaning={
-    luck:luckMeaning,
-    annual:annualMeaning,
-    combo:luckMeaning
-      ?`อ่านซ้อนกัน: วัยจรเน้น「${luckMeaning.stemGod}」ส่วนปีจรเน้น「${annualMeaning.stemGod}」— ใช้สิบเทพสองชั้นนี้เป็นกรอบจังหวะช่วงนี้ แล้วเทียบกับเจ้าชะตาและความหมายเชิงลึกด้านบน`
-      :`ยังไม่อยู่ในช่วงวัยจรที่แสดงชัด — ใช้อ่านปีจร「${annualMeaning.stemGod}」เป็นหลักก่อน แล้วค่อยเทียบกับเจ้าชะตาและความหมายเชิงลึก`,
-  };
+  const currentCycleMeaning = buildCycleNarrative({
+    luck: luckMeaning,
+    annual: annualMeaningInput,
+    strengthStatus: analysis.strength.status,
+    favorLabels,
+  });
   return {
     input:{birthDate:input.birthDate,birthTime:birth.time,gender:input.gender},
     meta:{

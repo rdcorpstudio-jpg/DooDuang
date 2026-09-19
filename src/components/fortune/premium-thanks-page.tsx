@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
 import {
-  APP_NAME,
-  FORTUNE_PACKAGE_LABEL,
   LINE_OA_ADD_URL,
   LINE_OA_HANDLE,
 } from "@/lib/site";
@@ -36,9 +33,7 @@ function LineMark({ className }: { className?: string }) {
  * Site-wide listener on this URL confirms pay + fires Meta/LINE Purchase.
  */
 export function PremiumThanksPage() {
-  const [ready, setReady] = useState(false);
-  const [premium, setPremium] = useState(false);
-  const [continueHref, setContinueHref] = useState("/premium");
+  const [continueHref, setContinueHref] = useState("/reading?afterPremium=1");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -49,11 +44,9 @@ export function PremiumThanksPage() {
     let cancelled = false;
 
     async function refresh() {
-      const access = await requirePremiumFromServer();
+      await requirePremiumFromServer();
       if (cancelled) return;
-      setPremium(access.ok);
       setContinueHref(getPremiumOnboardPath(readFortuneProfile()));
-      setReady(true);
     }
 
     function onPremiumChanged() {
@@ -68,90 +61,39 @@ export function PremiumThanksPage() {
     };
   }, []);
 
-  const statusLine = !ready
-    ? "กำลังยืนยันการชำระ…"
-    : premium
-      ? `พรีเมียม ${FORTUNE_PACKAGE_LABEL} ปลดล็อกแล้ว`
-      : "กำลังยืนยันสิทธิ์…";
-
   return (
     <div className="relative flex h-full min-h-full flex-col overflow-hidden text-white">
-      {/* Full-bleed Mae — same spirit as landing */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <Image
-          src="/images/bg/hero-mae-elder.webp"
-          alt=""
-          fill
-          priority
-          unoptimized
-          className="object-cover"
-          style={{ objectPosition: "58% 18%" }}
-          sizes="480px"
-        />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: "50% 28%" }}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/images/bg/mae-bg-poster.webp?v=new1"
+        >
+          <source src="/videos/mae-bg.mp4?v=new1" type="video/mp4" />
+        </video>
         <div
           className="absolute inset-0"
           style={{
             background: `
               linear-gradient(180deg,
-                rgba(16,24,39,0.18) 0%,
-                transparent 22%,
-                transparent 42%,
-                rgba(16,24,39,0.55) 68%,
-                rgba(16,24,39,0.92) 100%)
+                rgba(8,16,32,0.35) 0%,
+                rgba(8,16,32,0.08) 18%,
+                transparent 34%,
+                rgba(8,16,32,0.45) 52%,
+                rgba(8,16,32,0.88) 72%,
+                rgba(6,14,28,0.96) 100%)
             `,
-          }}
-        />
-        <div
-          className="absolute inset-x-0 bottom-0 h-[55%]"
-          style={{
-            background:
-              "radial-gradient(ellipse 90% 70% at 50% 100%, rgba(213,177,111,0.14), transparent 70%)",
           }}
         />
       </div>
 
-      <div className="relative z-10 flex min-h-full flex-col px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <div
-          className={cn(
-            "mx-auto w-[min(58%,11.5rem)] shrink-0 transition duration-700",
-            mounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-          )}
-        >
-          <Image
-            src="/images/brand/mae-wordmark-sm.webp?v=clear1"
-            alt={APP_NAME}
-            width={400}
-            height={200}
-            priority
-            unoptimized
-            className="mae-logo-breathe h-auto w-full object-contain"
-          />
-        </div>
-
-        {/* Status — mid gap between wordmark and thank-you */}
-        <div
-          className={cn(
-            "flex flex-1 items-center justify-center px-2 transition duration-700",
-            mounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-          )}
-        >
-          <p
-            className="mae-gold-text text-center text-[1.15rem] font-bold leading-snug tracking-[0.04em] sm:text-[1.25rem]"
-            style={{
-              textShadow:
-                "0 1px 2px rgba(16,24,39,0.85), 0 8px 24px rgba(16,24,39,0.55)",
-            }}
-          >
-            {ready && !premium ? (
-              <span className="inline-flex items-center gap-2">
-                <Loader2 className="h-5 w-5 animate-spin text-[#e8d19a]" />
-                {statusLine}
-              </span>
-            ) : (
-              statusLine
-            )}
-          </p>
-        </div>
+      <div className="relative z-10 flex min-h-full flex-col px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(0.85rem,env(safe-area-inset-top))]">
+        <div className="h-[42dvh] shrink-0" aria-hidden />
 
         <div
           className={cn(
@@ -159,19 +101,19 @@ export function PremiumThanksPage() {
             mounted ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
           )}
         >
-          <h1 className="font-sacred text-[1.85rem] font-normal leading-[1.25] tracking-[0.02em] text-white">
+          <h1 className="font-sacred text-[1.7rem] font-normal leading-[1.28] tracking-[0.02em] text-white sm:text-[1.85rem]">
             ขอบคุณที่ไว้วางใจ
-            <span className="mae-hero-gold-line mt-1 block text-[1.95rem]">
+            <span className="mae-hero-gold-line mt-1.5 block text-[1.8rem] leading-[1.3] sm:text-[1.95rem]">
               แม่มั่งมีอยู่ตรงนี้
             </span>
           </h1>
 
-          <p className="mt-3 max-w-[17.5rem] text-[13px] leading-[1.7] text-[#d8dee8]/88">
+          <p className="mt-3.5 max-w-[18rem] text-[15.5px] font-medium leading-[1.65] text-[#e8eef8]/92">
             เก็บสิทธิ์พรีเมียมไว้ในไลน์
             <br />
             รับฤกษ์อัปเดต และแจ้งเตือนก่อนหมดอายุ
             <br />
-            <span className="text-[#e8d19a]/88">{LINE_OA_HANDLE}</span>
+            <span className="font-semibold text-[#e8d19a]">{LINE_OA_HANDLE}</span>
           </p>
 
           <a
@@ -184,7 +126,7 @@ export function PremiumThanksPage() {
                 path: "/premium/thanks",
               });
             }}
-            className="mt-5 inline-flex h-12 w-full max-w-[240px] items-center justify-center gap-2 rounded-full text-[15px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
+            className="mt-5 inline-flex h-12 w-full max-w-[260px] items-center justify-center gap-2 rounded-full text-[15.5px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
             style={{
               background: "#06C755",
               boxShadow:
@@ -197,34 +139,27 @@ export function PremiumThanksPage() {
 
           <Link
             href={continueHref}
-            className="mae-gold-cta group relative mt-3 flex h-11 w-full max-w-[240px] items-center justify-center rounded-full px-6 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+            className="mae-gold-cta group relative mt-2.5 flex h-11 w-full max-w-[260px] items-center justify-center rounded-full px-6 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           >
-            <span className="text-[14px] font-bold tracking-wide">
+            <span className="text-[15.5px] font-bold tracking-wide">
               เริ่มดูดวงพรีเมียม →
             </span>
           </Link>
 
-          <Link
-            href="/dashboard"
-            className="mt-3 text-[12px] text-[#c5cdd9]/65 outline-none transition hover:text-[#e8d19a]"
-          >
-            ไว้ทีหลัง · ไปหน้าบัญชี
-          </Link>
-
-          <div className="mt-5 flex w-fit max-w-full items-center justify-center gap-1.5 text-left">
+          <div className="mt-4 flex w-fit max-w-full items-center justify-center gap-2 text-left">
             <Image
               src="/images/brand/diamond-trophy-transparent.webp"
               alt=""
               width={56}
               height={56}
               unoptimized
-              className="h-12 w-12 object-contain"
+              className="h-11 w-11 object-contain"
             />
             <div className="min-w-0 py-0.5">
-              <p className="text-[9px] font-semibold tracking-[0.16em] text-[#d5b16f]/9">
+              <p className="text-[13px] font-semibold tracking-[0.14em] text-[#e8d19a]">
                 เกียรติยศ
               </p>
-              <p className="mae-gold-text font-sacred text-[1rem] leading-snug">
+              <p className="mae-gold-text font-sacred text-[1.1rem] leading-snug">
                 รางวัลเพชรสยาม 2026
               </p>
             </div>

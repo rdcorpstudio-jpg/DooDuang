@@ -121,7 +121,7 @@ export function AstroHeroOrb({
               }
             />
             {!isResult ? (
-              <div className="astro-hero-bloom-violet absolute inset-[14%] rounded-full" />
+              <div className="astro-hero-bloom-gold absolute inset-[14%] rounded-full opacity-70" />
             ) : null}
             {sparks.map((s) => (
               <span
@@ -420,12 +420,12 @@ export function AstroHeroOrb({
                 <stop offset="25%" stopColor="#f0d78c" stopOpacity="0.5" />
                 <stop
                   offset="55%"
-                  stopColor={isResult ? "#e8c547" : "#a78bfa"}
+                  stopColor={isResult ? "#e8c547" : "#d5b16f"}
                   stopOpacity={isResult ? 0.14 : 0.18}
                 />
                 <stop
                   offset="100%"
-                  stopColor={isResult ? "#c9a227" : "#7c3aed"}
+                  stopColor={isResult ? "#c9a227" : "#8f6e38"}
                   stopOpacity="0"
                 />
               </radialGradient>

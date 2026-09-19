@@ -17,17 +17,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           "disabled:cursor-not-allowed disabled:opacity-45",
           "active:scale-[0.98]",
           {
-            "bg-gradient-to-r from-[#8b3fd9] via-[#a967f5] to-[#c9a8ff] text-white shadow-[0_8px_24px_rgba(139,92,246,0.35)] hover:shadow-[0_10px_28px_rgba(169,103,245,0.45)] hover:brightness-105":
-              variant === "primary",
-            "border border-[#c9a8ff]/25 bg-white/[0.04] text-[#e9ddff] hover:bg-white/[0.08] hover:border-[#c9a8ff]/40":
+            "mae-gold-cta text-[#101827]": variant === "primary",
+            "border border-[rgba(232,209,154,0.35)] bg-[rgba(16,24,39,0.72)] text-[#e8d19a] hover:bg-[rgba(16,24,39,0.88)] hover:border-[rgba(232,209,154,0.5)]":
               variant === "secondary",
-            "text-[#d4b8ff]/85 hover:bg-white/[0.06] hover:text-white":
+            "text-[#e8d19a]/85 hover:bg-[rgba(213,177,111,0.1)] hover:text-[#e8d19a]":
               variant === "ghost",
-            "border border-[#c9a8ff]/35 text-[#d4b8ff] hover:bg-[#a967f5]/12":
+            "border border-[rgba(232,209,154,0.4)] text-[#e8d19a] hover:bg-[rgba(213,177,111,0.12)]":
               variant === "outline",
-            "px-3 py-1.5 text-[12px]": size === "sm",
-            "px-5 py-2.5 text-[14px]": size === "md",
-            "w-full px-6 py-3.5 text-[15px]": size === "lg",
+            "px-3 py-1.5 text-[15.5px]": size === "sm",
+            "px-5 py-2.5 text-[15.5px]": size === "md",
+            "w-full px-6 py-3.5 text-[15.5px]": size === "lg",
           },
           className
         )}

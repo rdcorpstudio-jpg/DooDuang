@@ -122,7 +122,7 @@ export function PhoneLoginForm({
     try {
       const next = safeCallback(callbackUrl);
       const wantPay = wantsCheckoutAfterLogin(next);
-      const returnPath = next.split("?")[0] || "/premium";
+      const returnPath = next.split("?")[0] || "/home";
 
       const res = await fetch("/api/auth/phone/verify", {
         method: "POST",
@@ -158,9 +158,9 @@ export function PhoneLoginForm({
     }
   }
 
-  const fieldH = compact ? "h-10" : "h-12";
-  const btnText = compact ? "text-[13.5px]" : "text-[15px]";
-  const labelText = compact ? "text-[11px]" : "text-[12px]";
+  const fieldH = compact ? "h-10" : "h-[3.25rem]";
+  const btnText = compact ? "text-[13.5px]" : "text-[15.5px]";
+  const labelText = compact ? "text-[11px]" : "text-[14px]";
   const gap = compact ? "space-y-2" : "space-y-3";
 
   return (
@@ -197,14 +197,14 @@ export function PhoneLoginForm({
                 setError(null);
               }}
               className={cn(
-                "phone-login-input w-full rounded-full px-3.5 text-[16px] leading-normal text-[#f7f4ec] outline-none transition placeholder:text-[#9aa3b2]/55 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35",
+                "phone-login-input w-full rounded-full px-3.5 text-[16px] leading-normal text-[#b8c0ce] outline-none transition placeholder:text-[#8b93a3]/45 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35",
                 fieldH
               )}
               style={{
                 background: "rgba(16,24,39,0.72)",
-                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
-                WebkitTextFillColor: "#f7f4ec",
-                color: "#f7f4ec",
+                boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.14)",
+                WebkitTextFillColor: "#b8c0ce",
+                color: "#b8c0ce",
                 fontSize: 16,
                 transform: "none",
                 zoom: 1,
@@ -215,18 +215,24 @@ export function PhoneLoginForm({
             type="submit"
             disabled={loading || digitsOnly(phone).length < 9}
             className={cn(
-              "mae-gold-cta inline-flex w-full items-center justify-center gap-2 rounded-full font-semibold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-45",
+              "inline-flex w-full items-center justify-center gap-2 rounded-full font-semibold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#e8d19a]/45 disabled:opacity-45",
               fieldH,
               btnText
             )}
+            style={{
+              color: "#e8d19a",
+              background: "rgba(18, 28, 48, 0.72)",
+              border: "1px solid rgba(213, 177, 111, 0.28)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+            }}
           >
             {loading ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2.2} />
-                กำลังส่งรหัส…
+                <span className="dd-btn-label">กำลังส่งรหัส…</span>
               </>
             ) : (
-              "รับรหัส OTP"
+              <span className="dd-btn-label">รับรหัส OTP</span>
             )}
           </button>
         </form>
@@ -304,18 +310,24 @@ export function PhoneLoginForm({
             type="submit"
             disabled={loading || digitsOnly(code).length < 4}
             className={cn(
-              "mae-gold-cta inline-flex w-full items-center justify-center gap-2 rounded-full font-semibold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-45",
+              "inline-flex w-full items-center justify-center gap-2 rounded-full font-semibold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#e8d19a]/45 disabled:opacity-45",
               fieldH,
               btnText
             )}
+            style={{
+              color: "#e8d19a",
+              background: "rgba(18, 28, 48, 0.72)",
+              border: "1px solid rgba(213, 177, 111, 0.28)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+            }}
           >
             {loading ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2.2} />
-                กำลังยืนยัน…
+                <span className="dd-btn-label">กำลังยืนยัน…</span>
               </>
             ) : (
-              "เข้าสู่ระบบ"
+              <span className="dd-btn-label">เข้าสู่ระบบ</span>
             )}
           </button>
           <button

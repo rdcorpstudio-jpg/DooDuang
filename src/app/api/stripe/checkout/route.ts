@@ -104,7 +104,10 @@ export async function POST(request: Request) {
       if (wantsJson) {
         return NextResponse.json({ error: err.message, code: "ALREADY_SUBSCRIBED" }, { status: 409 });
       }
-      return NextResponse.redirect(new URL("/premium", request.url), 303);
+      return NextResponse.redirect(
+        new URL("/reading?afterPremium=1", request.url),
+        303,
+      );
     }
     console.error("Stripe checkout failed:", err);
     const message = err instanceof Error ? err.message : "";

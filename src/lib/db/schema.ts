@@ -130,6 +130,7 @@ export const fortuneProfiles = pgTable("fortune_profiles", {
   nickname: text("nickname").notNull(),
   birthDate: text("birth_date").notNull(),
   gender: text("gender"),
+  genderNote: text("gender_note"),
   birthTime: text("birth_time"),
   birthPlace: text("birth_place"),
   focus: text("focus"),

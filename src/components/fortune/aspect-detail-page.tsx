@@ -23,6 +23,7 @@ import {
   hydrateFortuneProfileFromWizard,
   readFortuneProfile,
 } from "@/lib/fortune/profile-storage";
+import { profileToAnalyzeInput } from "@/lib/fortune/profile-reading";
 import {
   requirePremiumFromServer,
   setPremiumUnlocked,
@@ -74,11 +75,11 @@ export function AspectDetailPage({
   const from = search.get("from");
   const backHref =
     from === "premium"
-      ? "/premium"
-      : from === "menu"
-        ? "/menu"
+      ? "/home"
+      : from === "menu" || from === "predict"
+        ? "/home"
         : from === "reading"
-          ? "/premium"
+          ? "/home"
           : backHrefProp;
   const [ready, setReady] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
@@ -136,14 +137,7 @@ export function AspectDetailPage({
   useStripePaymentReturn(handlePaid);
 
   const pack = useMemo(
-    () =>
-      buildDailyReadingPack({
-        birthDate: profile.birthDate,
-        nickname: profile.nickname,
-        birthTime: profile.birthTime,
-        focus: profile.focus,
-        gender: profile.gender,
-      }),
+    () => buildDailyReadingPack(profileToAnalyzeInput(profile)),
     [profile]
   );
 

@@ -53,7 +53,7 @@ export function FortuneLuckyExtras({
     <section className={cn("fortune-glass overflow-hidden rounded-[16px]", className)}>
       <div className="px-3 pt-3">
         <div className="flex items-center gap-1.5">
-          <Target className="h-3.5 w-3.5 shrink-0 text-[#F16DB5]" strokeWidth={1.8} />
+          <Target className="h-3.5 w-3.5 shrink-0 text-[#d5b16f]" strokeWidth={1.8} />
           <h3 className="text-[13px] font-semibold text-[#F7F8FF]">เลขนำโชค</h3>
         </div>
 
@@ -85,7 +85,7 @@ export function FortuneLuckyExtras({
         type="button"
         onClick={() => setOpenNumbers((v) => !v)}
         aria-expanded={openNumbers}
-        className="flex w-full items-center justify-center gap-1 border-t border-white/[0.08] py-2 text-[13px] font-medium text-[#F16DB5] outline-none focus-visible:ring-2 focus-visible:ring-[#F16DB5]/40"
+        className="flex w-full items-center justify-center gap-1 border-t border-white/[0.08] py-2 text-[13px] font-medium text-[#d5b16f] outline-none focus-visible:ring-2 focus-visible:ring-[#d5b16f]/40"
       >
         ดูความหมาย
         <ChevronDown

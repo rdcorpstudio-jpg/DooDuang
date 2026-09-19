@@ -1,23 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BirthDatePicker } from "@/components/fortune/birth-date-picker";
-import { FortuneLoading } from "@/components/fortune/fortune-loading";
-import { FortuneResultView } from "@/components/fortune/fortune-result-view";
-import { ZodiacWheelBg } from "@/components/layout/zodiac-wheel-bg";
+import { FortuneLoading, FORTUNE_LOADING_DURATION_MS } from "@/components/fortune/fortune-loading";
 import { PageBackButton } from "@/components/ui/page-back-button";
+import { MaePageBackground } from "@/components/layout/mae-page-background";
+import { MaeBrandLink } from "@/components/layout/mae-brand-link";
+import { AnimatedPage } from "@/components/ui/reveal";
 import { READING_OPTIONS } from "@/lib/fortune/zodiac";
-import type { ExtendedFortuneResult } from "@/lib/fortune/extended";
+import {
+  readFortuneProfile,
+  writeFortuneProfile,
+} from "@/lib/fortune/profile-storage";
 import { Check, ChevronRight } from "lucide-react";
 import {
   GENDER_OPTIONS,
   type Gender,
 } from "@/components/ui/sacred-form";
 import { cn } from "@/lib/utils";
-
-type FortuneApiResult = ExtendedFortuneResult & { shareToken?: string | null };
 
 interface ReadingFormProps {
   type: string;
@@ -28,9 +30,10 @@ interface ProfileForm {
   nickname: string;
   birthDate: string;
   gender: Gender | "";
+  genderNote: string;
 }
 
-const MIN_LOADING_MS = 4800;
+const MIN_LOADING_MS = FORTUNE_LOADING_DURATION_MS;
 
 const MAE = {
   gold: "#d5b16f",
@@ -50,6 +53,11 @@ const GENDER_ICONS: Record<
     alt: "ชาย",
     sizeClass: "h-9 w-9",
   },
+  unspecified: {
+    src: "/images/icons/gender-other.webp?v=gold3d4",
+    alt: "ไม่ระบุ",
+    sizeClass: "h-9 w-9",
+  },
   other: {
     src: "/images/icons/gender-other.webp?v=gold3d4",
     alt: "อื่นๆ",
@@ -67,23 +75,18 @@ function todayIso() {
 }
 
 export function ReadingForm({ type }: ReadingFormProps) {
-  const [mounted, setMounted] = useState(false);
+  const router = useRouter();
   const [profile, setProfile] = useState<ProfileForm>({
     realName: "",
     nickname: "",
     birthDate: todayIso(),
     gender: "",
+    genderNote: "",
   });
-  const [result, setResult] = useState<FortuneApiResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const readingOption = READING_OPTIONS.find((o) => o.id === type);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setMounted(true), 40);
-    return () => window.clearTimeout(timer);
-  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -93,27 +96,29 @@ export function ReadingForm({ type }: ReadingFormProps) {
     const startedAt = Date.now();
 
     try {
-      const res = await fetch("/api/fortune", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, ...profile }),
+      const existing = readFortuneProfile();
+      writeFortuneProfile({
+        realName: profile.realName,
+        nickname: profile.nickname,
+        birthDate: profile.birthDate,
+        gender: profile.gender,
+        genderNote:
+          profile.gender === "other" ? profile.genderNote.trim() : undefined,
+        birthTime: existing?.birthTime,
+        birthPlace: existing?.birthPlace,
+        focus: existing?.focus,
+        deepenSkipped: existing?.deepenSkipped,
+        profileLockedUntil: existing?.profileLockedUntil,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "เกิดข้อผิดพลาด");
-      }
 
       const elapsed = Date.now() - startedAt;
       if (elapsed < MIN_LOADING_MS) {
         await wait(MIN_LOADING_MS - elapsed);
       }
 
-      setResult(data);
+      router.replace("/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
-    } finally {
       setLoading(false);
     }
   }
@@ -122,51 +127,25 @@ export function ReadingForm({ type }: ReadingFormProps) {
     profile.realName.trim() &&
     profile.nickname.trim() &&
     profile.birthDate &&
-    profile.gender;
+    profile.gender &&
+    (profile.gender !== "other" || profile.genderNote.trim());
 
   if (!readingOption) {
     return (
       <div className="relative flex h-full items-center justify-center px-6">
-        <div className="text-center">
+        <div className="flex flex-col items-center text-center">
           <p className="text-white/60">ไม่พบประเภทดูดวงนี้</p>
-          <Link href="/reading" className="mt-4 inline-block text-sm text-[#d5b16f]">
-            กลับ
-          </Link>
+          <PageBackButton href="/reading" className="mt-4" />
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      className={cn(
-        "mae-wizard relative h-full overflow-x-hidden overflow-y-auto overscroll-contain text-white",
-        mounted ? "opacity-100" : "opacity-0",
-      )}
-    >
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div
-          className="absolute inset-0 bg-cover bg-no-repeat"
-          style={{
-            backgroundImage: "url(/images/bg/mae-app-bg.webp?v=gate4)",
-            backgroundPosition: "50% 30%",
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `
-              linear-gradient(180deg,
-                rgba(10,14,24,0.12) 0%,
-                rgba(10,14,24,0.22) 40%,
-                rgba(10,14,24,0.45) 70%,
-                rgba(10,14,24,0.62) 100%)
-            `,
-          }}
-        />
-      </div>
+    <div className="mae-wizard relative h-full overflow-x-hidden overflow-y-auto overscroll-contain text-white">
+      <MaePageBackground />
 
-      {loading && !result ? (
+      {loading ? (
         <div className="relative z-10 h-full">
           <FortuneLoading
             nickname={profile.nickname}
@@ -175,39 +154,43 @@ export function ReadingForm({ type }: ReadingFormProps) {
         </div>
       ) : null}
 
-      <div className="relative z-10 min-h-full px-5 pb-10 pt-4">
-        {!result && !loading ? (
+      <AnimatedPage className="relative z-10 min-h-full px-5 pb-10 pt-4">
+        {!loading ? (
           <>
-            <PageBackButton href="/reading" />
+            <div className="flex items-center justify-between gap-3">
+              <MaeBrandLink />
+              <PageBackButton href="/reading" />
+            </div>
 
             <div className="mx-auto mt-4 max-w-[340px]">
-              <div className="wizard-step-header relative mb-5 text-center">
-                <div
-                  className="wizard-step-zodiac pointer-events-none absolute left-1/2 z-0 -translate-x-1/2 -translate-y-1/2"
-                  aria-hidden
-                >
-                  <div className="wizard-step-zodiac-spin h-full w-full">
-                    <ZodiacWheelBg className="h-full w-full" />
-                  </div>
-                </div>
+              <div
+                className="wizard-step-panel wizard-step-forward wizard-step-header relative mb-5 overflow-visible text-center"
+              >
                 <p
-                  className="relative z-10 mb-2 text-[12px] font-semibold tracking-[0.14em]"
-                  style={{ color: MAE.gold }}
+                  className="wizard-anim-item relative z-10 mb-2 text-[12px] font-semibold tracking-[0.14em]"
+                  style={{ color: MAE.gold, ["--wizard-delay" as string]: "40ms" }}
                 >
                   {readingOption.title}
                 </p>
-                <h1 className="wizard-step-title relative z-10 font-sans text-[1.9rem] font-bold leading-[1.25] tracking-tight">
+                <h1
+                  className="wizard-anim-item wizard-step-title relative z-10 font-sans text-[1.9rem] font-bold tracking-tight"
+                  style={{ ["--wizard-delay" as string]: "100ms" }}
+                >
                   กรอกข้อมูลของคุณ
                 </h1>
-                <p className="wizard-step-subtitle relative z-10 mx-auto mt-2.5 max-w-[18rem] text-[13.5px] leading-relaxed">
+                <p
+                  className="wizard-anim-item wizard-step-subtitle relative z-10 mx-auto mt-2 max-w-[18rem] text-[15px] font-medium"
+                  style={{ ["--wizard-delay" as string]: "160ms" }}
+                >
                   ใช้สำหรับคำนวณผลทำนายเท่านั้น
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div
-                  className="rounded-[22px] p-5"
+                  className="wizard-anim-item rounded-[22px] p-5"
                   style={{
+                    ["--wizard-delay" as string]: "200ms",
                     background: "rgba(16,24,39,0.48)",
                     boxShadow:
                       "inset 0 0 0 1px rgba(213,177,111,0.28), 0 10px 32px rgba(0,0,0,0.22)",
@@ -260,71 +243,9 @@ export function ReadingForm({ type }: ReadingFormProps) {
                       className="mb-2 block text-[13px] font-medium tracking-wide"
                       style={{ color: "rgba(236,214,168,0.88)" }}
                     >
-                      เพศ
-                    </span>
-                    <div className="flex flex-col gap-2.5">
-                      {GENDER_OPTIONS.map((option) => {
-                        const meta = GENDER_ICONS[option.id];
-                        const selected = profile.gender === option.id;
-                        return (
-                          <button
-                            key={option.id}
-                            type="button"
-                            onClick={() =>
-                              setProfile((p) => ({ ...p, gender: option.id }))
-                            }
-                            className={cn(
-                              "flex w-full items-center gap-3 rounded-[18px] px-3.5 py-3 text-left outline-none transition duration-200",
-                              "active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
-                              selected
-                                ? "bg-[rgba(16,24,39,0.55)] shadow-[0_0_0_1.5px_rgba(213,177,111,0.75)]"
-                                : "bg-[rgba(16,24,39,0.28)] shadow-[inset_0_0_0_1px_rgba(213,177,111,0.22)]"
-                            )}
-                          >
-                            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgba(213,177,111,0.1)] shadow-[inset_0_0_0_1px_rgba(213,177,111,0.28)]">
-                              <Image
-                                src={meta.src}
-                                alt={meta.alt}
-                                width={32}
-                                height={32}
-                                unoptimized
-                                className={cn(
-                                  "object-contain object-center",
-                                  meta.sizeClass
-                                )}
-                              />
-                            </span>
-                            <span className="min-w-0 flex-1 text-[15px] font-semibold tracking-wide text-white">
-                              {option.label}
-                            </span>
-                            <span
-                              className={cn(
-                                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
-                                selected
-                                  ? "bg-[#d5b16f] text-[#101827]"
-                                  : "shadow-[inset_0_0_0_1.5px_rgba(213,177,111,0.35)]"
-                              )}
-                              aria-hidden
-                            >
-                              {selected ? (
-                                <Check className="h-3.5 w-3.5" strokeWidth={2.6} />
-                              ) : null}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <span
-                      className="mb-2 block text-[13px] font-medium tracking-wide"
-                      style={{ color: "rgba(236,214,168,0.88)" }}
-                    >
-                      วันเดือนปีเกิด
+                      วันเกิด
                     </span>
                     <BirthDatePicker
-                      tone="mae"
                       value={profile.birthDate}
                       onChange={(birthDate) =>
                         setProfile((p) => ({ ...p, birthDate }))
@@ -332,9 +253,88 @@ export function ReadingForm({ type }: ReadingFormProps) {
                     />
                   </div>
 
+                  <div>
+                    <span
+                      className="mb-2 block text-[13px] font-medium tracking-wide"
+                      style={{ color: "rgba(236,214,168,0.88)" }}
+                    >
+                      เพศ
+                    </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {GENDER_OPTIONS.map((opt) => {
+                        const selected = profile.gender === opt.id;
+                        const icon = GENDER_ICONS[opt.id];
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() =>
+                              setProfile((p) => ({
+                                ...p,
+                                gender: opt.id,
+                                genderNote:
+                                  opt.id === "other" ? p.genderNote : "",
+                              }))
+                            }
+                            className={cn(
+                              "flex flex-col items-center gap-1.5 rounded-[14px] px-2 py-3 transition",
+                              selected
+                                ? "bg-[rgba(213,177,111,0.16)] shadow-[inset_0_0_0_1.5px_rgba(213,177,111,0.55)]"
+                                : "bg-[rgba(8,18,36,0.45)] shadow-[inset_0_0_0_1px_rgba(186,204,230,0.18)]",
+                            )}
+                          >
+                            <span className="relative grid h-10 w-10 place-items-center">
+                              <Image
+                                src={icon.src}
+                                alt={icon.alt}
+                                width={36}
+                                height={36}
+                                className={icon.sizeClass}
+                                unoptimized
+                              />
+                              {selected ? (
+                                <span className="absolute -right-0.5 -top-0.5 grid h-4 w-4 place-items-center rounded-full bg-[#d5b16f]">
+                                  <Check
+                                    className="h-2.5 w-2.5 text-[#0b1220]"
+                                    strokeWidth={3}
+                                  />
+                                </span>
+                              ) : null}
+                            </span>
+                            <span
+                              className={cn(
+                                "text-[12px] font-medium",
+                                selected ? "text-[#e8d19a]" : "text-white/70",
+                              )}
+                            >
+                              {opt.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {profile.gender === "other" ? (
+                      <input
+                        type="text"
+                        value={profile.genderNote}
+                        onChange={(e) =>
+                          setProfile((p) => ({
+                            ...p,
+                            genderNote: e.target.value,
+                          }))
+                        }
+                        placeholder="ระบุเพิ่มเติม เช่น นอนไบนารี"
+                        maxLength={80}
+                        className="name-step-input mae-wizard-input mt-2.5"
+                      />
+                    ) : null}
+                  </div>
+
                   {error ? (
-                    <div className="mt-4 rounded-xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 text-[14px] text-rose-200">
-                      {error}
+                    <div className="mt-4">
+                      <p className="text-center text-[13px] text-[#e87878]">
+                        {error}
+                      </p>
                     </div>
                   ) : null}
                 </div>
@@ -366,26 +366,7 @@ export function ReadingForm({ type }: ReadingFormProps) {
             </div>
           </>
         ) : null}
-
-        {result ? (
-          <FortuneResultView
-            result={result}
-            profile={{
-              realName: profile.realName,
-              nickname: profile.nickname,
-              birthDate: profile.birthDate,
-              gender: profile.gender,
-            }}
-            readingOption={readingOption}
-            type={type}
-            shareToken={result.shareToken}
-            onRetry={() => {
-              setResult(null);
-              setError(null);
-            }}
-          />
-        ) : null}
-      </div>
+      </AnimatedPage>
     </div>
   );
 }

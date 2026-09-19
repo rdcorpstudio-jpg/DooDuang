@@ -1,9 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { APP_NAME_ACCENT, APP_NAME_PRIMARY } from "@/lib/site";
+import { MaeBrandLink } from "@/components/layout/mae-brand-link";
 
 export async function Header() {
   const session = await auth();
@@ -17,25 +16,7 @@ export async function Header() {
   return (
     <header className="z-50 shrink-0 border-b sacred-chrome">
       <div className="flex items-center justify-between px-4 py-3">
-        <Link href="/" className="group flex items-center gap-2">
-          <Image
-            src="/images/icons/star-gold.webp"
-            alt=""
-            width={22}
-            height={22}
-            className="object-contain"
-            style={{ mixBlendMode: "screen" }}
-            unoptimized
-          />
-          <span className="flex items-baseline gap-1">
-            <span className="font-sacred text-[1.05rem] text-white transition-opacity group-hover:opacity-90">
-              {APP_NAME_PRIMARY}
-            </span>
-            <span className="font-sacred intro-title-accent text-[1.05rem]">
-              {APP_NAME_ACCENT}
-            </span>
-          </span>
-        </Link>
+        <MaeBrandLink href="/" />
 
         <div className="flex items-center gap-1.5">
           {session?.user ? (

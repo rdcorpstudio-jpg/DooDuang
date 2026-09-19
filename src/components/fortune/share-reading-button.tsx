@@ -70,6 +70,51 @@ export function buildPalmShareText(pack: PalmReadingPack) {
   ].join("\n");
 }
 
+export function buildTarotShareText(input: {
+  nameTh: string;
+  upright: boolean;
+  summary: string;
+  do: string;
+  watch: string;
+}) {
+  const orientation = input.upright ? "ตั้งตรง" : "กลับหัว";
+  return [
+    `ไพ่ประจำวันจาก ${APP_NAME}`,
+    `${input.nameTh} · ${orientation}`,
+    "",
+    input.summary,
+    "",
+    `ควรทำ: ${input.do}`,
+    `ควรระวัง: ${input.watch}`,
+    "",
+    `เปิดไพ่ของคุณที่ ${appOrigin()}/reading/tarot`,
+  ].join("\n");
+}
+
+export function buildCoupleShareText(input: {
+  roleLabel: string;
+  youSign: string;
+  partnerSign: string;
+  score: number;
+  vibeTitle: string;
+  blurb: string;
+  tip: string;
+  weekTip: string;
+}) {
+  return [
+    `ดวงคู่จาก ${APP_NAME}`,
+    `${input.roleLabel} · ราศี${input.youSign} × ราศี${input.partnerSign}`,
+    `คะแนนรวม ${input.score}/12 · ${input.vibeTitle}`,
+    "",
+    input.blurb,
+    "",
+    `จังหวะสัปดาห์นี้: ${input.weekTip}`,
+    `วิธีคุยให้ดีขึ้น: ${input.tip}`,
+    "",
+    `ดูดวงคู่ที่ ${appOrigin()}/premium/couple`,
+  ].join("\n");
+}
+
 export async function shareOrCopy(title: string, text: string) {
   try {
     if (typeof navigator !== "undefined" && navigator.share) {
@@ -130,7 +175,7 @@ export function ShareReadingButton({
         "no-sky-lift inline-flex items-center justify-center gap-2 rounded-full py-3 text-[14px] font-semibold outline-none transition active:scale-[0.99]",
         variant === "primary"
           ? "dd-gold-glass-btn w-full text-[#5C4810]"
-          : "w-full bg-white/70 text-[#d5b16f] ring-1 ring-[#d5b16f]/35",
+          : "w-full bg-[rgba(16,24,39,0.72)] text-[#d5b16f] ring-1 ring-[#d5b16f]/35",
         className
       )}
     >

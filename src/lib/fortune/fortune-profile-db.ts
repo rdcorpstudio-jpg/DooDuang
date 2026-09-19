@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { requireDb } from "@/lib/db";
 import { fortuneProfiles } from "@/lib/db/schema";
 
-const GENDERS = new Set(["female", "male", "other", ""]);
+const GENDERS = new Set(["female", "male", "unspecified", "other", ""]);
 const FOCUSES = new Set(["life", "work", "money", "love", "health"]);
 
 export type FortuneProfilePayload = {
@@ -10,6 +10,7 @@ export type FortuneProfilePayload = {
   nickname: string;
   birthDate: string;
   gender: string;
+  genderNote?: string | null;
   birthTime?: string | null;
   birthPlace?: string | null;
   focus?: string | null;
@@ -29,6 +30,13 @@ export function normalizeFortuneProfileInput(
 
   const genderRaw = typeof raw.gender === "string" ? raw.gender.trim() : "";
   const gender = GENDERS.has(genderRaw) ? genderRaw : "";
+
+  const genderNoteRaw =
+    typeof raw.genderNote === "string" ? raw.genderNote.trim() : "";
+  const genderNote =
+    gender === "other" && genderNoteRaw.length >= 1
+      ? genderNoteRaw.slice(0, 80)
+      : null;
 
   const birthTime =
     typeof raw.birthTime === "string" && /^\d{1,2}:\d{2}$/.test(raw.birthTime.trim())
@@ -61,6 +69,7 @@ export function normalizeFortuneProfileInput(
     nickname,
     birthDate,
     gender,
+    genderNote,
     birthTime,
     birthPlace,
     focus,
@@ -76,6 +85,7 @@ export function rowToFortuneProfilePayload(row: typeof fortuneProfiles.$inferSel
     nickname: row.nickname,
     birthDate: row.birthDate,
     gender: row.gender ?? "",
+    genderNote: row.genderNote ?? undefined,
     birthTime: row.birthTime ?? undefined,
     birthPlace: row.birthPlace ?? undefined,
     focus: row.focus ?? undefined,
@@ -119,6 +129,7 @@ export async function upsertFortuneProfileForUser(
     nickname: input.nickname,
     birthDate: input.birthDate,
     gender: input.gender || null,
+    genderNote: input.genderNote || null,
     birthTime: input.birthTime || null,
     birthPlace: input.birthPlace || null,
     focus: input.focus || null,

@@ -13,6 +13,8 @@ export type LuckyShirtInfo = {
   name: string;
   meaning: string;
   src: string;
+  /** สีจริงสำหรับวงสี — แทนไอคอนเสื้อ 3D */
+  hex: string;
   /** ใช้เมื่อไหร่ — ผูกโทนพลังวัน */
   bestForTone: FortuneTone[];
   /** สรุปสั้นใต้ไอคอน */
@@ -32,6 +34,7 @@ export const LUCKY_SHIRT_CATALOG: LuckyShirtInfo[] = [
     meaning: "การงาน",
     label: "การงาน",
     src: "/images/shirts/green.webp",
+    hex: "#3d8f6a",
     bestForTone: ["mid"],
     summary:
       "สีเขียวช่วยให้โฟกัสงานและเดินเรื่องต่อเนื่องได้ดี เหมาะวันที่พลังปานกลาง อยากปิดงานค้างหรือจัดลำดับให้ชัด",
@@ -45,6 +48,7 @@ export const LUCKY_SHIRT_CATALOG: LuckyShirtInfo[] = [
     meaning: "โชคลาภ",
     label: "โชคลาภ",
     src: "/images/shirts/purple.webp",
+    hex: "#7b5ea7",
     bestForTone: ["high"],
     summary:
       "สีม่วงเสริมจังหวะโอกาสและการเจรจา เหมาะวันพลังสูง ที่อยากเสนอไอเดีย คุยดีล หรือเปิดประตูเรื่องใหม่",
@@ -58,6 +62,7 @@ export const LUCKY_SHIRT_CATALOG: LuckyShirtInfo[] = [
     meaning: "ความมั่นใจ",
     label: "มั่นใจ",
     src: "/images/shirts/orange.webp",
+    hex: "#e0893a",
     bestForTone: ["high", "mid"],
     summary:
       "สีส้มดันความกล้าและความมั่นใจในการแสดงออก เหมาะวันที่ต้องพรีเซนต์ คุยงาน หรือตัดสินใจให้คนอื่นเห็นทิศทาง",
@@ -71,6 +76,7 @@ export const LUCKY_SHIRT_CATALOG: LuckyShirtInfo[] = [
     meaning: "พลังใจ",
     label: "พลังใจ",
     src: "/images/shirts/red.webp",
+    hex: "#c94545",
     bestForTone: ["mid", "low"],
     summary:
       "สีแดงเติมไฟและกำลังใจ เหมาะวันที่รู้สึกเฉื่อย หรือต้องสู้เรื่องที่ต้องใช้แรงใจ ไม่ใช่แค่วิเคราะห์",
@@ -84,6 +90,7 @@ export const LUCKY_SHIRT_CATALOG: LuckyShirtInfo[] = [
     meaning: "คุ้มครอง",
     label: "คุ้มครอง",
     src: "/images/shirts/black.webp",
+    hex: "#2a3142",
     bestForTone: ["low"],
     summary:
       "สีดำช่วยเก็บพลังและตั้งขอบเขต เหมาะวันพลังต่ำ ที่ควรชะลอ จัดระบบ และไม่เปิดแนวรบใหม่",

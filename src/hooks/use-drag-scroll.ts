@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Mouse drag-to-scroll for horizontal carousels.
+ * Mouse drag-to-scroll + wheel/trackpad for horizontal carousels.
  * Touch / pen keep native overflow pan; clicks still work unless the user dragged.
  */
 export function useDragScroll() {
@@ -78,11 +78,24 @@ export function useDragScroll() {
       }
     };
 
+    /** Trackpad / mouse wheel → เลื่อนแนวนอนบนคอม */
+    const onWheel = (e: WheelEvent) => {
+      const dx = e.deltaX !== 0 ? e.deltaX : e.deltaY;
+      if (dx === 0) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 0) return;
+      const next = Math.min(max, Math.max(0, el.scrollLeft + dx));
+      if (next === el.scrollLeft) return;
+      el.scrollLeft = next;
+      e.preventDefault();
+    };
+
     el.addEventListener("pointerdown", onPointerDown);
     el.addEventListener("pointermove", onPointerMove);
     el.addEventListener("pointerup", end);
     el.addEventListener("pointercancel", end);
     el.addEventListener("lostpointercapture", end);
+    el.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
       el.removeEventListener("pointerdown", onPointerDown);
@@ -90,6 +103,7 @@ export function useDragScroll() {
       el.removeEventListener("pointerup", end);
       el.removeEventListener("pointercancel", end);
       el.removeEventListener("lostpointercapture", end);
+      el.removeEventListener("wheel", onWheel);
     };
   }, []);
 

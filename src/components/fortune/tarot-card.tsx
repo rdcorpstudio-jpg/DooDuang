@@ -69,12 +69,12 @@ export function TarotCard({ option, className }: TarotCardProps) {
   return (
     <Link href={`/reading/${option.id}`} className={cn("group block", className)}>
       <div className="relative aspect-[2/3] w-full">
-        <div className="absolute inset-0 rounded-2xl bg-brand-purple-deep/40 blur-lg translate-y-2 group-hover:translate-y-3 transition-transform" />
+        <div className="absolute inset-0 rounded-2xl bg-[#101827]/60 blur-lg translate-y-2 group-hover:translate-y-3 transition-transform" />
 
         <div
           className={cn(
             "relative h-full rounded-2xl border-2 overflow-hidden transition-all duration-300",
-            "group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-brand-purple-dark/50",
+            "group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-[#d5b16f]/25",
             option.accent,
             `bg-gradient-to-br ${option.gradient}`
           )}
@@ -101,7 +101,7 @@ export function TarotCard({ option, className }: TarotCardProps) {
         </div>
       </div>
 
-      <p className="text-center text-[11px] text-purple-400/50 mt-2 px-1 leading-snug group-hover:text-purple-300/70 transition-colors">
+      <p className="text-center text-[11px] text-[#e8d19a]/55 mt-2 px-1 leading-snug group-hover:text-[#e8d19a]/80 transition-colors">
         {option.description}
       </p>
     </Link>

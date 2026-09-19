@@ -19,7 +19,6 @@ const goldTextStyle: CSSProperties = {
   backgroundClip: "text",
   color: "transparent",
   WebkitTextFillColor: "transparent",
-  filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
 };
 
 /** Compact urgency line for pay card header */
@@ -33,7 +32,7 @@ export function PremiumOfferUrgencyLine({ className }: { className?: string }) {
   return (
     <p
       className={cn(
-        "text-[15px] font-bold leading-snug tracking-wide tabular-nums",
+        "text-[15.5px] font-semibold leading-snug tracking-wide tabular-nums",
         className,
       )}
       style={goldTextStyle}

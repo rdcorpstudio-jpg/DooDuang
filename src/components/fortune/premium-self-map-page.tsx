@@ -2,7 +2,7 @@
 
 import { useMemo, type ReactNode } from "react";
 import Image from "next/image";
-import { Check, ChevronRight } from "lucide-react";
+import { Check } from "lucide-react";
 import {
   PremiumDetailShell,
   usePremiumProfileGate,
@@ -11,9 +11,22 @@ import {
 import { analyzeFortune } from "@/lib/fortune/analyze";
 import { pickZodiacDeep } from "@/lib/fortune/content/zodiac-deep";
 import { buildPremiumValuePack } from "@/lib/fortune/build-premium-value-pack";
+import { MAE_GLASS } from "@/lib/mae-glass";
 import { cn } from "@/lib/utils";
 
 const ADVICE_STEPS = ["เลือกสิ่งสำคัญ", "ลงมือทำ", "พักให้พอ"] as const;
+
+const TITLE_GOLD = {
+  background:
+    "linear-gradient(180deg, #fffef8 0%, #ffe9b0 24%, #f0d078 48%, #d5b16f 72%, #b8924f 100%)",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  color: "transparent",
+  WebkitTextFillColor: "transparent",
+} as const;
+
+const GOLD = "#e8d19a";
+const GOLD_SOFT = "#d5b16f";
 
 /** ภาพแผนที่ตัวตน — WebP ความละเอียดต้นฉบับ ไม่ย่อพิกเซล */
 const SELF_MAP_ART = {
@@ -56,6 +69,14 @@ const SELF_MAP_ART = {
 
 type SelfMapArtSlot = keyof typeof SELF_MAP_ART;
 
+const glassStyle = {
+  background: MAE_GLASS.bg,
+  border: MAE_GLASS.border,
+  boxShadow: `${MAE_GLASS.shadow}, ${MAE_GLASS.highlight}`,
+  backdropFilter: MAE_GLASS.blur,
+  WebkitBackdropFilter: MAE_GLASS.blur,
+} as const;
+
 /** แยก bullet โดยไม่ตัดคำกลางประโยค */
 function splitBullets(text: string, max = 2): string[] {
   const trimmed = text.trim().replace(/\s+/g, " ");
@@ -93,10 +114,7 @@ function ArtSlot({
     <div
       data-art-slot={slot}
       className={cn("relative w-full overflow-hidden", className)}
-      style={{
-        aspectRatio: `${art.w} / ${art.h}`,
-        borderBottom: "1.5px solid rgba(213, 177, 111, 0.55)",
-      }}
+      style={{ aspectRatio: `${art.w} / ${art.h}` }}
       aria-hidden
     >
       <Image
@@ -114,7 +132,7 @@ function ArtSlot({
   );
 }
 
-function InfographicCard({
+function MapCard({
   children,
   className,
 }: {
@@ -123,16 +141,22 @@ function InfographicCard({
 }) {
   return (
     <section
-      className={cn("overflow-hidden rounded-[20px]", className)}
-      style={{
-        background:
-          "linear-gradient(165deg, rgba(24,34,52,0.92) 0%, rgba(16,24,39,0.96) 100%)",
-        border: "1.5px solid rgba(213, 177, 111, 0.55)",
-        boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
-      }}
+      className={cn("overflow-hidden rounded-[22px]", className)}
+      style={glassStyle}
     >
       {children}
     </section>
+  );
+}
+
+function SectionLabel({ children }: { children: ReactNode }) {
+  return (
+    <p
+      className="text-[11.5px] font-semibold tracking-[0.14em]"
+      style={{ color: GOLD_SOFT }}
+    >
+      {children}
+    </p>
   );
 }
 
@@ -194,181 +218,214 @@ export function PremiumSelfMapPage() {
   return (
     <PremiumDetailShell>
       <header className="mt-4">
-        <h1 className="text-[1.55rem] font-bold tracking-tight text-[#d5b16f]">
+        <p
+          className="text-[12.5px] font-semibold tracking-[0.16em]"
+          style={{ color: GOLD }}
+        >
+          ราศี{zodiacName}
+        </p>
+        <h1
+          className="mt-1.5 text-[clamp(1.55rem,6.5vw,1.85rem)] font-bold leading-[1.35] tracking-tight"
+          style={TITLE_GOLD}
+        >
           แผนที่ตัวเอง
         </h1>
-        <p className="mt-1 text-[14px] text-[#f7f4ec]/65">
-          ราศี{zodiacName} · ใจความสำคัญ
+        <p className="mt-2 text-[14px] font-medium leading-snug text-[rgba(186,204,230,0.78)]">
+          ใจความสำคัญของตัวตนคุณ
         </p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {chips.map((c) => (
-            <span
-              key={c}
-              className="rounded-full px-2.5 py-1 text-[12px] font-medium text-[#e8d19a]"
-              style={{
-                background: "rgba(213,177,111,0.12)",
-                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.32)",
-              }}
-            >
-              {c}
-            </span>
-          ))}
-        </div>
+        {chips.length > 0 ? (
+          <div className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+            {chips.map((c) => (
+              <span
+                key={c}
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium"
+                style={{ color: "rgba(232,209,154,0.92)" }}
+              >
+                <span
+                  className="h-1 w-1 rounded-full"
+                  style={{ background: GOLD_SOFT }}
+                  aria-hidden
+                />
+                {c}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </header>
 
-      {/* Identity — art + short line */}
-      <InfographicCard className="mt-4">
-        <ArtSlot slot="identity" className="rounded-none rounded-t-[20px]" />
-        <div className="px-3.5 py-3.5">
-          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
-            ตัวตนของคุณ
-          </p>
-          <p className="mt-1.5 text-[14px] font-medium leading-[1.55] text-white">
+      {/* Identity hero */}
+      <MapCard className="mt-5">
+        <div className="relative">
+          <ArtSlot slot="identity" />
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
+            style={{
+              background:
+                "linear-gradient(180deg, transparent, rgba(6,12,24,0.85))",
+            }}
+          />
+        </div>
+        <div className="px-4 py-4">
+          <SectionLabel>ตัวตนของคุณ</SectionLabel>
+          <p className="mt-2 text-[15px] font-medium leading-[1.6] text-white">
             {identity}
           </p>
         </div>
-      </InfographicCard>
+      </MapCard>
 
-      {/* Strength / Shadow */}
-      <div className="mt-3 grid grid-cols-2 gap-2.5">
-        <InfographicCard>
-          <ArtSlot
-            slot="strength"
-            className="rounded-none rounded-t-[20px]"
-          />
-          <div className="px-2.5 py-3">
-            <p className="text-[12px] font-semibold text-[#d5b16f]">จุดแข็ง</p>
-            <ul className="mt-2 space-y-2">
-              {strengths.map((s) => (
-                <li
-                  key={s}
-                  className="flex items-start gap-1.5 text-[12.5px] leading-[1.5] text-white/90"
-                >
-                  <Check
-                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d5b16f]"
-                    strokeWidth={2.6}
-                  />
-                  <span>{s}</span>
-                </li>
-              ))}
-            </ul>
+      {/* Strength / Shadow — stacked for readability */}
+      <div className="mt-3 space-y-3">
+        <MapCard>
+          <div className="flex">
+            <div className="relative w-[5.75rem] shrink-0 self-stretch overflow-hidden sm:w-[6.75rem]">
+              <Image
+                src={SELF_MAP_ART.strength.src}
+                alt=""
+                fill
+                unoptimized
+                quality={100}
+                className="object-cover object-center"
+                sizes="120px"
+                draggable={false}
+              />
+            </div>
+            <div className="min-w-0 flex-1 px-3.5 py-3.5">
+              <SectionLabel>จุดแข็ง</SectionLabel>
+              <ul className="mt-2.5 space-y-2">
+                {strengths.map((s) => (
+                  <li
+                    key={s}
+                    className="flex items-start gap-2 text-[13.5px] font-medium leading-[1.5] text-white/90"
+                  >
+                    <Check
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                      style={{ color: GOLD_SOFT }}
+                      strokeWidth={2.6}
+                    />
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </InfographicCard>
+        </MapCard>
 
-        <InfographicCard>
-          <ArtSlot
-            slot="shadow"
-            className="rounded-none rounded-t-[20px]"
-          />
-          <div className="px-2.5 py-3">
-            <p className="text-[12px] font-semibold text-[#d5b16f]">เงาที่ควรรู้</p>
-            <ul className="mt-2 space-y-2">
-              {shadows.map((s) => (
-                <li
-                  key={s}
-                  className="flex items-start gap-1.5 text-[12.5px] leading-[1.5] text-white/90"
-                >
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#d5b16f]" />
-                  <span>{s}</span>
-                </li>
-              ))}
-            </ul>
+        <MapCard>
+          <div className="flex">
+            <div className="relative w-[5.75rem] shrink-0 self-stretch overflow-hidden sm:w-[6.75rem]">
+              <Image
+                src={SELF_MAP_ART.shadow.src}
+                alt=""
+                fill
+                unoptimized
+                quality={100}
+                className="object-cover object-center"
+                sizes="120px"
+                draggable={false}
+              />
+            </div>
+            <div className="min-w-0 flex-1 px-3.5 py-3.5">
+              <SectionLabel>เงาที่ควรรู้</SectionLabel>
+              <ul className="mt-2.5 space-y-2">
+                {shadows.map((s) => (
+                  <li
+                    key={s}
+                    className="flex items-start gap-2 text-[13.5px] font-medium leading-[1.5] text-white/90"
+                  >
+                    <span
+                      className="mt-1.5 h-1 w-1 shrink-0 rounded-full"
+                      style={{ background: GOLD_SOFT }}
+                    />
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </InfographicCard>
+        </MapCard>
       </div>
 
-      {/* Turning — ภาพบน ข้อความเต็มด้านล่าง อ่านง่ายกว่าแยกซ้ายขวา */}
-      <InfographicCard className="mt-3">
-        <ArtSlot
-          slot="turning"
-          className="rounded-none rounded-t-[20px]"
-        />
-        <div className="px-3.5 py-3.5">
-          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
-            จุดเปลี่ยน
-          </p>
-          <p className="mt-1.5 text-[14px] font-medium leading-[1.55] text-white">
+      {/* Turning */}
+      <MapCard className="mt-3">
+        <ArtSlot slot="turning" />
+        <div className="px-4 py-4">
+          <SectionLabel>จุดเปลี่ยน</SectionLabel>
+          <p className="mt-2 text-[15px] font-medium leading-[1.6] text-white">
             {turning}
           </p>
         </div>
-      </InfographicCard>
+      </MapCard>
 
-      {/* Love / Work */}
+      {/* Love / Work row */}
       <div className="mt-3 grid grid-cols-2 gap-2.5">
-        <InfographicCard>
-          <ArtSlot
-            slot="love"
-            className="rounded-none rounded-t-[20px]"
-          />
-          <div className="px-2.5 py-3">
-            <p className="text-[12px] font-semibold text-[#d5b16f]">
-              สไตล์ความรัก
-            </p>
-            <p className="mt-1.5 text-[12.5px] leading-[1.5] text-white/90">
+        <MapCard>
+          <ArtSlot slot="love" />
+          <div className="px-3 py-3">
+            <SectionLabel>ความรัก</SectionLabel>
+            <p className="mt-1.5 text-[12.5px] font-medium leading-[1.5] text-white/90">
               {love}
             </p>
           </div>
-        </InfographicCard>
-        <InfographicCard>
-          <ArtSlot
-            slot="work"
-            className="rounded-none rounded-t-[20px]"
-          />
-          <div className="px-2.5 py-3">
-            <p className="text-[12px] font-semibold text-[#d5b16f]">
-              สไตล์การทำงาน
-            </p>
-            <p className="mt-1.5 text-[12.5px] leading-[1.5] text-white/90">
+        </MapCard>
+        <MapCard>
+          <ArtSlot slot="work" />
+          <div className="px-3 py-3">
+            <SectionLabel>การงาน</SectionLabel>
+            <p className="mt-1.5 text-[12.5px] font-medium leading-[1.5] text-white/90">
               {work}
             </p>
           </div>
-        </InfographicCard>
+        </MapCard>
       </div>
 
       {/* Quote */}
-      <InfographicCard className="mt-3 px-4 py-4 text-center">
-        <p className="text-[11px] font-semibold tracking-[0.16em] text-[#d5b16f]">
-          คำคมประจำตัว
-        </p>
-        <p className="mt-2 text-[15px] font-medium leading-snug text-white">
+      <MapCard className="mt-3 px-4 py-5 text-center">
+        <SectionLabel>คำคมประจำตัว</SectionLabel>
+        <p
+          className="mt-2.5 text-[1.05rem] font-semibold leading-[1.45]"
+          style={TITLE_GOLD}
+        >
           “{quote}”
         </p>
-      </InfographicCard>
+      </MapCard>
 
       {/* Advice */}
-      <InfographicCard className="mt-3 px-3.5 py-4">
-        <ArtSlot
-          slot="advice"
-          className="rounded-[14px]"
-        />
-        <p className="mt-3 text-[11px] font-semibold tracking-[0.14em] text-[#d5b16f]">
-          คำแนะนำประจำตัว
-        </p>
-        <p className="mt-1.5 text-[14px] font-medium leading-[1.55] text-white">
-          {advice}
-        </p>
-        <div className="mt-3.5 flex flex-wrap items-center justify-center gap-1.5">
-          {ADVICE_STEPS.map((step, i) => (
-            <div key={step} className="flex items-center gap-1.5">
-              <span
-                className="whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold text-[#e8d19a]"
+      <MapCard className="mt-3">
+        <ArtSlot slot="advice" />
+        <div className="px-4 py-4">
+          <SectionLabel>คำแนะนำประจำตัว</SectionLabel>
+          <p className="mt-2 text-[15px] font-medium leading-[1.6] text-white">
+            {advice}
+          </p>
+
+          <ol className="mt-4 space-y-2">
+            {ADVICE_STEPS.map((step, i) => (
+              <li
+                key={step}
+                className="flex items-center gap-3 rounded-[14px] px-3 py-2.5"
                 style={{
-                  background: "rgba(213,177,111,0.12)",
-                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.32)",
+                  background: "rgba(8,14,28,0.4)",
+                  boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)",
                 }}
               >
-                {step}
-              </span>
-              {i < ADVICE_STEPS.length - 1 ? (
-                <ChevronRight
-                  className="h-3.5 w-3.5 shrink-0 text-[#d5b16f]"
-                  strokeWidth={2.2}
-                />
-              ) : null}
-            </div>
-          ))}
+                <span
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[12px] font-bold tabular-nums"
+                  style={{
+                    color: "#1a1408",
+                    background:
+                      "linear-gradient(155deg, #fff8e4 0%, #e8d19a 50%, #d5b16f 100%)",
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span className="text-[13.5px] font-semibold text-white">
+                  {step}
+                </span>
+              </li>
+            ))}
+          </ol>
         </div>
-      </InfographicCard>
+      </MapCard>
     </PremiumDetailShell>
   );
 }

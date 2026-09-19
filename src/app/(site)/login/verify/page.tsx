@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { AnimatedPage } from "@/components/ui/reveal";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { PageHero } from "@/components/ui/page-hero";
 import { SacredDivider } from "@/components/ui/sacred-mark";
 
@@ -24,12 +24,7 @@ export default function VerifyPage() {
         <p className="mb-5 text-[13px] leading-relaxed text-[#9aa3b2]">
           เปิดกล่องจดหมายแล้วกดลิงก์ยืนยันเพื่อเข้าใช้งานต่อ
         </p>
-        <Link
-          href="/"
-          className="mae-gold-cta inline-flex h-10 items-center justify-center rounded-full px-5 text-[14px] font-semibold"
-        >
-          กลับหน้าแรก
-        </Link>
+        <PageBackButton href="/" label="กลับหน้าแรก" className="mx-auto" />
       </div>
     </AnimatedPage>
   );

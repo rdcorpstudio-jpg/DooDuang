@@ -3,13 +3,16 @@
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
-import { Check, ChevronLeft, ChevronRight, Loader2, Lock, X } from "lucide-react";
+import { Check, ChevronRight, Loader2, Lock, X } from "lucide-react";
 import { PremiumOfferUrgencyLine } from "@/components/fortune/premium-offer-countdown";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import {
   FORTUNE_PACKAGE_LABEL,
   FORTUNE_UNLOCK_LIST_PRICE,
   FORTUNE_UNLOCK_PRICE,
 } from "@/lib/site";
+import { isLocalPremiumBypass } from "@/lib/fortune/premium-unlock";
+import { MAE_GLASS } from "@/lib/mae-glass";
 import { cn } from "@/lib/utils";
 
 type CheckoutStep = "ready" | "redirecting";
@@ -20,9 +23,16 @@ type SessionUser = {
   email?: string | null;
 };
 
-const IS_LOCAL_DEV = process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
+const IS_LOCAL_DEV = isLocalPremiumBypass();
 
 const LOGIN_THEN_PAY = "/premium/pay";
+
+/** Mae glass — กรอบเดียวทั้งแอป */
+const GLASS = MAE_GLASS;
+
+const GOLD_LINE = "#d5b16f";
+const GOLD_SOFT = "#e8d19a";
+const TEXT_MUTED = "rgba(186, 204, 230, 0.78)";
 
 const GOLD_FOIL =
   "linear-gradient(180deg, #fffef8 0%, #ffe9b0 22%, #f0d078 48%, #d5b16f 72%, #b8924f 88%, #8f6e38 100%)";
@@ -33,52 +43,51 @@ const goldTextStyle: CSSProperties = {
   backgroundClip: "text",
   color: "transparent",
   WebkitTextFillColor: "transparent",
-  filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
 };
 
-const COMPARE_ROWS: {
-  label: string;
-  free: boolean;
-  premium: boolean;
-}[] = [
-  { label: "ดวงรายวันเบื้องต้น", free: true, premium: true },
-  { label: "ไพ่ทาโรต์", free: true, premium: true },
-  { label: "ดวงรายสัปดาห์ · แนวโน้มเดือน", free: false, premium: true },
-  { label: "ปฏิทินฤกษ์มงคลเต็ม", free: false, premium: true },
-  { label: "แผนที่ตัวตน · ราศีเชิงลึก", free: false, premium: true },
-  { label: "รายงานดวงปีเต็ม", free: false, premium: true },
-  { label: "โหงวเฮ้ง · ลายมือ · ดวงคู่", free: false, premium: true },
-  { label: "จังหวะงาน เงิน ความรัก", free: false, premium: true },
-  { label: "บันทึกโปรไฟล์ดูซ้ำได้ทั้งปี", free: false, premium: true },
-  { label: "อัปเดตคำแนะนำตามจังหวะชีวิต", free: false, premium: true },
-  { label: "ดูดวงไม่จำกัดตลอดปี", free: false, premium: true },
-  { label: "สิทธิ์ใหม่ก่อนใคร", free: false, premium: true },
-];
+const GOLD_GLASS_CTA: CSSProperties = {
+  color: "#1a1408",
+  background:
+    "linear-gradient(155deg, #fff4d0 0%, #f0d078 32%, #d5b16f 62%, #c9a35a 88%, #b8924f 100%)",
+  border: "1px solid rgba(255, 232, 170, 0.55)",
+  boxShadow:
+    "inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(143,110,56,0.22), 0 8px 20px rgba(143,110,56,0.28)",
+  backdropFilter: "blur(8px)",
+  WebkitBackdropFilter: "blur(8px)",
+};
 
-function CellMark({ on, tone }: { on: boolean; tone: "free" | "premium" }) {
-  if (!on) {
-    return <span className="text-[13px] text-white/25">—</span>;
-  }
-  if (tone === "premium") {
-    return (
-      <Check
-        className="h-4 w-4"
-        strokeWidth={2.8}
-        style={{
-          color: "#d5b16f",
-          filter: "drop-shadow(0 0 4px rgba(213,177,111,0.55))",
-        }}
-      />
-    );
-  }
-  return <Check className="h-4 w-4 text-[#7dcea0]" strokeWidth={2.6} />;
+const COMPARE_ROWS = [
+  "ดวงรายวันเบื้องต้น",
+  "ไพ่ทาโรต์",
+  "ดวงรายสัปดาห์ · แนวโน้มเดือน",
+  "ปฏิทินฤกษ์มงคลเต็ม",
+  "แผนที่ตัวตน · ราศีเชิงลึก",
+  "รายงานดวงปีเต็ม",
+  "โหงวเฮ้ง · ลายมือ · ดวงคู่",
+  "จังหวะงาน เงิน ความรัก",
+  "บันทึกโปรไฟล์ดูซ้ำได้ทั้งปี",
+  "อัปเดตคำแนะนำตามจังหวะชีวิต",
+  "ดูดวงไม่จำกัดตลอดปี",
+  "สิทธิ์ใหม่ก่อนใคร",
+] as const;
+
+function PremiumCheck() {
+  return (
+    <Check
+      className="h-4 w-4 shrink-0"
+      strokeWidth={2.8}
+      style={{ color: GOLD_SOFT }}
+      aria-hidden
+    />
+  );
 }
 
-const MAE_PANEL: CSSProperties = {
-  background:
-    "linear-gradient(165deg, rgba(24,34,52,0.98) 0%, rgba(16,24,39,0.98) 100%)",
-  boxShadow:
-    "inset 0 0 0 1.5px rgba(232,209,154,0.55), 0 24px 56px rgba(0,0,0,0.45)",
+const AIVA_PANEL: CSSProperties = {
+  background: GLASS.bg,
+  border: GLASS.border,
+  boxShadow: `${GLASS.shadow}, ${GLASS.highlight}`,
+  backdropFilter: GLASS.blur,
+  WebkitBackdropFilter: GLASS.blur,
 };
 
 /** Stripe checkout — sheet modal, full page, or inline card on free result */
@@ -113,7 +122,7 @@ export function FortunePaymentSheet({
     returnPath ||
     (typeof window !== "undefined"
       ? `${window.location.pathname}${window.location.search}`
-      : "/premium");
+      : "/home");
 
   const refreshSession = useCallback(async () => {
     setError(null);
@@ -175,9 +184,9 @@ export function FortunePaymentSheet({
   }, [open, onClose, step, isPage, isInline]);
 
   const goToPayPage = useCallback(() => {
-    const ret = resolvedReturn.split("?")[0] || "/premium";
+    const ret = resolvedReturn.split("?")[0] || "/home";
     const qs = new URLSearchParams();
-    if (ret !== "/premium" && ret !== "/premium/pay") qs.set("return", ret);
+    if (ret !== "/home" && ret !== "/premium/pay") qs.set("return", ret);
     const path = qs.size ? `/premium/pay?${qs}` : "/premium/pay";
     if (!isPage && !isInline) onClose();
     router.push(path);
@@ -194,7 +203,7 @@ export function FortunePaymentSheet({
       if (url.searchParams.has("checkout")) {
         url.searchParams.delete("checkout");
         const qs = url.searchParams.toString();
-        router.replace(qs ? `${pathname}?${qs}` : pathname || "/premium");
+        router.replace(qs ? `${pathname}?${qs}` : pathname || "/home");
       }
     } catch {
       /* ignore */
@@ -227,30 +236,37 @@ export function FortunePaymentSheet({
       <div className={cn(!isPage && !isInline && "pr-7")}>
         <h2
           id={titleId}
-          className="text-[1.55rem] font-bold leading-none tracking-tight"
-          style={goldTextStyle}
+          className="mae-pay-title text-[1.65rem] font-bold leading-none tracking-tight"
+          style={{ ...goldTextStyle, fontWeight: 700 }}
         >
           พรีเมียม {FORTUNE_PACKAGE_LABEL}
         </h2>
-        <p className="mt-1.5 text-[14px] font-medium leading-snug text-white">
+        <p
+          className="mt-2 text-[15.5px] font-medium leading-snug"
+          style={{ color: TEXT_MUTED }}
+        >
           ดูดวงได้เต็มที่ ตลอดทั้งปี
         </p>
       </div>
 
-      {/* Offer card — same language as /premium/pay */}
+      {/* Offer card — glass โทนเดียวกับหน้าหลักใหม่ */}
       <div
-        className="mt-3.5 overflow-hidden rounded-[20px]"
+        className="mt-4 overflow-hidden rounded-[22px]"
         style={{
-          background:
-            "linear-gradient(165deg, rgba(24,34,52,0.88) 0%, rgba(16,24,39,0.82) 100%)",
-          boxShadow:
-            "inset 0 0 0 1.5px rgba(232,209,154,0.75), 0 0 24px rgba(213,177,111,0.12)",
+          background: GLASS.bgSoft,
+          border: GLASS.border,
+          boxShadow: `${GLASS.highlight}, 0 10px 28px rgba(0,0,0,0.22)`,
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
         }}
       >
         <div className="shrink-0 px-3.5 pb-2.5 pt-3.5">
           <PremiumOfferUrgencyLine />
 
-          <div className="mt-3.5 border-b border-[rgba(232,209,154,0.32)] pb-3">
+          <div
+            className="mt-3.5 pb-3"
+            style={{ borderBottom: "1px solid rgba(213, 177, 111, 0.14)" }}
+          >
             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
               <p className="flex items-baseline gap-1.5 leading-none">
                 <span
@@ -260,29 +276,42 @@ export function FortunePaymentSheet({
                   <span className="mr-0.5 text-[1.35rem] font-bold">฿</span>
                   {FORTUNE_UNLOCK_PRICE}
                 </span>
-                <span className="text-[14px] font-medium tracking-wide text-white/90">
+                <span
+                  className="text-[14px] font-medium tracking-wide"
+                  style={{ color: TEXT_MUTED }}
+                >
                   / 1 ปี
                 </span>
               </p>
-              <span className="text-[18px] font-semibold text-white/50 line-through decoration-white/50">
+              <span
+                className="text-[17px] font-semibold line-through"
+                style={{ color: "rgba(186, 204, 230, 0.45)" }}
+              >
                 ฿{FORTUNE_UNLOCK_LIST_PRICE.toLocaleString("th-TH")}
               </span>
               <span
-                className="ml-auto inline-flex rounded-full p-[1.5px]"
-                style={{ backgroundImage: GOLD_FOIL }}
+                className="ml-auto inline-flex items-center rounded-full px-3 py-1"
+                style={{
+                  background: "rgba(213, 177, 111, 0.14)",
+                  border: "1px solid rgba(232, 209, 154, 0.4)",
+                }}
               >
-                <span className="inline-flex items-center rounded-full bg-[#121c2c] px-3 py-1">
-                  <span
-                    className="text-[13px] font-bold tracking-wide"
-                    style={goldTextStyle}
-                  >
-                    ประหยัด ฿{saved.toLocaleString("th-TH")}
-                  </span>
+                <span
+                  className="text-[13px] font-bold tracking-wide"
+                  style={goldTextStyle}
+                >
+                  ประหยัด ฿{saved.toLocaleString("th-TH")}
                 </span>
               </span>
             </div>
-            <p className="mt-2.5 flex items-center gap-1.5 text-[14px] font-medium text-white/75">
-              <span className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[#5b9bd5]">
+            <p
+              className="mt-2.5 flex items-center gap-1.5 text-[14.5px] font-medium"
+              style={{ color: "rgba(220, 230, 245, 0.88)" }}
+            >
+              <span
+                className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full"
+                style={{ background: "rgba(79, 140, 255, 0.9)" }}
+              >
                 <Check className="h-3 w-3 text-white" strokeWidth={3} />
               </span>
               จ่ายครั้งเดียว · ไม่มีต่ออายุอัตโนมัติ
@@ -291,35 +320,31 @@ export function FortunePaymentSheet({
         </div>
 
         <div className="max-h-[min(48vh,24rem)] overflow-y-auto overscroll-contain px-3.5 pb-2">
-          <div className="sticky top-0 z-[1] grid grid-cols-[1fr_2.8rem_4rem] items-center gap-1 border-b border-[rgba(232,209,154,0.22)] bg-[rgba(18,28,44,0.96)] py-2 backdrop-blur-sm">
-            <p className="text-[14px] font-medium text-white/90">
-              สิทธิ์การใช้งาน
+          <div
+            className="sticky top-0 z-[1] flex items-center justify-between gap-2 py-2.5 backdrop-blur-md"
+            style={{
+              background: "rgba(14, 22, 40, 0.88)",
+              borderBottom: "1px solid rgba(213, 177, 111, 0.14)",
+            }}
+          >
+            <p className="text-[14.5px] font-medium text-white/90">
+              สิทธิ์ที่ได้รับ
             </p>
-            <p className="text-center text-[13px] font-semibold text-white/60">
-              ฟรี
-            </p>
-            <p
-              className="text-center text-[13px] font-bold"
-              style={goldTextStyle}
-            >
+            <p className="text-[13px] font-bold" style={goldTextStyle}>
               พรีเมียม
             </p>
           </div>
 
-          {COMPARE_ROWS.map((row) => (
+          {COMPARE_ROWS.map((label) => (
             <div
-              key={row.label}
-              className="grid grid-cols-[1fr_2.8rem_4rem] items-center gap-1 border-b border-white/[0.07] py-2 last:border-b-0"
+              key={label}
+              className="flex items-center gap-2.5 py-2.5 last:border-b-0"
+              style={{ borderBottom: "1px dashed rgba(213, 177, 111, 0.12)" }}
             >
-              <p className="pr-1 text-[14px] leading-snug text-white/90">
-                {row.label}
+              <PremiumCheck />
+              <p className="min-w-0 flex-1 text-[15px] leading-snug text-white/90">
+                {label}
               </p>
-              <span className="flex justify-center">
-                <CellMark on={row.free} tone="free" />
-              </span>
-              <span className="flex justify-center">
-                <CellMark on={row.premium} tone="premium" />
-              </span>
             </div>
           ))}
         </div>
@@ -331,17 +356,21 @@ export function FortunePaymentSheet({
             <button
               type="button"
               onClick={() => onPaid()}
-              className="mae-gold-cta flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              style={GOLD_GLASS_CTA}
             >
               ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
               <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
             </button>
-            <p className="text-center text-[10px] tracking-wide text-[#6b7380]">
+            <p className="text-center text-[11px]" style={{ color: TEXT_MUTED }}>
               โหมดทดลอง · จำลองชำระสำเร็จ
             </p>
           </div>
         ) : loadingSession ? (
-          <div className="flex items-center justify-center gap-2 py-2 text-[12px] text-[#9aa3b2]">
+          <div
+            className="flex items-center justify-center gap-2 py-2 text-[13px]"
+            style={{ color: TEXT_MUTED }}
+          >
             <Loader2 className="h-4 w-4 animate-spin" />
             กำลังตรวจสอบสถานะ…
           </div>
@@ -355,19 +384,20 @@ export function FortunePaymentSheet({
                   `/login?callbackUrl=${encodeURIComponent(LOGIN_THEN_PAY)}`
                 );
               }}
-              className="mae-gold-cta flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              style={GOLD_GLASS_CTA}
             >
               ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
               <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
             </button>
-            <p className="text-center text-[11px] text-[#e8d19a]/80">
+            <p className="text-center text-[15px] font-medium" style={{ color: GOLD_SOFT }}>
               เข้าสู่ระบบแล้วชำระ · เหลือ 3 สิทธิ์
             </p>
           </div>
         ) : (
           <div className="space-y-2">
             {user.email ? (
-              <p className="text-center text-[11px] text-[#9aa3b2]">
+              <p className="text-center text-[14px]" style={{ color: TEXT_MUTED }}>
                 {user.email}
               </p>
             ) : null}
@@ -375,7 +405,8 @@ export function FortunePaymentSheet({
               type="button"
               onClick={goToPayPage}
               disabled={step === "redirecting"}
-              className="mae-gold-cta flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
+              className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
+              style={GOLD_GLASS_CTA}
             >
               ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
               <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
@@ -384,11 +415,14 @@ export function FortunePaymentSheet({
         )}
 
         {error ? (
-          <p className="text-center text-[12px] text-rose-300">{error}</p>
+          <p className="text-center text-[14px] text-rose-300">{error}</p>
         ) : null}
 
-        <p className="flex items-center justify-center gap-1.5 pt-0.5 text-[10px] text-[#6b7380]">
-          <Lock className="h-3 w-3 shrink-0 text-[#d5b16f]/80" strokeWidth={2.2} />
+        <p
+          className="flex items-center justify-center gap-1.5 pt-1 text-[14px] font-medium"
+          style={{ color: TEXT_MUTED }}
+        >
+          <Lock className="h-4 w-4 shrink-0" strokeWidth={2.2} style={{ color: GOLD_SOFT }} />
           ตรวจสอบรายการก่อนดำเนินการต่อ
         </p>
       </div>
@@ -401,7 +435,7 @@ export function FortunePaymentSheet({
         className="no-sky-lift relative overflow-hidden rounded-[24px]"
         role="region"
         aria-labelledby={titleId}
-        style={MAE_PANEL}
+        style={AIVA_PANEL}
       >
         {body}
       </div>
@@ -415,23 +449,16 @@ export function FortunePaymentSheet({
         role="main"
         aria-labelledby={titleId}
       >
-        <div className="relative z-10 mb-3 grid grid-cols-[1fr_auto_1fr] items-center px-0.5">
-          <button
-            type="button"
+        <div className="relative z-10 mb-3 flex items-center px-0.5">
+          <PageBackButton
             onClick={step === "redirecting" ? undefined : onClose}
-            disabled={step === "redirecting"}
-            className="inline-flex items-center gap-0.5 justify-self-start text-[13px] font-medium text-white/80 outline-none transition active:opacity-60 disabled:opacity-40"
-          >
-            <ChevronLeft className="h-4 w-4" strokeWidth={2.2} />
-            กลับ
-          </button>
-          <span className="justify-self-center" aria-hidden />
-          <span className="justify-self-end" aria-hidden />
+            className={step === "redirecting" ? "pointer-events-none opacity-40" : undefined}
+          />
         </div>
 
         <div
           className="relative mx-auto w-full overflow-hidden rounded-[22px]"
-          style={MAE_PANEL}
+          style={AIVA_PANEL}
         >
           {body}
         </div>
@@ -457,14 +484,15 @@ export function FortunePaymentSheet({
 
       <div
         className="dd-sheet-panel relative z-[1] max-h-[min(96vh,820px)] w-full max-w-[400px] overflow-y-auto overflow-x-hidden rounded-[22px]"
-        style={MAE_PANEL}
+        style={AIVA_PANEL}
       >
         <button
           type="button"
           onClick={onClose}
           disabled={step === "redirecting"}
-          className="absolute right-3 top-3 z-[2] flex h-8 w-8 items-center justify-center rounded-full text-[#9aa3b2] outline-none transition hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4 disabled:opacity-40"
+          className="absolute right-3 top-3 z-[2] flex h-8 w-8 items-center justify-center rounded-full outline-none transition hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/40 disabled:opacity-40"
           aria-label="ปิด"
+          style={{ color: GOLD_LINE }}
         >
           <X className="h-4 w-4" strokeWidth={2} />
         </button>

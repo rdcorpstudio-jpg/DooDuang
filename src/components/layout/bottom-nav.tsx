@@ -1,189 +1,165 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { Home, Moon, Sparkles, User, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { isMaeShellPath } from "@/lib/mae-shell";
-import { isPremiumUnlocked } from "@/lib/fortune/premium-unlock";
-import {
-  hasFreeReadingBasics,
-  hydrateFortuneProfileFromWizard,
-  readFortuneProfile,
-} from "@/lib/fortune/profile-storage";
 
-type NavTab = {
+const GOLD = "#e8d19a";
+const MUTED = "#7d8eaa";
+
+/** สีจาก maemangmee-horoscope-html */
+export const APP_BAR_BG = "rgba(3, 13, 31, 0.97)";
+export const APP_BAR_NAVY = "#030d1f";
+export const APP_PAGE_BG = "#06142a";
+export const APP_FRAME_BG =
+  "linear-gradient(145deg, rgba(8, 30, 57, 0.94), rgba(3, 12, 29, 0.92))";
+
+export const APP_NAV_TABS: readonly {
+  id: "home" | "predict" | "special" | "profile";
   href: string;
   label: string;
-  src: string;
+  Icon: LucideIcon;
   match: (p: string) => boolean;
-};
+}[] = [
+  {
+    id: "home",
+    href: "/home",
+    label: "หน้าหลัก",
+    Icon: Home,
+    match: (p) => p === "/" || p === "/home",
+  },
+  {
+    id: "predict",
+    href: "/predict",
+    label: "ทำนาย",
+    Icon: Moon,
+    match: (p) =>
+      p.startsWith("/predict") ||
+      p.startsWith("/menu") ||
+      (p.startsWith("/reading") &&
+        !p.startsWith("/reading/face") &&
+        !p.startsWith("/reading/palm")),
+  },
+  {
+    id: "special",
+    href: "/special",
+    label: "ดวงพิเศษ",
+    Icon: Sparkles,
+    match: (p) =>
+      p.startsWith("/special") ||
+      p.startsWith("/reading/face") ||
+      p.startsWith("/reading/palm") ||
+      p.startsWith("/premium/couple"),
+  },
+  {
+    id: "profile",
+    href: "/dashboard",
+    label: "โปรไฟล์",
+    Icon: User,
+    match: (p) =>
+      p.startsWith("/dashboard") ||
+      p.startsWith("/login") ||
+      p.startsWith("/auth/") ||
+      p.startsWith("/pricing") ||
+      p.startsWith("/calendar"),
+  },
+];
 
-const HOME_TAB: NavTab = {
-  href: "/",
-  label: "หน้าแรก",
-  src: "/images/icons/nav/home.webp",
-  match: (p) => p === "/" || p === "/mae" || p.startsWith("/mae/"),
-};
+export type AppNavActiveId = (typeof APP_NAV_TABS)[number]["id"];
 
-/** After profile — home = daily fortune (marketing landing skipped) */
-const APP_HOME_FREE_TAB: NavTab = {
-  href: "/premium",
-  label: "ดวงวันนี้",
-  src: "/images/icons/nav/home.webp",
-  match: (p) => p === "/" || p === "/premium",
-};
-
-const APP_HOME_PREMIUM_TAB: NavTab = {
-  ...APP_HOME_FREE_TAB,
-  label: "พรีเมียม",
-  src: "/images/icons/nav/horoscope.webp",
-};
-
-/** Pre-profile — ดูดวง tab */
-const FORTUNE_FREE_TAB: NavTab = {
-  href: "/premium",
-  label: "ดูดวง",
-  src: "/images/icons/nav/horoscope.webp",
-  match: (p) => p === "/premium",
-};
-
-const MENU_TAB: NavTab = {
-  href: "/menu",
-  label: "เมนู",
-  src: "/images/icons/nav/menu.webp",
-  match: (p) =>
-    p.startsWith("/menu") ||
-    p.startsWith("/reading") ||
-    p.startsWith("/r/") ||
-    p.startsWith("/preview/") ||
-    p.startsWith("/premium/couple") ||
-    p.startsWith("/premium/self-map") ||
-    p.startsWith("/premium/year") ||
-    p.startsWith("/premium/outlook") ||
-    p.startsWith("/premium/week") ||
-    p.startsWith("/premium/report"),
-};
-
-const ACCOUNT_TAB: NavTab = {
-  href: "/dashboard",
-  label: "บัญชี",
-  src: "/images/icons/nav/account.webp",
-  match: (p) =>
-    p.startsWith("/dashboard") ||
-    p.startsWith("/login") ||
-    p.startsWith("/auth/") ||
-    p.startsWith("/pricing"),
-};
-
-/** Bottom nav — after fill: หน้าแรก/พรีเมียม · เมนู · บัญชี (no marketing home) */
-export function BottomNav() {
+function NavTabs({ forceActiveId }: { forceActiveId?: AppNavActiveId }) {
   const pathname = usePathname() || "/";
-  const maeNav = isMaeShellPath(pathname);
-  const [premium, setPremium] = useState(false);
-  const [hasBasics, setHasBasics] = useState(false);
-
-  useEffect(() => {
-    function sync() {
-      hydrateFortuneProfileFromWizard();
-      setPremium(isPremiumUnlocked());
-      setHasBasics(hasFreeReadingBasics(readFortuneProfile()));
-    }
-    sync();
-    window.addEventListener("dooduang-premium-changed", sync);
-    window.addEventListener("dooduang-profile-changed", sync);
-    window.addEventListener("storage", sync);
-    window.addEventListener("focus", sync);
-    return () => {
-      window.removeEventListener("dooduang-premium-changed", sync);
-      window.removeEventListener("dooduang-profile-changed", sync);
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("focus", sync);
-    };
-  }, []);
-
-  const tabs: NavTab[] = hasBasics
-    ? [
-        premium ? APP_HOME_PREMIUM_TAB : APP_HOME_FREE_TAB,
-        MENU_TAB,
-        ACCOUNT_TAB,
-      ]
-    : [HOME_TAB, FORTUNE_FREE_TAB, MENU_TAB, ACCOUNT_TAB];
 
   return (
+    <div
+      className="mx-auto grid max-w-[480px] grid-cols-4 gap-1 px-2.5 py-2"
+      role="tablist"
+    >
+      {APP_NAV_TABS.map(({ id, href, label, Icon, match }) => {
+        const active = forceActiveId ? forceActiveId === id : match(pathname);
+        return (
+          <Link
+            key={id}
+            href={href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "relative flex min-h-[3.15rem] flex-col items-center justify-center gap-0.5 rounded-[14px] px-1 outline-none transition-colors duration-200",
+              active ? "text-[#e8d19a]" : "text-[#7d8eaa] hover:text-[#c5d2e6]",
+            )}
+          >
+            <Icon
+              size={active ? 21 : 19}
+              strokeWidth={active ? 2.25 : 1.8}
+              color={active ? GOLD : MUTED}
+              absoluteStrokeWidth
+              aria-hidden
+            />
+            <span
+              className={cn(
+                "text-[12px] leading-none tracking-wide",
+                active ? "font-semibold" : "font-medium",
+              )}
+              style={{
+                color: active ? GOLD : MUTED,
+                WebkitFontSmoothing: "antialiased",
+              }}
+            >
+              {label}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * Bottom nav — floating dock โทนกรม–ขาวน้ำแข็ง
+ */
+export function BottomNav({
+  forceActiveId,
+  framed = false,
+}: {
+  forceActiveId?: AppNavActiveId;
+  /** @deprecated โทนเดียวแล้ว — คงไว้เพื่อไม่พัง call site เก่า */
+  framed?: boolean;
+}) {
+  void framed;
+  return (
     <nav
-      className="bottom-nav relative z-40 shrink-0"
+      className="bottom-nav relative z-40 shrink-0 px-2.5 pb-[max(0.35rem,env(safe-area-inset-bottom,0px))] pt-1"
       aria-label="เมนูหลัก"
-      style={{
-        background: maeNav
-          ? "linear-gradient(180deg, rgba(23,36,58,0.96) 0%, rgba(16,24,39,0.98) 100%)"
-          : "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(248,245,255,0.97) 100%)",
-        borderTop: maeNav
-          ? "1px solid rgba(213,177,111,0.22)"
-          : "1px solid rgba(180,160,230,0.22)",
-        backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
-        paddingBottom: "max(0.2rem, env(safe-area-inset-bottom))",
-      }}
     >
       <div
-        className={cn(
-          "mx-auto grid max-w-[480px] gap-0 px-1 pt-1 pb-0.5",
-          tabs.length === 3 ? "grid-cols-3" : "grid-cols-4"
-        )}
+        className="overflow-hidden rounded-full"
+        style={{
+          background:
+            "linear-gradient(165deg, rgba(12,28,52,0.72) 0%, rgba(5,14,30,0.78) 100%)",
+          boxShadow: "0 -6px 24px rgba(0,0,0,0.22)",
+          backdropFilter: "blur(22px)",
+          WebkitBackdropFilter: "blur(22px)",
+        }}
       >
-        {tabs.map(({ href, label, src, match }) => {
-          const active = match(pathname);
-
-          return (
-            <Link
-              key={`${href}-${label}`}
-              href={href}
-              className={cn(
-                "fortune-tap relative flex min-h-[2.75rem] flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1 outline-none transition-all duration-200",
-                "focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
-                active ? "text-[#d5b16f]" : "text-[#b9a077]"
-              )}
-            >
-              <span
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center transition duration-200",
-                  active && "dd-nav-icon-pop"
-                )}
-              >
-                <Image
-                  src={`${src}?v=navgold1`}
-                  alt=""
-                  width={active ? 28 : 24}
-                  height={active ? 28 : 24}
-                  unoptimized
-                  className={cn(
-                    "object-contain transition duration-200",
-                    active
-                      ? "opacity-100 drop-shadow-[0_2px_6px_rgba(180,140,60,0.35)]"
-                      : "opacity-80"
-                  )}
-                  style={{
-                    width: active ? 28 : 24,
-                    height: active ? 28 : 24,
-                  }}
-                />
-              </span>
-              <span
-                className={cn(
-                  "text-[10px] leading-none tracking-wide",
-                  active
-                    ? "font-semibold text-[#d5b16f]"
-                    : "font-medium text-[#c4a86a]"
-                )}
-              >
-                {label}
-              </span>
-            </Link>
-          );
-        })}
+        <NavTabs forceActiveId={forceActiveId} />
       </div>
     </nav>
+  );
+}
+
+/**
+ * กรอบบาร์ล่างแบบ fixed — หน้า draft ที่เลื่อนเต็มจอ
+ */
+export function FixedAppBottomNav({
+  activeId,
+}: {
+  activeId: AppNavActiveId;
+}) {
+  return (
+    <div className="pointer-events-none fixed bottom-0 left-1/2 z-30 w-full max-w-[480px] -translate-x-1/2">
+      <div className="pointer-events-auto">
+        <BottomNav forceActiveId={activeId} />
+      </div>
+    </div>
   );
 }

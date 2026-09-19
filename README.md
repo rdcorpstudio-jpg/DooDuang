@@ -64,6 +64,13 @@ CREATE INDEX IF NOT EXISTS analytics_events_user_created_idx
   ON analytics_events (user_id, created_at);
 ```
 
+#### Fortune profile — gender note (`gender_note`)
+
+```sql
+ALTER TABLE fortune_profiles
+  ADD COLUMN IF NOT EXISTS gender_note text;
+```
+
 **กฎสำหรับทีม / AI:** ทุกครั้งที่มีงานเกี่ยวกับ DB ต้องส่ง **ข้อความ SQL คัดลอกวางได้** สำหรับ Railway console — ห้ามบอกแค่ `npm run db:push` โดยไม่มี SQL
 
 ทางเลือก (เครื่อง local ที่มี `DATABASE_URL`):

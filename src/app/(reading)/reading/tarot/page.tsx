@@ -9,7 +9,13 @@ function TarotPageInner() {
   const seed = useMemo(() => {
     const fromQuery = params.get("seed");
     if (fromQuery && fromQuery.trim()) return fromQuery.trim();
-    return `tarot-daily-${new Date().toISOString().slice(0, 10)}`;
+    const day = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Bangkok",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    return `tarot-daily-${day}`;
   }, [params]);
 
   return <FortuneDailyTarot seed={seed} />;

@@ -15,7 +15,7 @@ export function Footer() {
           </span>
         </div>
         <div className="flex gap-3.5">
-          <Link href="/reading" className="nav-link-mystic">
+          <Link href="/welcome" className="nav-link-mystic">
             ดูดวง
           </Link>
           <Link href="/privacy" className="nav-link-mystic">

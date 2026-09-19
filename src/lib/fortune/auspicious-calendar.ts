@@ -33,19 +33,19 @@ export const MARKER_META: Record<
 > = {
   holy: {
     label: "วันพระ",
-    hint: "เหมาะกับการทำบุญ ทำความดี และตั้งจิตให้สงบ",
+    hint: "วันนี้เหมาะเคลียร์ใจ เรื่องที่ค้างค่อย ๆ คุยกัน คำเหน็บพักไว้ก่อนนะ",
   },
   victory: {
     label: "วันธงชัย",
-    hint: "ส่งเสริมความสำเร็จและโชคลาภ เหมาะเริ่มงานสำคัญและกิจกรรมมงคล",
+    hint: "วันนี้เริ่มเรื่องที่เตรียมครบแล้วได้เลย ลงมือทีละขั้นแล้วปิดให้จบ",
   },
   fortune: {
     label: "วันโชคลาภ",
-    hint: "จังหวะดีเรื่องการเงิน โอกาส และการเจรจาที่เกี่ยวกับผลประโยชน์",
+    hint: "วันนี้คุยเรื่องตัวเลขได้ เตรียมยอดให้ชัดก่อนคุยผลประโยชน์",
   },
   chaos: {
     label: "วันโลกาวินาศ",
-    hint: "ควรเลี่ยงเริ่มต้นเรื่องใหญ่หรือตัดสินใจเร่งด่วน อาจเจออุปสรรคได้ง่าย",
+    hint: "วันนี้ทำเรื่องที่เตรียมครบแล้วก่อน ส่วนแผนใหญ่ที่ยังมีจุดค้างให้พักไว้ตรวจอีกที",
   },
 };
 
@@ -143,19 +143,19 @@ export function formatThaiDayShort(date: Date) {
 
 export function adviceForDay(profile: DayProfile): string {
   if (profile.markers.includes("chaos") && profile.markers.includes("victory")) {
-    return "วันนี้มีทั้งพลังส่งเสริมและจุดที่ควรระวัง — ถ้าเรื่องต้องนิ่งระยะยาว เลือกชั่วโมงมงคลหรือเลื่อนวันเริ่มจะปลอดภัยกว่า";
+    return "วันนี้มีทั้งฤกษ์รุกและจุดชะลอ — เรื่องที่ต้องนิ่งระยะยาว ให้เริ่มในชั่วโมงมงคล หรือเลื่อนวันเริ่ม";
   }
   if (profile.markers.includes("chaos")) {
-    return "วันนี้เหมาะพักตัดสินใจใหญ่ โฟกัสงานเดิมให้เรียบร้อยก่อนเปิดหน้าใหม่";
+    return MARKER_META.chaos.hint;
   }
   if (profile.markers.includes("victory")) {
-    return "เหมาะเริ่มต้นงานสำคัญ ลงนาม หรือกิจกรรมมงคล — ลงมือให้ชัดและจบเป็นขั้นตอน";
+    return MARKER_META.victory.hint;
   }
   if (profile.markers.includes("fortune")) {
-    return "จังหวะดีเรื่องเงินและการเจรจา เตรียมข้อมูลให้พร้อมก่อนคุยผลประโยชน์";
+    return MARKER_META.fortune.hint;
   }
   if (profile.markers.includes("holy")) {
-    return "เหมาะทำบุญ ตั้งจิตให้สงบ และลดเรื่องที่ก่อความขัดแย้ง";
+    return MARKER_META.holy.hint;
   }
   switch (profile.energy) {
     case "strong":

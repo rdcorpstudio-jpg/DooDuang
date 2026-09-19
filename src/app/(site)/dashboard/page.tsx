@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AccountDashboard } from "@/components/account/account-dashboard";
 import { DEFAULT_LOGIN_CALLBACK } from "@/components/auth/google-sign-in-button";
+import { MaePageLoading } from "@/components/layout/mae-page-loading";
 import {
   readFortuneProfile,
   writeFortuneProfile,
@@ -85,11 +86,7 @@ function DashboardInner() {
   }, [router, preview]);
 
   if (!user) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center px-4 text-[13px] text-[#f7f4ec]/55">
-        กำลังเปิด…
-      </div>
-    );
+    return <MaePageLoading label="กำลังเปิดโปรไฟล์…" />;
   }
 
   return (
@@ -123,13 +120,7 @@ function DashboardInner() {
 /** Client account page — use ?preview=1 to mock logged-in without Google */
 export default function DashboardPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[40vh] items-center justify-center px-4 text-[13px] text-[#f7f4ec]/55">
-          กำลังเปิด…
-        </div>
-      }
-    >
+    <Suspense fallback={<MaePageLoading label="กำลังเปิดโปรไฟล์…" />}>
       <DashboardInner />
     </Suspense>
   );

@@ -64,7 +64,9 @@ export function LineSignInButton({
         ) : (
           <LineMark className="h-4 w-4" />
         )}
-        {loading ? "กำลังเปิด LINE…" : "เข้าสู่ระบบด้วย LINE"}
+        <span className="dd-btn-label">
+          {loading ? "กำลังเปิด LINE…" : "เข้าสู่ระบบด้วย LINE"}
+        </span>
       </button>
     </div>
   );

@@ -33,13 +33,13 @@ export function PricingCard({
           แนะนำ
         </span>
       ) : null}
-      <h3 className="text-[15px] font-semibold text-white">{name}</h3>
-      <p className="mt-1 text-[12px] text-white/40">{description}</p>
+      <h3 className="text-[15px] font-semibold text-[#f7f4ec]">{name}</h3>
+      <p className="mt-1 text-[12px] text-[#bacce6]/70">{description}</p>
       <div className="my-4">
-        <span className="text-[1.75rem] font-semibold tabular-nums text-white">
+        <span className="text-[1.75rem] font-semibold tabular-nums text-[#f7f4ec]">
           {formatPrice(price)}
         </span>
-        <span className="ml-2 text-[13px] text-white/45">
+        <span className="ml-2 text-[13px] text-[#bacce6]/65">
           / {durationLabel}
         </span>
       </div>
@@ -49,7 +49,7 @@ export function PricingCard({
           "mt-auto inline-flex w-full items-center justify-center rounded-full px-5 py-2.5 text-[14px] font-medium tracking-wide transition active:scale-[0.98]",
           popular
             ? "bg-gradient-to-r from-[#b8860b] via-[#e8c547] to-[#c9a227] text-[#1f1704] hover:opacity-95"
-            : "bg-white/10 text-white hover:bg-white/15"
+            : "bg-[rgba(16,24,39,0.85)] text-[#e8d19a] ring-1 ring-[#d5b16f]/40 hover:bg-[rgba(16,24,39,0.95)]"
         )}
       >
         ชำระเงิน

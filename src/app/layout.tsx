@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Sarabun, Srisakdi } from "next/font/google";
+import { IBM_Plex_Sans_Thai, Noto_Serif_Thai } from "next/font/google";
 import { LineTag } from "@/components/analytics/line-tag";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { StripePurchaseReturnListener } from "@/components/analytics/stripe-purchase-return-listener";
@@ -11,16 +11,22 @@ import {
 } from "@/lib/site";
 import "./globals.css";
 
-const sarabun = Sarabun({
+/**
+ * เนื้อหา/UI: IBM Plex Sans Thai
+ * หัวข้อ: Noto Serif Thai
+ */
+const plexThai = IBM_Plex_Sans_Thai({
   subsets: ["thai", "latin"],
   weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-sarabun",
+  variable: "--font-app",
+  display: "swap",
 });
 
-const srisakdi = Srisakdi({
+const notoSerifThai = Noto_Serif_Thai({
   subsets: ["thai", "latin"],
-  weight: ["400"],
-  variable: "--font-srisakdi",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-noto-serif",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -47,8 +53,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th">
-      <body className={`${sarabun.variable} ${srisakdi.variable} font-sans`}>
+    <html
+      lang="th"
+      className={`${plexThai.variable} ${notoSerifThai.variable} ${plexThai.className}`}
+    >
+      <body className={plexThai.className}>
         <LineTag />
         <MetaPixel />
         <StripePurchaseReturnListener />

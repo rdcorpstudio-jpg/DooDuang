@@ -40,7 +40,7 @@ export function PremiumSalesPage({
         variant="page"
         onClose={() => router.push("/")}
         onPaid={handlePaid}
-        returnPath="/premium"
+        returnPath="/premium/pay"
       />
     </AnimatedPage>
   );

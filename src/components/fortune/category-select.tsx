@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MysticBackground } from "@/components/fortune/mystic-background";
 import { FortuneCategoryCard } from "@/components/fortune/fortune-category-card";
-import { PageBackButton } from "@/components/ui/page-back-button";
+import { MaeBrandLink } from "@/components/layout/mae-brand-link";
+import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { Reveal } from "@/components/ui/reveal";
 import { HOME_CATEGORY_OPTIONS } from "@/lib/fortune/zodiac";
 import { FORTUNE_DISCLAIMER } from "@/lib/site";
@@ -17,21 +17,19 @@ export function CategorySelect() {
   }, []);
 
   return (
-    <div className="relative h-full overflow-hidden">
-      <MysticBackground />
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_100%,rgba(124,58,237,0.22),transparent_55%)]"
-        aria-hidden
-      />
+    <div className="relative h-full overflow-hidden text-white">
+      <MaePageBackground />
 
-      <div className="relative z-10 flex h-full flex-col px-5 pb-5 pt-3">
+      <div className="relative z-10 flex h-full flex-col px-5 pb-5 pt-5 sm:px-6">
         <Reveal visible={mounted} delay={0} className="shrink-0">
-          <PageBackButton href="/premium" />
+          <div className="flex items-center justify-between gap-3">
+            <MaeBrandLink />
+          </div>
         </Reveal>
 
         <Reveal visible={mounted} delay={70} className="mt-5 shrink-0">
-          <p className="text-[13px] text-white/40">สำรวจ</p>
-          <h1 className="mt-1 text-[1.75rem] font-semibold tracking-tight text-white">
+          <p className="text-[15.5px] font-medium text-[#e8d19a]">สำรวจ</p>
+          <h1 className="mae-gold-text mt-1 text-[1.75rem] font-bold tracking-tight">
             หมวดดวงทั้งหมด
           </h1>
         </Reveal>
@@ -48,7 +46,9 @@ export function CategorySelect() {
         </div>
 
         <Reveal visible={mounted} delay={380} className="shrink-0 pt-2 text-center">
-          <p className="text-[11px] tracking-wide text-white/28">{FORTUNE_DISCLAIMER}</p>
+          <p className="text-[15.5px] font-medium tracking-wide text-[rgba(186,204,230,0.7)]">
+            {FORTUNE_DISCLAIMER}
+          </p>
         </Reveal>
       </div>
     </div>

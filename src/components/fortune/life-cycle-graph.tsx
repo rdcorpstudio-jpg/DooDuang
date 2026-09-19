@@ -6,19 +6,19 @@ import { cn } from "@/lib/utils";
 import { MysticFrame } from "@/components/ui/mystic-frame";
 
 function scoreColor(score: number) {
-  if (score >= 10) return "#4ade80";
-  if (score >= 8) return "#a3e635";
-  if (score >= 6) return "#facc15";
-  if (score >= 4) return "#fb923c";
-  return "#f43f5e";
+  if (score >= 10) return "#7dcea0";
+  if (score >= 8) return "#9dcea8";
+  if (score >= 6) return "#d5b16f";
+  if (score >= 4) return "#f0a86a";
+  return "#e87878";
 }
 
 function scoreGlow(score: number) {
-  if (score >= 10) return "rgba(74,222,128,0.55)";
-  if (score >= 8) return "rgba(163,230,53,0.45)";
-  if (score >= 6) return "rgba(250,204,21,0.4)";
-  if (score >= 4) return "rgba(251,146,60,0.4)";
-  return "rgba(244,63,94,0.4)";
+  if (score >= 10) return "rgba(125,206,160,0.45)";
+  if (score >= 8) return "rgba(125,206,160,0.35)";
+  if (score >= 6) return "rgba(213,177,111,0.4)";
+  if (score >= 4) return "rgba(240,168,106,0.4)";
+  return "rgba(232,120,120,0.4)";
 }
 
 function smoothLine(pts: { x: number; y: number }[]) {
@@ -234,12 +234,12 @@ function GoldLockButton({
       />
       <GoldLockIcon className="relative h-7 w-7 transition-transform duration-200 group-hover:scale-105 group-active:scale-95" />
       {label ? (
-        <span className="text-center text-[10px] font-semibold leading-tight text-amber-100 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+        <span className="text-center text-[10px] font-semibold leading-tight text-[#e8d19a] drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
           {label}
         </span>
       ) : null}
       {label ? (
-        <span className="text-center text-[8.5px] leading-tight text-amber-100/70 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+        <span className="text-center text-[8.5px] leading-tight text-[#e8d19a]/70 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
           ({hint})
         </span>
       ) : null}
@@ -465,18 +465,18 @@ export function LifeCycleGraph({
       contentClassName="relative"
     >
       <div className="relative z-[1] px-4 pb-1 pt-3">
-        <p className="text-[13px] font-semibold leading-snug tracking-wide text-[#67e8f9]">
+        <p className="text-[13px] font-semibold leading-snug tracking-wide text-[#e8d19a]">
           {subtitle}
         </p>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-white/42">
           {rangeNote ? <span>{rangeNote}</span> : null}
           {rangeNote ? <span className="text-white/18">·</span> : null}
           <span className="inline-flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#7CFF6B]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#7dcea0]" />
             สูง
-            <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-[#FFE14A]" />
+            <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-[#d5b16f]" />
             กลาง
-            <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-[#FF4D7A]" />
+            <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-[#e87878]" />
             ต่ำ
           </span>
           <span className="text-white/18">·</span>
@@ -491,7 +491,7 @@ export function LifeCycleGraph({
           className="pointer-events-none absolute bottom-0 left-0 top-0 z-[2] w-9"
           aria-hidden
         >
-          <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#120c28]/80 via-[#120c28]/25 to-transparent" />
+          <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#101827]/80 via-[#101827]/25 to-transparent" />
           <svg viewBox={`0 0 36 ${H}`} className="relative h-full w-full" preserveAspectRatio="none">
             <text
               x={28}
@@ -540,7 +540,7 @@ export function LifeCycleGraph({
               style={{
                 letterSpacing: "normal",
                 fontFamily:
-                  "var(--font-sarabun), Sarabun, ui-sans-serif, system-ui, sans-serif",
+                  "var(--font-app), \"IBM Plex Sans Thai\", ui-sans-serif, system-ui, sans-serif",
               }}
             >
               <defs>
@@ -554,7 +554,7 @@ export function LifeCycleGraph({
                   ))}
                 </linearGradient>
                 <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgba(103,232,249,0.28)" />
+                  <stop offset="0%" stopColor="rgba(213,177,111,0.28)" />
                   <stop offset="35%" stopColor="rgba(74,222,128,0.16)" />
                   <stop offset="70%" stopColor="rgba(250,204,21,0.06)" />
                   <stop offset="100%" stopColor="rgba(12,10,30,0)" />
@@ -628,15 +628,15 @@ export function LifeCycleGraph({
                         width={60}
                         height={16}
                         rx={8}
-                        fill="rgba(14,116,144,0.45)"
-                        stroke="rgba(103,232,249,0.55)"
+                        fill="rgba(213,177,111,0.35)"
+                        stroke="rgba(232,209,154,0.55)"
                         strokeWidth="0.8"
                       />
                       <text
                         x={selectedPt.x}
                         y={17}
                         textAnchor="middle"
-                        fill="#ecfeff"
+                        fill="#e8d19a"
                         fontSize="9"
                         fontWeight="600"
                       >
@@ -673,13 +673,13 @@ export function LifeCycleGraph({
                           rx={4}
                           fill={
                             isFocus || p.isPresent
-                              ? "rgba(14,116,144,0.6)"
-                              : "rgba(8,6,24,0.72)"
+                              ? "rgba(213,177,111,0.35)"
+                              : "rgba(16,24,39,0.85)"
                           }
                           stroke={
                             isFocus || p.isPresent
-                              ? "rgba(125,211,252,0.45)"
-                              : "rgba(255,255,255,0.08)"
+                              ? "rgba(232,209,154,0.55)"
+                              : "rgba(213,177,111,0.2)"
                           }
                           strokeWidth="0.75"
                         />
@@ -712,7 +712,7 @@ export function LifeCycleGraph({
                           cy={p.y}
                           r="12.5"
                           fill="none"
-                          stroke="rgba(103,232,249,0.28)"
+                          stroke="rgba(213,177,111,0.28)"
                           strokeWidth="1"
                         />
                       </>
@@ -736,7 +736,7 @@ export function LifeCycleGraph({
                       cx={p.x}
                       cy={p.y}
                       r={isFocus || p.isPresent ? 5.5 : dense ? 3.6 : 4.4}
-                      fill={isFocus || p.isPresent ? "#38bdf8" : p.color}
+                      fill={isFocus || p.isPresent ? "#d5b16f" : p.color}
                       stroke="rgba(255,255,255,0.95)"
                       strokeWidth="1.2"
                     />
@@ -748,8 +748,8 @@ export function LifeCycleGraph({
                         textAnchor="middle"
                         fill={
                           isFocus || p.isPresent
-                            ? "#e0f2fe"
-                            : "rgba(255,255,255,0.62)"
+                            ? "#e8d19a"
+                            : "rgba(247,244,236,0.62)"
                         }
                         fontSize={viewScores.length >= 10 ? "8" : "8.5"}
                         fontWeight={isFocus || p.isPresent ? 700 : 500}
@@ -762,7 +762,7 @@ export function LifeCycleGraph({
                         x={p.x}
                         y={H - 6}
                         textAnchor="middle"
-                        fill="#67e8f9"
+                        fill="#e8d19a"
                         fontSize="7.5"
                         fontWeight="700"
                       >
@@ -870,7 +870,7 @@ export function LifeCycleGraph({
             onClick={() => setDetailIndex(null)}
           >
             <div
-              className="w-full max-w-[320px] overflow-hidden rounded-2xl border border-white/12 bg-[linear-gradient(165deg,#1a1438_0%,#100c24_100%)] p-4 shadow-[0_0_28px_rgba(103,232,249,0.12),0_16px_40px_rgba(0,0,0,0.45)]"
+              className="w-full max-w-[320px] overflow-hidden rounded-2xl border border-white/12 bg-[linear-gradient(165deg,#152238_0%,#101827_100%)] p-4 shadow-[0_0_28px_rgba(213,177,111,0.12),0_16px_40px_rgba(0,0,0,0.45)]"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-3">
@@ -878,13 +878,13 @@ export function LifeCycleGraph({
                   <p className="text-[11px] text-white/40">
                     {detailNote.label} · {detailNote.score}/12
                     {detailNote.isPresent ? (
-                      <span className="ml-1.5 text-[#22d3ee]">ปัจจุบัน</span>
+                      <span className="ml-1.5 text-[#e8d19a]">ปัจจุบัน</span>
                     ) : null}
                   </p>
                   <h4 className="mt-1 text-[16px] font-semibold text-white">
                     {detailNote.full}
                   </h4>
-                  <p className="mt-0.5 text-[13px] font-medium text-[#67e8f9]">
+                  <p className="mt-0.5 text-[13px] font-medium text-[#e8d19a]">
                     {detail.summary}
                   </p>
                 </div>
@@ -899,7 +899,7 @@ export function LifeCycleGraph({
               </div>
 
               <p className="mt-3 text-[13.5px] leading-relaxed text-white/70">{detail.body}</p>
-              <p className="mt-3 rounded-xl bg-cyan-400/10 px-3 py-2 text-[12.5px] leading-snug text-cyan-100/90 ring-1 ring-cyan-300/20">
+              <p className="mt-3 rounded-xl bg-[rgba(213,177,111,0.1)] px-3 py-2 text-[12.5px] leading-snug text-[#e8d19a]/90 ring-1 ring-[rgba(232,209,154,0.28)]">
                 แนะนำ: {detail.tip}
               </p>
 
@@ -990,8 +990,8 @@ function MonthNotesPanel({
                 data-month-index={m.index}
                 className={cn(
                   "relative flex items-center gap-2 border-t border-white/[0.06] px-4 py-2 transition-colors",
-                  active && !rowLocked && "bg-cyan-400/[0.1]",
-                  isCurrent && !rowLocked && "bg-cyan-400/[0.06]"
+                  active && !rowLocked && "bg-[rgba(213,177,111,0.1)]",
+                  isCurrent && !rowLocked && "bg-[rgba(213,177,111,0.06)]"
                 )}
               >
                 <button
@@ -1007,7 +1007,7 @@ function MonthNotesPanel({
                     <p
                       className={cn(
                         "text-[13px] font-semibold leading-none",
-                        active || isCurrent ? "text-cyan-100" : "text-white"
+                        active || isCurrent ? "text-[#e8d19a]" : "text-white"
                       )}
                     >
                       {m.label}
@@ -1020,7 +1020,7 @@ function MonthNotesPanel({
                     <p className="text-[11px] leading-none text-white/45">
                       {m.full}
                       {isCurrent ? (
-                        <span className="ml-1.5 font-semibold text-[#22d3ee]">
+                        <span className="ml-1.5 font-semibold text-[#e8d19a]">
                           ปัจจุบัน
                         </span>
                       ) : null}
@@ -1035,7 +1035,7 @@ function MonthNotesPanel({
                   <button
                     type="button"
                     onClick={() => onReadMore?.(m.index)}
-                    className="shrink-0 rounded-full px-1.5 py-1 text-[11px] font-medium leading-none text-[#67e8f9] underline-offset-2 hover:underline"
+                    className="shrink-0 rounded-full px-1.5 py-1 text-[11px] font-medium leading-none text-[#e8d19a] underline-offset-2 hover:underline"
                   >
                     อ่านเพิ่ม
                   </button>
@@ -1046,9 +1046,9 @@ function MonthNotesPanel({
                     className="absolute inset-0 z-[1] flex items-center justify-center bg-[#08061a]/25"
                     aria-label={`ปลดล็อก ${m.full}`}
                   >
-                    <span className="relative inline-flex items-center gap-1.5 rounded-full border border-amber-200/20 bg-amber-500/10 px-2.5 py-1">
+                    <span className="relative inline-flex items-center gap-1.5 rounded-full border border-[rgba(232,209,154,0.28)] bg-[rgba(213,177,111,0.12)] px-2.5 py-1">
                       <GoldLockIcon className="relative h-[18px] w-[18px]" />
-                      <span className="text-[11px] font-medium text-amber-100/90">
+                      <span className="text-[11px] font-medium text-[#e8d19a]/90">
                         ปลดล็อก
                       </span>
                     </span>

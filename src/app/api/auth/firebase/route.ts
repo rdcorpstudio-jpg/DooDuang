@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     const idToken = typeof body.idToken === "string" ? body.idToken : "";
     const wantCheckout = body.checkout === true;
     const returnPath =
-      typeof body.returnPath === "string" ? body.returnPath : "/premium";
+      typeof body.returnPath === "string" ? body.returnPath : "/home";
     if (!idToken) {
       return NextResponse.json({ error: "ไม่พบ token" }, { status: 400 });
     }

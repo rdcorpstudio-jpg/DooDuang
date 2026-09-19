@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { MONTH_LABELS_TH, MONTH_NAMES_TH } from "@/components/fortune/life-cycle-graph";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
 import { FortuneUnlockBanner } from "@/components/fortune/fortune-unlock-banner";
@@ -39,23 +37,23 @@ function LockMark({ x, y }: { x: number; y: number }) {
   );
 }
 
-/** 3 bands aligned with legend — <6 red so low scores actually show */
+/** 3 bands — โทนแม่ (เขียวอ่อน · ทอง · แดงอุ่น) ไม่ใช่นีออน */
 function scoreDotColor(score: number) {
-  if (score >= 8) return "#7CFF6B";
-  if (score >= 6) return "#FFE14A";
-  return "#FF4D7A";
+  if (score >= 8) return "#7dcea0";
+  if (score >= 6) return "#d5b16f";
+  return "#e87878";
 }
 
 function scoreGlow(score: number) {
-  if (score >= 8) return "rgba(124,255,107,0.45)";
-  if (score >= 6) return "rgba(255,225,74,0.4)";
-  return "rgba(255,77,122,0.45)";
+  if (score >= 8) return "rgba(125,206,160,0.4)";
+  if (score >= 6) return "rgba(213,177,111,0.4)";
+  return "rgba(232,120,120,0.4)";
 }
 
 function scoreBadgeBg(score: number) {
-  if (score >= 8) return "rgba(124, 255, 107, 0.14)";
-  if (score >= 6) return "rgba(255, 225, 74, 0.12)";
-  return "rgba(255, 77, 122, 0.14)";
+  if (score >= 8) return "rgba(125, 206, 160, 0.14)";
+  if (score >= 6) return "rgba(213, 177, 111, 0.14)";
+  return "rgba(232, 120, 120, 0.14)";
 }
 
 type YearPoint = {
@@ -211,21 +209,21 @@ function StockStylePanChart({
 
   return (
     <div className="relative">
-      <div className="mb-2.5 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 px-0.5 text-[11.5px] text-[#f7f4ec]/55">
+      <div className="mb-2.5 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 px-0.5 text-[15.5px] font-medium text-[#f7f4ec]/70">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#FF4D7A]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#e87878]" />
           ควรระวัง
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#FFE14A]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#d5b16f]" />
           ปานกลาง
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#7CFF6B]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#7dcea0]" />
           จังหวะดี
         </span>
       </div>
-      <p className="mb-2 px-0.5 text-center text-[12px] leading-snug text-[#f7f4ec]/45">
+      <p className="mb-2 px-0.5 text-center text-[15.5px] font-medium leading-snug text-[#f7f4ec]/55">
         ปัดซ้าย–ขวาเพื่อเลื่อนดู · แตะจุดเพื่อเลือก
       </p>
       <div
@@ -243,7 +241,7 @@ function StockStylePanChart({
           style={{
             letterSpacing: "normal",
             fontFamily:
-              "var(--font-sarabun), Sarabun, ui-sans-serif, system-ui, sans-serif",
+              "var(--font-app), \"IBM Plex Sans Thai\", ui-sans-serif, system-ui, sans-serif",
           }}
         >
           <defs>
@@ -307,7 +305,7 @@ function StockStylePanChart({
                   strokeWidth={1}
                   strokeDasharray="4 5"
                 />
-                <text x={10} y={y + 4} fill="rgba(247,244,236,0.4)" fontSize={11}>
+                <text x={10} y={y + 4} fill="rgba(247,244,236,0.55)" fontSize={13}>
                   {t}
                 </text>
               </g>
@@ -386,7 +384,7 @@ function StockStylePanChart({
                     y={yy - (selected ? 18 : 14)}
                     textAnchor="middle"
                     fill={color}
-                    fontSize={selected ? 14 : 11.5}
+                    fontSize={selected ? 16 : 14}
                     fontWeight={selected ? 700 : 600}
                     opacity={selected ? 1 : 0.88}
                     className="pointer-events-none"
@@ -536,7 +534,6 @@ function UnlockedTwelveYearTrend({
   focus,
   gender,
   initialMode = "month",
-  detailHrefBase = "/premium/year/detail",
   className,
 }: {
   seed: string;
@@ -547,8 +544,6 @@ function UnlockedTwelveYearTrend({
   focus?: FortuneFocus;
   gender?: string;
   initialMode?: "month" | "year";
-  /** Base path for “อ่านเพิ่มเติม” — appends ?ce= */
-  detailHrefBase?: string;
   className?: string;
 }) {
   const now = new Date();
@@ -644,52 +639,67 @@ function UnlockedTwelveYearTrend({
       : null;
 
   return (
-    <section className={cn("space-y-3", className)}>
-      <div className="space-y-1">
-        <div className="flex items-center justify-between gap-2.5 px-0.5">
-          <div className="flex min-w-0 items-center gap-1.5">
-            <FortuneIcon name="compass" size={18} plain className="shrink-0" />
-            <h2 className="truncate text-[15px] font-semibold tracking-wide text-[#d5b16f]">
-              จังหวะชีวิต
-            </h2>
-          </div>
-          <div
-            className="inline-flex shrink-0 rounded-full p-0.5"
-            style={{
-              background: "rgba(16,24,39,0.6)",
-              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
-            }}
-          >
-            {(
-              [
-                { id: "month" as const, label: "รายเดือน" },
-                { id: "year" as const, label: "รายปี" },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setMode(tab.id)}
-                className={cn(
-                  "rounded-full px-2.5 py-1 text-[12px] font-semibold outline-none transition",
-                  mode === tab.id
-                    ? "bg-[#d5b16f] text-[#101827]"
-                    : "text-[#e8d19a]/75"
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <p className="px-0.5 text-[12px] leading-snug text-[#f7f4ec]/55">
-          เลื่อนดูเส้นเวลา · สลับรายเดือนหรือรายปี
-        </p>
+    <section className={cn("space-y-3.5", className)}>
+      <div
+        className="flex rounded-full p-1"
+        style={{
+          background: "rgba(8,14,28,0.55)",
+          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)",
+        }}
+        role="tablist"
+        aria-label="สลับรายเดือนหรือรายปี"
+      >
+        {(
+          [
+            { id: "month" as const, label: "รายเดือน" },
+            { id: "year" as const, label: "รายปี" },
+          ] as const
+        ).map((tab) => {
+          const active = mode === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setMode(tab.id)}
+              className={cn(
+                "flex-1 rounded-full py-2.5 text-[14.5px] font-bold outline-none transition active:scale-[0.99]",
+                active ? "text-[#1a1408]" : "text-[rgba(232,209,154,0.75)]",
+              )}
+              style={
+                active
+                  ? {
+                      background:
+                        "linear-gradient(155deg, #fff8e4 0%, #e8d19a 40%, #d5b16f 100%)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)",
+                    }
+                  : undefined
+              }
+            >
+              <span className="dd-btn-label">{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {mode === "month" ? (
         <>
-          <div className="mae-aspect-card rounded-[18px] px-2.5 py-3">
+          <div
+            className="overflow-hidden rounded-[22px] px-2.5 pb-3 pt-3.5"
+            style={{
+              background:
+                "linear-gradient(160deg, rgba(12,28,52,0.72) 0%, rgba(6,14,30,0.78) 100%)",
+              boxShadow:
+                "inset 0 0 0 1px rgba(255,255,255,0.12), 0 14px 32px rgba(0,0,0,0.22)",
+            }}
+          >
+            <div className="mb-2 flex items-center gap-1.5 px-1.5">
+              <FortuneIcon name="compass" size={16} plain className="shrink-0" />
+              <p className="text-[13.5px] font-semibold tracking-wide text-[#e8d19a]">
+                จังหวะรายเดือน
+              </p>
+            </div>
             <StockStylePanChart
               points={monthChart}
               selectedIndex={monthIndexSel}
@@ -697,45 +707,59 @@ function UnlockedTwelveYearTrend({
               ariaLabel="กราฟจังหวะชีวิตรายเดือน ปัดเลื่อนดูได้"
             />
           </div>
-          <div className="mae-aspect-card rounded-[18px] px-3.5 py-3.5">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="text-[13px] font-medium text-[#d5b16f]">
+
+          <div
+            className="rounded-[22px] px-4 py-4"
+            style={{
+              background:
+                "linear-gradient(160deg, rgba(12,28,52,0.72) 0%, rgba(6,14,30,0.78) 100%)",
+              boxShadow:
+                "inset 0 0 0 1px rgba(255,255,255,0.12), 0 14px 32px rgba(0,0,0,0.22)",
+            }}
+          >
+            <div className="flex items-end justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-semibold tracking-[0.12em] text-[#e8d19a]">
                   {activeMonth.isNow ? "เดือนนี้" : "เดือนที่เลือก"}
                 </p>
-                <p className="mt-0.5 text-[17px] font-semibold text-[#f7f4ec]">
+                <p className="mt-1 text-[1.35rem] font-bold leading-tight text-white">
                   {activeMonth.fullLabel}
                 </p>
               </div>
-              <span
-                className="no-sky-lift shrink-0 rounded-full px-3 py-1.5 text-[12.5px] font-semibold tabular-nums"
-                style={{
-                  color: scoreDotColor(activeMonth.score),
-                  background: scoreBadgeBg(activeMonth.score),
-                  boxShadow: `inset 0 0 0 1px ${scoreDotColor(activeMonth.score)}66`,
-                }}
-              >
-                พลัง {activeMonth.score} · {monthBand.label}
-              </span>
+              <div className="shrink-0 text-right">
+                <p
+                  className="text-[2rem] font-bold tabular-nums leading-none"
+                  style={{ color: scoreDotColor(activeMonth.score) }}
+                >
+                  {activeMonth.score}
+                </p>
+                <p
+                  className="mt-1 text-[12px] font-semibold"
+                  style={{ color: scoreDotColor(activeMonth.score) }}
+                >
+                  {monthBand.label}
+                </p>
+              </div>
             </div>
-            <p className="mt-2 text-[15px] leading-relaxed text-[#f7f4ec]/80">
+
+            <p className="mt-3 text-[14.5px] font-medium leading-[1.55] text-white/90">
               {monthBand.meaning}
             </p>
+
             {monthBridge ? (
-              <p className="mt-2 rounded-[12px] px-2.5 py-2 text-[13px] leading-relaxed text-[#e8d19a]/90"
+              <p
+                className="mt-3 rounded-[14px] px-3 py-2.5 text-[13.5px] font-medium leading-[1.5]"
                 style={{
-                  background: "rgba(213,177,111,0.08)",
+                  color: "rgba(232,209,154,0.92)",
+                  background: "rgba(213,177,111,0.1)",
                   boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.22)",
                 }}
               >
                 วันนี้ ({dayToneLabelTh(todayTone)}) · {monthBridge}
               </p>
-            ) : activeMonth.isNow ? (
-              <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/55">
-                วันนี้ ({dayToneLabelTh(todayTone)}) สอดคล้องกับจังหวะเดือนนี้
-              </p>
             ) : null}
-            <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/70">
+
+            <p className="mt-3 text-[12.5px] font-medium leading-snug text-[rgba(186,204,230,0.65)]">
               {activeMonth.isNow
                 ? "แตะจุดเดือนอื่นบนกราฟเพื่อเทียบจังหวะก่อน–หลัง"
                 : `เทียบกับเดือนนี้ · พลัง ${months[monthNowIdx >= 0 ? monthNowIdx : monthIndexSel]?.score ?? "—"}`}
@@ -744,7 +768,21 @@ function UnlockedTwelveYearTrend({
         </>
       ) : (
         <>
-          <div className="mae-aspect-card rounded-[18px] px-2.5 py-3">
+          <div
+            className="overflow-hidden rounded-[22px] px-2.5 pb-3 pt-3.5"
+            style={{
+              background:
+                "linear-gradient(160deg, rgba(12,28,52,0.72) 0%, rgba(6,14,30,0.78) 100%)",
+              boxShadow:
+                "inset 0 0 0 1px rgba(255,255,255,0.12), 0 14px 32px rgba(0,0,0,0.22)",
+            }}
+          >
+            <div className="mb-2 flex items-center gap-1.5 px-1.5">
+              <FortuneIcon name="compass" size={16} plain className="shrink-0" />
+              <p className="text-[13.5px] font-semibold tracking-wide text-[#e8d19a]">
+                จังหวะรายปี
+              </p>
+            </div>
             <StockStylePanChart
               points={yearChart}
               selectedIndex={yearIndex}
@@ -752,47 +790,81 @@ function UnlockedTwelveYearTrend({
               ariaLabel="กราฟจังหวะชีวิตรายปี ปัดเลื่อนดูได้"
             />
           </div>
-          <div className="mae-aspect-card relative space-y-2 rounded-[18px] px-3.5 py-3.5">
-            <div className="flex items-start justify-between gap-3">
+
+          <div
+            className="rounded-[22px] px-4 py-4"
+            style={{
+              background:
+                "linear-gradient(160deg, rgba(12,28,52,0.72) 0%, rgba(6,14,30,0.78) 100%)",
+              boxShadow:
+                "inset 0 0 0 1px rgba(255,255,255,0.12), 0 14px 32px rgba(0,0,0,0.22)",
+            }}
+          >
+            <div className="flex items-end justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[13px] font-medium text-[#d5b16f]">
+                <p className="text-[12.5px] font-semibold tracking-[0.12em] text-[#e8d19a]">
                   {activeYear.ce === nowCe
                     ? "ปีนี้"
                     : activeYear.ce < nowCe
                       ? "ปีที่ผ่านมา"
                       : "ปีข้างหน้า"}
                 </p>
-                <p className="mt-1 text-[16px] font-semibold text-[#f7f4ec]">
+                <p className="mt-1 text-[1.35rem] font-bold leading-tight text-white">
                   พ.ศ. {activeYear.be}
                 </p>
               </div>
-              <span
-                className="no-sky-lift shrink-0 rounded-full px-3 py-1.5 text-[12.5px] font-semibold tabular-nums"
-                style={{
-                  color: scoreDotColor(activeYear.score),
-                  background: scoreBadgeBg(activeYear.score),
-                  boxShadow: `inset 0 0 0 1px ${scoreDotColor(activeYear.score)}66`,
-                }}
-              >
-                พลัง {activeYear.score} · {yearBand.label}
-              </span>
+              <div className="shrink-0 text-right">
+                <p
+                  className="text-[2rem] font-bold tabular-nums leading-none"
+                  style={{ color: scoreDotColor(activeYear.score) }}
+                >
+                  {activeYear.score}
+                </p>
+                <p
+                  className="mt-1 text-[12px] font-semibold"
+                  style={{ color: scoreDotColor(activeYear.score) }}
+                >
+                  {yearBand.label}
+                </p>
+              </div>
             </div>
-            <p className="text-[14px] font-medium leading-snug text-[#f7f4ec]/80">
+
+            <p className="mt-3 text-[14.5px] font-medium leading-[1.55] text-white/90">
               {activeYear.overview}
             </p>
-            <p className="line-clamp-2 text-[13px] leading-[1.65] text-[#f7f4ec]/65">
+            <p className="mt-2 text-[13.5px] font-medium leading-[1.5] text-[rgba(186,204,230,0.85)]">
               {yearBand.meaning}
             </p>
-            <Link
-              href={`${detailHrefBase}?ce=${activeYear.ce}`}
-              className="mae-gold-cta group mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold tracking-wide text-[#101827] outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
-            >
-              อ่านเพิ่มเติม
-              <ArrowRight
-                className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-                strokeWidth={2.4}
-              />
-            </Link>
+
+            <div className="mt-4 space-y-2">
+              {(
+                [
+                  { label: "จุดเปลี่ยน", body: activeYear.turning },
+                  { label: "ทำไมถึงเป็นแบบนี้", body: activeYear.reason },
+                  { label: "แนวทาง", body: activeYear.guidance },
+                  {
+                    label: "จุดเด่น · ใช้ยังไง",
+                    body: `${yearBand.strength} — ${yearBand.use}`,
+                  },
+                ] as const
+              ).map((block) => (
+                <div
+                  key={block.label}
+                  className="rounded-[14px] px-3 py-2.5 text-left"
+                  style={{
+                    background: "rgba(8,14,28,0.4)",
+                    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <p className="text-[11.5px] font-semibold tracking-[0.12em] text-[#e8d19a]">
+                    {block.label}
+                  </p>
+                  <p className="mt-1 text-[13.5px] font-medium leading-[1.5] text-white/88">
+                    {block.body}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </>
       )}
@@ -841,7 +913,6 @@ export function FortuneFreeMonthTrend({
   focus,
   gender,
   initialMode = "month",
-  detailHrefBase,
   className,
 }: {
   points?: FreeMonthPoint[] | null;
@@ -855,7 +926,6 @@ export function FortuneFreeMonthTrend({
   focus?: FortuneFocus;
   gender?: string;
   initialMode?: "month" | "year";
-  detailHrefBase?: string;
   className?: string;
 }) {
   if (unlocked) {
@@ -869,7 +939,6 @@ export function FortuneFreeMonthTrend({
         focus={focus}
         gender={gender}
         initialMode={initialMode}
-        detailHrefBase={detailHrefBase}
         className={className}
       />
     );
@@ -1007,11 +1076,11 @@ function FreeMonthTrendTeaser({
       <div className="px-0.5">
         <div className="flex items-center gap-1.5">
           <FortuneIcon name="compass" size={18} plain className="shrink-0" />
-          <h2 className="text-[15px] font-semibold tracking-wide text-[#d5b16f]">
+          <h2 className="text-[15.5px] font-bold tracking-wide text-[#e8d19a]">
             จังหวะชีวิตช่วงนี้
           </h2>
         </div>
-        <p className="mt-1 text-[12px] leading-snug text-[#f7f4ec]/55">
+        <p className="mt-1 text-[15.5px] font-medium leading-snug text-[#bacce6]/80">
           เริ่มจากเดือนนี้ · อนาคตล็อกไว้
         </p>
       </div>
@@ -1029,23 +1098,23 @@ function FreeMonthTrendTeaser({
         </div>
       ) : (
         <div className="mae-aspect-card rounded-[18px] border border-dashed border-[rgba(213,177,111,0.35)] px-3 py-5 text-center">
-          <p className="text-[14px] font-medium text-[#f7f4ec]/70">
+          <p className="text-[15.5px] font-medium text-[#bacce6]/80">
             ยังไม่มีข้อมูลจังหวะรายเดือน
-        </p>
-      </div>
+          </p>
+        </div>
       )}
 
       {hasData ? (
         <div className="mae-aspect-card rounded-[18px] px-3.5 py-3.5">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-[13px] font-medium text-[#d5b16f]">เดือนนี้</p>
-              <p className="mt-0.5 text-[17px] font-semibold text-[#f7f4ec]">
+              <p className="text-[15.5px] font-semibold text-[#e8d19a]">เดือนนี้</p>
+              <p className="mt-0.5 text-[1.25rem] font-bold text-[#f7f4ec]">
                 {active.fullLabel}
-            </p>
-          </div>
+              </p>
+            </div>
             <span
-              className="no-sky-lift shrink-0 rounded-full px-3 py-1.5 text-[12.5px] font-semibold tabular-nums"
+              className="no-sky-lift shrink-0 rounded-full px-3 py-1.5 text-[15.5px] font-bold tabular-nums"
               style={{
                 color: scoreDotColor(active.score),
                 background: scoreBadgeBg(active.score),
@@ -1054,13 +1123,13 @@ function FreeMonthTrendTeaser({
             >
               พลัง {active.score} · {band.label}
             </span>
-        </div>
-          <p className="mt-2 text-[15px] leading-relaxed text-[#f7f4ec]/80">
+          </div>
+          <p className="mt-2 text-[15.5px] leading-relaxed text-[#f7f4ec]/88">
             {band.meaning}
           </p>
           {monthBridge ? (
             <p
-              className="mt-2 rounded-[12px] px-2.5 py-2 text-[13px] leading-relaxed text-[#e8d19a]/90"
+              className="mt-2 rounded-[12px] px-2.5 py-2 text-[15.5px] leading-relaxed text-[#e8d19a]/90"
               style={{
                 background: "rgba(213,177,111,0.08)",
                 boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.22)",
@@ -1069,34 +1138,34 @@ function FreeMonthTrendTeaser({
               วันนี้ ({dayToneLabelTh(todayTone)}) · {monthBridge}
             </p>
           ) : (
-            <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/55">
+            <p className="mt-2 text-[15.5px] leading-relaxed text-[#bacce6]/80">
               วันนี้ ({dayToneLabelTh(todayTone)}) สอดคล้องกับจังหวะเดือนนี้
             </p>
           )}
-          <p className="mt-2 text-[13px] leading-relaxed text-[#f7f4ec]/55">
-            <span className="font-semibold text-[#d5b16f]">ใช้ยังไง · </span>
+          <p className="mt-2 text-[15.5px] leading-relaxed text-[#bacce6]/80">
+            <span className="font-semibold text-[#e8d19a]">ใช้ยังไง · </span>
             {band.use}
           </p>
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 text-[12px] text-[#f7f4ec]/55">
+      <div className="flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 text-[15.5px] font-medium text-[#bacce6]/75">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#FF4D7A]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#e87878]" />
           ควรระวัง
-              </span>
+        </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#FFE14A]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#d5b16f]" />
           ปานกลาง
-                </span>
+        </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#7CFF6B]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#7dcea0]" />
           จังหวะดี
-                  </span>
+        </span>
         <span className="inline-flex items-center gap-1.5">
           <FortuneIcon name="lock-gold" size={22} plain />
           อนาคต · ล็อกไว้
-                </span>
+        </span>
       </div>
 
       <FortuneUnlockBanner onUnlock={onUnlock} />

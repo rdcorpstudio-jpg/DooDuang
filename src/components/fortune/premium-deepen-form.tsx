@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Clock } from "lucide-react";
-import { FortuneLoading } from "@/components/fortune/fortune-loading";
+import { FortuneLoading, FORTUNE_LOADING_DURATION_MS } from "@/components/fortune/fortune-loading";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import {
   writeFortuneProfile,
@@ -19,7 +19,7 @@ const FOCUS_OPTIONS: { id: FortuneFocus; label: string }[] = [
   { id: "health", label: "สุขภาพ" },
 ];
 
-const MIN_LOADING_MS = 4800;
+const MIN_LOADING_MS = FORTUNE_LOADING_DURATION_MS;
 
 /** After premium unlock — collect time + birth place for deeper analysis */
 export function PremiumDeepenForm({

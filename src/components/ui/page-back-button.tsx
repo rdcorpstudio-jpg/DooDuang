@@ -5,14 +5,15 @@ import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const BACK_CLASS =
-  "inline-flex min-h-10 items-center gap-1 rounded-full px-3.5 py-2 text-[14px] font-semibold tracking-wide outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45";
+  "inline-flex h-11 min-h-11 shrink-0 items-center justify-center gap-1 rounded-full px-4 text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45";
 
 const BACK_STYLE = {
-  background: "rgba(213,177,111,0.14)",
-  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.5)",
+  color: "#e8d19a",
+  background: "rgba(16, 24, 39, 0.92)",
+  boxShadow: "inset 0 0 0 1.5px rgba(232, 209, 154, 0.7)",
 } as const;
 
-/** Clear gold “กลับ” control — always shows icon + label */
+/** Dark pill + gold rim “‹ กลับ” — matches Mae back control. */
 export function PageBackButton({
   href,
   onClick,
@@ -36,11 +37,11 @@ export function PageBackButton({
   const inner = (
     <>
       <ChevronLeft
-        className="h-5 w-5 shrink-0 text-[#e8d19a]"
-        strokeWidth={2.4}
+        className="h-5 w-5 shrink-0"
+        strokeWidth={2.6}
         aria-hidden
       />
-      <span className="mae-gold-text">{label}</span>
+      <span className="dd-btn-label">{label}</span>
     </>
   );
 

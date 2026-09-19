@@ -21,10 +21,14 @@ let statusCache: PremiumStatusPayload | null = null;
 
 /**
  * QA only — unlock premium UI without payment.
- * Set NEXT_PUBLIC_ALLOW_PREMIUM_SIM=1. Never set this on Railway/production.
+ * - Explicit: NEXT_PUBLIC_ALLOW_PREMIUM_SIM=1
+ * - Auto-on during `next dev` / localhost (never on production builds)
+ * Do NOT set the env flag on Railway/production.
  */
 export function isLocalPremiumBypass(): boolean {
-  return process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1";
+  if (process.env.NEXT_PUBLIC_ALLOW_PREMIUM_SIM === "1") return true;
+  if (process.env.NODE_ENV === "development") return true;
+  return false;
 }
 
 function legacyUnlockKey(birthDate: string, nickname: string) {

@@ -106,20 +106,20 @@ export function FortuneIdentityDeepDive({
 
         <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-white/[0.08] pt-3.5">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+            <p className="text-[15.5px] font-semibold tracking-wide text-[#e8d19a]">
               จุดแข็ง
             </p>
-            <ul className="mt-2 space-y-1.5 text-[12.5px] text-white/65">
+            <ul className="mt-2 space-y-1.5 text-[15.5px] text-[#bacce6]/85">
               {["รอบคอบ", "อดทน", "รับฟัง"].map((t) => (
                 <li key={t}>· {t}</li>
               ))}
             </ul>
           </div>
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#E4C56A]/85">
+            <p className="text-[15.5px] font-semibold tracking-wide text-[#e8d19a]">
               ควรปรับ
             </p>
-            <ul className="mt-2 space-y-1.5 text-[12.5px] text-white/65">
+            <ul className="mt-2 space-y-1.5 text-[15.5px] text-[#bacce6]/85">
               {["คิดมาก", "เกรงใจ", "แบกภาระ"].map((t) => (
                 <li key={t}>· {t}</li>
               ))}
@@ -127,14 +127,14 @@ export function FortuneIdentityDeepDive({
           </div>
         </div>
 
-        <p className="mt-3.5 border-t border-white/[0.08] pt-3 text-[12.5px] leading-[1.65] text-white/65">
-          <span className="font-semibold text-[#E8EEF8]">คนอื่นมองคุณ · </span>
+        <p className="mt-3.5 border-t border-[rgba(232,209,154,0.2)] pt-3 text-[15.5px] leading-[1.65] text-[#bacce6]/85">
+          <span className="font-semibold text-[#e8d19a]">คนอื่นมองคุณ · </span>
           ไว้ใจได้ แต่ไม่ค่อยบอกว่าเหนื่อย
         </p>
       </section>
 
       <section className="fortune-soft-board rounded-[24px] px-3.5 pb-4 pt-3.5">
-        <h2 className="font-sacred text-[1.15rem] leading-none tracking-wide text-[#3d1f72]">
+        <h2 className="font-sacred text-[1.15rem] leading-none tracking-wide text-[#e8d19a]">
           ดวงรายวัน
         </h2>
 
@@ -161,7 +161,7 @@ export function FortuneIdentityDeepDive({
                     priority
                   />
                 </span>
-                <p className="mt-1.5 text-[10.5px] font-semibold text-[#3d1f72]">
+                <p className="mt-1.5 text-[15.5px] font-semibold text-[#e8d19a]">
                   {d.name}
                 </p>
                 <div className="fortune-soft-bar mt-1.5 w-full max-w-[3.6rem]">
@@ -178,10 +178,10 @@ export function FortuneIdentityDeepDive({
         </div>
 
         <div className="mt-3.5">
-          <h3 className="font-sacred text-[1.02rem] leading-none text-[#3d1f72]">
+          <h3 className="font-sacred text-[1.15rem] leading-none text-[#e8d19a]">
             {active.detailTitle}
           </h3>
-          <p className="mt-2 text-[13px] leading-[1.55] text-[#4c2d7a]/92">
+          <p className="mt-2 text-[15.5px] leading-[1.55] text-[#bacce6]/90">
             {active.body}
           </p>
         </div>

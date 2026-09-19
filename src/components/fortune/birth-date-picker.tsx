@@ -1,12 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { SnapWheelColumn } from "@/components/fortune/snap-wheel-column";
 
-const ITEM_H = 40;
-const PAD = 2;
+const THAI_MONTHS_FULL = [
+  "มกราคม",
+  "กุมภาพันธ์",
+  "มีนาคม",
+  "เมษายน",
+  "พฤษภาคม",
+  "มิถุนายน",
+  "กรกฎาคม",
+  "สิงหาคม",
+  "กันยายน",
+  "ตุลาคม",
+  "พฤศจิกายน",
+  "ธันวาคม",
+] as const;
 
-const THAI_MONTHS = [
+const THAI_MONTHS_SHORT = [
   "ม.ค.",
   "ก.พ.",
   "มี.ค.",
@@ -36,96 +49,22 @@ function toIso(year: number, month: number, day: number) {
 
 function parseIso(value: string | undefined) {
   const today = new Date();
+  const fallbackYear = today.getFullYear() - 28;
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return {
-      year: today.getFullYear(),
-      month: today.getMonth() + 1,
-      day: today.getDate(),
-    };
+    return { year: fallbackYear, month: 1, day: 1 };
   }
   const [y, m, d] = value.split("-").map(Number);
+  if (
+    y === today.getFullYear() &&
+    m === today.getMonth() + 1 &&
+    d === today.getDate()
+  ) {
+    return { year: fallbackYear, month: m, day: Math.min(d, 28) };
+  }
   return { year: y, month: m, day: d };
 }
 
-function WheelColumn({
-  items,
-  value,
-  onChange,
-  ariaLabel,
-}: {
-  items: { value: number; label: string }[];
-  value: number;
-  onChange: (value: number) => void;
-  ariaLabel: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const lock = useRef(false);
-  const endTimer = useRef<number | null>(null);
-  const index = Math.max(0, items.findIndex((item) => item.value === value));
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    lock.current = true;
-    el.scrollTop = index * ITEM_H;
-    const t = window.setTimeout(() => {
-      lock.current = false;
-    }, 120);
-    return () => window.clearTimeout(t);
-  }, [index, items.length]);
-
-  function settle() {
-    const el = ref.current;
-    if (!el || lock.current) return;
-    const i = Math.max(
-      0,
-      Math.min(items.length - 1, Math.round(el.scrollTop / ITEM_H))
-    );
-    el.scrollTop = i * ITEM_H;
-    const next = items[i]?.value;
-    if (next != null && next !== value) onChange(next);
-  }
-
-  return (
-    <div className="relative z-[2] h-[min(200px,34svh)] min-h-[148px] max-h-[200px] flex-1 overflow-hidden">
-      <div
-        ref={ref}
-        role="listbox"
-        aria-label={ariaLabel}
-        onScroll={() => {
-          if (lock.current) return;
-          if (endTimer.current) window.clearTimeout(endTimer.current);
-          endTimer.current = window.setTimeout(settle, 100);
-        }}
-        className="date-wheel-col h-full overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-        style={{
-          scrollSnapType: "y mandatory",
-          paddingTop: PAD * ITEM_H,
-          paddingBottom: PAD * ITEM_H,
-        }}
-      >
-        {items.map((item) => (
-          <button
-            key={`${ariaLabel}-${item.value}`}
-            type="button"
-            className={cn(
-              "flex w-full shrink-0 items-center justify-center text-[17px]",
-              item.value === value
-                ? "font-bold text-[#d5b16f]"
-                : "font-medium text-white/40"
-            )}
-            style={{ height: ITEM_H, scrollSnapAlign: "center" }}
-            onClick={() => onChange(item.value)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/** Mae navy/gold birth date wheel */
+/** Mae birth date — redesigned scroll wheels. */
 export function BirthDatePicker({
   value,
   onChange,
@@ -134,81 +73,107 @@ export function BirthDatePicker({
   value: string;
   onChange: (isoDate: string) => void;
   className?: string;
-  /** @deprecated Ignored — picker is Mae-only */
   tone?: string;
 }) {
   const now = new Date();
   const maxYear = now.getFullYear();
   const minYear = maxYear - 80;
   const initial = parseIso(value);
-  const [year, setYear] = useState(initial.year);
+  const [year, setYear] = useState(
+    Math.min(maxYear, Math.max(minYear, initial.year)),
+  );
   const [month, setMonth] = useState(initial.month);
   const [day, setDay] = useState(initial.day);
 
-  // Commit visible wheel value when parent has no ISO yet (enables Save)
   useEffect(() => {
-    if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) return;
-    onChange(toIso(initial.year, initial.month, initial.day));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once on mount for empty value
+    const next = toIso(year, month, day);
+    if (value !== next) onChange(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const years = useMemo(
-    () =>
-      Array.from({ length: maxYear - minYear + 1 }, (_, i) => {
-        const y = maxYear - i;
-        return { value: y, label: String(y + 543) };
-      }),
-    [maxYear, minYear]
-  );
-
-  const months = useMemo(
-    () => THAI_MONTHS.map((label, i) => ({ value: i + 1, label })),
-    []
-  );
-
-  const maxDay = daysInMonth(year, month);
-  const days = useMemo(
-    () =>
-      Array.from({ length: maxDay }, (_, i) => ({
-        value: i + 1,
-        label: String(i + 1).padStart(2, "0"),
-      })),
-    [maxDay]
-  );
+  useEffect(() => {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
+    const parsed = parseIso(value);
+    setYear(parsed.year);
+    setMonth(parsed.month);
+    setDay(parsed.day);
+  }, [value]);
 
   function commit(nextYear: number, nextMonth: number, nextDay: number) {
-    const safeDay = clampDay(nextYear, nextMonth, nextDay);
-    setYear(nextYear);
-    setMonth(nextMonth);
+    const y = Math.min(maxYear, Math.max(minYear, nextYear));
+    const m = ((nextMonth - 1 + 12) % 12) + 1;
+    const safeDay = clampDay(y, m, nextDay);
+    setYear(y);
+    setMonth(m);
     setDay(safeDay);
-    onChange(toIso(nextYear, nextMonth, safeDay));
+    onChange(toIso(y, m, safeDay));
   }
+
+  const dayOptions = useMemo(() => {
+    const max = daysInMonth(year, month);
+    return Array.from({ length: max }, (_, i) => ({
+      value: i + 1,
+      label: String(i + 1).padStart(2, "0"),
+    }));
+  }, [year, month]);
+
+  const monthOptions = useMemo(
+    () =>
+      THAI_MONTHS_SHORT.map((label, i) => ({
+        value: i + 1,
+        label,
+      })),
+    [],
+  );
+
+  const yearOptions = useMemo(() => {
+    const list = [];
+    for (let y = maxYear; y >= minYear; y -= 1) {
+      list.push({ value: y, label: String(y + 543) });
+    }
+    return list;
+  }, [maxYear, minYear]);
+
+  const display = useMemo(
+    () => `${day} ${THAI_MONTHS_FULL[month - 1]} พ.ศ. ${year + 543}`,
+    [day, month, year],
+  );
 
   return (
     <div className={cn("relative", className)}>
-      <div className="mb-2.5 grid grid-cols-3 text-center text-[11px] font-semibold tracking-[0.12em] text-[#b9a077]">
-        <span>วัน</span>
-        <span>เดือน</span>
-        <span>ปี พ.ศ.</span>
-      </div>
-      <div className="relative flex overflow-hidden rounded-[18px] bg-[rgba(16,24,39,0.55)] ring-1 ring-inset ring-[rgba(213,177,111,0.28)]">
-        <div className="pointer-events-none absolute inset-x-2.5 top-1/2 z-[1] h-10 -translate-y-1/2 rounded-xl border border-[rgba(213,177,111,0.4)] bg-[rgba(213,177,111,0.14)]" />
-        <WheelColumn
-          ariaLabel="วัน"
-          items={days}
-          value={Math.min(day, maxDay)}
+      <p className="mb-3 text-center text-[17px] font-bold leading-snug text-white">
+        {display}
+      </p>
+
+      <div
+        className="mx-auto flex w-fit items-start justify-center gap-2 rounded-[28px] px-3 py-3"
+        style={{
+          background:
+            "linear-gradient(160deg, rgba(12,28,52,0.55) 0%, rgba(6,16,34,0.5) 100%)",
+          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)",
+        }}
+      >
+        <SnapWheelColumn
+          label="วัน"
+          widthClass="w-[3.6rem]"
+          options={dayOptions}
+          value={day}
+          editable
           onChange={(d) => commit(year, month, d)}
         />
-        <WheelColumn
-          ariaLabel="เดือน"
-          items={months}
+        <SnapWheelColumn
+          label="เดือน"
+          widthClass="w-[4.1rem]"
+          options={monthOptions}
           value={month}
           onChange={(m) => commit(year, m, day)}
         />
-        <WheelColumn
-          ariaLabel="ปี"
-          items={years}
+        <SnapWheelColumn
+          label="ปี พ.ศ."
+          widthClass="w-[4.6rem]"
+          options={yearOptions}
           value={year}
+          editable
           onChange={(y) => commit(y, month, day)}
         />
       </div>

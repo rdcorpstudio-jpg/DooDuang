@@ -92,7 +92,7 @@ export function useStripePaymentReturn(onUnlocked?: () => void) {
         if (unlockedOk || paidOk || pathname === THANKS_PATH) {
           router.replace(THANKS_PATH);
         } else {
-          router.replace(pathname || "/premium");
+          router.replace(pathname || "/home");
         }
       }
     })();

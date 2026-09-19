@@ -6,7 +6,6 @@ import {
 } from "@/lib/fortune/analyze";
 import { getZodiacByBirthDate } from "@/lib/fortune/zodiac";
 import {
-  COUPLE_BANK,
   OUTLOOK_BANK,
   SCAN_FOLLOWUP,
   SELF_MAP_BANK,
@@ -16,6 +15,18 @@ import {
   type SelfMapCopy,
   type WeekDayCopy,
 } from "@/lib/fortune/content/premium-value-th";
+import {
+  COUPLE_DIMENSIONS,
+  COUPLE_PROMPTS,
+  COUPLE_ROLE_TIP,
+  COUPLE_ROLES,
+  COUPLE_TONE_SHELL,
+  COUPLE_WEEK_TIP,
+  ELEMENT_PAIR_COPY,
+  elementPairKey,
+  type CoupleDimensionId,
+  type CoupleRoleId,
+} from "@/lib/fortune/content/couple-th";
 
 export type WeekStatus = "good" | "steady" | "rest";
 
@@ -38,12 +49,25 @@ export type PremiumWeekDay = {
   copy: WeekDayCopy;
 };
 
+export type CoupleDimensionScore = {
+  id: CoupleDimensionId;
+  label: string;
+  score: number;
+};
+
 export type PremiumCouplePack = {
   tone: FortuneTone;
   score: number;
   youSign: string;
   partnerSign: string;
+  youElement: string;
+  partnerElement: string;
+  role: CoupleRoleId;
+  roleLabel: string;
+  dimensions: CoupleDimensionScore[];
   copy: CoupleCopy;
+  prompts: [string, string, string];
+  weekTip: string;
 };
 
 export type PremiumValuePack = {
@@ -58,6 +82,20 @@ export type PremiumValuePack = {
 };
 
 const TH_WEEKDAY = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"] as const;
+const ZODIAC_ORDER = [
+  "aries",
+  "taurus",
+  "gemini",
+  "cancer",
+  "leo",
+  "virgo",
+  "libra",
+  "scorpio",
+  "sagittarius",
+  "capricorn",
+  "aquarius",
+  "pisces",
+] as const;
 
 function addDays(base: Date, days: number) {
   const d = new Date(base);
@@ -70,6 +108,15 @@ function isoLocal(d: Date) {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+function bangkokDayKey(d = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
 }
 
 function shortThaiDate(d: Date) {
@@ -139,59 +186,130 @@ function hashSeed(input: string) {
   return Math.abs(h) >>> 0;
 }
 
-/** Compatibility from two birth dates — visual score + tone bank */
+function clampScore(n: number) {
+  return Math.max(1, Math.min(12, Math.round(n)));
+}
+
+function dimScore(h: number, salt: number, base: number) {
+  const wobble = ((h >> salt) % 21) / 10 - 1;
+  return clampScore(base + wobble * 2.2);
+}
+
+/** Compatibility from two birth dates — dimensions + pair copy + role */
 export function buildCouplePack(
   yourBirthDate: string,
-  partnerBirthDate: string
+  partnerBirthDate: string,
+  role: CoupleRoleId = "lover"
 ): PremiumCouplePack {
   const you = getZodiacByBirthDate(yourBirthDate);
   const partner = getZodiacByBirthDate(partnerBirthDate);
-  const h = hashSeed(`${yourBirthDate}|${partnerBirthDate}|couple`);
-  const order = [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces",
-  ] as const;
-  const yi = order.indexOf(you.id);
-  const pi = order.indexOf(partner.id);
+  const h = hashSeed(`${yourBirthDate}|${partnerBirthDate}|couple|${role}`);
+  const yi = ZODIAC_ORDER.indexOf(you.id);
+  const pi = ZODIAC_ORDER.indexOf(partner.id);
   const dist = Math.abs(yi - pi);
   const ring = Math.min(dist, 12 - dist);
-  const base = 10 - ring * 1.4 + ((h % 30) - 15) / 10;
-  const score = Math.max(1, Math.min(12, Math.round(base)));
+  const sameElement = you.element === partner.element ? 1.2 : 0;
+  const base = 9.2 - ring * 1.15 + sameElement + ((h % 30) - 15) / 12;
+  const score = clampScore(base);
   const tone = scoreToTone(score);
+  const shell = COUPLE_TONE_SHELL[tone];
+  const pair =
+    ELEMENT_PAIR_COPY[elementPairKey(you.element, partner.element)] ??
+    ELEMENT_PAIR_COPY["ดิน+ลม"]!;
+  const roleMeta = COUPLE_ROLES.find((r) => r.id === role) ?? COUPLE_ROLES[0]!;
+
+  const talk = dimScore(h, 3, base + 0.4);
+  const trust = dimScore(h, 7, base - ring * 0.15);
+  const rhythm = dimScore(h, 11, base - (sameElement ? 0.2 : 0.8));
+  const ease = dimScore(h, 17, base - ring * 0.35);
+
+  const dimensions: CoupleDimensionScore[] = COUPLE_DIMENSIONS.map((d) => {
+    const value =
+      d.id === "talk"
+        ? talk
+        : d.id === "trust"
+          ? trust
+          : d.id === "rhythm"
+            ? rhythm
+            : ease;
+    return { id: d.id, label: d.label, score: value };
+  });
+
+  const weekTone = scoreToTone(
+    clampScore(base + ((hashSeed(`${bangkokDayKey()}|${h}`) % 17) - 8) / 6)
+  );
 
   return {
     tone,
     score,
     youSign: you.thaiName,
     partnerSign: partner.thaiName,
-    copy: COUPLE_BANK[tone],
+    youElement: you.element,
+    partnerElement: partner.element,
+    role,
+    roleLabel: roleMeta.label,
+    dimensions,
+    copy: {
+      vibeTitle: shell.vibeTitle,
+      blurb: shell.blurb,
+      together: pair.together,
+      friction: pair.friction,
+      tip: COUPLE_ROLE_TIP[role][tone],
+    },
+    prompts: COUPLE_PROMPTS[role],
+    weekTip: COUPLE_WEEK_TIP[weekTone],
   };
 }
 
 export const PARTNER_BIRTH_KEY = "dooduang-partner-birth";
+export const PARTNER_STATE_KEY = "dooduang-partner-state";
+
+export type PartnerState = {
+  birth: string;
+  role: CoupleRoleId;
+};
 
 export function readPartnerBirth(): string | null {
+  const state = readPartnerState();
+  return state?.birth ?? null;
+}
+
+export function writePartnerBirth(iso: string) {
+  const prev = readPartnerState();
+  writePartnerState({
+    birth: iso,
+    role: prev?.role ?? "lover",
+  });
+}
+
+export function readPartnerState(): PartnerState | null {
   try {
-    const v = sessionStorage.getItem(PARTNER_BIRTH_KEY);
-    return v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+    const raw = sessionStorage.getItem(PARTNER_STATE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<PartnerState>;
+      if (
+        parsed.birth &&
+        /^\d{4}-\d{2}-\d{2}$/.test(parsed.birth) &&
+        parsed.role &&
+        COUPLE_ROLES.some((r) => r.id === parsed.role)
+      ) {
+        return { birth: parsed.birth, role: parsed.role };
+      }
+    }
+    const legacy = sessionStorage.getItem(PARTNER_BIRTH_KEY);
+    if (legacy && /^\d{4}-\d{2}-\d{2}$/.test(legacy)) {
+      return { birth: legacy, role: "lover" };
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
-export function writePartnerBirth(iso: string) {
+export function writePartnerState(state: PartnerState) {
   try {
-    sessionStorage.setItem(PARTNER_BIRTH_KEY, iso);
+    sessionStorage.setItem(PARTNER_STATE_KEY, JSON.stringify(state));
+    sessionStorage.setItem(PARTNER_BIRTH_KEY, state.birth);
   } catch {
     /* ignore */
   }

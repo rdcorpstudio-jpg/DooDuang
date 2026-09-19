@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   clearOAuthPending,
   completeAppLogin,
@@ -11,6 +10,7 @@ import {
   resolveFirebaseUserAfterRedirect,
   safeCallback,
 } from "@/components/auth/google-sign-in-button";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { isFirebaseClientConfigured } from "@/lib/firebase/client";
 
 /** Only handles return from Google — never starts OAuth (no middle hop). */
@@ -102,12 +102,11 @@ export function AuthCompleteClient({
             className="mt-5 w-full space-y-2"
             buttonClassName="h-12 text-[15px]"
           />
-          <Link
+          <PageBackButton
             href={`/login?callbackUrl=${encodeURIComponent(next)}`}
-            className="mt-3 inline-flex h-10 w-full items-center justify-center text-[13px] font-medium text-[#9aa3b2]"
-          >
-            กลับหน้าเข้าสู่ระบบ
-          </Link>
+            label="กลับหน้าเข้าสู่ระบบ"
+            className="mt-3 w-full"
+          />
         </div>
       )}
     </div>

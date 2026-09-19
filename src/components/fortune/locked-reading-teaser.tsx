@@ -30,19 +30,19 @@ export function LockedPreviewTile({
         className
       )}
     >
-      <p className="flex items-center gap-1 text-[12px] font-semibold text-[#d5b16f]">
-        <Star className="h-3 w-3" strokeWidth={2} fill="currentColor" />
+      <p className="flex items-center gap-1 text-[15.5px] font-semibold text-[#e8d19a]">
+        <Star className="h-3.5 w-3.5" strokeWidth={2} fill="currentColor" />
         {title}
       </p>
       {unlocked ? (
-        <p className="mt-2 text-[12px] leading-snug text-[#c5cdd9]/88">{preview}</p>
+        <p className="mt-2 text-[15.5px] leading-snug text-[#bacce6]/88">{preview}</p>
       ) : (
         <>
-          <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-[#9aa3b2] blur-[2px]">
+          <p className="mt-2 line-clamp-2 text-[15.5px] leading-snug text-[#9aa3b2] blur-[2px]">
             {preview}
           </p>
-          <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-[#d5b16f]">
-            <Lock className="h-3 w-3" strokeWidth={2} />
+          <span className="mt-2 inline-flex items-center gap-1 text-[15.5px] font-medium text-[#e8d19a]">
+            <Lock className="h-3.5 w-3.5" strokeWidth={2} />
             พรีเมียม
           </span>
         </>
@@ -79,14 +79,14 @@ export function UnlockDetailBanner({
         onClick={() => onUnlock?.()}
         className="no-sky-lift flex w-full items-center gap-3 px-3.5 py-3.5 text-left outline-none transition active:opacity-80"
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F4BC52]/2 ring-1 ring-[#F4BC52]/4">
-          <Lock className="h-4 w-4 text-[#B8921F]" strokeWidth={1.9} />
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgba(213,177,111,0.16)] ring-1 ring-[rgba(232,209,154,0.45)]">
+          <Lock className="h-4 w-4 text-[#e8d19a]" strokeWidth={1.9} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-semibold text-[#f7f4ec]">
+          <span className="block text-[15.5px] font-semibold text-[#f7f4ec]">
             {title}
           </span>
-          <span className="mt-0.5 block text-[11.5px] leading-snug text-[#c5cdd9]/75">
+          <span className="mt-0.5 block text-[15.5px] font-medium leading-snug text-[#bacce6]/80">
             {subtitle ??
               `ดูรายละเอียดเชิงลึก · ${FORTUNE_UNLOCK_PRICE} บาท`}
           </span>

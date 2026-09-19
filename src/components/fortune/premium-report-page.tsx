@@ -15,9 +15,9 @@ import { pickZodiacDeep } from "@/lib/fortune/content/zodiac-deep";
 import { buildPremiumValuePack } from "@/lib/fortune/build-premium-value-pack";
 
 const ASPECT_LABEL: Record<string, string> = {
-  work: "งาน",
-  money: "เงิน",
-  love: "รัก",
+  work: "การงาน",
+  money: "การเงิน",
+  love: "ความรัก",
   health: "สุขภาพ",
 };
 

@@ -12,6 +12,8 @@ export type FortuneUserProfile = {
   nickname: string;
   birthDate: string;
   gender: Gender | "";
+  /** Free-text when gender === "other" */
+  genderNote?: string;
   /** Premium deepen — HH:mm */
   birthTime?: string;
   /** Premium deepen — จังหวัด/เมืองเกิด */
@@ -77,6 +79,10 @@ export function writeFortuneProfile(
     nickname: input.nickname.trim(),
     birthDate: input.birthDate.trim(),
     gender: input.gender || "",
+    genderNote:
+      input.gender === "other"
+        ? input.genderNote?.trim() || undefined
+        : undefined,
     birthTime: input.birthTime?.trim() || undefined,
     birthPlace: input.birthPlace?.trim() || undefined,
     focus: input.focus,
@@ -111,6 +117,7 @@ export function writeFortuneProfile(
               nickname: profile.nickname,
               birthDate: profile.birthDate,
               gender: profile.gender,
+              genderNote: profile.genderNote,
             },
           })
         );
@@ -141,6 +148,7 @@ export async function pushFortuneProfileToServer(
         nickname: next.nickname,
         birthDate: next.birthDate,
         gender: next.gender,
+        genderNote: next.genderNote ?? null,
         birthTime: next.birthTime ?? null,
         birthPlace: next.birthPlace ?? null,
         focus: next.focus ?? null,
@@ -194,6 +202,7 @@ export async function syncFortuneProfileWithServer(): Promise<FortuneUserProfile
       nickname: server.nickname,
       birthDate: server.birthDate,
       gender: (server.gender as FortuneUserProfile["gender"]) || "",
+      genderNote: server.genderNote,
       birthTime: server.birthTime,
       birthPlace: server.birthPlace,
       focus: server.focus as FortuneUserProfile["focus"],
@@ -267,16 +276,12 @@ export function hasFreeReadingBasics(
 }
 
 /**
- * After unlock:
- * - basic complete → /premium (deepen time/place only, then loading)
- * - otherwise → reading wizard for missing gender/birth/name (no loading yet)
+ * After unlock — always go to the new post-pay form
+ * (ชื่อ+เพศ → วัน/เวลาเกิด → ที่เกิด+เรื่องที่อยากดู)
  */
 export function getPremiumOnboardPath(
-  profile: FortuneUserProfile | null | undefined = null
+  _profile: FortuneUserProfile | null | undefined = null
 ): string {
-  if (hasBasicFortuneProfile(profile)) {
-    return "/premium";
-  }
   return "/reading?afterPremium=1";
 }
 
@@ -294,6 +299,7 @@ export function hydrateFortuneProfileFromWizard(): FortuneUserProfile | null {
         nickname?: string;
         birthDate?: string;
         gender?: Gender | "";
+        genderNote?: string;
         birthTime?: string;
         birthPlace?: string;
         focus?: FortuneFocus;
@@ -307,6 +313,7 @@ export function hydrateFortuneProfileFromWizard(): FortuneUserProfile | null {
       nickname: p.nickname,
       birthDate: p.birthDate,
       gender: p.gender ?? "",
+      genderNote: p.genderNote,
       birthTime: p.birthTime,
       birthPlace: p.birthPlace,
       focus: p.focus,

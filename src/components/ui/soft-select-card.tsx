@@ -12,7 +12,7 @@ export function SoftSelectCard({
   meta,
   icon: Icon,
   iconNode,
-  orbTone = "violet",
+  orbTone: _orbTone = "gold",
   selected,
   onClick,
   className,
@@ -55,39 +55,35 @@ export function SoftSelectCard({
             } as React.CSSProperties)
       }
     >
-      <span
-        className={cn(
-          "soft-select-orb relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
-          `soft-select-orb-${orbTone}`,
-        )}
-      >
+      <span className="relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center">
         {iconNode ??
           (Icon ? (
-            <Icon className="relative z-[1] h-[18px] w-[18px] text-white/90" strokeWidth={1.75} />
+            <Icon className="h-[22px] w-[22px] text-[#e8d19a]" strokeWidth={1.75} />
           ) : null)}
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block text-[11px] font-medium tracking-[0.02em] text-white/42">
+        <span className="block text-[11px] font-medium tracking-[0.02em] text-[#bacce6]/55">
           {label}
         </span>
-        <span className="mt-0.5 block text-[17px] font-semibold tracking-tight text-white">
+        <span className="mt-0.5 block text-[17px] font-semibold tracking-tight text-[#f7f4ec]">
           {title}
         </span>
       </span>
 
       {meta ? (
         <span className="mr-1 text-right">
-          <span className="block text-[10px] text-white/35">พลัง</span>
-          <span className="block text-[15px] font-semibold tabular-nums text-white/85">
+          <span className="block text-[10px] text-[#bacce6]/45">พลัง</span>
+          <span className="block text-[15px] font-semibold tabular-nums text-[#e8d19a]">
             {meta}
           </span>
         </span>
       ) : null}
 
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#3b2a5c] shadow-[0_4px_12px_rgba(0,0,0,0.18)] transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
-        <ArrowRight className="h-4 w-4" strokeWidth={2.4} />
-      </span>
+      <ArrowRight
+        className="h-5 w-5 shrink-0 text-[#e8d19a] transition-transform duration-300 group-hover:translate-x-0.5 group-active:translate-x-1"
+        strokeWidth={2.4}
+      />
     </button>
   );
 }

@@ -65,11 +65,11 @@ export type FortuneFoundation = {
 };
 
 const ACCENT = {
-  violet: { accent: "#cfb4f1", wash: "rgba(197,162,255,0.12)" },
+  violet: { accent: "#e8d19a", wash: "rgba(213,177,111,0.12)" },
   amber: { accent: "#dfc58e", wash: "rgba(234,203,135,0.12)" },
-  rose: { accent: "#e3a9c4", wash: "rgba(227,169,196,0.12)" },
-  cyan: { accent: "#b3d3d8", wash: "rgba(161,211,217,0.12)" },
-  indigo: { accent: "#bdb9eb", wash: "rgba(189,185,235,0.12)" },
+  rose: { accent: "#e8d19a", wash: "rgba(213,177,111,0.12)" },
+  cyan: { accent: "#bacce6", wash: "rgba(186,204,230,0.12)" },
+  indigo: { accent: "#d5b16f", wash: "rgba(213,177,111,0.12)" },
 } as const;
 
 export function foundationAccent(key: FortuneFoundation["topics"][number]["accent"]) {

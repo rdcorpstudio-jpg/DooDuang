@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const code = typeof body?.code === "string" ? body.code : "";
     const wantCheckout = body?.checkout === true;
     const returnPath =
-      typeof body?.returnPath === "string" ? body.returnPath : "/premium";
+      typeof body?.returnPath === "string" ? body.returnPath : "/home";
 
     const phone = normalizeThaiMobile(rawPhone);
     if (!phone) {

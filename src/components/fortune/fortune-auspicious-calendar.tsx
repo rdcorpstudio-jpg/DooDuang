@@ -118,6 +118,7 @@ function DayCell({
   selected,
   isToday,
   locked,
+  muted,
   onSelect,
 }: {
   profile: DayProfile;
@@ -125,6 +126,7 @@ function DayCell({
   selected: boolean;
   isToday: boolean;
   locked: boolean;
+  muted?: boolean;
   onSelect: () => void;
 }) {
   const color = ENERGY_META[profile.energy].color;
@@ -139,9 +141,11 @@ function DayCell({
     <button
       type="button"
       onClick={onSelect}
+      disabled={muted}
       className={cn(
-        "relative mx-auto flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-semibold outline-none transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
-        locked && "opacity-55"
+        "relative mx-auto flex h-10 w-10 items-center justify-center rounded-full text-[15.5px] font-semibold outline-none transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
+        locked && "opacity-55",
+        muted && "cursor-not-allowed opacity-30",
       )}
       style={{
         color: MAE.navy,
@@ -152,7 +156,7 @@ function DayCell({
             ? `0 0 0 1.5px rgba(232,209,154,0.75)`
             : `0 1px 2px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,248,228,0.18)`,
       }}
-      aria-label={`${dayNum}${locked ? " (ล็อก)" : ""}`}
+      aria-label={`${dayNum}${locked ? " (ล็อก)" : muted ? " (อดีต)" : ""}`}
       aria-pressed={selected}
     >
       {dayNum}
@@ -185,18 +189,18 @@ function DayDetailCards({
 
   return (
     <div className="space-y-3.5">
-      <p className="mae-gold-text text-[11px] font-semibold tracking-[0.14em]">
+      <p className="mae-gold-text text-[15.5px] font-semibold tracking-[0.14em]">
         ฤกษ์มงคล · {titleDate}
       </p>
 
       <div>
         <div className="flex items-center gap-2">
           <EnergyDot energy={profile.energy} size={14} />
-          <p className="text-[14px] font-semibold text-[#f7f4ec]">
+          <p className="text-[15.5px] font-semibold text-[#f7f4ec]">
             {ENERGY_META[profile.energy].label}
           </p>
         </div>
-        <p className="mt-1.5 text-[13px] leading-[1.65] text-[#c5cdd9]/85">
+        <p className="mt-1.5 text-[15.5px] leading-[1.65] text-[#c5cdd9]/85">
           {adviceForDay({ ...profile, markers: [] })}
         </p>
       </div>
@@ -207,11 +211,11 @@ function DayDetailCards({
             <div key={m}>
               <div className="flex items-center gap-2">
                 <MarkerIcon marker={m} size={14} />
-                <p className="text-[12px] font-semibold tracking-wide text-[#d5b16f]">
+                <p className="text-[15.5px] font-semibold tracking-wide text-[#d5b16f]">
                   {MARKER_META[m].label}
                 </p>
               </div>
-              <p className="mt-1 text-[13px] leading-[1.65] text-[#c5cdd9]/88">
+              <p className="mt-1 text-[15.5px] leading-[1.65] text-[#c5cdd9]/88">
                 {MARKER_META[m].hint}
               </p>
             </div>
@@ -223,11 +227,11 @@ function DayDetailCards({
         <div className="border-t border-[#d5b16f]/18 pt-3.5">
           <div className="flex items-center gap-2">
             <MarkerIcon marker="chaos" size={14} />
-            <p className="text-[12px] font-semibold tracking-wide text-[#c4a070]">
+            <p className="text-[15.5px] font-semibold tracking-wide text-[#c4a070]">
               {MARKER_META.chaos.label}
             </p>
           </div>
-          <p className="mt-1 text-[13px] leading-[1.65] text-[#c5cdd9]/88">
+          <p className="mt-1 text-[15.5px] leading-[1.65] text-[#c5cdd9]/88">
             {MARKER_META.chaos.hint}
           </p>
         </div>
@@ -236,10 +240,10 @@ function DayDetailCards({
       {(hasChaos && primaryMarkers.includes("victory")) ||
       profile.markers.length > 1 ? (
         <div className="border-t border-[#d5b16f]/18 pt-3.5">
-          <p className="text-[11px] font-semibold tracking-[0.14em] text-[#9aa3b2]">
+          <p className="text-[15.5px] font-semibold tracking-[0.14em] text-[#9aa3b2]">
             หมายเหตุ
           </p>
-          <p className="mt-1 text-[13px] leading-[1.65] text-[#c5cdd9]/88">
+          <p className="mt-1 text-[15.5px] leading-[1.65] text-[#c5cdd9]/88">
             {adviceForDay(profile)}
           </p>
         </div>
@@ -248,7 +252,7 @@ function DayDetailCards({
   );
 }
 
-/** Free: look back 1 month → today. Premium: browse 12 years. */
+/** Free: today only. Premium: browse past + future (12 years). */
 export function FortuneAuspiciousCalendar({
   seed,
   unlocked = false,
@@ -267,12 +271,6 @@ export function FortuneAuspiciousCalendar({
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }, []);
   const todayIso = toIsoDate(today);
-  const freeStart = useMemo(() => {
-    const d = new Date(today);
-    d.setMonth(d.getMonth() - 1);
-    return d;
-  }, [today]);
-  const freeStartIso = toIsoDate(freeStart);
   const yearRange = useMemo(() => getCalendarYearRange(today.getFullYear()), [today]);
 
   const canBrowse = unlocked || variant === "full";
@@ -282,13 +280,9 @@ export function FortuneAuspiciousCalendar({
   const [selectedIso, setSelectedIso] = useState(todayIso);
   const [legendOpen, setLegendOpen] = useState(variant === "full");
 
-  const isFreeDay = (iso: string) => iso >= freeStartIso && iso <= todayIso;
-
-  const isFreeMonth = (year: number, month: number) => {
-    const monthStart = new Date(year, month, 1);
-    const monthEnd = new Date(year, month + 1, 0);
-    return monthEnd >= freeStart && monthStart <= today;
-  };
+  const isPastDay = (iso: string) => iso < todayIso;
+  const isFutureDay = (iso: string) => iso > todayIso;
+  const isTodayDay = (iso: string) => iso === todayIso;
 
   const grid = useMemo(
     () => getMonthGrid(seed, viewYear, viewMonth),
@@ -296,7 +290,7 @@ export function FortuneAuspiciousCalendar({
   );
 
   const activeIso =
-    canBrowse || isFreeDay(selectedIso) ? selectedIso : todayIso;
+    canBrowse || isTodayDay(selectedIso) ? selectedIso : todayIso;
 
   const selectedProfile = useMemo(
     () => getDayProfile(seed, parseIsoDate(activeIso)),
@@ -306,23 +300,26 @@ export function FortuneAuspiciousCalendar({
   const selectedLabel = formatThaiDayShort(parseIsoDate(selectedProfile.iso));
 
   function shiftMonth(delta: number) {
+    if (!canBrowse) {
+      if (delta < 0) return; // อดีต — ฟรีดูไม่ได้
+      onUnlock?.(); // เดือนถัดไป = อนาคต → พรีเมียม
+      return;
+    }
     const d = new Date(viewYear, viewMonth + delta, 1);
     const y = d.getFullYear();
     const m = d.getMonth();
-    if (!canBrowse) {
-      if (!isFreeMonth(y, m)) {
-        onUnlock?.();
-        return;
-      }
-    } else if (y < yearRange.start || y > yearRange.end) {
-      return;
-    }
+    if (y < yearRange.start || y > yearRange.end) return;
     setViewYear(y);
     setViewMonth(m);
   }
 
   function selectDay(profile: DayProfile) {
-    if (!canBrowse && !isFreeDay(profile.iso)) {
+    if (canBrowse) {
+      setSelectedIso(profile.iso);
+      return;
+    }
+    if (isPastDay(profile.iso)) return;
+    if (isFutureDay(profile.iso)) {
       onUnlock?.();
       return;
     }
@@ -350,23 +347,27 @@ export function FortuneAuspiciousCalendar({
         <div className="relative z-[1]">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="flex items-center gap-1.5 text-[12px] font-semibold tracking-wide text-[#d5b16f]">
+              <p className="flex items-center gap-1.5 text-[15.5px] font-semibold tracking-wide text-[#d5b16f]">
                 <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
                 ปฏิทินฤกษ์ 12 ปี
               </p>
               <h2 className="mae-gold-text mt-1 text-[18px] font-semibold">
-                {canBrowse ? "ดูฤกษ์มงคลรายวัน" : "ฤกษ์ย้อนหลัง 1 เดือน"}
+                {canBrowse ? "ดูฤกษ์มงคลรายวัน" : "ฤกษ์วันนี้"}
               </h2>
               {canBrowse ? (
-                <p className="mt-0.5 text-[12px] text-[#9aa3b2]">
+                <p className="mt-0.5 text-[15.5px] text-[#9aa3b2]">
                   พ.ศ. {yearRange.start + 543}–{yearRange.end + 543}
                 </p>
-              ) : null}
+              ) : (
+                <p className="mt-0.5 text-[15.5px] text-[#9aa3b2]">
+                  ฟรี · ดูได้เฉพาะวันนี้ · วันข้างหน้าต้องพรีเมียม
+                </p>
+              )}
             </div>
             <button
               type="button"
               onClick={goToday}
-              className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold text-[#d5b16f] outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+              className="shrink-0 rounded-full px-2.5 py-1 text-[15.5px] font-semibold text-[#d5b16f] outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
               style={{
                 background: "rgba(16,24,39,0.55)",
                 boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.4)",
@@ -381,12 +382,13 @@ export function FortuneAuspiciousCalendar({
             <button
               type="button"
               onClick={() => shiftMonth(-1)}
-              className="flex h-8 w-8 items-center justify-center text-[#d5b16f] outline-none transition active:opacity-60"
+              disabled={!canBrowse}
+              className="flex h-8 w-8 items-center justify-center text-[#d5b16f] outline-none transition active:opacity-60 disabled:opacity-30"
               aria-label="เดือนก่อน"
             >
               <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
             </button>
-            <p className="mae-gold-text text-[15px] font-semibold">
+            <p className="mae-gold-text text-[15.5px] font-semibold">
               {formatThaiMonthYear(viewYear, viewMonth)}
             </p>
             <button
@@ -404,7 +406,7 @@ export function FortuneAuspiciousCalendar({
             {WEEKDAYS.map((d) => (
               <p
                 key={d}
-                className="text-center text-[11px] font-medium text-[#9aa3b2]"
+                className="text-center text-[15.5px] font-medium text-[#9aa3b2]"
               >
                 {d}
               </p>
@@ -416,7 +418,8 @@ export function FortuneAuspiciousCalendar({
             {grid.map((cell, i) => {
               if (!cell) return <div key={`e-${i}`} />;
               const dayNum = parseIsoDate(cell.iso).getDate();
-              const locked = !canBrowse && !isFreeDay(cell.iso);
+              const locked = !canBrowse && isFutureDay(cell.iso);
+              const muted = !canBrowse && isPastDay(cell.iso);
               const selected = activeIso === cell.iso;
               return (
                 <DayCell
@@ -426,6 +429,7 @@ export function FortuneAuspiciousCalendar({
                   selected={selected}
                   isToday={cell.iso === todayIso}
                   locked={locked}
+                  muted={muted}
                   onSelect={() => selectDay(cell)}
                 />
               );
@@ -439,10 +443,10 @@ export function FortuneAuspiciousCalendar({
               onClick={() => setLegendOpen((v) => !v)}
               className="flex w-full items-center justify-between text-left outline-none"
             >
-              <p className="text-[13px] font-semibold text-[#f7f4ec]">
+              <p className="text-[15.5px] font-semibold text-[#f7f4ec]">
                 รายละเอียดของวัน
               </p>
-              <span className="text-[11px] text-[#9aa3b2]">
+              <span className="text-[15.5px] text-[#9aa3b2]">
                 {legendOpen ? "ย่อ" : "ดูคำอธิบาย"}
               </span>
             </button>
@@ -451,7 +455,7 @@ export function FortuneAuspiciousCalendar({
                 {(Object.keys(ENERGY_META) as DayEnergy[]).map((e) => (
                   <div key={e} className="flex items-center gap-2">
                     <EnergyDot energy={e} />
-                    <span className="text-[12px] text-[#c5cdd9]/85">
+                    <span className="text-[15.5px] text-[#c5cdd9]/85">
                       {ENERGY_META[e].label}
                     </span>
                   </div>
@@ -459,7 +463,7 @@ export function FortuneAuspiciousCalendar({
                 {(["holy", "victory", "fortune"] as DayMarker[]).map((m) => (
                   <div key={m} className="flex items-center gap-2">
                     <MarkerIcon marker={m} size={14} />
-                    <span className="text-[12px] text-[#c5cdd9]/85">
+                    <span className="text-[15.5px] text-[#c5cdd9]/85">
                       {MARKER_META[m].label}
                     </span>
                   </div>
@@ -483,7 +487,7 @@ export function FortuneAuspiciousCalendar({
               type="button"
               onClick={onUnlock}
               disabled={!onUnlock}
-              className="mae-gold-cta mt-3 flex h-11 w-full items-center justify-center gap-1.5 rounded-full text-[14px] font-semibold outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
+              className="mae-gold-cta mt-3 flex h-11 w-full items-center justify-center gap-1.5 rounded-full text-[15.5px] font-semibold outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
             >
               <Lock className="h-3.5 w-3.5" strokeWidth={2.2} />
               ปลดล็อกปฏิทิน 12 ปี · {FORTUNE_UNLOCK_PRICE} บาท

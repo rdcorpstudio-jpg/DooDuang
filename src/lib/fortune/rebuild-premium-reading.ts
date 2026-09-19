@@ -27,6 +27,8 @@ export function rebuildPremiumReading(
     birthDate: profile.birthDate,
     nickname: profile.nickname,
     gender: profile.gender || undefined,
+    genderNote:
+      profile.gender === "other" ? profile.genderNote?.trim() || undefined : undefined,
     birthTime: profile.birthTime,
     birthPlace: profile.birthPlace,
     focus: profile.focus,

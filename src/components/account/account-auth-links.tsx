@@ -80,68 +80,63 @@ function LinkChip({
   onClick: () => void;
 }) {
   const label =
-    variant === "google" ? "Google" : variant === "line" ? "LINE" : "เบอร์";
-  const status = linked ? "เชื่อมแล้ว" : busy ? "…" : "เชื่อม";
+    variant === "google" ? "Google" : variant === "line" ? "LINE" : "เบอร์มือถือ";
+  const status = linked ? "เชื่อมแล้ว" : busy ? "กำลังเชื่อม…" : null;
 
   return (
     <button
       type="button"
       disabled={linked || busy}
       onClick={onClick}
-      aria-label={`${label} ${status}`}
+      aria-label={linked ? `${label} เชื่อมแล้ว` : `เชื่อม ${label}`}
       className={cn(
-        "flex h-[2.35rem] min-w-[5.1rem] items-center justify-center gap-1 rounded-full px-2 outline-none transition active:scale-[0.98] disabled:active:scale-100",
-        variant === "google" &&
-          "border border-[#dadce0] bg-white shadow-none disabled:opacity-95",
-        variant === "line" && "text-white disabled:opacity-95",
-        variant === "phone" &&
-          "mae-gold-cta text-[#1a1408] disabled:opacity-95",
+        "flex h-12 w-full items-center gap-3 rounded-full px-3.5 text-left outline-none transition active:scale-[0.99] disabled:active:scale-100",
         linked && "cursor-default"
       )}
-      style={
-        variant === "line"
-          ? {
-              background: "#06C755",
-              boxShadow: linked ? undefined : "0 4px 10px rgba(6,199,85,0.18)",
-            }
-          : undefined
-      }
+      style={{
+        background: "rgba(16, 24, 39, 0.72)",
+        boxShadow: linked
+          ? "inset 0 0 0 1.5px rgba(232, 209, 154, 0.55)"
+          : "inset 0 0 0 1px rgba(213, 177, 111, 0.32)",
+      }}
     >
-      {busy ? (
-        <Loader2
-          className={cn(
-            "h-3 w-3 animate-spin",
-            variant === "google" ? "text-[#3c4043]" : undefined
-          )}
-          strokeWidth={2.2}
-        />
-      ) : variant === "google" ? (
-        <GoogleMark />
-      ) : variant === "line" ? (
-        <LineMark className="text-white" />
-      ) : (
-        <Phone className="h-3 w-3 text-[#1a1408]" strokeWidth={2.2} />
-      )}
       <span
         className={cn(
-          "flex min-w-0 flex-col items-start leading-none",
-          variant === "google" && "text-[#3c4043]",
-          variant === "line" && "text-white",
-          variant === "phone" && "text-[#1a1408]"
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+          variant === "google" && "bg-white",
+          variant === "line" && "bg-[#06C755]",
+          variant === "phone" && "bg-[rgba(213,177,111,0.18)]"
         )}
       >
-        <span className="text-[9px] font-semibold">{label}</span>
-        <span
-          className={cn(
-            "mt-0.5 text-[8px] font-semibold",
-            variant === "google" && (linked ? "text-[#5f6368]" : "text-[#3c4043]/75"),
-            variant === "line" && (linked ? "text-white/85" : "text-white/90"),
-            variant === "phone" && "text-[#3b2a0e]"
-          )}
-        >
-          {status}
-        </span>
+        {busy ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-[#e8d19a]" strokeWidth={2.2} />
+        ) : variant === "google" ? (
+          <GoogleMark className="h-4 w-4" />
+        ) : variant === "line" ? (
+          <LineMark className="h-4 w-4 text-white" />
+        ) : (
+          <Phone className="h-4 w-4 text-[#d5b16f]" strokeWidth={2} />
+        )}
       </span>
+
+      <span className="min-w-0 flex-1 text-[14px] font-semibold leading-none text-[#f7f4ec]">
+        {label}
+        {status ? (
+          <span className="mt-1 block text-[11px] font-medium text-[#e8d19a]">
+            {status}
+          </span>
+        ) : null}
+      </span>
+
+      {!linked && !busy ? (
+        <span className="shrink-0 text-[12px] font-semibold text-[#d5b16f]">
+          เชื่อม →
+        </span>
+      ) : linked ? (
+        <span className="shrink-0 text-[12px] font-semibold text-[#e8d19a]">
+          ✓
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -487,8 +482,8 @@ export function AccountAuthLinks({ className }: { className?: string }) {
   const showPhone = PHONE_AUTH_ENABLED;
 
   return (
-    <div className={cn("flex shrink-0 flex-col items-end gap-1", className)}>
-      <div className="flex flex-col gap-1.5">
+    <div className={cn("w-full", className)}>
+      <div className="flex w-full flex-col gap-2">
         <LinkChip
           variant="google"
           linked={google}
@@ -514,12 +509,12 @@ export function AccountAuthLinks({ className }: { className?: string }) {
         ) : null}
       </div>
       {showPhone && links?.phoneMasked ? (
-        <p className="max-w-[5.5rem] truncate text-right text-[9px] text-[#f7f4ec]/45">
+        <p className="mt-1.5 px-1 text-[11px] text-[#e8d19a]/70">
           {links.phoneMasked}
         </p>
       ) : null}
       {message ? (
-        <p className="whitespace-nowrap text-right text-[9px] leading-none text-[#e8d19a]">
+        <p className="mt-1.5 px-1 text-[11px] leading-snug text-[#e8d19a]">
           {message}
         </p>
       ) : null}

@@ -6,15 +6,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CalendarDays,
-  ChevronRight,
   Clock,
   Crown,
-  Hand,
   LogOut,
   MapPin,
   Pencil,
-  ScanFace,
-  ScrollText,
   Sparkles,
   UserRound,
 } from "lucide-react";
@@ -27,6 +23,8 @@ import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet"
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { ZodiacSignImage } from "@/components/fortune/zodiac-sign-image";
 import { AccountAuthLinks } from "@/components/account/account-auth-links";
+import { MaeBrandLink } from "@/components/layout/mae-brand-link";
+import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { getZodiacByBirthDate } from "@/lib/fortune/zodiac";
 import {
@@ -49,6 +47,15 @@ import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE, LINE_OA_ADD_URL } from "@/
 import { cn } from "@/lib/utils";
 import { trackClientEvent } from "@/lib/analytics/client";
 
+const TITLE_GOLD = {
+  background:
+    "linear-gradient(180deg, #fffef8 0%, #ffe9b0 24%, #f0d078 48%, #d5b16f 72%, #b8924f 100%)",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  color: "transparent",
+  WebkitTextFillColor: "transparent",
+} as const;
+
 type AccountUser = {
   id: string;
   name?: string | null;
@@ -70,33 +77,6 @@ function LineMark({ className }: { className?: string }) {
   );
 }
 
-const QUICK_LINKS = [
-  {
-    href: "/reading",
-    title: "ดูดวงวันนี้",
-    sub: "ภาพรวมรายวัน",
-    Icon: ScrollText,
-  },
-  {
-    href: "/reading/tarot",
-    title: "ไพ่รายวัน",
-    sub: "เปิดฟรีวันละใบ",
-    Icon: Sparkles,
-  },
-  {
-    href: "/premium",
-    title: "หน้าดวง",
-    sub: "ดวงแบบปลดล็อกเต็ม",
-    Icon: Crown,
-  },
-  {
-    href: "/reading/face",
-    title: "โหงวเฮ้ง",
-    sub: "อ่านจากใบหน้า",
-    Icon: ScanFace,
-  },
-] as const;
-
 function formatBirthThai(iso: string) {
   const d = new Date(`${iso}T12:00:00`);
   if (Number.isNaN(d.getTime())) return iso;
@@ -107,8 +87,10 @@ function formatBirthThai(iso: string) {
   }).format(d);
 }
 
-function genderLabel(gender: string) {
-  return GENDER_OPTIONS.find((g) => g.id === gender)?.label ?? "—";
+function genderLabel(gender: string, note?: string) {
+  const base = GENDER_OPTIONS.find((g) => g.id === gender)?.label ?? "—";
+  if (gender === "other" && note?.trim()) return `${base} · ${note.trim()}`;
+  return base;
 }
 
 /** Logged-in account / profile — Mae navy-gold account panel */
@@ -130,6 +112,7 @@ export function AccountDashboard({
     nickname: "",
     birthDate: "",
     gender: "" as Gender | "",
+    genderNote: "",
   });
 
   useEffect(() => {
@@ -155,6 +138,7 @@ export function AccountDashboard({
           nickname: loaded.nickname,
           birthDate: loaded.birthDate,
           gender: loaded.gender,
+          genderNote: loaded.genderNote ?? "",
         });
       } else {
         setEditing(true);
@@ -197,6 +181,7 @@ export function AccountDashboard({
       nickname: profile?.nickname ?? "",
       birthDate: profile?.birthDate ?? "",
       gender: profile?.gender ?? "",
+      genderNote: profile?.genderNote ?? "",
     });
     setEditing(true);
   }
@@ -215,6 +200,10 @@ export function AccountDashboard({
       setSaveError("เลือกเพศก่อนบันทึก");
       return;
     }
+    if (draft.gender === "other" && !draft.genderNote.trim()) {
+      setSaveError("ระบุเพศเพิ่มเติมก่อนบันทึก");
+      return;
+    }
     if (profile && !canEditFortuneProfile(profile)) {
       setSaveError(
         `แก้ไขโปรไฟล์ได้อีกครั้งในอีก ${profileEditCooldownDaysLeft(profile)} วัน`
@@ -229,6 +218,8 @@ export function AccountDashboard({
       nickname: draft.nickname,
       birthDate: draft.birthDate,
       gender: draft.gender,
+      genderNote:
+        draft.gender === "other" ? draft.genderNote.trim() : undefined,
       birthTime: existing?.birthTime,
       birthPlace: existing?.birthPlace,
       focus: existing?.focus,
@@ -274,14 +265,22 @@ export function AccountDashboard({
   }
 
   return (
-    <AnimatedPage className="no-sky-lift mx-auto w-full max-w-[480px] space-y-3.5 px-4 pb-10 pt-4">
-      <header className="px-0.5 text-center">
-        <p className="mae-gold-text text-[12px] font-semibold tracking-[0.2em]">
-          โปรไฟล์
-        </p>
-        <h1 className="mae-gold-text mt-1 text-[1.45rem] font-bold tracking-tight">
-          บัญชีของคุณ
-        </h1>
+    <AnimatedPage className="relative mx-auto w-full max-w-[480px]">
+      <MaePageBackground />
+      <div className="relative z-10 space-y-3.5 px-4 pb-10 pt-4">
+      <header className="space-y-3 px-0.5">
+        <MaeBrandLink />
+        <div className="text-center">
+          <p className="text-[12px] font-semibold tracking-[0.2em] text-[#e8d19a]/85">
+            โปรไฟล์
+          </p>
+          <h1
+            className="mt-1 text-[clamp(1.55rem,6.5vw,1.85rem)] font-bold tracking-tight"
+            style={TITLE_GOLD}
+          >
+            บัญชีของคุณ
+          </h1>
+        </div>
       </header>
 
       {/* Identity */}
@@ -306,7 +305,7 @@ export function AccountDashboard({
             <h2 className="truncate text-[1.25rem] font-semibold text-[#f7f4ec]">
               คุณ{displayName}
             </h2>
-            <p className="mt-0.5 truncate text-[13px] text-[#f7f4ec]/65">
+            <p className="mt-0.5 truncate text-[13px] text-[#bacce6]/75">
               {user.email ?? "เข้าสู่ระบบแล้ว"}
             </p>
             <p
@@ -324,6 +323,12 @@ export function AccountDashboard({
               {premium ? "พรีเมียมใช้งานอยู่" : "สมาชิกทั่วไป"}
             </p>
           </div>
+        </div>
+
+        <div className="relative z-[1] mt-4">
+          <p className="mb-2 text-[11px] font-medium tracking-wide text-[#e8d19a]/75">
+            เชื่อมบัญชี
+          </p>
           <AccountAuthLinks />
         </div>
 
@@ -339,13 +344,15 @@ export function AccountDashboard({
             <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
               {premium ? `พรีเมียม ${FORTUNE_PACKAGE_LABEL}` : "ยังไม่มี"}
             </p>
-            <p className="text-[11px] text-[#f7f4ec]/55">
-              {premium && premiumUntil
-                ? `ถึง ${new Intl.DateTimeFormat("th-TH", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  }).format(premiumUntil)}`
+            <p className="text-[11px] text-[#bacce6]/65">
+              {premium
+                ? premiumUntil
+                  ? `ถึง ${new Intl.DateTimeFormat("th-TH", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    }).format(premiumUntil)}`
+                  : "ใช้งานอยู่"
                 : `ปลดล็อก ${FORTUNE_UNLOCK_PRICE} บาท`}
             </p>
           </div>
@@ -416,10 +423,10 @@ export function AccountDashboard({
       <section className="mae-aspect-card rounded-[20px] px-3.5 py-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div>
-            <h2 className="mae-gold-text text-[17px] font-semibold">
+            <h2 className="text-[17px] font-semibold" style={TITLE_GOLD}>
               โปรไฟล์ดวง
             </h2>
-            <p className="text-[12px] text-[#f7f4ec]/65">
+            <p className="text-[12px] text-[#bacce6]/70">
               ใช้ดูดวงทุกหน้าในแอป
             </p>
           </div>
@@ -499,7 +506,7 @@ export function AccountDashboard({
               <span className="mb-1.5 block text-[13px] font-medium text-[#9aa3b2]">
                 เพศ
               </span>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-2 gap-1.5">
                 {GENDER_OPTIONS.map((opt) => {
                   const selected = draft.gender === opt.id;
                   return (
@@ -507,7 +514,12 @@ export function AccountDashboard({
                       key={opt.id}
                       type="button"
                       onClick={() =>
-                        setDraft((d) => ({ ...d, gender: opt.id }))
+                        setDraft((d) => ({
+                          ...d,
+                          gender: opt.id,
+                          genderNote:
+                            opt.id === "other" ? d.genderNote : "",
+                        }))
                       }
                       className={cn(
                         "rounded-full py-2.5 text-[13px] font-medium outline-none transition active:scale-[0.98]",
@@ -529,6 +541,22 @@ export function AccountDashboard({
                   );
                 })}
               </div>
+              {draft.gender === "other" ? (
+                <input
+                  type="text"
+                  value={draft.genderNote}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, genderNote: e.target.value }))
+                  }
+                  placeholder="ระบุเพิ่มเติม เช่น นอนไบนารี"
+                  maxLength={80}
+                  className="mt-2 h-11 w-full rounded-full px-4 text-[14px] text-[#f7f4ec] outline-none placeholder:text-[#9aa3b2]/55"
+                  style={{
+                    background: "rgba(213,177,111,0.08)",
+                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                  }}
+                />
+              ) : null}
             </div>
             <p className="text-center text-[11px] text-[#f7f4ec]/55">
               บันทึกแล้วจะแก้ไขได้อีกครั้งหลัง 3 สัปดาห์
@@ -555,7 +583,8 @@ export function AccountDashboard({
                 disabled={
                   !draft.nickname.trim() ||
                   !draft.birthDate ||
-                  !draft.gender
+                  !draft.gender ||
+                  (draft.gender === "other" && !draft.genderNote.trim())
                 }
                 className="mae-gold-cta flex-1 rounded-full py-3 text-[14px] font-semibold disabled:opacity-50"
               >
@@ -621,7 +650,7 @@ export function AccountDashboard({
               >
                 <dt className="text-[11px] text-[#e8d19a]/75">เพศ</dt>
                 <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
-                  {genderLabel(profile.gender)}
+                  {genderLabel(profile.gender, profile.genderNote)}
                 </dd>
               </div>
               <div
@@ -688,74 +717,12 @@ export function AccountDashboard({
                 </div>
               ) : null}
             </dl>
-
-            <Link
-              href="/reading"
-              className="mae-gold-cta mt-1 flex w-full items-center justify-between rounded-[14px] px-3.5 py-3 text-left outline-none transition active:scale-[0.99]"
-            >
-              <span>
-                <span className="block text-[14px] font-semibold">
-                  เปิดดวงวันนี้
-                </span>
-                <span className="text-[11px] opacity-75">
-                  ใช้โปรไฟล์นี้ดูต่อ
-                </span>
-              </span>
-              <ChevronRight className="h-4 w-4" strokeWidth={2.2} />
-            </Link>
           </div>
         ) : (
           <p className="py-4 text-center text-[13px] text-[#f7f4ec]/65">
             ยังไม่มีโปรไฟล์ดวง — กรอกข้อมูลด้านบนเพื่อเริ่มต้น
           </p>
         )}
-      </section>
-
-      {/* Quick links */}
-      <section className="space-y-2.5">
-        <h2 className="mae-gold-text px-0.5 text-[17px] font-semibold">
-          ทางลัด
-        </h2>
-        <div className="grid grid-cols-2 gap-2">
-          {QUICK_LINKS.map(({ href, title, sub, Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="mae-aspect-card flex flex-col gap-2 rounded-[18px] px-3 py-3 outline-none transition active:scale-[0.98]"
-            >
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-full"
-                style={{ background: "rgba(213,177,111,0.12)" }}
-              >
-                <Icon className="h-4 w-4 text-[#d5b16f]" strokeWidth={1.8} />
-              </span>
-              <span>
-                <span className="block text-[14px] font-semibold text-[#f7f4ec]">
-                  {title}
-                </span>
-                <span className="text-[11px] text-[#f7f4ec]/55">{sub}</span>
-              </span>
-            </Link>
-          ))}
-        </div>
-        <Link
-          href="/reading/palm"
-          className="mae-aspect-card flex items-center gap-3 rounded-[16px] px-3.5 py-3 outline-none transition active:scale-[0.99]"
-        >
-          <span
-            className="flex h-9 w-9 items-center justify-center rounded-full"
-            style={{ background: "rgba(213,177,111,0.12)" }}
-          >
-            <Hand className="h-4 w-4 text-[#d5b16f]" strokeWidth={1.8} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[14px] font-semibold text-[#f7f4ec]">
-              ดูลายมือ
-            </span>
-            <span className="text-[11px] text-[#f7f4ec]/55">อ่านเส้นมือจากภาพ</span>
-          </span>
-          <ChevronRight className="h-4 w-4 text-[#d5b16f]" strokeWidth={2.2} />
-        </Link>
       </section>
 
       <button
@@ -779,6 +746,7 @@ export function AccountDashboard({
           returnPath="/dashboard"
         />
       </Suspense>
+      </div>
     </AnimatedPage>
   );
 }

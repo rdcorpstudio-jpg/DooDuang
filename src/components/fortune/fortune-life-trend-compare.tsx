@@ -31,7 +31,7 @@ export function FortuneLifeTrendCompare({
       <div className="flex items-start justify-between gap-3 px-0.5">
         <div className="flex min-w-0 items-center gap-2">
           <ChartNoAxesColumn
-            className="h-4 w-4 shrink-0 text-[#67e8f9]"
+            className="h-4 w-4 shrink-0 text-[#e8d19a]"
             strokeWidth={1.7}
           />
           <h2 className="text-[15px] font-semibold tracking-wide text-white">
@@ -62,7 +62,7 @@ export function FortuneLifeTrendCompare({
 
       <div className="fortune-dash-inset fortune-frame-cyan flex items-start gap-2.5 rounded-[14px] px-3 py-2.5">
         <Lightbulb
-          className="mt-0.5 h-4 w-4 shrink-0 text-[#67e8f9]"
+          className="mt-0.5 h-4 w-4 shrink-0 text-[#e8d19a]"
           strokeWidth={1.8}
         />
         <p className="text-[12px] leading-snug text-white/55">

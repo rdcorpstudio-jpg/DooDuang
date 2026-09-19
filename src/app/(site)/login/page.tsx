@@ -11,7 +11,7 @@ interface LoginPageProps {
 }
 
 function safeCallback(callbackUrl?: string) {
-  const fallback = "/dashboard";
+  const fallback = "/welcome";
   const raw = (callbackUrl || fallback).trim() || fallback;
   if (!raw.startsWith("/") || raw.startsWith("//")) return fallback;
   if (raw.startsWith("/login") || raw.startsWith("/auth/")) return fallback;
