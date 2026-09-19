@@ -248,6 +248,7 @@ export function AccountDashboard({
       nickname: verified.nickname,
       birthDate: verified.birthDate,
       gender: verified.gender,
+      genderNote: verified.genderNote ?? "",
     });
     setEditing(false);
   }
