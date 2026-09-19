@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation";
 import { LoginScreen } from "@/components/auth/login-screen";
 import { auth } from "@/lib/auth";
+import { parseHomeTopicId } from "@/lib/home-topics";
 
 interface LoginPageProps {
   searchParams: Promise<{
     callbackUrl?: string;
     autologin?: string;
     lineError?: string;
+    topic?: string;
   }>;
 }
 
@@ -19,8 +21,9 @@ function safeCallback(callbackUrl?: string) {
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { callbackUrl, autologin, lineError } = await searchParams;
+  const { callbackUrl, autologin, lineError, topic } = await searchParams;
   const next = safeCallback(callbackUrl);
+  const homeTopic = parseHomeTopicId(topic);
 
   const session = await auth().catch(() => null);
   if (session?.user) {
@@ -35,6 +38,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       callbackUrl={next}
       autoStartGoogle={autologin === "1"}
       lineError={lineError}
+      topic={homeTopic}
     />
   );
 }

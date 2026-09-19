@@ -15,7 +15,7 @@ import {
   GENDER_OPTIONS,
   type Gender,
 } from "@/components/ui/sacred-form";
-import { PageBackButton } from "@/components/ui/page-back-button";
+import { OnboardTopBar } from "@/components/onboard/onboard-top-bar";
 import { READING_OPTIONS } from "@/lib/fortune/zodiac";
 import type { ExtendedFortuneResult } from "@/lib/fortune/extended";
 import {
@@ -26,6 +26,16 @@ import {
   hasFreeReadingBasics,
 } from "@/lib/fortune/profile-storage";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
+import {
+  homeTopicPostProfileLoginHref,
+  ONBOARD_FUNNEL_TOTAL,
+  parseHomeTopicId,
+} from "@/lib/home-topics";
+import {
+  readOnboardDraft,
+  writeOnboardDraft,
+  type OnboardFormStep,
+} from "@/lib/onboard-draft";
 import { cn } from "@/lib/utils";
 
 function scrollFieldIntoView(event: FocusEvent<HTMLInputElement>) {
@@ -67,7 +77,7 @@ interface ProfileForm {
 const READING_TYPE = "overall" as const;
 const readingOption = READING_OPTIONS.find((o) => o.id === READING_TYPE)!;
 
-const MIN_LOADING_MS = 4800;
+const MIN_LOADING_MS = 1400;
 const FETCH_TIMEOUT_MS = 6000;
 
 type WizardCache = {
@@ -312,7 +322,7 @@ function StepHeader({
   subtitle,
 }: {
   title: string;
-  subtitle: string;
+  subtitle?: string;
 }) {
   return (
     <div
@@ -330,11 +340,13 @@ function StepHeader({
       <h1 className="wizard-step-title relative z-10 font-sans text-[1.9rem] font-bold leading-[1.25] tracking-tight">
         {title}
       </h1>
-      <p
-        className="wizard-keyboard-hide wizard-step-subtitle relative z-10 mx-auto mt-2.5 max-w-[18rem] text-[13.5px] leading-relaxed"
-      >
-        {subtitle}
-      </p>
+      {subtitle ? (
+        <p
+          className="wizard-keyboard-hide wizard-step-subtitle relative z-10 mx-auto mt-2.5 max-w-[18rem] text-[13.5px] leading-relaxed"
+        >
+          {subtitle}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -384,7 +396,9 @@ function FormContinueButton({
       disabled={disabled}
       onClick={onClick}
     >
-      <span className="text-[16px] font-bold tracking-wide">{label}</span>
+      <span className="max-w-[14.5rem] truncate text-[16px] font-bold tracking-wide">
+        {label}
+      </span>
       <ChevronRight
         className="h-[18px] w-[18px] transition-transform duration-200 group-hover:translate-x-0.5"
         strokeWidth={2.4}
@@ -430,6 +444,7 @@ export function ReadingWizard() {
     if (!raw.startsWith("/") || raw.startsWith("//")) return null;
     return raw;
   })();
+  const topicId = parseHomeTopicId(searchParams.get("topic"));
 
   const [step, setStep] = useState<Step>("gender");
   const [profile, setProfile] = useState<ProfileForm>({
@@ -480,8 +495,14 @@ export function ReadingWizard() {
       return;
     }
 
+    const resumeFormStep = (() => {
+      const s = searchParams.get("step");
+      if (s === "gender" || s === "birth" || s === "name") return s;
+      return null;
+    })();
+
     const cached = readWizardCache();
-    if (cached) {
+    if (cached && !topicId) {
       setProfile({
         ...cached.profile,
         birthTime: cached.profile.birthTime ?? "",
@@ -492,15 +513,42 @@ export function ReadingWizard() {
     } else {
       try {
         const saved = readFortuneProfile();
-        if (saved) {
-          setProfile({
-            realName: saved.realName,
-            nickname: saved.nickname,
-            birthDate: saved.birthDate || todayIso(),
-            gender: saved.gender,
-            birthTime: saved.birthTime ?? "",
-            focus: saved.focus ?? "life",
-          });
+        const draft = topicId ? readOnboardDraft() : null;
+        const merged = {
+          realName: draft?.realName ?? saved?.realName ?? "",
+          nickname: draft?.nickname ?? saved?.nickname ?? "",
+          birthDate: draft?.birthDate || saved?.birthDate || todayIso(),
+          gender: (draft?.gender || saved?.gender || "") as Gender | "",
+          birthTime: saved?.birthTime ?? "",
+          focus: saved?.focus ?? "life",
+        };
+        if (saved || draft) {
+          setProfile(merged);
+        }
+        if (topicId) {
+          const formStep: OnboardFormStep | null =
+            resumeFormStep ??
+            (draft?.formStep === "gender" ||
+            draft?.formStep === "birth" ||
+            draft?.formStep === "name"
+              ? draft.formStep
+              : null);
+          if (formStep) {
+            setStep(formStep);
+          } else if (saved && hasFreeReadingBasics(saved)) {
+            router.replace(homeTopicPostProfileLoginHref(topicId));
+            return;
+          } else if (!merged.gender) {
+            setStep("gender");
+          } else if (
+            !merged.birthDate ||
+            !/^\d{4}-\d{2}-\d{2}$/.test(merged.birthDate)
+          ) {
+            setStep("birth");
+          } else {
+            setStep("name");
+          }
+        } else if (saved) {
           if (hasFreeReadingBasics(saved)) {
             if (nextPath) {
               router.replace(nextPath);
@@ -525,7 +573,7 @@ export function ReadingWizard() {
       }
     }
     setReady(true);
-  }, [afterPremium, router]);
+  }, [afterPremium, router, searchParams]);
 
   useEffect(() => {
     if (!ready || afterPremium || !autoStartFree) return;
@@ -591,6 +639,69 @@ export function ReadingWizard() {
     clearWizardCache();
     // Basics only — deepen (time/place) + loading happens on /premium
     router.replace(nextPath || "/premium");
+  }
+
+  useEffect(() => {
+    if (!ready || !topicId) return;
+    if (step !== "gender" && step !== "birth" && step !== "name") return;
+    writeOnboardDraft({
+      topic: topicId,
+      gender: profile.gender,
+      birthDate: profile.birthDate,
+      nickname: profile.nickname,
+      realName: profile.realName,
+      formStep: step,
+    });
+  }, [ready, topicId, profile, step]);
+
+  function persistWizardProfile() {
+    const nickname = profile.nickname.trim();
+    const realName = profile.realName.trim() || nickname;
+    const existing = readFortuneProfile();
+    writeFortuneProfile({
+      realName,
+      nickname,
+      birthDate: profile.birthDate,
+      gender: profile.gender,
+      birthTime: existing?.birthTime,
+      birthPlace: existing?.birthPlace,
+      focus: existing?.focus ?? profile.focus,
+      deepenSkipped: existing?.deepenSkipped,
+      profileLockedUntil: existing?.profileLockedUntil,
+    });
+    clearWizardCache();
+  }
+
+  function continueAfterName() {
+    if (!profile.gender) {
+      setError("กรุณาเลือกเพศ");
+      setStep("gender");
+      return;
+    }
+    if (!profile.birthDate) {
+      setError("กรุณาเลือกวันเกิด");
+      setStep("birth");
+      return;
+    }
+    if (!profile.nickname.trim()) {
+      setError("กรุณากรอกชื่อเล่น");
+      setStep("name");
+      return;
+    }
+    if (afterPremium && !profile.realName.trim()) {
+      setError("กรุณากรอกชื่อจริงและชื่อเล่น");
+      setStep("name");
+      return;
+    }
+
+    persistWizardProfile();
+
+    if (topicId) {
+      router.push(homeTopicPostProfileLoginHref(topicId));
+      return;
+    }
+
+    void runFortune();
   }
 
   async function runFortune() {
@@ -685,6 +796,8 @@ export function ReadingWizard() {
   }
 
   const stepNumber = step === "gender" ? 1 : step === "birth" ? 2 : 3;
+  const funnelDot = topicId ? stepNumber + 1 : stepNumber;
+  const funnelTotal = topicId ? ONBOARD_FUNNEL_TOTAL : 3;
 
   if (!ready) {
     return (
@@ -791,36 +904,12 @@ export function ReadingWizard() {
       </div>
 
       <div className="wizard-keyboard-compact relative z-10 flex min-h-0 flex-1 flex-col px-7 pt-3">
-        <div className="relative z-20 mb-2 grid shrink-0 grid-cols-[minmax(4.5rem,1fr)_auto_minmax(4.5rem,1fr)] items-center gap-2">
-          {step === "gender" ? (
-            <span aria-hidden className="justify-self-start" />
-          ) : (
-            <PageBackButton onClick={goBack} className="justify-self-start" />
-          )}
-          <div className="flex flex-col items-center justify-self-center" aria-hidden />
-          <div className="justify-self-end text-right">
-            <p
-              className="text-[12px] font-semibold tabular-nums"
-              style={{ color: MAE.gold }}
-            >
-              <span key={stepNumber} className="wizard-step-num">
-                {stepNumber}
-              </span>
-              <span className="text-white/40">/3</span>
-            </p>
-            <div className="mt-1.5 flex justify-end gap-1">
-              {[1, 2, 3].map((n) => (
-                <span
-                  key={n}
-                  className={cn(
-                    "h-1 rounded-full transition",
-                    n <= stepNumber ? "w-5 bg-[#d5b16f]" : "w-5 bg-white/18"
-                  )}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+        <OnboardTopBar
+          current={funnelDot}
+          total={funnelTotal}
+          backHref={step === "gender" && topicId ? "/choose" : undefined}
+          onBack={step === "gender" ? undefined : goBack}
+        />
 
         {/* Scrollable step body — CTA stays pinned below */}
         <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
@@ -886,7 +975,7 @@ export function ReadingWizard() {
                   </>
                 )}
 
-                {step === "name" && (
+                {step === "name" && afterPremium && (
                   <>
                     <StepHeader
                       title="ชื่อของคุณ"
@@ -951,6 +1040,42 @@ export function ReadingWizard() {
                     </WizardShell>
                   </>
                 )}
+
+                {step === "name" && !afterPremium && (
+                  <>
+                    <StepHeader title="แล้วให้แม่เรียกว่าอะไรดี?" />
+                    <WizardShell>
+                      <label className="block">
+                        <span
+                          className="mb-2 block text-[13px] font-medium tracking-wide"
+                          style={{ color: "rgba(236,214,168,0.88)" }}
+                        >
+                          ชื่อเล่น
+                        </span>
+                        <input
+                          type="text"
+                          value={profile.nickname}
+                          onChange={(e) =>
+                            setProfile((p) => ({
+                              ...p,
+                              nickname: e.target.value,
+                            }))
+                          }
+                          onFocus={scrollFieldIntoView}
+                          placeholder="เช่น นัท"
+                          className="name-step-input mae-wizard-input"
+                          autoComplete="nickname"
+                          enterKeyHint="done"
+                        />
+                      </label>
+                      {error ? (
+                        <div className="mt-4 rounded-xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 text-[14px] text-rose-200">
+                          {error}
+                        </div>
+                      ) : null}
+                    </WizardShell>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -978,13 +1103,19 @@ export function ReadingWizard() {
             {step === "name" ? (
               <FormContinueButton
                 label={
-                  afterPremium ? "ไปกรอกข้อมูลเชิงลึก" : "เปิดดูดวงเบื้องต้น"
+                  afterPremium
+                    ? "ไปกรอกข้อมูลเชิงลึก"
+                    : profile.nickname.trim()
+                      ? `ดูคำทำนายของ${profile.nickname.trim()}`
+                      : "ดูคำทำนาย"
                 }
                 delayMs={280}
                 disabled={
-                  !profile.realName.trim() || !profile.nickname.trim()
+                  afterPremium
+                    ? !profile.realName.trim() || !profile.nickname.trim()
+                    : !profile.nickname.trim()
                 }
-                onClick={() => void runFortune()}
+                onClick={() => continueAfterName()}
               />
             ) : null}
             <PrivacyNote delayMs={380} className="mt-3" />

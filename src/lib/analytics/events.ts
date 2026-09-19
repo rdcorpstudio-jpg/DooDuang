@@ -53,7 +53,7 @@ export const ANALYTICS_FEATURES = [
 export type AnalyticsFeature = (typeof ANALYTICS_FEATURES)[number];
 
 export const ANALYTICS_FEATURE_LABELS: Record<AnalyticsFeature, string> = {
-  home: "หน้าแรก / Landing",
+  home: "หน้าแรก",
   menu: "เมนูเลือกเรื่อง",
   daily: "ดวงรายวัน",
   tarot: "ไพ่รายวัน",

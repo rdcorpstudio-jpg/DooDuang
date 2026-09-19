@@ -5,7 +5,7 @@ import { isMaeCelestialPath } from "@/lib/mae-shell";
 
 /**
  * App sky — crisp on top, light clear blur down the page (no white wash).
- * Main `/` Mae landing owns its video; `/mae` Guanyin uses hero video;
+ * Main `/` Mae home owns its video; `/mae` Guanyin uses hero video;
  * premium / menu / tarot use night-sky photo plate.
  */
 

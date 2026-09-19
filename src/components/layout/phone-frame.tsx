@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isAdminPath, isMaeShellPath } from "@/lib/mae-shell";
+import {
+  isHomePath,
+  isPreviewHomePath,
+  shouldAllowDocumentScroll,
+  shouldDisableComfortZoom,
+  shouldHideBottomNav,
+} from "@/lib/app-screens";
 import { StarfieldBackground, SoftSkyStarsOverlay } from "@/components/layout/starfield-background";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { syncPremiumFromServer } from "@/lib/fortune/premium-unlock";
@@ -20,25 +27,11 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const adminShell = isAdminPath(pathname);
   const maeShell = !adminShell && isMaeShellPath(pathname);
-  const isAuthPath =
-    pathname.startsWith("/auth") || pathname.startsWith("/login");
-  const hideNav =
-    adminShell ||
-    isAuthPath ||
-    pathname === "/" ||
-    pathname === "" ||
-    pathname.startsWith("/premium/pay") ||
-    pathname.startsWith("/preview/home") ||
-    keyboardOpen;
+  const hideNav = shouldHideBottomNav(pathname, keyboardOpen);
+  const homeScreen = isHomePath(pathname);
   /* CSS zoom on ancestors breaks iOS caret / focus for phone OTP fields.
      Home hero is a tight 1-screen composition — comfort zoom crushes it on real phones. */
-  const disableComfortZoom =
-    adminShell ||
-    isAuthPath ||
-    keyboardOpen ||
-    pathname === "/" ||
-    pathname === "" ||
-    pathname.startsWith("/preview/home");
+  const disableComfortZoom = shouldDisableComfortZoom(pathname, keyboardOpen);
 
   useEffect(() => {
     if (adminShell) return;
@@ -84,14 +77,8 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     };
   }, []);
 
-  const allowPageScroll =
-    adminShell ||
-    pathname.startsWith("/premium/pay") ||
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/auth") ||
-    pathname.startsWith("/preview/home");
-
-  const useCustomHomeBg = pathname.startsWith("/preview/home");
+  const allowPageScroll = shouldAllowDocumentScroll(pathname);
+  const useCustomHomeBg = isPreviewHomePath(pathname);
 
   return (
     <div className={cn("phone-shell", adminShell && "phone-shell--admin")}>
@@ -101,6 +88,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
           keyboardOpen && "phone-frame--keyboard",
           maeShell && "phone-frame--mae",
           adminShell && "phone-frame--admin",
+          homeScreen && "phone-frame--home",
           className
         )}
       >

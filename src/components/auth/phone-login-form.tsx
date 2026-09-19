@@ -226,7 +226,7 @@ export function PhoneLoginForm({
                 กำลังส่งรหัส…
               </>
             ) : (
-              "รับรหัส OTP"
+              "ส่งรหัส OTP"
             )}
           </button>
         </form>

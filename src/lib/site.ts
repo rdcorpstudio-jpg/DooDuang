@@ -36,6 +36,10 @@ export const PREMIUM_PERKS = [
   "บันทึกโปรไฟล์ ดูซ้ำได้ทั้งปี",
   "อัปเดตคำแนะนำตามจังหวะชีวิต",
 ] as const;
+/** First-run home CTA — pick a topic, then login, then wizard */
+export const HOME_CHOOSE_HREF = "/choose";
+export const HOME_READING_LOGIN_HREF = "/choose";
+export const HOME_READING_AFTER_LOGIN = "/reading";
 export const SITE_URL = "https://dooduang-bay.vercel.app";
 export const LEGAL_UPDATED_AT = "3 กันยายน 2569";
 

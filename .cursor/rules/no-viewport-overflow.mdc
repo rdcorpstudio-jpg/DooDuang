@@ -1,0 +1,24 @@
+---
+description: Keep primary UI inside the visible viewport — never clip the only CTA
+alwaysApply: true
+---
+
+# ห้ามทะลุกรอบมองเห็น
+
+จอแอปต้องพอดีกับพื้นที่ที่ผู้ใช้เห็นจริง (`visualViewport` / `100svh` / `--vv-height`) ไม่ใช้ความสูงเลย์เอาต์ที่สูงกว่าจอแล้วซ่อนด้วย `overflow`
+
+- ปุ่มหลัก ชื่อแบรนด์ แท็บ แถบส่งฟอร์ม ต้องเห็นครบ ไม่ถูกตัดขอบล่าง/บน
+- จอเดียว (เช่น `/`) ห้ามพึ่งสกroll เพื่อให้เห็นปุ่มเดียวของหน้า
+- ห้ามชิดขอบล่างที่ `0` โดยไม่มี inset — อย่างน้อย `max(4.75rem, 12svh + safe-area)`
+- นับแถบเบราว์เซอร์ รอยบาก home indicator ด้วย `env(safe-area-inset-*)` และ `--vv-height`
+- ตรวจอย่างน้อย 360×640, 390×844, และหน้าต่างเดสก์ท็อปที่เตี้ย ก่อนบอกว่าจบ
+
+```css
+/* ❌ BAD — ปุ่มติดก้นเลย์เอาต์ เครื่องเล็ก/มีแถบ URL แล้วไม่เห็น */
+.cta { margin-top: auto; padding-bottom: 8px; }
+.screen { height: 100dvh; overflow: hidden; }
+
+/* ✅ GOOD — สูงเท่าจอที่เห็น และเว้น dock ให้ปุ่มทั้งก้อนอยู่ในกรอบ */
+.screen { height: var(--vv-height, 100svh); overflow: hidden; }
+.cta-dock { padding-bottom: max(5.75rem, calc(14svh + env(safe-area-inset-bottom, 0px))); }
+```

@@ -27,7 +27,7 @@ const HOME_TAB: NavTab = {
   match: (p) => p === "/" || p === "/mae" || p.startsWith("/mae/"),
 };
 
-/** After profile — home = daily fortune (marketing landing skipped) */
+/** After profile — home tab = daily fortune (first-run `/` skipped) */
 const APP_HOME_FREE_TAB: NavTab = {
   href: "/premium",
   label: "ดวงวันนี้",
@@ -41,12 +41,12 @@ const APP_HOME_PREMIUM_TAB: NavTab = {
   src: "/images/icons/nav/horoscope.webp",
 };
 
-/** Pre-profile — ดูดวง tab */
+/** Pre-profile — ดูดวง tab goes to wizard (avoids /premium bounce) */
 const FORTUNE_FREE_TAB: NavTab = {
-  href: "/premium",
+  href: "/reading",
   label: "ดูดวง",
   src: "/images/icons/nav/horoscope.webp",
-  match: (p) => p === "/premium",
+  match: (p) => p === "/premium" || p === "/reading",
 };
 
 const MENU_TAB: NavTab = {
@@ -55,7 +55,7 @@ const MENU_TAB: NavTab = {
   src: "/images/icons/nav/menu.webp",
   match: (p) =>
     p.startsWith("/menu") ||
-    p.startsWith("/reading") ||
+    p.startsWith("/reading/") ||
     p.startsWith("/r/") ||
     p.startsWith("/preview/") ||
     p.startsWith("/premium/couple") ||
@@ -129,7 +129,7 @@ export function BottomNav() {
     >
       <div
         className={cn(
-          "mx-auto grid max-w-[480px] gap-0 px-1 pt-1 pb-0.5",
+          "mx-auto grid w-full max-w-3xl gap-0 px-1 pt-1 pb-0.5",
           tabs.length === 3 ? "grid-cols-3" : "grid-cols-4"
         )}
       >
@@ -141,7 +141,7 @@ export function BottomNav() {
               key={`${href}-${label}`}
               href={href}
               className={cn(
-                "fortune-tap relative flex min-h-[2.75rem] flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1 outline-none transition-all duration-200",
+                "fortune-tap relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1 outline-none transition-all duration-200",
                 "focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
                 active ? "text-[#d5b16f]" : "text-[#b9a077]"
               )}

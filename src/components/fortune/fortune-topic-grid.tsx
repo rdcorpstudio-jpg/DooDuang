@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import Link from "next/link";
 import {
   FortuneIcon,
@@ -8,7 +8,6 @@ import {
 } from "@/components/fortune/fortune-icon";
 import { buildDailyReadingPack } from "@/lib/fortune/build-daily-pack";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
-import { useDragScroll } from "@/hooks/use-drag-scroll";
 import { cn } from "@/lib/utils";
 
 const DOMAIN_META = [
@@ -40,7 +39,7 @@ const CARD_SHELL: CSSProperties = {
   boxShadow: "0 10px 28px rgba(0,0,0,0.35)",
 };
 
-/** ดวงแต่ละด้าน — center-snap carousel matching mock */
+/** Explore job cards — 2x2 on the hub first screen. */
 export function FortuneTopicGrid({
   birthDate = "2000-01-01",
   nickname = "",
@@ -50,7 +49,6 @@ export function FortuneTopicGrid({
   gender,
   className,
   from = "reading",
-  unlocked: _unlocked = true,
 }: {
   birthDate?: string;
   nickname?: string;
@@ -90,97 +88,31 @@ export function FortuneTopicGrid({
     [pack.aspects]
   );
 
-  const aspectHref = (id: string) =>
-    `/reading/aspect?id=${id}&from=${from}`;
-
-  const { ref: scrollerRef } = useDragScroll();
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-
-    const sync = () => {
-      const cards = Array.from(el.children) as HTMLElement[];
-      if (!cards.length) return;
-      const mid = el.scrollLeft + el.clientWidth / 2;
-      let best = 0;
-      let bestDist = Number.POSITIVE_INFINITY;
-      cards.forEach((card, i) => {
-        const center = card.offsetLeft + card.offsetWidth / 2;
-        const dist = Math.abs(center - mid);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
-      });
-      setActive((prev) => (prev === best ? prev : best));
-    };
-
-    sync();
-    el.addEventListener("scroll", sync, { passive: true });
-    window.addEventListener("resize", sync);
-    return () => {
-      el.removeEventListener("scroll", sync);
-      window.removeEventListener("resize", sync);
-    };
-  }, [domains.length]);
+  const aspectHref = (id: string) => `/reading/aspect?id=${id}&from=${from}`;
 
   return (
     <section className={cn("space-y-3", className)}>
       <h2 className="mae-gold-text px-0.5 text-[15px] font-semibold tracking-wide">
-        ดวงแต่ละด้าน
+        เลือกเรื่องที่อยากรู้
       </h2>
 
-      <div
-        ref={scrollerRef}
-        className="topic-aspect-scroll no-tap -mx-3 flex cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain py-1 active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        style={{
-          touchAction: "pan-x pan-y",
-          WebkitOverflowScrolling: "touch",
-          paddingLeft: "7%",
-          paddingRight: "7%",
-          scrollPaddingLeft: "7%",
-          scrollPaddingRight: "7%",
-        }}
-      >
+      <div className="grid grid-cols-2 gap-2.5">
         {domains.map((d) => (
           <Link
             key={d.domainId}
             href={aspectHref(d.domainId)}
-            className="relative flex h-[112px] w-[82%] max-w-[340px] shrink-0 snap-center items-center gap-2.5 rounded-[20px] px-3.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/40"
-            style={{ ...CARD_SHELL, scrollSnapStop: "always" }}
+            className="flex min-h-[7.5rem] flex-col items-start rounded-[18px] px-3 py-3 text-left outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/40"
+            style={CARD_SHELL}
             aria-label={`อ่านดวง${d.name}`}
           >
-            <span className="relative flex h-[64px] w-[58px] shrink-0 items-center justify-center">
-              <FortuneIcon name={d.icon} size={52} plain className="relative" />
-            </span>
-
-            <span className="flex min-w-0 flex-1 flex-col justify-center py-2.5">
-              <p className="text-[1.05rem] font-bold leading-none tracking-tight text-white">
-                {d.name}
-              </p>
-              <p className="mt-1.5 line-clamp-2 text-[12px] leading-snug text-white/82">
-                {d.blurb}
-              </p>
-              <span className="mt-2 inline-flex items-center gap-1 whitespace-nowrap text-[12px] font-semibold tracking-wide text-[#e8d19a]">
-                อ่านคำทำนาย
-                <span aria-hidden>→</span>
-              </span>
-            </span>
+            <FortuneIcon name={d.icon} size={36} plain />
+            <p className="mt-2 overflow-visible text-[15px] font-bold leading-snug tracking-tight text-white">
+              {d.name}
+            </p>
+            <p className="mt-1.5 text-[12px] leading-[1.65] text-white/75">
+              {d.blurb}
+            </p>
           </Link>
-        ))}
-      </div>
-
-      <div className="flex items-center justify-center gap-1.5" aria-hidden>
-        {domains.map((d, i) => (
-          <span
-            key={d.domainId}
-            className={cn(
-              "h-[6px] w-[6px] rounded-full transition-colors duration-200",
-              i === active ? "bg-[#f0d078]" : "bg-white/22"
-            )}
-          />
         ))}
       </div>
     </section>

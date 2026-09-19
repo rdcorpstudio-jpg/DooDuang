@@ -182,7 +182,7 @@ export function PremiumHomePage({
 
   if (!ready) {
     return (
-      <AnimatedPage className="mx-auto w-full max-w-[480px] px-4 py-10 text-center text-[14px] text-[#9AB8DC]">
+      <AnimatedPage className="mx-auto w-full max-w-3xl px-4 py-10 text-center text-[14px] text-[#9AB8DC]">
         กำลังเปิด…
       </AnimatedPage>
     );
@@ -192,7 +192,7 @@ export function PremiumHomePage({
   if (!unlocked) {
     if (!hasFreeReadingBasics(profile) && !forceUnlocked) {
       return (
-        <AnimatedPage className="mx-auto w-full max-w-[480px] px-4 py-10 text-center text-[14px] text-[#9AB8DC]">
+        <AnimatedPage className="mx-auto w-full max-w-3xl px-4 py-10 text-center text-[14px] text-[#9AB8DC]">
           กำลังไปหน้ากรอกข้อมูล…
         </AnimatedPage>
       );
@@ -203,7 +203,7 @@ export function PremiumHomePage({
     const realName = profile?.realName || nickname;
 
     return (
-      <AnimatedPage className="mx-auto w-full min-w-0 max-w-[480px] px-0 pb-10 pt-0">
+      <AnimatedPage className="mx-auto w-full min-w-0 max-w-3xl px-0 pb-20 pt-0">
         <LifeInsightMockup
           key={`free-${seed}`}
           seed={seed}
@@ -230,9 +230,9 @@ export function PremiumHomePage({
 
   if (!hasBasicFortuneProfile(profile) && !forceUnlocked) {
     return (
-      <AnimatedPage className="mx-auto w-full max-w-[480px] px-4 py-10 text-center text-[14px] text-[#9AB8DC]">
-        กำลังไปหน้าเลือกเพศ…
-      </AnimatedPage>
+        <AnimatedPage className="mx-auto w-full max-w-3xl px-4 py-10 text-center text-[14px] text-[#9AB8DC]">
+          กำลังไปหน้าเลือกเพศ…
+        </AnimatedPage>
     );
   }
 
@@ -263,7 +263,7 @@ export function PremiumHomePage({
   const deepenComplete = Boolean(profile?.birthTime && profile?.birthPlace);
 
   return (
-    <AnimatedPage className="mx-auto w-full min-w-0 max-w-[480px] px-0 pb-10 pt-0">
+    <AnimatedPage className="mx-auto w-full min-w-0 max-w-3xl px-0 pb-20 pt-0">
       {!deepenComplete ? (
         <button
           type="button"

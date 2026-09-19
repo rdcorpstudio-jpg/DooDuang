@@ -17,11 +17,13 @@ import { FortunePremiumSelfDeep } from "@/components/fortune/fortune-premium-sel
 import { FortunePremiumValueSection } from "@/components/fortune/fortune-premium-value-section";
 import { FortunePremiumRituals } from "@/components/fortune/fortune-premium-rituals";
 import { FortuneIcon } from "@/components/fortune/fortune-icon";
+import { MoreDetails } from "@/components/ui/more-details";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
 import {
   buildDailyReadingPack,
   monthScoreForDate,
 } from "@/lib/fortune/build-daily-pack";
+import { FORTUNE_DISCLAIMER } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 function hashSeed(input: string) {
@@ -100,11 +102,14 @@ export function LifeInsightMockup({
     if (typeof window === "undefined") return;
     if (window.location.hash !== "#self-intro") return;
     const t = window.setTimeout(() => {
-      document.getElementById("self-intro")?.scrollIntoView({
+      const target = document.getElementById("self-intro");
+      const fold = target?.closest("details");
+      if (fold) fold.open = true;
+      target?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-    }, 120);
+    }, 160);
     return () => window.clearTimeout(t);
   }, [seed]);
 
@@ -144,17 +149,10 @@ export function LifeInsightMockup({
   return (
     <div
       className={cn(
-        "fortune-free-page dd-page-live mx-auto w-full min-w-0 max-w-[480px] space-y-3.5",
+        "fortune-free-page dd-page-live mx-auto w-full min-w-0 max-w-3xl space-y-3.5 px-1 sm:px-2",
         className
       )}
     >
-      <div
-        className="fortune-reveal"
-        style={{ "--fortune-delay": "20ms" } as CSSProperties}
-      >
-        <FortunePromoSplitBanner unlocked={contentUnlocked} />
-      </div>
-
       <div
         className="fortune-reveal"
         style={{ "--fortune-delay": "40ms" } as CSSProperties}
@@ -170,26 +168,50 @@ export function LifeInsightMockup({
         />
       </div>
 
-      {contentUnlocked ? (
-        <div
-          className="fortune-reveal px-3"
-          style={{ "--fortune-delay": "95ms" } as CSSProperties}
-        >
-          <FortunePremiumValueSection
-            birthDate={birthDate}
-            nickname={nickname}
-            birthTime={deepTime}
-            birthPlace={deepPlace}
-            focus={typedFocus}
-            gender={gender}
-          />
+      <div
+        className="fortune-reveal px-3"
+        style={{ "--fortune-delay": "120ms" } as CSSProperties}
+      >
+        <FortuneTopicGrid
+          nickname={nickname}
+          birthDate={birthDate}
+          birthTime={deepTime}
+          birthPlace={deepPlace}
+          focus={typedFocus}
+          gender={gender}
+          from={isPremiumPage ? "premium" : "reading"}
+          unlocked={contentUnlocked}
+        />
+        <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+          <Link
+            href={`/reading/tarot?seed=${encodeURIComponent(seed)}`}
+            className="flex min-h-[4.5rem] flex-col justify-center rounded-[18px] px-3 py-3 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/40"
+            style={{
+              background: "linear-gradient(165deg, #1a2234 0%, #121826 100%)",
+              border: "1px solid rgba(213, 177, 111, 0.45)",
+            }}
+          >
+            <p className="text-[14px] font-bold text-white">ไพ่รายวัน</p>
+            <p className="mt-0.5 text-[11px] text-white/65">เปิดไพ่วันนี้</p>
+          </Link>
+          <Link
+            href="/menu"
+            className="flex min-h-[4.5rem] flex-col justify-center rounded-[18px] px-3 py-3 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/40"
+            style={{
+              background: "linear-gradient(165deg, #1a2234 0%, #121826 100%)",
+              border: "1px solid rgba(213, 177, 111, 0.45)",
+            }}
+          >
+            <p className="text-[14px] font-bold text-white">เมนูทั้งหมด</p>
+            <p className="mt-0.5 text-[11px] text-white/65">เลือกเรื่องอื่น</p>
+          </Link>
         </div>
-      ) : null}
+      </div>
 
       {!isPremiumPage && unlocked ? (
         <div
           className="fortune-reveal px-3"
-          style={{ "--fortune-delay": "80ms" } as CSSProperties}
+          style={{ "--fortune-delay": "160ms" } as CSSProperties}
         >
           <Link
             href="/premium"
@@ -235,142 +257,109 @@ export function LifeInsightMockup({
       ) : null}
 
       <div
-        className="fortune-reveal px-3"
-        style={{ "--fortune-delay": "120ms" } as CSSProperties}
+        className="fortune-reveal px-3 pb-4"
+        style={{ "--fortune-delay": "200ms" } as CSSProperties}
       >
-        <FortuneFreeZodiacToday
-          birthDate={birthDate}
-          nickname={nickname}
-          birthTime={deepTime}
-          birthPlace={deepPlace}
-          focus={typedFocus}
-          gender={gender}
-          unlocked={unlocked}
-          deep={contentUnlocked}
-          onUnlock={onUnlock}
-        />
-      </div>
-
-      <div
-        className="fortune-reveal px-3"
-        style={{ "--fortune-delay": "180ms" } as CSSProperties}
-      >
-        <FortuneTopicGrid
-          nickname={nickname}
-          birthDate={birthDate}
-          birthTime={deepTime}
-          birthPlace={deepPlace}
-          focus={typedFocus}
-          gender={gender}
-          from={isPremiumPage ? "premium" : "reading"}
-          unlocked={contentUnlocked}
-        />
-      </div>
-
-      <div
-        className="fortune-reveal px-3"
-        style={{ "--fortune-delay": "220ms" } as CSSProperties}
-      >
-        <FortuneLuckyStrip
-          birthDate={birthDate}
-          nickname={nickname}
-          birthTime={deepTime}
-          birthPlace={deepPlace}
-          focus={typedFocus}
-          gender={gender}
-        />
-      </div>
-
-      <div
-        className="fortune-reveal"
-        style={{ "--fortune-delay": "260ms" } as CSSProperties}
-      >
-        <FortuneExtraReadings
-          seed={seed}
-          unlocked={contentUnlocked}
-          onUnlock={onUnlock}
-        />
-      </div>
-
-      <div
-        className="fortune-reveal px-3"
-        style={{ "--fortune-delay": "300ms" } as CSSProperties}
-      >
-        <FortuneCalendarShirtPreview
-          seed={seed}
-          birthDate={birthDate}
-          nickname={nickname}
-          birthTime={deepTime}
-          birthPlace={deepPlace}
-          focus={typedFocus}
-          gender={gender}
-          unlocked={contentUnlocked}
-          onUnlock={onUnlock}
-        />
-      </div>
-
-      <div
-        className="fortune-reveal px-3"
-        style={{ "--fortune-delay": "340ms" } as CSSProperties}
-      >
-        <FortuneFreeMonthTrend
-          seed={seed}
-          birthDate={birthDate}
-          nickname={nickname}
-          birthTime={deepTime}
-          birthPlace={deepPlace}
-          focus={typedFocus}
-          gender={gender}
-          points={monthPoints}
-          unlocked={contentUnlocked}
-          onUnlock={onUnlock}
-        />
-      </div>
-
-      <div
-        id="self-intro"
-        className="fortune-reveal scroll-mt-4 px-3"
-        style={{ "--fortune-delay": "380ms" } as CSSProperties}
-      >
-        {contentUnlocked ? (
-          <FortunePremiumSelfDeep
+        <MoreDetails title="อ่านราศี พิธี และแนวโน้มเดือน">
+          <FortunePromoSplitBanner unlocked={contentUnlocked} />
+          {contentUnlocked ? (
+            <FortunePremiumValueSection
+              birthDate={birthDate}
+              nickname={nickname}
+              birthTime={deepTime}
+              birthPlace={deepPlace}
+              focus={typedFocus}
+              gender={gender}
+            />
+          ) : null}
+          <FortuneFreeZodiacToday
+            birthDate={birthDate}
+            nickname={nickname}
+            birthTime={deepTime}
+            birthPlace={deepPlace}
+            focus={typedFocus}
+            gender={gender}
+            unlocked={unlocked}
+            deep={contentUnlocked}
+            onUnlock={onUnlock}
+          />
+          <FortuneLuckyStrip
+            birthDate={birthDate}
+            nickname={nickname}
+            birthTime={deepTime}
+            birthPlace={deepPlace}
+            focus={typedFocus}
+            gender={gender}
+          />
+          <FortuneExtraReadings
             seed={seed}
-            nickname={nickname}
-            birthDate={birthDate}
-            birthTime={deepTime}
-            birthPlace={deepPlace}
-            focus={typedFocus}
-            gender={gender}
+            unlocked={contentUnlocked}
+            onUnlock={onUnlock}
           />
-        ) : (
-          <FortuneFreeSelfIntro
+          <FortuneCalendarShirtPreview
             seed={seed}
-            nickname={nickname}
             birthDate={birthDate}
+            nickname={nickname}
             birthTime={deepTime}
             birthPlace={deepPlace}
             focus={typedFocus}
             gender={gender}
-            premium={contentUnlocked}
+            unlocked={contentUnlocked}
+            onUnlock={onUnlock}
           />
-        )}
+          <FortuneFreeMonthTrend
+            seed={seed}
+            birthDate={birthDate}
+            nickname={nickname}
+            birthTime={deepTime}
+            birthPlace={deepPlace}
+            focus={typedFocus}
+            gender={gender}
+            points={monthPoints}
+            unlocked={contentUnlocked}
+            onUnlock={onUnlock}
+          />
+          <div id="self-intro" className="scroll-mt-4">
+            {contentUnlocked ? (
+              <FortunePremiumSelfDeep
+                seed={seed}
+                nickname={nickname}
+                birthDate={birthDate}
+                birthTime={deepTime}
+                birthPlace={deepPlace}
+                focus={typedFocus}
+                gender={gender}
+              />
+            ) : (
+              <FortuneFreeSelfIntro
+                seed={seed}
+                nickname={nickname}
+                birthDate={birthDate}
+                birthTime={deepTime}
+                birthPlace={deepPlace}
+                focus={typedFocus}
+                gender={gender}
+                premium={contentUnlocked}
+              />
+            )}
+          </div>
+          {contentUnlocked ? (
+            <FortunePremiumRituals
+              birthDate={birthDate}
+              nickname={nickname}
+              birthTime={deepTime}
+              birthPlace={deepPlace}
+              focus={typedFocus}
+              gender={gender}
+            />
+          ) : null}
+        </MoreDetails>
+        <MoreDetails title="อ่านข้อควรรู้ก่อนใช้คำทำนาย" className="mt-2.5">
+          <p className="text-[12px] leading-relaxed text-[#c5cdd9]/80">
+            {FORTUNE_DISCLAIMER}
+          </p>
+        </MoreDetails>
       </div>
-
-      {contentUnlocked ? (
-        <div
-          className="fortune-reveal px-3 pb-2"
-          style={{ "--fortune-delay": "560ms" } as CSSProperties}
-        >
-          <FortunePremiumRituals
-            birthDate={birthDate}
-            nickname={nickname}
-            birthTime={deepTime}
-            birthPlace={deepPlace}
-            focus={typedFocus}
-            gender={gender}
-          />
-        </div>
-      ) : null}
     </div>
   );
 }

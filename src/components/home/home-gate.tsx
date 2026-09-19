@@ -11,8 +11,8 @@ import {
 } from "@/lib/fortune/profile-storage";
 
 /**
- * `/` — marketing landing for new users.
- * After birth/name basics are saved, skip landing → daily fortune home.
+ * `/` — first-run app home for new users.
+ * After birth/name basics are saved, skip home → daily fortune tab.
  */
 export function HomeGate() {
   const router = useRouter();

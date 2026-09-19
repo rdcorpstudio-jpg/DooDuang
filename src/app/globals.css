@@ -19,6 +19,7 @@
     background: #fff;
     width: 100%;
     overflow-x: hidden;
+    --vv-height: 100svh;
   }
 
   body {
@@ -92,20 +93,17 @@
   text-size-adjust: 100%;
 }
 
-/* Desktop only: centered column like HD Mall horoscope (.container max-width: 480px).
-   Require fine pointer so tablets / phones never letterbox. */
+/* Desktop: full-bleed app surface — no fake phone chrome, no 480px lock. */
 @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .phone-shell {
-    background: #fff;
+    background: #101827;
   }
 
   .phone-frame {
-    width: min(100vw, 480px);
-    max-width: 480px;
+    width: 100%;
+    max-width: 100%;
     height: 100dvh;
-    box-shadow:
-      0 0 0 1px rgba(16, 24, 39, 0.08),
-      0 24px 64px rgba(16, 24, 39, 0.12);
+    box-shadow: none;
   }
 
   .phone-shell--admin {
@@ -273,21 +271,51 @@
   -webkit-text-fill-color: #3c4043 !important;
 }
 
-/* Login — room for gate arch at top (image 2 has empty mid for UI) */
+/* Login — universe stays as atmosphere; the card is the task. */
 .login-screen-sky {
-  height: clamp(7.5rem, 38dvh, 17rem);
+  height: 0;
 }
 
-@media (max-height: 720px) {
-  .login-screen-sky {
-    height: clamp(5rem, 28dvh, 11rem);
-  }
+.login-card {
+  width: 100%;
+  border-radius: 22px;
+  padding: 1.35rem 1.15rem 1.2rem;
+  background: rgba(16, 24, 39, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 16px 40px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-@media (min-height: 860px) {
-  .login-screen-sky {
-    height: clamp(11rem, 40dvh, 18.5rem);
-  }
+.login-outline-btn {
+  box-shadow: inset 0 0 0 1.5px rgba(247, 244, 236, 0.82);
+  background: transparent;
+}
+
+.login-card .google-white-btn,
+.phone-frame--mae .login-card .google-white-btn,
+.phone-frame--mae .login-card button.google-white-btn {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #f7f4ec !important;
+  -webkit-text-fill-color: #f7f4ec !important;
+  border-color: transparent !important;
+  box-shadow: inset 0 0 0 1.5px rgba(247, 244, 236, 0.82) !important;
+}
+
+.login-card .google-white-btn:hover,
+.phone-frame--mae .login-card .google-white-btn:hover,
+.phone-frame--mae .login-card button.google-white-btn:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #f7f4ec !important;
+  -webkit-text-fill-color: #f7f4ec !important;
+}
+
+.login-card .google-white-btn span,
+.phone-frame--mae .login-card .google-white-btn span {
+  color: #f7f4ec !important;
+  -webkit-text-fill-color: #f7f4ec !important;
 }
 
 .phone-frame--mae .ring-\[\#9B7FE8\]\/12,
@@ -746,7 +774,74 @@
 }
 
 .mae-landing {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+  overscroll-behavior: none;
+}
+
+/* First-run home fills the visible frame only — never taller than visualViewport. */
+.mae-home-screen,
+.mae-home-screen .mae-hero-plate {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.mae-home-screen .mae-hero-spacer {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+
+/* CTA sits in a reserved lower dock, not flush to the physical bottom. */
+.mae-home-screen .mae-hero-copy {
+  margin-top: auto !important;
+  margin-bottom: 0 !important;
+  max-width: 22rem;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.mae-home-cta {
+  min-height: 3.15rem;
+  width: 100%;
+  max-width: 20rem;
+  color: #101827;
+  text-shadow: none;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e7ebf2 100%);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -1px 1px rgba(170, 180, 196, 0.28),
+    0 10px 18px rgba(16, 24, 39, 0.26),
+    0 22px 40px rgba(16, 24, 39, 0.2);
+}
+
+.mae-home-cta:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fc 50%, #eef1f6 100%);
+}
+
+.mae-home-cta:active {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 4px 12px rgba(16, 24, 39, 0.22);
+}
+
+.mae-home-screen .mae-hero-copy .mae-home-cta {
+  min-height: 3.15rem;
+  width: 100%;
+  max-width: 20rem;
+  text-shadow: none;
+}
+
+.mae-home-screen .mae-hero-lede {
+  margin: 0 auto 1.25rem;
+  max-width: 21.5rem;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #9aa3b2;
+  text-shadow: 0 1px 8px rgba(16, 24, 39, 0.72);
 }
 
 /* Hero — base (shared); desktop/mobile overrides below */
@@ -774,11 +869,32 @@
 
   .mae-hero-copy {
     margin-top: auto !important;
-    /* Raise lower block from bottom — logo stays fixed */
-    margin-bottom: 30%;
-    padding-top: 0.35rem;
+    margin-bottom: 1.75rem;
+    padding-top: 0;
     padding-bottom: 0.25rem;
     align-items: center;
+    max-width: 24rem;
+  }
+
+  .mae-home-screen .mae-hero-copy {
+    max-width: 24rem;
+    margin-bottom: 0;
+  }
+
+  .mae-hero-copy h1 > span:first-child {
+    font-size: 2.15rem;
+    line-height: 1.45;
+  }
+
+  .mae-hero-copy .mae-hero-gold-line {
+    font-size: 2.25rem;
+    line-height: 1.45;
+  }
+
+  .mae-hero-lede {
+    font-size: 15px;
+    line-height: 1.75;
+    max-width: 24rem;
   }
 
   .mae-hero-award {
@@ -837,16 +953,29 @@
     flex-direction: column;
     box-sizing: border-box;
     height: 100%;
-    height: 100svh;
-    height: 100dvh;
     min-height: 100%;
-    min-height: 100svh;
-    min-height: 100dvh;
     max-height: 100%;
-    max-height: 100dvh;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
     padding-top: max(0.5rem, env(safe-area-inset-top));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1.15rem, env(safe-area-inset-bottom));
+  }
+
+  .mae-home-screen .mae-hero-plate {
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+  }
+
+  .mae-home-screen .mae-hero-wordmark {
+    top: 52%;
+    width: min(76%, 15.25rem);
+  }
+
+  .mae-home-screen .mae-hero-spacer {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
 
   .mae-hero-wordmark {
@@ -873,27 +1002,32 @@
 
   .mae-hero-copy h1 > span:first-child {
     font-size: 1.72rem;
-    line-height: 1.18;
+    line-height: 1.45;
+    padding-block: 0.12em;
   }
 
   .mae-hero-copy .mae-hero-gold-line {
     font-size: 1.82rem;
-    line-height: 1.18;
-    margin-top: 0.15rem;
+    line-height: 1.45;
+    margin-top: 0.2rem;
+    padding-block: 0.12em;
   }
 
   .mae-hero-lede {
-    margin-top: 0.4rem;
-    font-size: 12px;
-    line-height: 1.6;
+    margin-top: 0.55rem;
+    font-size: 13.5px;
+    line-height: 1.75;
+    max-width: 20.5rem;
   }
 
-  .mae-hero-copy .mae-gold-cta {
-    margin-top: 0.55rem;
+  .mae-hero-copy .mae-gold-cta,
+  .mae-hero-copy .mae-home-cta {
+    margin-top: 0;
+    min-height: 3rem;
   }
 
   .mae-hero-award {
-    margin-top: 0.55rem;
+    margin-top: 0.7rem;
   }
 
   .mae-hero-award .mae-award-glow {
@@ -932,24 +1066,59 @@
 
   .mae-hero-copy h1 > span:first-child {
     font-size: 1.55rem;
+    line-height: 1.45;
   }
 
   .mae-hero-copy .mae-hero-gold-line {
     font-size: 1.62rem;
+    line-height: 1.45;
   }
 
   .mae-hero-lede {
-    margin-top: 0.3rem;
-    font-size: 11.5px;
+    margin-top: 0.4rem;
+    font-size: 13px;
+    line-height: 1.7;
   }
 
-  .mae-hero-copy .mae-gold-cta {
-    margin-top: 0.45rem;
-    height: 2.5rem;
+  .mae-hero-copy .mae-gold-cta,
+  .mae-hero-copy .mae-home-cta {
+    margin-top: 0;
+    height: auto;
+    min-height: 3rem;
   }
 
   .mae-hero-award {
-    margin-top: 0.4rem;
+    margin-top: 0.5rem;
+  }
+}
+
+/*
+  Home CTA dock — must win over the mobile plate padding (1.15rem).
+  Keep the pill fully inside the visible frame on short phones and browser chrome.
+*/
+.mae-home-screen .mae-hero-plate {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  padding-bottom: max(
+    5.75rem,
+    calc(14svh + env(safe-area-inset-bottom, 0px))
+  );
+}
+
+.mae-home-screen .mae-hero-wordmark {
+  top: 52%;
+  width: min(76%, 15.25rem);
+}
+
+@media (max-width: 767px) and (max-height: 640px) {
+  .mae-home-screen .mae-hero-wordmark {
+    top: 48%;
+    width: min(70%, 13.75rem);
+  }
+
+  .mae-home-screen .mae-hero-lede {
+    margin-bottom: 0.9rem;
+    font-size: 13px;
+    line-height: 1.65;
   }
 }
 
@@ -1220,8 +1389,9 @@ details[open] > .mae-faq-body {
 
 .mae-hero-copy h1 > span:first-child {
   letter-spacing: 0.02em;
-  line-height: 1.28;
-  padding-block: 0;
+  line-height: 1.45;
+  overflow: visible;
+  padding-block: 0.12em;
   text-shadow:
     0 1px 2px rgba(0, 0, 0, 0.5),
     0 4px 14px rgba(0, 0, 0, 0.35);
@@ -1230,8 +1400,9 @@ details[open] > .mae-faq-body {
 .mae-hero-copy h1 > span:nth-child(2),
 .mae-hero-copy h1 > span:last-child {
   letter-spacing: 0.02em;
-  line-height: 1.28;
-  padding-block: 0;
+  line-height: 1.45;
+  overflow: visible;
+  padding-block: 0.12em;
   text-shadow: none;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35))
     drop-shadow(0 0 18px rgba(213, 177, 111, 0.22));
@@ -1901,6 +2072,12 @@ html[data-keyboard-open="true"] .phone-comfort {
   max-width: 100% !important;
   height: var(--vv-height, 100dvh);
   max-height: var(--vv-height, 100dvh);
+}
+
+/* Home uses the visible frame so the only CTA cannot sit under browser chrome. */
+.phone-frame--home {
+  height: var(--vv-height, 100svh);
+  max-height: var(--vv-height, 100svh);
 }
 
 /* Site-wide press feedback on anything tappable */

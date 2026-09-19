@@ -1,5 +1,5 @@
 /** Routes that use Mae navy–gold shell (celestial bg + phone-frame--mae).
- * Main `/` is Mae landing; classic Guanyin lives at `/mae`.
+ * Main `/` is Mae first-run home; classic Guanyin lives at `/mae`.
  */
 
 export function isAdminPath(pathname: string) {
@@ -11,6 +11,7 @@ export function isMaeShellPath(pathname: string) {
   if (pathname === "/mae" || pathname.startsWith("/mae/")) return false;
   if (pathname === "/" || pathname === "") return true;
   return (
+    pathname.startsWith("/choose") ||
     pathname.startsWith("/reading") ||
     pathname.startsWith("/r/") ||
     pathname.startsWith("/premium") ||
