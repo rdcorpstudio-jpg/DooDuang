@@ -6,7 +6,7 @@ export const APP_BRAND_MARK = "แม่มั่งมี";
 export const APP_TAGLINE = "แม่ช่วยดู คุณเลือกทาง";
 export const APP_PURPOSE =
   "แม่มั่งมีชวนคุณดูดวงเพื่อทบทวนเรื่องงาน เงิน ความรัก และการดูแลตัวเอง ค่อย ๆ อ่านให้เห็นทั้งจุดที่ไปต่อได้และเรื่องที่ควรระวัง แล้วเลือกคำแนะนำที่เข้ากับชีวิตจริงของคุณ เรื่องสำคัญ แม่อยากให้คุณดูข้อมูลรอบตัวให้ครบก่อนตัดสินใจด้วยนะ";
-export const FORTUNE_UNLOCK_PRICE = 390;
+export const FORTUNE_UNLOCK_PRICE = 290;
 /** List / compare-at price shown on pay UI */
 export const FORTUNE_UNLOCK_LIST_PRICE = 1190;
 /** Premium access after one-time purchase (exact days) */
