@@ -2,6 +2,7 @@
 export const ANALYTICS_EVENT_NAMES = [
   "page_view",
   "screen_view",
+  "offer_view",
   "pay_view",
   "signup",
   "login",
@@ -18,6 +19,7 @@ export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];
 export const CLIENT_ANALYTICS_EVENT_NAMES = [
   "page_view",
   "screen_view",
+  "offer_view",
   "pay_view",
   "feature_open",
   "thanks_line_cta",
@@ -84,6 +86,7 @@ export const FUNNEL_STEPS: {
   { name: "profile_saved", label: "บันทึกโปรไฟล์" },
   { name: "feature_open", label: "เปิดฟีเจอร์" },
   { name: "feature_complete", label: "ใช้ฟีเจอร์สำเร็จ" },
+  { name: "offer_view", label: "เห็นข้อเสนอ / ราคา" },
   { name: "pay_view", label: "เปิดหน้าชำระเงิน" },
   { name: "checkout_started", label: "เริ่มชำระเงิน" },
   { name: "payment_succeeded", label: "ชำระสำเร็จ" },
@@ -186,6 +189,7 @@ export function screenLabelFromPath(pathname: string): string {
   const feature = featureFromPath(path);
   if (feature) return ANALYTICS_FEATURE_LABELS[feature];
   if (path === "/premium/pay") return "หน้าชำระเงิน";
+  if (path === "/pricing") return "หน้าราคา";
   if (path === "/premium/thanks") return "ขอบคุณหลังชำระ";
   if (path === "/login") return "เข้าสู่ระบบ";
   if (path === "/dashboard") return "บัญชี";

@@ -10,6 +10,8 @@ import {
   FORTUNE_UNLOCK_LIST_PRICE,
   FORTUNE_UNLOCK_PRICE,
 } from "@/lib/site";
+import { trackOfferView } from "@/lib/analytics/client";
+import { featureFromPath } from "@/lib/analytics/events";
 import { cn } from "@/lib/utils";
 
 type CheckoutStep = "ready" | "redirecting";
@@ -108,6 +110,7 @@ export function FortunePaymentSheet({
   const [error, setError] = useState<string | null>(null);
   const [wantsAutoPay, setWantsAutoPay] = useState(false);
   const autoPayStarted = useRef(false);
+  const offerViewTracked = useRef(false);
 
   const resolvedReturn =
     returnPath ||
@@ -135,6 +138,15 @@ export function FortunePaymentSheet({
       setLoadingSession(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!open || offerViewTracked.current) return;
+    offerViewTracked.current = true;
+    trackOfferView({
+      path: pathname,
+      feature: featureFromPath(resolvedReturn) || featureFromPath(pathname || ""),
+    });
+  }, [open, pathname, resolvedReturn]);
 
   useEffect(() => {
     if (!open) return;
