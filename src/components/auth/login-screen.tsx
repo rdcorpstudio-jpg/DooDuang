@@ -127,21 +127,13 @@ export function LoginScreen({
         <h1 className="max-w-[16rem] shrink-0 text-[1.55rem] font-semibold leading-[1.45] tracking-wide text-[#f7f4ec]">
           {forCheckout ? "เข้าสู่ระบบเพื่อชำระ" : "เก็บคำทำนายไว้กับคุณ"}
         </h1>
-        <p className="mt-3 shrink-0 text-[15px] leading-[1.7] text-[#9aa3b2]">
-          {forCheckout ? (
-            <>
-              เข้าสู่ระบบเพื่อยืนยันสิทธิ์หลังชำระ
-              <br />
-              หรือทักแชทแม่เพื่อชำระผ่านไลน์
-            </>
-          ) : (
-            <>
-              เข้าสู่ระบบเพื่อบันทึกผล
-              <br />
-              และกลับมาอ่านได้ทุกเมื่อ
-            </>
-          )}
-        </p>
+        {forCheckout ? null : (
+          <p className="mt-3 shrink-0 text-[15px] leading-[1.7] text-[#9aa3b2]">
+            เข้าสู่ระบบเพื่อบันทึกผล
+            <br />
+            และกลับมาอ่านได้ทุกเมื่อ
+          </p>
+        )}
 
         {lineErrorMessage ? (
           <p className="mt-3 text-[12px] leading-snug text-[#ff8fa3]">
