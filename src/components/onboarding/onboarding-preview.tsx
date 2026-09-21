@@ -530,7 +530,7 @@ export function OnboardingPreview() {
               strokeWidth={2.6}
             />
           </button>
-        </div>
+      </div>
       </AnimatedPage>
     </div>
   );

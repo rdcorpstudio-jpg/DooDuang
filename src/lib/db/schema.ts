@@ -6,6 +6,7 @@ import {
   boolean,
   primaryKey,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -164,9 +165,31 @@ export const analyticsEvents = pgTable(
   ]
 );
 
+/** One dream reading per logged-in user per Bangkok day. */
+export const dreamAsks = pgTable(
+  "dream_asks",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** Asia/Bangkok calendar day, YYYY-MM-DD */
+    dayKey: text("day_key").notNull(),
+    dream: text("dream").notNull(),
+    result: text("result").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("dream_asks_user_day_idx").on(table.userId, table.dayKey),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type PhoneOtp = typeof phoneOtps.$inferSelect;
 export type Reading = typeof readings.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
 export type FortuneProfile = typeof fortuneProfiles.$inferSelect;
 export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type DreamAsk = typeof dreamAsks.$inferSelect;

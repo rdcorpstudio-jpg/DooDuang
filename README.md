@@ -64,6 +64,22 @@ CREATE INDEX IF NOT EXISTS analytics_events_user_created_idx
   ON analytics_events (user_id, created_at);
 ```
 
+#### Dream reading, one ask per day (`dream_asks`)
+
+```sql
+CREATE TABLE IF NOT EXISTS dream_asks (
+  id text PRIMARY KEY,
+  user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day_key text NOT NULL,
+  dream text NOT NULL,
+  result text NOT NULL,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS dream_asks_user_day_idx
+  ON dream_asks (user_id, day_key);
+```
+
 #### Fortune profile — gender note (`gender_note`)
 
 ```sql

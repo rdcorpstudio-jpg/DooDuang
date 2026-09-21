@@ -300,7 +300,7 @@ export function CalendarDraft() {
       className="relative mx-auto min-h-full w-full max-w-[480px] text-white"
       style={{ background: "transparent" }}
     >
-      <MaePageBackground priority />
+      <MaePageBackground priority blur={18} scrollBlur={false} />
 
       <div className="relative z-[2] overflow-x-hidden pb-[7.25rem] pt-5">
         <AnimatedPage className="px-5 sm:px-6">

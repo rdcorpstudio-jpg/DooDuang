@@ -705,7 +705,7 @@ export function HomeDraft() {
                 "radial-gradient(circle, rgba(232,209,154,0.2) 0%, transparent 68%)",
             }}
           />
-          <span
+              <span
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 h-px"
             style={{
@@ -727,13 +727,13 @@ export function HomeDraft() {
                 style={{ color: "rgba(186,204,230,0.65)" }}
               >
                 {dateLabel.day} {dateLabel.month}
-              </p>
-            </div>
+          </p>
+        </div>
 
             <div className="mt-4 flex items-start gap-4">
               <div
                 className="mae-daily-date relative flex h-[4.25rem] w-[4.25rem] shrink-0 flex-col items-center justify-center rounded-[20px] text-center"
-                style={{
+          style={{
                   background:
                     "radial-gradient(ellipse 80% 70% at 50% 35%, rgba(232,209,154,0.22) 0%, rgba(12,28,52,0.55) 70%)",
                   boxShadow:
@@ -742,7 +742,7 @@ export function HomeDraft() {
               >
                 <span
                   className="w-full text-center text-[1.65rem] font-bold leading-none tabular-nums"
-                  style={{
+              style={{
                     background:
                       "linear-gradient(180deg, #fff8e4 0%, #e8d19a 55%, #b8924f 100%)",
                     WebkitBackgroundClip: "text",
@@ -752,14 +752,14 @@ export function HomeDraft() {
                   }}
                 >
                   {dateLabel.day}
-                </span>
+              </span>
                 <span
                   className="mt-1 w-full text-center text-[11.5px] font-semibold tracking-wide"
                   style={{ color: "rgba(232,209,154,0.88)" }}
                 >
                   {dateLabel.month}
-                </span>
-              </div>
+              </span>
+            </div>
 
               <p
                 className="min-w-0 flex-1 pt-1 text-[17px] font-medium leading-[1.55]"
@@ -771,7 +771,7 @@ export function HomeDraft() {
               >
                 {maeDay.dayCard.summary}
               </p>
-            </div>
+          </div>
 
             {maeDay.dayCard.cautions.length > 0 ? (
               <div
@@ -784,32 +784,32 @@ export function HomeDraft() {
                 <p
                   className="text-[13.5px] font-semibold tracking-[0.06em]"
                   style={{ color: "#ffb4b0" }}
-                >
-                  ข้อควรระวังวันนี้
-                </p>
-                <ul className="mt-2.5 space-y-2">
+            >
+              ข้อควรระวังวันนี้
+            </p>
+            <ul className="mt-2.5 space-y-2">
                   {maeDay.dayCard.cautions.map((c) => (
-                    <li
-                      key={c}
+                <li
+                  key={c}
                       className="flex items-start gap-2.5 text-[15.5px] leading-[1.5]"
                       style={{ color: "rgba(255,245,245,0.92)" }}
-                    >
-                      <span
+                >
+                  <span
                         className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full"
                         style={{
                           background: "#ff9a9a",
                           boxShadow: "0 0 8px rgba(255,154,154,0.45)",
                         }}
-                        aria-hidden
-                      />
-                      <span>{c}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                    aria-hidden
+                  />
+                  <span>{c}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
             ) : null}
 
-            <Link
+          <Link
               href="/calendar"
               className="wallpaper-dl-btn group relative mt-5 flex h-[3.6rem] w-full items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99]"
             >
@@ -832,7 +832,7 @@ export function HomeDraft() {
                 className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
                 aria-hidden
               />
-            </Link>
+          </Link>
           </div>
         </section>
 
@@ -914,7 +914,7 @@ export function HomeDraft() {
               const locked = item.premium && !premium;
               return (
                 <button
-                  key={item.id}
+                key={item.id}
                   type="button"
                   onClick={() => {
                     if (didDrag()) return;
@@ -924,47 +924,47 @@ export function HomeDraft() {
                   aria-label={
                     locked ? `${item.title} · ต้องเป็นพรีเมียม` : item.title
                   }
-                >
-                  <span
+              >
+                <span
                     className="mae-shortcut-art relative h-[6rem] w-[6rem] overflow-hidden rounded-[20px] p-[1.5px]"
-                    style={{
+                  style={{
                       background:
                         "linear-gradient(155deg, rgba(232,209,154,0.55) 0%, rgba(184,146,79,0.25) 55%, rgba(255,255,255,0.12) 100%)",
                       boxShadow: "0 12px 28px rgba(0,0,0,0.28)",
-                    }}
-                  >
-                    <span
+                  }}
+                >
+                  <span
                       className="relative block h-full w-full overflow-hidden rounded-[18px]"
                       style={{ background: "rgba(7, 11, 20, 0.95)" }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.icon}
-                        alt=""
-                        width={384}
-                        height={384}
-                        decoding="async"
-                        draggable={false}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.icon}
+                      alt=""
+                      width={384}
+                      height={384}
+                      decoding="async"
+                      draggable={false}
                         className={cn(
                           "pointer-events-none h-full w-full scale-[1.04] object-cover object-center transition-transform duration-300",
                           locked && "opacity-55",
                         )}
-                      />
+                    />
                       {locked ? (
                         <span className="pointer-events-none absolute bottom-2.5 right-2.5 z-[2] flex h-6 w-6 items-center justify-center rounded-full bg-[#051126]/92 text-[#efc36c] shadow-[0_0_0_1px_rgba(239,195,108,0.55)]">
                           <Lock className="h-3.5 w-3.5" strokeWidth={2.5} />
                         </span>
                       ) : null}
-                    </span>
                   </span>
-                  <span
+                </span>
+                <span
                     className="line-clamp-2 w-full text-center text-[15px] font-semibold leading-[1.3]"
                     style={{
                       color: locked ? "rgba(239,195,108,0.85)" : "#f5f7ff",
                     }}
-                  >
-                    {item.title}
-                  </span>
+                >
+                  {item.title}
+                </span>
                 </button>
               );
             })}
@@ -1058,7 +1058,7 @@ export function HomeDraft() {
             <div className="min-w-0">
               <p
                 className="text-[13.5px] font-semibold tracking-[0.14em]"
-                style={{ color: GOLD_SOFT }}
+                  style={{ color: GOLD_SOFT }}
               >
                 วันนี้ใส่สีไหนดี
               </p>
@@ -1123,7 +1123,7 @@ export function HomeDraft() {
                 <div className="mt-3.5 grid grid-cols-2 gap-2">
                   {supports.map((group) => (
                     <div
-                      key={group.id}
+                key={group.id}
                       className="flex items-center gap-2.5 rounded-[14px] px-2.5 py-2.5"
                       style={{
                         background: "rgba(8,14,28,0.4)",
@@ -1166,17 +1166,17 @@ export function HomeDraft() {
                     <div className="flex shrink-0 -space-x-2">
                       {forbidden.colors.map((c) => (
                         <Image
-                          key={c.name}
+                      key={c.name}
                           src={poloShirtSrcForColorName(c.name)}
                           alt={c.name}
-                          title={c.name}
+                      title={c.name}
                           width={28}
                           height={28}
                           className="h-7 w-7 rounded-full object-contain ring-1 ring-[rgba(8,14,28,0.8)]"
                           unoptimized
-                        />
-                      ))}
-                    </div>
+                    />
+                  ))}
+                </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[13.5px] font-semibold tracking-wide text-[#f0a8b0]">
                         พักไว้ก่อน
@@ -1236,7 +1236,7 @@ export function HomeDraft() {
           </div>
         </div>
 
-        {/* ฤกษ์วันนี้ — แถวตัวอักษรแบบแม่ ไม่กล่องเขียว/แดงคู่ */}
+        {/* ฤกษ์วันนี้ — ตัวอักษรล้วน ไม่กล่องสีซ้อน */}
         <section
           className="relative mx-5 mt-6 overflow-hidden rounded-[22px] px-4 py-5 sm:mx-6"
           style={{
@@ -1247,74 +1247,79 @@ export function HomeDraft() {
             WebkitBackdropFilter: GLASS.blur,
           }}
         >
-          <div className="flex items-end justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-            <Sparkles
-                className="h-4.5 w-4.5 shrink-0"
-              style={{ color: GOLD_SOFT }}
-              strokeWidth={2.2}
-              aria-hidden
-            />
-              <h2 className="mae-gold-text text-[21px] font-bold">ฤกษ์วันนี้</h2>
-          </div>
+          <div className="min-w-0">
             <p
-              className="shrink-0 text-[15.5px] font-semibold"
+              className="text-[13.5px] font-semibold tracking-[0.14em]"
               style={{ color: GOLD_SOFT }}
             >
-              ธาตุ · {maeDay.auspiciousToday.elementLine.replace(/^ธาตุประจำตัวของคุณ · /, "")}
+              ธาตุ ·{" "}
+              {maeDay.auspiciousToday.elementLine.replace(
+                /^ธาตุประจำตัวของคุณ · /,
+                "",
+              )}
             </p>
+            <h2 className="mae-gold-text mt-1 text-[1.55rem] font-bold leading-tight">
+              ฤกษ์วันนี้
+            </h2>
           </div>
+
+          <p className="mt-4 text-[1.2rem] font-bold leading-snug text-white">
+            {maeDay.auspiciousToday.dayName}
+          </p>
+          <p
+            className="mt-1.5 text-[16px] font-medium leading-[1.55]"
+            style={{ color: TEXT_MUTED }}
+          >
+            {maeDay.auspiciousToday.dayHint}
+          </p>
+
+          <div
+            className="mt-4 h-px w-full"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(232,209,154,0.35), rgba(255,255,255,0.06))",
+            }}
+          />
 
           <div className="mt-3.5">
-            <p className="text-[20px] font-bold leading-tight text-[#f5f7ff]">
-              {maeDay.auspiciousToday.dayName}
-            </p>
             <p
-              className="mt-2 text-[15.5px] leading-[1.55]"
-              style={{ color: "#f5f7ff" }}
+              className="text-[14.5px] font-semibold"
+              style={{ color: "#b9ebdc" }}
             >
-              {maeDay.auspiciousToday.dayHint}
+              {maeDay.auspiciousToday.goodWindow.label}
+              <span className="font-medium text-[#b9ebdc]/75">
+                {" "}
+                · {maeDay.auspiciousToday.goodWindow.status}
+              </span>
+            </p>
+            <p className="mt-1 text-[1.65rem] font-bold tabular-nums leading-none tracking-tight text-white">
+              {goodWin.start}
+              <span className="mx-1.5 text-[1.1rem] font-medium text-white/45">
+                –
+              </span>
+              {goodWin.end}
             </p>
           </div>
 
-          <ul className="mt-3.5 space-y-0">
-            <li className="flex items-baseline justify-between gap-3 py-3">
-              <div className="min-w-0">
-                <p className="text-[15.5px] font-medium" style={{ color: TEXT_MUTED }}>
-                  {maeDay.auspiciousToday.goodWindow.label}
-                </p>
-                <p className="mt-1 text-[18px] font-bold tabular-nums leading-none text-[#f5f7ff]">
-                  {goodWin.start}
-                  <span className="mx-1 text-[15.5px] font-medium text-[#f5f7ff]/70">–</span>
-                  {goodWin.end}
-              </p>
-            </div>
-              <span
-                className="shrink-0 text-[15.5px] font-semibold"
-                style={{ color: "#b9ebdc" }}
-              >
-                {maeDay.auspiciousToday.goodWindow.status}
+          <div className="mt-4">
+            <p
+              className="text-[14.5px] font-semibold"
+              style={{ color: "#f0a8b0" }}
+            >
+              {maeDay.auspiciousToday.avoidWindow.label}
+              <span className="font-medium text-[#f0a8b0]/75">
+                {" "}
+                · {maeDay.auspiciousToday.avoidWindow.status}
               </span>
-            </li>
-            <li className="flex items-baseline justify-between gap-3 border-t border-dashed border-white/10 py-3">
-              <div className="min-w-0">
-                <p className="text-[15.5px] font-medium" style={{ color: TEXT_MUTED }}>
-                  {maeDay.auspiciousToday.avoidWindow.label}
-                </p>
-                <p className="mt-1 text-[18px] font-bold tabular-nums leading-none text-[#f5f7ff]">
-                  {avoidWin.start}
-                  <span className="mx-1 text-[15.5px] font-medium text-[#f5f7ff]/70">–</span>
-                  {avoidWin.end}
-              </p>
-            </div>
-              <span
-                className="shrink-0 text-[15.5px] font-semibold"
-                style={{ color: "#ffaaa5" }}
-              >
-                {maeDay.auspiciousToday.avoidWindow.status}
+            </p>
+            <p className="mt-1 text-[1.65rem] font-bold tabular-nums leading-none tracking-tight text-white">
+              {avoidWin.start}
+              <span className="mx-1.5 text-[1.1rem] font-medium text-white/45">
+                –
               </span>
-            </li>
-          </ul>
+              {avoidWin.end}
+            </p>
+          </div>
         </section>
 
       </AnimatedPage>
