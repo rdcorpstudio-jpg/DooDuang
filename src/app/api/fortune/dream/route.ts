@@ -7,6 +7,7 @@ import {
   bangkokDayKey,
   generateDreamReading,
   parseDreamReading,
+  repairDreamNumbers,
   type DreamReading,
 } from "@/lib/fortune/dream-reading";
 
@@ -54,7 +55,7 @@ export async function GET() {
     }
     return NextResponse.json({
       user: true,
-      ...payload(row.dream, reading, true),
+      ...payload(row.dream, repairDreamNumbers(row.dream, reading), true),
     });
   } catch (err) {
     console.error("dream GET failed:", err);
@@ -108,11 +109,13 @@ export async function POST(request: Request) {
     if (row) {
       const reading = parseDreamReading(row.result);
       if (reading) {
-        return NextResponse.json(payload(row.dream, reading, true));
+        return NextResponse.json(
+          payload(row.dream, repairDreamNumbers(row.dream, reading, dayKey), true),
+        );
       }
     }
 
-    const reading = await generateDreamReading(dream);
+    const reading = await generateDreamReading(dream, dayKey);
     if (!reading) {
       return NextResponse.json(
         { error: "แม่เปิดตำราไม่สำเร็จ ลองอีกครั้ง" },
@@ -137,7 +140,13 @@ export async function POST(request: Request) {
       const again = await todayRow(session.user.id);
       const saved = again.row ? parseDreamReading(again.row.result) : null;
       if (again.row && saved) {
-        return NextResponse.json(payload(again.row.dream, saved, true));
+        return NextResponse.json(
+          payload(
+            again.row.dream,
+            repairDreamNumbers(again.row.dream, saved, dayKey),
+            true,
+          ),
+        );
       }
     }
 
