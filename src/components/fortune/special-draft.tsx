@@ -8,6 +8,7 @@ import {
   ChevronRight,
   MessageCircle,
   Moon,
+  Smartphone,
   Sparkles,
   Star,
 } from "lucide-react";
@@ -21,8 +22,6 @@ import { readFortuneProfile } from "@/lib/fortune/profile-storage";
 const GOLD = "#e8d19a";
 const GOLD_SOFT = "#efc36c";
 const TEXT_MUTED = "rgba(230, 236, 248, 0.88)";
-const GOLD_RING =
-  "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)";
 
 const TITLE_GOLD = {
   background:
@@ -41,6 +40,9 @@ type ComingSoonItem = {
   Icon: LucideIcon;
   href?: string;
   status?: string;
+  cta?: string;
+  /** Pill on card; omit to hide */
+  badge?: string;
 };
 
 const NEW_ITEMS: ComingSoonItem[] = [
@@ -51,6 +53,17 @@ const NEW_ITEMS: ComingSoonItem[] = [
     art: "/images/special/coming-soon/03-dream-reading.webp?v=2",
     Icon: Moon,
     href: "/special/dream",
+    cta: "เปิดตำราฝัน",
+    badge: "วันละ 1 ครั้ง",
+  },
+  {
+    id: "phone",
+    title: "วิเคราะห์เบอร์",
+    blurb: "ใส่เบอร์มือถือ แม่วิเคราะห์พลังเลขให้",
+    art: "/images/special/coming-soon/05-phone-reading.jpg",
+    Icon: Smartphone,
+    href: "/special/phone",
+    cta: "เปิดตำราเบอร์",
   },
 ];
 
@@ -121,13 +134,13 @@ function ComingSoonCard({ item }: { item: ComingSoonItem }) {
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-[22px]"
+      className="relative w-full overflow-hidden rounded-[16px]"
       style={{
-        aspectRatio: "2.2 / 1",
+        aspectRatio: "2.75 / 1",
         background:
           "linear-gradient(118deg, #152038 0%, #0c1528 48%, #08101e 100%)",
         boxShadow:
-          "inset 0 0 0 1px rgba(255,255,255,0.1), 0 12px 28px rgba(0,0,0,0.28)",
+          "inset 0 0 0 1px rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.24)",
       }}
       aria-label={`${item.title} · เร็วๆ นี้`}
     >
@@ -195,11 +208,11 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
   return (
     <Link
       href={item.href}
-      className="group relative block w-full overflow-hidden rounded-[18px] text-left outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+      className="group relative block w-full overflow-hidden rounded-[16px] text-left outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
       style={{
-        aspectRatio: "2.35 / 1",
+        aspectRatio: "2.75 / 1",
         boxShadow:
-          "inset 0 0 0 1px rgba(255,255,255,0.14), 0 10px 24px rgba(0,0,0,0.26)",
+          "inset 0 0 0 1px rgba(255,255,255,0.14), 0 8px 20px rgba(0,0,0,0.24)",
       }}
       aria-label={item.title}
     >
@@ -220,22 +233,24 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
         }}
       />
 
-      <span
-        className="absolute right-3 top-3 z-[2] inline-flex items-center rounded-full px-2.5 text-[15px] font-semibold leading-[1.45]"
-        style={{
-          color: GOLD,
-          background: "rgba(8,12,24,0.72)",
-          boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.45)",
-          paddingTop: "0.32em",
-          paddingBottom: "0.26em",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-        }}
-      >
-        วันละ 1 ครั้ง
-      </span>
+      {item.badge ? (
+        <span
+          className="absolute right-2.5 top-2.5 z-[2] inline-flex items-center rounded-full px-2.5 text-[15px] font-semibold leading-[1.4]"
+          style={{
+            color: GOLD,
+            background: "rgba(8,12,24,0.72)",
+            boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.45)",
+            paddingTop: "0.28em",
+            paddingBottom: "0.22em",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+          }}
+        >
+          {item.badge}
+        </span>
+      ) : null}
 
-      <div className="relative z-[1] flex h-full flex-col justify-center gap-1.5 px-4 py-3.5 pr-[4.5rem]">
+      <div className="relative z-[1] flex h-full flex-col justify-center gap-1 px-3.5 py-3 pr-3.5">
         <p
           className="text-[15px] font-semibold tracking-[0.12em]"
           style={{ color: GOLD }}
@@ -243,32 +258,27 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
           ตำราแม่มั่งมี
         </p>
         <p
-          className="max-w-[16.5rem] text-[1.35rem] font-bold leading-[1.3]"
+          className="max-w-[15.5rem] text-[1.2rem] font-bold leading-[1.25]"
           style={{
             ...TITLE_GOLD,
-            paddingTop: "0.08em",
-            paddingBottom: "0.04em",
+            paddingTop: "0.06em",
+            paddingBottom: "0.03em",
           }}
         >
           {item.title}
         </p>
         <p
-          className="max-w-[16.5rem] text-[15px] font-medium leading-[1.45] line-clamp-2"
+          className="max-w-[15.5rem] text-[15px] font-medium leading-[1.4] line-clamp-2"
           style={{ color: "rgba(245,247,255,0.92)" }}
         >
           {item.blurb}
         </p>
-        <div className="mt-1">
+        <div className="mt-0.5">
           <span
-            className="inline-flex w-fit items-center gap-0.5 rounded-full px-3.5 py-[0.45em] text-[15px] font-bold leading-none"
-            style={{
-              color: "#1a1408",
-              background: GOLD_RING,
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.35), 0 6px 14px rgba(0,0,0,0.25)",
-            }}
+            className="inline-flex w-fit items-center gap-0.5 text-[15px] font-semibold leading-none"
+            style={{ color: GOLD_SOFT }}
           >
-            เปิดตำราฝัน
+            {item.cta ?? "แตะเพื่อเปิด"}
             <ChevronRight className="h-4 w-4" strokeWidth={2.6} />
           </span>
         </div>

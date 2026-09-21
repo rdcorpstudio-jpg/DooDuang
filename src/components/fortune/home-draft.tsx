@@ -39,6 +39,7 @@ import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE, LINE_OA_ADD_URL } from "@/
 import { cn } from "@/lib/utils";
 import { poloShirtSrcForColorName } from "@/lib/fortune/polo-shirt-asset";
 import { MAE_GLASS } from "@/lib/mae-glass";
+import { HomeDailyTarotCard } from "@/components/fortune/home-daily-tarot-card";
 
 /** สวัสดีตามช่วงเวลา — เช้า / บ่าย / เย็น */
 function greetingByHour(hour: number) {
@@ -1321,6 +1322,10 @@ export function HomeDraft() {
             </p>
           </div>
         </section>
+
+        <div className="mx-5 mt-5 sm:mx-6">
+          <HomeDailyTarotCard />
+        </div>
 
       </AnimatedPage>
 

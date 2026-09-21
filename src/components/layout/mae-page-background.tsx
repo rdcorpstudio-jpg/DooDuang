@@ -21,8 +21,8 @@ function findScrollParent(el: HTMLElement | null): HTMLElement | null {
 
 /**
  * `sticky` — stays put while page content scrolls (draft pages).
- * `fill` — absolute cover of parent (phone-frame starfield shell).
- * Natural width scale (no object-cover zoom).
+ * `fill` — absolute cover of parent (loading / phone-frame); image object-cover.
+ * Sticky keeps natural width scale (no object-cover zoom).
  * Sticky mode can blur on scroll; `blur` sets a constant plate blur.
  */
 export function MaePageBackground({
@@ -95,24 +95,45 @@ export function MaePageBackground({
       }}
     >
       <div
-        className="absolute inset-x-0 top-0 w-full origin-top will-change-[filter,transform]"
+        className={cn(
+          "origin-top will-change-[filter,transform]",
+          mode === "fill"
+            ? "absolute inset-0"
+            : "absolute inset-x-0 top-0 w-full",
+        )}
         style={{
           filter: blurPx > 0.05 ? `blur(${blurPx}px)` : undefined,
-          transform: blurPx > 0.05 ? `scale(${1 + blurPx * 0.012})` : undefined,
+          transform:
+            blurPx > 0.05
+              ? `scale(${1 + blurPx * 0.012})`
+              : undefined,
           transition: "filter 60ms linear, transform 60ms linear",
         }}
       >
-        <Image
-          src={MAE_PAGE_BG_SRC}
-          alt=""
-          width={941}
-          height={1672}
-          priority={priority}
-          unoptimized
-          sizes="(max-width: 480px) 100vw, 480px"
-          className="h-auto w-full max-w-none select-none"
-          draggable={false}
-        />
+        {mode === "fill" ? (
+          <Image
+            src={MAE_PAGE_BG_SRC}
+            alt=""
+            fill
+            priority={priority}
+            unoptimized
+            sizes="(max-width: 480px) 100vw, 480px"
+            className="select-none object-cover object-[center_18%]"
+            draggable={false}
+          />
+        ) : (
+          <Image
+            src={MAE_PAGE_BG_SRC}
+            alt=""
+            width={941}
+            height={1672}
+            priority={priority}
+            unoptimized
+            sizes="(max-width: 480px) 100vw, 480px"
+            className="h-auto w-full max-w-none select-none"
+            draggable={false}
+          />
+        )}
       </div>
       <div
         className="absolute inset-0"

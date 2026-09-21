@@ -80,6 +80,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS dream_asks_user_day_idx
   ON dream_asks (user_id, day_key);
 ```
 
+#### Phone reading, one ask per day (`phone_asks`)
+
+```sql
+CREATE TABLE IF NOT EXISTS phone_asks (
+  id text PRIMARY KEY,
+  user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day_key text NOT NULL,
+  phone text NOT NULL,
+  result text NOT NULL,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS phone_asks_user_day_idx
+  ON phone_asks (user_id, day_key);
+```
+
 #### Fortune profile — gender note (`gender_note`)
 
 ```sql

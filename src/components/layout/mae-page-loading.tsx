@@ -1,6 +1,7 @@
 "use client";
 
 import { MaePageBackground } from "@/components/layout/mae-page-background";
+import { APP_PAGE_BG } from "@/components/layout/bottom-nav";
 import { MAE_GLASS } from "@/lib/mae-glass";
 import { cn } from "@/lib/utils";
 
@@ -31,9 +32,12 @@ export function MaePageLoading({
     <div
       className={cn(
         "mae-page-loading relative flex flex-col items-center justify-center overflow-hidden px-6",
-        fill ? "h-full min-h-full w-full" : "min-h-[14rem] w-full py-10",
+        fill
+          ? "h-full min-h-[100dvh] w-full"
+          : "min-h-[14rem] w-full py-10",
         className,
       )}
+      style={fill ? { background: APP_PAGE_BG } : undefined}
       role="status"
       aria-live="polite"
       aria-busy="true"

@@ -186,6 +186,27 @@ export const dreamAsks = pgTable(
   ],
 );
 
+/** One phone-number reading per logged-in user per Bangkok day. */
+export const phoneAsks = pgTable(
+  "phone_asks",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** Asia/Bangkok calendar day, YYYY-MM-DD */
+    dayKey: text("day_key").notNull(),
+    phone: text("phone").notNull(),
+    result: text("result").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("phone_asks_user_day_idx").on(table.userId, table.dayKey),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type PhoneOtp = typeof phoneOtps.$inferSelect;
 export type Reading = typeof readings.$inferSelect;
@@ -193,3 +214,4 @@ export type Payment = typeof payments.$inferSelect;
 export type FortuneProfile = typeof fortuneProfiles.$inferSelect;
 export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
 export type DreamAsk = typeof dreamAsks.$inferSelect;
+export type PhoneAsk = typeof phoneAsks.$inferSelect;

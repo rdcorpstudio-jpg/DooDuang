@@ -23,6 +23,7 @@ import {
 } from "@/lib/fortune/tarot-deck";
 import {
   bangkokTodayKey,
+  TAROT_FAN_COUNT,
   tarotDayStorageKey,
 } from "@/lib/fortune/tarot-day-storage";
 import { MaeBrandLink } from "@/components/layout/mae-brand-link";
@@ -32,7 +33,7 @@ import { AnimatedPage } from "@/components/ui/reveal";
 import { APP_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-const FAN_COUNT = 13;
+const FAN_COUNT = TAROT_FAN_COUNT;
 const CARD_SIZES = "(max-width: 480px) 52vw, 240px";
 const FAN_CARD_SIZES = "220px";
 const FAN_CARD_W = 142;
