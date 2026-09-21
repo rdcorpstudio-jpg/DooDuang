@@ -222,21 +222,27 @@ export function FortunePhonePage() {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[22rem] overflow-hidden"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[36rem] overflow-hidden"
+        style={{
+          WebkitMaskImage:
+            "linear-gradient(180deg, #000 0%, #000 42%, rgba(0,0,0,0.55) 68%, transparent 100%)",
+          maskImage:
+            "linear-gradient(180deg, #000 0%, #000 42%, rgba(0,0,0,0.55) 68%, transparent 100%)",
+        }}
       >
         <Image
           src={PHONE_ART}
           alt=""
           fill
           unoptimized
-          className="object-cover object-[center_30%] opacity-[0.34]"
+          className="object-cover object-[center_28%] opacity-[0.38]"
           sizes="480px"
         />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(6,20,42,0.35) 0%, rgba(6,20,42,0.72) 55%, #06142a 100%)",
+              "linear-gradient(180deg, rgba(6,20,42,0.2) 0%, rgba(6,20,42,0.45) 50%, rgba(6,20,42,0.7) 100%)",
           }}
         />
       </div>
