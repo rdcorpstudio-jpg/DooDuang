@@ -154,7 +154,7 @@ export function BaziCycleCard({ chart }: Props) {
             {busy ? "แม่กำลังอ่านดวงจร…" : "ให้แม่สรุปช่วงนี้"}
           </button>
           <p className="mt-2.5 text-[13px]" style={{ color: TEXT_MUTED }}>
-            วิเคราะห์ด้วย AI · บัญชีละ 1 ครั้ง
+            บัญชีละ 1 ครั้ง
           </p>
         </div>
       ) : null}
