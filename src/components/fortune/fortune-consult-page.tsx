@@ -151,9 +151,13 @@ export function FortuneConsultPage() {
   }, [loaded?.session?.messages.length, busy]);
 
   const session = loaded?.session ?? null;
+  const dbBlocked =
+    Boolean(error) &&
+    (error.includes("ฐานข้อมูล") || error.includes("consult_sessions"));
   const outOfSessions =
     Boolean(loaded?.signedIn) &&
     !session &&
+    !dbBlocked &&
     (loaded?.remainingSessions ?? 0) <= 0;
   const leftMs = useBangkokMidnightCountdown(outOfSessions);
   const canReset = outOfSessions && leftMs <= 0;
@@ -204,7 +208,8 @@ export function FortuneConsultPage() {
           profile: readFortuneProfile(),
         }),
       });
-      const data = (await res.json()) as {
+      const raw = await res.text();
+      let data: {
         error?: string;
         code?: string;
         premium?: boolean;
@@ -212,7 +217,13 @@ export function FortuneConsultPage() {
         used?: number;
         remainingSessions?: number;
         session?: SessionView | null;
-      };
+      } = {};
+      try {
+        data = raw ? (JSON.parse(raw) as typeof data) : {};
+      } catch {
+        setError("เชื่อมต่อไม่ได้ ลองอีกครั้ง");
+        return;
+      }
       if (res.status === 401 || data.code === "UNAUTHENTICATED") {
         window.location.href = "/login?callbackUrl=/special/consult";
         return;

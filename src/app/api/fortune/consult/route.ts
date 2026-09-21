@@ -28,8 +28,12 @@ async function resolveProfile(
   userId: string,
   rawProfile: unknown,
 ): Promise<FortuneProfilePayload | null> {
-  const row = await getFortuneProfileForUser(userId);
-  if (row) return rowToFortuneProfilePayload(row);
+  try {
+    const row = await getFortuneProfileForUser(userId);
+    if (row) return rowToFortuneProfilePayload(row);
+  } catch (err) {
+    console.error("consult profile lookup failed:", err);
+  }
   return normalizeFortuneProfileInput(
     rawProfile as Partial<FortuneProfilePayload> | null,
   );
@@ -37,6 +41,23 @@ async function resolveProfile(
 
 function dailyLimit() {
   return CONSULT_DAILY_SESSIONS;
+}
+
+function dbErrorPayload(err: unknown) {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (/consult_sessions/i.test(msg) && /does not exist|undefined_table/i.test(msg)) {
+    return {
+      error: "ยังไม่ได้สร้างตาราง consult_sessions ในฐานข้อมูล",
+      code: "NO_TABLE" as const,
+    };
+  }
+  if (/getaddrinfo|ENOTFOUND|ECONNREFUSED|connect/i.test(msg)) {
+    return {
+      error: "เชื่อมต่อฐานข้อมูลไม่ได้",
+      code: "DB_CONNECT" as const,
+    };
+  }
+  return { error: "เกิดข้อผิดพลาด", code: "SERVER" as const };
 }
 
 async function daySessions(userId: string, dayKey: string) {
@@ -91,9 +112,15 @@ export async function GET() {
     });
   } catch (err) {
     console.error("consult GET failed:", err);
+    const detail = dbErrorPayload(err);
     return NextResponse.json({
       user: true,
-      error: "เปิดห้องคุยไม่สำเร็จ ลองรีเฟรชอีกครั้ง",
+      limit: dailyLimit(),
+      used: 0,
+      remainingSessions: 0,
+      activeSession: null,
+      ...detail,
+      error: detail.error || "เปิดห้องคุยไม่สำเร็จ ลองรีเฟรชอีกครั้ง",
     });
   }
 }
@@ -104,13 +131,6 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "ต้องเข้าสู่ระบบก่อน", code: "UNAUTHENTICATED" },
       { status: 401 },
-    );
-  }
-
-  if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json(
-      { error: "ยังเปิดปรึกษาแม่ไม่ได้", code: "NO_API_KEY" },
-      { status: 503 },
     );
   }
 
@@ -133,16 +153,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "คำขอไม่ถูกต้อง" }, { status: 400 });
   }
 
+  // Greeting-only start does not need OpenAI; messages do.
+  if (action === "message" && !process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: "ยังเปิดปรึกษาแม่ไม่ได้", code: "NO_API_KEY" },
+      { status: 503 },
+    );
+  }
+
   const premium = hasPremiumAccess({
     status: session.user.subscriptionStatus,
     until: session.user.premiumUntil,
   });
   const limit = dailyLimit();
   const dayKey = bangkokDayKey();
-  const db = requireDb();
-  const profile = await resolveProfile(session.user.id, rawProfile);
 
   try {
+    const db = requireDb();
+
     if (action === "start") {
       // Drop older days — consult quota resets every Bangkok day
       await db
@@ -193,13 +221,20 @@ export async function POST(request: Request) {
         })
         .returning();
 
+      if (!created) {
+        return NextResponse.json(
+          { error: "เปิดห้องคุยไม่สำเร็จ", code: "INSERT_FAILED" },
+          { status: 500 },
+        );
+      }
+
       const all = await daySessions(session.user.id, dayKey);
       return NextResponse.json({
         premium,
         limit,
         used: all.length,
         remainingSessions: Math.max(0, limit - all.length),
-        session: created ? sessionPayload(created) : null,
+        session: sessionPayload(created),
       });
     }
 
@@ -219,6 +254,8 @@ export async function POST(request: Request) {
           { status: 400 },
         );
       }
+
+      const profile = await resolveProfile(session.user.id, rawProfile);
 
       const [row] = await db
         .select()
@@ -283,6 +320,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "คำขอไม่ถูกต้อง" }, { status: 400 });
   } catch (err) {
     console.error("consult POST failed:", err);
-    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+    const detail = dbErrorPayload(err);
+    return NextResponse.json(detail, { status: 500 });
   }
 }
