@@ -277,7 +277,7 @@ export async function POST(request: Request) {
       if (row.userTurns >= CONSULT_MAX_USER_TURNS) {
         return NextResponse.json(
           {
-            error: "รอบนี้คุยครบแล้ว เปิดรอบใหม่ได้ถ้ายังมีโควต้า",
+            error: "คำถามนี้ตอบแล้ว เปิดคำถามใหม่ได้ถ้ายังมีโควต้า",
             code: "SESSION_FULL",
             session: sessionPayload(row),
           },

@@ -102,7 +102,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS phone_asks_user_day_idx
 
 #### Consult Mae chat sessions (`consult_sessions`)
 
-Quota: **3** questions (sessions) per Bangkok day (`day_key`). Each session allows up to **8** user messages. Older days are deleted when starting a new day.
+Quota: **3** questions per Bangkok day (`day_key`). Each question is one user message + Mae reply. Older days are deleted when starting a new day.
 
 ```sql
 CREATE TABLE IF NOT EXISTS consult_sessions (

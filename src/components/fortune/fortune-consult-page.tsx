@@ -12,7 +12,6 @@ import {
   bangkokDayKey,
   CONSULT_DAILY_SESSIONS,
   CONSULT_MAX_INPUT,
-  CONSULT_MAX_USER_TURNS,
   type ConsultMessage,
 } from "@/lib/fortune/consult-reading";
 import { readFortuneProfile } from "@/lib/fortune/profile-storage";
@@ -457,14 +456,6 @@ export function FortuneConsultPage() {
                   >
                     วันนี้ใช้แล้ว {loaded.used}/{loaded.limit} คำถาม
                   </p>
-                  {session ? (
-                    <p
-                      className="text-[15px] font-semibold tabular-nums"
-                      style={{ color: GOLD_SOFT }}
-                    >
-                      ข้อความ {session.userTurns}/{CONSULT_MAX_USER_TURNS}
-                    </p>
-                  ) : null}
                 </div>
               </div>
             </Reveal>
@@ -618,7 +609,7 @@ export function FortuneConsultPage() {
                         className="text-[15px] font-medium"
                         style={{ color: MUTED }}
                       >
-                        รอบนี้คุยครบแล้ว
+                        รอบนี้ถามครบแล้ว
                       </p>
                       {loaded.remainingSessions > 0 ? (
                         <button

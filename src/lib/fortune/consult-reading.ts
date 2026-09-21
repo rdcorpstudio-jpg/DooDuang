@@ -5,9 +5,9 @@ import type { FortuneProfilePayload } from "./fortune-profile-db";
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const TIMEOUT_MS = 18_000;
 
-/** Daily consult sessions (Bangkok day) — same for everyone */
+/** Daily consult questions (Bangkok day) — one user turn = one question */
 export const CONSULT_DAILY_SESSIONS = 3;
-export const CONSULT_MAX_USER_TURNS = 8;
+export const CONSULT_MAX_USER_TURNS = 1;
 export const CONSULT_MAX_INPUT = 280;
 
 export { bangkokDayKey };
