@@ -40,8 +40,15 @@ const FAN_CARD_W = 142;
 const FAN_CARD_H = 244;
 const GOLD_SOFT = "#e8d19a";
 const TEXT_MUTED = "rgba(186, 204, 230, 0.78)";
-const GOLD_RING =
-  "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)";
+/** Outer bevel — bright edge + deep bronze */
+const GOLD_RING_OUTER =
+  "linear-gradient(145deg, #fff6d4 0%, #f0d78a 18%, #c9a24a 42%, #8a6a2e 68%, #5c451c 88%, #3d2e12 100%)";
+/** Mid channel — darker metallic inset */
+const GOLD_RING_MID =
+  "linear-gradient(145deg, #6b5224 0%, #a07a38 35%, #d4b56a 55%, #7a5c28 100%)";
+/** Inner hairline highlight */
+const GOLD_RING_INNER =
+  "linear-gradient(145deg, #fff8e0 0%, #e8d19a 40%, #b8924f 100%)";
 
 function DailyHeader({
   cardName,
@@ -106,7 +113,7 @@ function CardFace({
 }) {
   return (
     <div
-      className={cn("relative h-full w-full overflow-hidden rounded-[10px]", className)}
+      className={cn("relative h-full w-full overflow-hidden rounded-[1px]", className)}
       style={{ background: "#0b1220" }}
     >
       <Image
@@ -144,24 +151,43 @@ function GoldFrame({
   children: ReactNode;
   className?: string;
   glow?: boolean;
-  /** ขอบบาง — ไพ่มีกรอบทองในภาพอยู่แล้ว */
+  /** ขอบบาง — หลังไพ่ในพัด */
   thin?: boolean;
 }) {
+  const outerPad = thin ? 2 : 3;
+  const midPad = thin ? 1 : 1.5;
+  const innerPad = thin ? 0.5 : 1;
+
   return (
     <div
-      className={cn(
-        "relative overflow-hidden rounded-[12px]",
-        thin ? "p-[1px]" : "p-[2px]",
-        className,
-      )}
+      className={cn("relative overflow-hidden rounded-[3px]", className)}
       style={{
-        background: GOLD_RING,
+        padding: outerPad,
+        background: GOLD_RING_OUTER,
         boxShadow: glow
-          ? "0 0 28px rgba(213,177,111,0.4), 0 14px 28px rgba(0,0,0,0.45)"
-          : "0 10px 22px rgba(0,0,0,0.35)",
+          ? "0 0 20px rgba(213,177,111,0.32), 0 12px 26px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.35)"
+          : "0 10px 22px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.28)",
       }}
     >
-      {children}
+      <div
+        className="h-full w-full overflow-hidden rounded-[2px]"
+        style={{
+          padding: midPad,
+          background: GOLD_RING_MID,
+          boxShadow: "inset 0 0 0 1px rgba(40,28,10,0.45)",
+        }}
+      >
+        <div
+          className="h-full w-full overflow-hidden rounded-[1px]"
+          style={{
+            padding: innerPad,
+            background: GOLD_RING_INNER,
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.55)",
+          }}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
@@ -242,7 +268,7 @@ function TarotCardFan({
                   alt=""
                   flush
                   sizes={FAN_CARD_SIZES}
-                  className="rounded-[11px]"
+                  className="rounded-[2px]"
                 />
               {i === selected ? (
                   <span
@@ -324,7 +350,7 @@ function FlipRevealCard({
     <div
       className="tarot-flip-scene relative mx-auto"
       style={{
-        width: large ? "min(68vw, 248px)" : "min(48vw, 176px)",
+        width: large ? "min(48vw, 168px)" : "min(42vw, 148px)",
         aspectRatio: "840 / 1455",
       }}
     >
@@ -336,12 +362,12 @@ function FlipRevealCard({
         )}
       >
         <div className="tarot-flip-face tarot-flip-back">
-          <GoldFrame glow thin className="h-full w-full">
+          <GoldFrame glow className="h-full w-full">
             <CardFace src="/images/tarot/card-back.webp?v=4" alt="หลังไพ่" flush />
           </GoldFrame>
         </div>
         <div className="tarot-flip-face tarot-flip-front">
-          <GoldFrame glow thin className="h-full w-full">
+          <GoldFrame glow className="h-full w-full">
             <CardFace src={faceSrc} alt={faceAlt} upright={upright} />
           </GoldFrame>
           <span className="tarot-flip-glow pointer-events-none absolute inset-0" aria-hidden />

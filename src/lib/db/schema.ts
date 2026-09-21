@@ -207,6 +207,29 @@ export const phoneAsks = pgTable(
   ],
 );
 
+/** Mae consult chat — one row per session (quota counted by dayKey) */
+export const consultSessions = pgTable(
+  "consult_sessions",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** Asia/Bangkok calendar day, YYYY-MM-DD */
+    dayKey: text("day_key").notNull(),
+    /** JSON: [{ role: "user"|"assistant", content: string }] */
+    messages: text("messages").notNull().default("[]"),
+    userTurns: integer("user_turns").notNull().default(0),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("consult_sessions_user_day_idx").on(table.userId, table.dayKey),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type PhoneOtp = typeof phoneOtps.$inferSelect;
 export type Reading = typeof readings.$inferSelect;
@@ -215,3 +238,4 @@ export type FortuneProfile = typeof fortuneProfiles.$inferSelect;
 export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
 export type DreamAsk = typeof dreamAsks.$inferSelect;
 export type PhoneAsk = typeof phoneAsks.$inferSelect;
+export type ConsultSession = typeof consultSessions.$inferSelect;

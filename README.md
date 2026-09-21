@@ -66,6 +66,8 @@ CREATE INDEX IF NOT EXISTS analytics_events_user_created_idx
 
 #### Dream reading, one ask per day (`dream_asks`)
 
+Only the **latest** ask is kept — previous days are deleted when a new ask is saved.
+
 ```sql
 CREATE TABLE IF NOT EXISTS dream_asks (
   id text PRIMARY KEY,
@@ -80,7 +82,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS dream_asks_user_day_idx
   ON dream_asks (user_id, day_key);
 ```
 
-#### Phone reading, one ask per day (`phone_asks`)
+#### Phone reading, one ask per Bangkok week (`phone_asks`)
+
+`day_key` stores the **Monday** date (`YYYY-MM-DD`) of that week. Only the **latest** ask is kept — previous weeks are deleted when a new ask is saved.
 
 ```sql
 CREATE TABLE IF NOT EXISTS phone_asks (
@@ -94,6 +98,25 @@ CREATE TABLE IF NOT EXISTS phone_asks (
 
 CREATE UNIQUE INDEX IF NOT EXISTS phone_asks_user_day_idx
   ON phone_asks (user_id, day_key);
+```
+
+#### Consult Mae chat sessions (`consult_sessions`)
+
+Quota: **3** questions (sessions) per Bangkok day (`day_key`). Each session allows up to **8** user messages. Older days are deleted when starting a new day.
+
+```sql
+CREATE TABLE IF NOT EXISTS consult_sessions (
+  id text PRIMARY KEY,
+  user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day_key text NOT NULL,
+  messages text NOT NULL DEFAULT '[]',
+  user_turns integer NOT NULL DEFAULT 0,
+  created_at timestamp NOT NULL DEFAULT now(),
+  updated_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS consult_sessions_user_day_idx
+  ON consult_sessions (user_id, day_key);
 ```
 
 #### Fortune profile — gender note (`gender_note`)

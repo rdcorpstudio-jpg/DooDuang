@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 import { APP_NAME } from "@/lib/site";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { PageHero } from "@/components/ui/page-hero";
@@ -34,14 +34,26 @@ export default function ReviewsPage() {
 
       <Link
         href="/welcome"
-        className="mae-gold-cta group relative mx-auto mt-8 flex h-12 w-full max-w-[280px] items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98]"
+        className="wallpaper-dl-btn group relative mx-auto mt-8 flex h-[3.55rem] w-full max-w-[300px] items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
       >
-        <span className="text-[15px] font-semibold tracking-wide">
-          เลือกเรื่องที่อยากรู้
+        <span className="wallpaper-dl-btn__icon relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]">
+          <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
         </span>
-        <ArrowRight
-          className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5"
-          strokeWidth={2.2}
+        <span className="relative z-[1] min-w-0 flex-1">
+          <span className="dd-btn-label block text-[15.5px] font-bold leading-tight tracking-wide">
+            เลือกเรื่องที่อยากรู้
+          </span>
+          <span className="mt-0.5 block text-[12px] font-medium leading-tight opacity-70">
+            เปิดทำนายกับแม่มั่งมี
+          </span>
+        </span>
+        <ChevronRight
+          className="relative z-[1] mr-1 h-5 w-5 shrink-0 opacity-80 transition-transform duration-200 group-hover:translate-x-0.5"
+          strokeWidth={2.4}
+        />
+        <span
+          className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
+          aria-hidden
         />
       </Link>
     </AnimatedPage>

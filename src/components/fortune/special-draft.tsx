@@ -43,9 +43,22 @@ type ComingSoonItem = {
   cta?: string;
   /** Pill on card; omit to hide */
   badge?: string;
+  /** object-position when art has baked-in copy on the left */
+  artFocus?: string;
 };
 
 const NEW_ITEMS: ComingSoonItem[] = [
+  {
+    id: "consult-mae",
+    title: "ปรึกษาแม่",
+    blurb: "คุยกับแม่เรื่องที่อยู่ในใจ",
+    art: "/images/special/coming-soon/02-consult-mae-card.webp?v=4",
+    Icon: MessageCircle,
+    href: "/special/consult",
+    cta: "เปิดห้องคุย",
+    badge: "3 คำถามต่อวัน",
+    artFocus: "72% center",
+  },
   {
     id: "dream",
     title: "ทำนายฝัน",
@@ -60,7 +73,7 @@ const NEW_ITEMS: ComingSoonItem[] = [
     id: "phone",
     title: "วิเคราะห์เบอร์",
     blurb: "ใส่เบอร์มือถือ แม่วิเคราะห์พลังเลขให้",
-    art: "/images/special/coming-soon/05-phone-reading.jpg",
+    art: "/images/special/coming-soon/05-phone-reading.webp",
     Icon: Smartphone,
     href: "/special/phone",
     cta: "เปิดตำราเบอร์",
@@ -74,13 +87,6 @@ const COMING_SOON_ITEMS: ComingSoonItem[] = [
     blurb: "กำลังเตรียมเปิดใช้งาน",
     art: "/images/special/coming-soon/01-lucky-numbers.webp?v=2",
     Icon: Sparkles,
-  },
-  {
-    id: "consult-mae",
-    title: "ปรึกษาแม่",
-    blurb: "คุยกับแม่เรื่องที่อยู่ในใจ",
-    art: "/images/special/coming-soon/02-consult-mae.webp",
-    Icon: MessageCircle,
   },
   {
     id: "civil-exam",
@@ -211,6 +217,7 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
       className="group relative block w-full overflow-hidden rounded-[16px] text-left outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
       style={{
         aspectRatio: "2.75 / 1",
+        background: "#0a1222",
         boxShadow:
           "inset 0 0 0 1px rgba(255,255,255,0.14), 0 8px 20px rgba(0,0,0,0.24)",
       }}
@@ -221,7 +228,8 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
         alt=""
         fill
         unoptimized
-        className="object-cover object-[88%_center] transition duration-500 group-hover:scale-[1.03]"
+        className="object-cover transition duration-500 group-hover:scale-[1.03]"
+        style={{ objectPosition: item.artFocus ?? "88% center" }}
         sizes="(max-width: 480px) 100vw, 960px"
       />
       <div
@@ -229,19 +237,19 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
         aria-hidden
         style={{
           background:
-            "linear-gradient(105deg, rgba(8,14,28,0.94) 0%, rgba(8,14,28,0.72) 42%, rgba(8,14,28,0.18) 66%, transparent 82%)",
+            "linear-gradient(105deg, rgba(8,14,28,0.88) 0%, rgba(8,14,28,0.55) 42%, rgba(8,14,28,0.12) 68%, transparent 82%)",
         }}
       />
 
       {item.badge ? (
         <span
-          className="absolute right-2.5 top-2.5 z-[2] inline-flex items-center rounded-full px-2.5 text-[15px] font-semibold leading-[1.4]"
+          className="absolute right-2.5 top-2.5 z-[2] inline-flex items-center rounded-full px-2 text-[12px] font-semibold leading-[1.35]"
           style={{
             color: GOLD,
             background: "rgba(8,12,24,0.72)",
             boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.45)",
-            paddingTop: "0.28em",
-            paddingBottom: "0.22em",
+            paddingTop: "0.22em",
+            paddingBottom: "0.18em",
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
           }}
@@ -252,13 +260,7 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
 
       <div className="relative z-[1] flex h-full flex-col justify-center gap-1 px-3.5 py-3 pr-3.5">
         <p
-          className="text-[15px] font-semibold tracking-[0.12em]"
-          style={{ color: GOLD }}
-        >
-          ตำราแม่มั่งมี
-        </p>
-        <p
-          className="max-w-[15.5rem] text-[1.2rem] font-bold leading-[1.25]"
+          className="max-w-[15.5rem] text-[1.35rem] font-bold leading-[1.25]"
           style={{
             ...TITLE_GOLD,
             paddingTop: "0.06em",
@@ -327,14 +329,8 @@ export function SpecialDraft() {
         <AnimatedPage className="px-4 sm:px-5">
           <header className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1 text-left">
-              <p
-                className="text-[15px] font-semibold tracking-[0.14em]"
-                style={{ color: GOLD }}
-              >
-                เร็วๆ นี้
-              </p>
               <h1
-                className="mt-1.5 text-[1.85rem] font-bold leading-[1.4] tracking-tight"
+                className="text-[1.85rem] font-bold leading-[1.4] tracking-tight"
                 style={{
                   ...TITLE_GOLD,
                   paddingTop: "0.16em",
@@ -393,15 +389,6 @@ export function SpecialDraft() {
               </li>
             ))}
           </ul>
-
-          <p
-            className="mx-auto mt-9 max-w-[19rem] text-center text-[15px] font-medium leading-snug"
-            style={{ color: "rgba(186,204,230,0.7)" }}
-          >
-            อยากให้มีดวงเรื่องไหนเพิ่ม
-            <br />
-            บอกเราได้เลย
-          </p>
         </AnimatedPage>
 
         <FixedAppBottomNav activeId="special" />

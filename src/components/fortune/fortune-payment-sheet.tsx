@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
-import { Check, ChevronRight, Loader2, Lock, X } from "lucide-react";
+import { Check, Loader2, Lock, X } from "lucide-react";
+import { PremiumBuyCta } from "@/components/fortune/premium-buy-cta";
 import { PremiumOfferUrgencyLine } from "@/components/fortune/premium-offer-countdown";
 import { PageBackButton } from "@/components/ui/page-back-button";
 import {
@@ -45,17 +46,6 @@ const goldTextStyle: CSSProperties = {
   backgroundClip: "text",
   color: "transparent",
   WebkitTextFillColor: "transparent",
-};
-
-const GOLD_GLASS_CTA: CSSProperties = {
-  color: "#1a1408",
-  background:
-    "linear-gradient(155deg, #fff4d0 0%, #f0d078 32%, #d5b16f 62%, #c9a35a 88%, #b8924f 100%)",
-  border: "1px solid rgba(255, 232, 170, 0.55)",
-  boxShadow:
-    "inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(143,110,56,0.22), 0 8px 20px rgba(143,110,56,0.28)",
-  backdropFilter: "blur(8px)",
-  WebkitBackdropFilter: "blur(8px)",
 };
 
 const COMPARE_ROWS = [
@@ -365,15 +355,7 @@ export function FortunePaymentSheet({
       <div className="mt-4 space-y-2.5">
         {IS_LOCAL_DEV ? (
           <div className="space-y-2">
-            <button
-              type="button"
-              onClick={() => onPaid()}
-              className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
-              style={GOLD_GLASS_CTA}
-            >
-              ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
-              <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
-            </button>
+            <PremiumBuyCta onClick={() => onPaid()} />
             <p className="text-center text-[11px]" style={{ color: TEXT_MUTED }}>
               โหมดทดลอง · จำลองชำระสำเร็จ
             </p>
@@ -388,20 +370,14 @@ export function FortunePaymentSheet({
           </div>
         ) : !user ? (
           <div className="space-y-2">
-            <button
-              type="button"
+            <PremiumBuyCta
               onClick={() => {
                 onClose();
                 router.push(
                   `/login?callbackUrl=${encodeURIComponent(LOGIN_THEN_PAY)}`
                 );
               }}
-              className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
-              style={GOLD_GLASS_CTA}
-            >
-              ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
-              <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
-            </button>
+            />
             <p className="text-center text-[15px] font-medium" style={{ color: GOLD_SOFT }}>
               เข้าสู่ระบบแล้วชำระ · เหลือ 3 สิทธิ์
             </p>
@@ -413,16 +389,12 @@ export function FortunePaymentSheet({
                 {user.email}
               </p>
             ) : null}
-            <button
-              type="button"
+            <PremiumBuyCta
               onClick={goToPayPage}
               disabled={step === "redirecting"}
-              className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
-              style={GOLD_GLASS_CTA}
-            >
-              ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
-              <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
-            </button>
+              loading={step === "redirecting"}
+              loadingLabel="กำลังไปหน้าชำระ…"
+            />
           </div>
         )}
 

@@ -123,6 +123,9 @@ export async function POST(request: Request) {
       );
     }
 
+    // Keep only the latest ask — drop older days when a new one is created
+    await db.delete(dreamAsks).where(eq(dreamAsks.userId, session.user.id));
+
     const inserted = await db
       .insert(dreamAsks)
       .values({
@@ -131,23 +134,13 @@ export async function POST(request: Request) {
         dream,
         result: JSON.stringify(reading),
       })
-      .onConflictDoNothing({
-        target: [dreamAsks.userId, dreamAsks.dayKey],
-      })
       .returning();
 
     if (inserted.length === 0) {
-      const again = await todayRow(session.user.id);
-      const saved = again.row ? parseDreamReading(again.row.result) : null;
-      if (again.row && saved) {
-        return NextResponse.json(
-          payload(
-            again.row.dream,
-            repairDreamNumbers(again.row.dream, saved, dayKey),
-            true,
-          ),
-        );
-      }
+      return NextResponse.json(
+        { error: "บันทึกไม่สำเร็จ ลองอีกครั้ง" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json(payload(dream, reading, false));

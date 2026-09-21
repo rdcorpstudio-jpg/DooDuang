@@ -1,17 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Check,
-  ChevronRight,
-  CreditCard,
-  Loader2,
-  Lock,
-  QrCode,
-} from "lucide-react";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { PageBackButton } from "@/components/ui/page-back-button";
+import { PremiumBuyCta } from "@/components/fortune/premium-buy-cta";
 import { PremiumOfferUrgencyLine } from "@/components/fortune/premium-offer-countdown";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import {
@@ -38,6 +29,14 @@ import { trackClientEvent, trackOfferView } from "@/lib/analytics/client";
 import { readLastFeature } from "@/lib/analytics/last-feature";
 import { getOrCreateVisitorId } from "@/lib/analytics/visitor-id";
 import { MAE_GLASS } from "@/lib/mae-glass";
+import {
+  Check,
+  CreditCard,
+  Lock,
+  QrCode,
+} from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { startMaeNavigation } from "@/components/layout/navigation-loading";
 
@@ -450,14 +449,7 @@ export function PremiumPayPage() {
 
             {localSim ? (
               <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={simulateLocalPaid}
-                  className="mae-gold-cta flex h-12 w-full items-center justify-center gap-1.5 rounded-full px-4 text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
-                >
-                  ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
-                  <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
-                </button>
+                <PremiumBuyCta onClick={simulateLocalPaid} />
                 <p
                   className="text-center text-[13px] font-medium"
                   style={{ color: GOLD_SOFT }}
@@ -466,43 +458,19 @@ export function PremiumPayPage() {
                 </p>
               </div>
             ) : !user ? (
-              <button
-                type="button"
+              <PremiumBuyCta
                 onClick={goLogin}
                 disabled={loadingSession}
-                className="mae-gold-cta flex h-12 w-full items-center justify-center gap-1.5 rounded-full px-4 text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
-              >
-                {loadingSession ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    กำลังตรวจสอบ…
-                  </>
-                ) : (
-                  <>
-                    ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
-                    <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
-                  </>
-                )}
-              </button>
+                loading={loadingSession}
+                loadingLabel="กำลังตรวจสอบ…"
+              />
             ) : (
-              <button
-                type="button"
+              <PremiumBuyCta
                 onClick={() => void startCheckout()}
                 disabled={submitting}
-                className="mae-gold-cta flex h-12 w-full items-center justify-center gap-1.5 rounded-full px-4 text-[15.5px] font-bold tracking-wide outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    กำลังไปหน้า Stripe…
-                  </>
-                ) : (
-                  <>
-                    ซื้อพรีเมียม ฿{FORTUNE_UNLOCK_PRICE}
-                    <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
-                  </>
-                )}
-              </button>
+                loading={submitting}
+                loadingLabel="กำลังไปหน้า Stripe…"
+              />
             )}
 
             {!localSim && !user && !loadingSession ? (

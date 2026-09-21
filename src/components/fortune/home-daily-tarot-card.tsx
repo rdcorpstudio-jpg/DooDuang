@@ -132,31 +132,49 @@ export function HomeDailyTarotCard() {
               "radial-gradient(circle, rgba(232,209,154,0.18) 0%, transparent 68%)",
           }}
         />
-        {/* กรอบเหลี่ยมทอง — เล็กลงจากเดิม */}
+        {/* กรอบเหลี่ยมทอง — 3 ชั้น bevel */}
         <div
-          className="relative p-[2.5px]"
+          className="relative overflow-hidden rounded-[3px] p-[3px]"
           style={{
             background:
-              "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)",
+              "linear-gradient(145deg, #fff6d4 0%, #f0d78a 18%, #c9a24a 42%, #8a6a2e 68%, #5c451c 88%, #3d2e12 100%)",
             boxShadow:
-              "0 14px 32px rgba(0,0,0,0.4), 0 0 18px rgba(232,209,154,0.18)",
+              "0 14px 32px rgba(0,0,0,0.42), 0 0 16px rgba(232,209,154,0.16), inset 0 1px 0 rgba(255,255,255,0.35)",
           }}
         >
           <div
-            className="relative w-[7.75rem] overflow-hidden bg-[#0a1424] sm:w-[8.25rem]"
+            className="overflow-hidden rounded-[2px] p-[1.5px]"
             style={{
-              aspectRatio: "840 / 1455",
-              transform: upright ? undefined : "rotate(180deg)",
+              background:
+                "linear-gradient(145deg, #6b5224 0%, #a07a38 35%, #d4b56a 55%, #7a5c28 100%)",
+              boxShadow: "inset 0 0 0 1px rgba(40,28,10,0.45)",
             }}
           >
-            <Image
-              src={tarotCardImageSrc(card)}
-              alt={title}
-              fill
-              unoptimized
-              className="object-cover object-center transition duration-500 group-hover:scale-[1.02]"
-              sizes="132px"
-            />
+            <div
+              className="overflow-hidden rounded-[1px] p-px"
+              style={{
+                background:
+                  "linear-gradient(145deg, #fff8e0 0%, #e8d19a 40%, #b8924f 100%)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.55)",
+              }}
+            >
+              <div
+                className="relative w-[6.75rem] overflow-hidden rounded-[1px] bg-[#0a1424] sm:w-[7.25rem]"
+                style={{
+                  aspectRatio: "840 / 1455",
+                  transform: upright ? undefined : "rotate(180deg)",
+                }}
+              >
+                <Image
+                  src={tarotCardImageSrc(card)}
+                  alt={title}
+                  fill
+                  unoptimized
+                  className="object-cover object-center transition duration-500 group-hover:scale-[1.02]"
+                  sizes="132px"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

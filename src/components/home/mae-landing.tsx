@@ -8,9 +8,11 @@ import {
   ArrowRight,
   BookOpen,
   ChevronDown,
+  ChevronRight,
   Lightbulb,
   MessageCircle,
   Settings2,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInView } from "@/hooks/use-in-view";
@@ -295,39 +297,52 @@ export function MaeLanding() {
           )}
         >
           <h1 className="mx-auto mt-0 flex w-full flex-col items-center overflow-visible font-sacred text-white">
-            <span className="text-center text-[2.05rem] font-normal leading-[1.22] tracking-[0.02em] text-white">
+            <span className="text-center text-[2.05rem] font-normal leading-[1.42] tracking-[0.02em] text-white">
               เข้าใจจังหวะชีวิต
             </span>
-            <span className="mae-hero-gold-line mt-1 text-center text-[2.15rem] font-normal leading-[1.22] tracking-[0.02em]">
+            <span className="mae-hero-gold-line mt-1.5 text-center text-[2.15rem] font-normal leading-[1.45] tracking-[0.02em]">
               ก้าวต่ออย่างอุ่นใจ
             </span>
           </h1>
 
-          <p className="mae-hero-lede mx-auto mt-3 w-full max-w-[18rem] text-center text-[12.5px] leading-[1.75] tracking-[0.015em] text-[#d8dee8]/88">
+          <p className="mae-hero-lede mx-auto mt-1.5 w-full max-w-[19rem] text-center text-[12.5px] leading-[1.7] tracking-[0.015em] text-[#d8dee8]/88">
             บางช่วง… เราตั้งใจเต็มที่
             <br />
             แต่หลายอย่างกลับไม่เป็นอย่างหวัง
             <br />
             <span className="text-[#e8d19a]/88">
-              ลองให้การอ่านดวง เป็นอีกมุมในการทบทวนตัวเอง
+              ลองให้การอ่านดวง เป็นอีกมุมในการทบทวน
+              <span className="whitespace-nowrap">ตัวเอง</span>
             </span>
           </p>
 
           <Link
             href="/welcome"
-            className="mae-gold-cta group relative mx-auto mt-5 flex h-11 w-full max-w-[240px] items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+            className="wallpaper-dl-btn mae-cta-nudge group relative mx-auto mt-3.5 flex h-[3.4rem] w-full max-w-[280px] items-center gap-2.5 overflow-hidden rounded-[16px] px-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           >
-            <span className="text-[14px] font-bold tracking-wide">
-              เลือกเรื่องที่อยากรู้
+            <span className="wallpaper-dl-btn__icon relative z-[1] flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]">
+              <Sparkles className="h-[17px] w-[17px]" strokeWidth={2.2} />
             </span>
-            <ArrowRight
-              className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+            <span className="relative z-[1] flex min-w-0 flex-1 flex-col justify-center gap-0.5 overflow-visible">
+              <span className="block text-[14.5px] font-bold leading-[1.3] tracking-wide">
+                เลือกเรื่องที่อยากรู้
+              </span>
+              <span className="block text-[11.5px] font-medium leading-[1.3] opacity-70">
+                เริ่มอ่านดวงกับแม่มั่งมี
+              </span>
+            </span>
+            <ChevronRight
+              className="relative z-[1] mr-0.5 h-5 w-5 shrink-0 opacity-80 transition-transform duration-200 group-hover:translate-x-0.5"
               strokeWidth={2.4}
+            />
+            <span
+              className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
+              aria-hidden
             />
           </Link>
 
           {/* Award — group centered under CTA */}
-          <div className="mae-hero-award mx-auto mt-5 flex w-fit max-w-[min(100%,20.5rem)] items-center justify-center gap-1.5 text-left">
+          <div className="mae-hero-award mx-auto mt-2.5 flex w-fit max-w-[min(100%,20.5rem)] items-center justify-center gap-1.5 text-left">
             <span className="mae-award-glow relative flex h-[3.85rem] w-[3.85rem] shrink-0 items-center justify-center">
               <Image
                 src="/images/brand/diamond-trophy-transparent.webp"

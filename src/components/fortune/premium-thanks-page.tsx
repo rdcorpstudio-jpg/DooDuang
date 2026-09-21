@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronRight, Sparkles } from "lucide-react";
 import {
   LINE_OA_ADD_URL,
   LINE_OA_HANDLE,
@@ -101,9 +102,9 @@ export function PremiumThanksPage() {
             mounted ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
           )}
         >
-          <h1 className="font-sacred text-[1.7rem] font-normal leading-[1.28] tracking-[0.02em] text-white sm:text-[1.85rem]">
+          <h1 className="overflow-visible font-sacred text-[1.7rem] font-normal leading-[1.45] tracking-[0.02em] text-white sm:text-[1.85rem]">
             ขอบคุณที่ไว้วางใจ
-            <span className="mae-hero-gold-line mt-1.5 block text-[1.8rem] leading-[1.3] sm:text-[1.95rem]">
+            <span className="mae-hero-gold-line mt-1.5 block text-[1.8rem] leading-[1.45] sm:text-[1.95rem]">
               แม่มั่งมีอยู่ตรงนี้
             </span>
           </h1>
@@ -139,11 +140,27 @@ export function PremiumThanksPage() {
 
           <Link
             href={continueHref}
-            className="mae-gold-cta group relative mt-2.5 flex h-11 w-full max-w-[260px] items-center justify-center rounded-full px-6 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+            className="wallpaper-dl-btn group relative mt-3 flex h-[3.55rem] w-full max-w-[260px] items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           >
-            <span className="text-[15.5px] font-bold tracking-wide">
-              เริ่มดูดวงพรีเมียม →
+            <span className="wallpaper-dl-btn__icon relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]">
+              <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
             </span>
+            <span className="relative z-[1] min-w-0 flex-1">
+              <span className="dd-btn-label block text-[15.5px] font-bold leading-tight tracking-wide">
+                เริ่มดูดวงพรีเมียม
+              </span>
+              <span className="mt-0.5 block text-[12px] font-medium leading-tight opacity-70">
+                เปิดตำราทั้งหมดได้แล้ว
+              </span>
+            </span>
+            <ChevronRight
+              className="relative z-[1] mr-1 h-5 w-5 shrink-0 opacity-80 transition-transform duration-200 group-hover:translate-x-0.5"
+              strokeWidth={2.4}
+            />
+            <span
+              className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
+              aria-hidden
+            />
           </Link>
 
           <div className="mt-4 flex w-fit max-w-full items-center justify-center gap-2 text-left">

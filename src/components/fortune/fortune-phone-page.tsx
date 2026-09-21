@@ -8,13 +8,14 @@ import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { MaePageLoading } from "@/components/layout/mae-page-loading";
 import { AnimatedPage, Reveal, useRevealMounted } from "@/components/ui/reveal";
 import { PageBackButton } from "@/components/ui/page-back-button";
-import { bangkokDayKey } from "@/lib/fortune/dream-reading";
 import {
   formatPhoneDisplay,
   isValidThaiMobile,
+  msUntilNextBangkokWeek,
   normalizePhoneInput,
   type PhoneReading,
 } from "@/lib/fortune/phone-reading";
+import { readFortuneProfile } from "@/lib/fortune/profile-storage";
 import { MAE_GLASS } from "@/lib/mae-glass";
 
 const GOLD = "#e8d19a";
@@ -23,29 +24,25 @@ const TEXT = "rgba(240,244,250,0.92)";
 const MUTED = "rgba(186,204,230,0.82)";
 const CAUTION = "#f0a8b0";
 const GLASS = MAE_GLASS;
-const PHONE_ART = "/images/special/coming-soon/05-phone-reading.jpg";
+const PHONE_ART = "/images/special/coming-soon/05-phone-reading.webp";
 
 function pad2(n: number) {
   return String(Math.max(0, n)).padStart(2, "0");
 }
 
-function msUntilNextBangkokMidnight(now = Date.now()) {
-  const dayKey = bangkokDayKey(new Date(now));
-  const start = new Date(`${dayKey}T00:00:00+07:00`).getTime();
-  return Math.max(0, start + 86_400_000 - now);
-}
-
 function formatCountdown(ms: number) {
   const total = Math.ceil(ms / 1000);
-  const h = Math.floor(total / 3600);
+  const d = Math.floor(total / 86_400);
+  const h = Math.floor((total % 86_400) / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
+  if (d > 0) return `${d}ว ${pad2(h)}:${pad2(m)}:${pad2(s)}`;
   return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
 }
 
-function useBangkokMidnightCountdown(active: boolean) {
+function useWeekCountdown(active: boolean) {
   const [leftMs, setLeftMs] = useState(() =>
-    active ? msUntilNextBangkokMidnight() : 0,
+    active ? msUntilNextBangkokWeek() : 0,
   );
 
   useEffect(() => {
@@ -53,7 +50,7 @@ function useBangkokMidnightCountdown(active: boolean) {
       setLeftMs(0);
       return;
     }
-    const tick = () => setLeftMs(msUntilNextBangkokMidnight());
+    const tick = () => setLeftMs(msUntilNextBangkokWeek());
     tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
@@ -119,12 +116,17 @@ export function FortunePhonePage() {
       setError("ใส่เบอร์มือถือไทย 10 หลัก เช่น 08x-xxx-xxxx");
       return;
     }
+    const profile = readFortuneProfile();
+    if (!profile?.nickname || !profile.birthDate) {
+      setError("กรอกโปรไฟล์ชื่อและวันเกิดก่อน แม่จะเทียบกับพื้นดวงได้");
+      return;
+    }
     setBusy(true);
     try {
       const res = await fetch("/api/fortune/phone", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone, profile }),
       });
       const data = (await res.json()) as {
         error?: string;
@@ -134,6 +136,10 @@ export function FortunePhonePage() {
       };
       if (res.status === 401 || data.code === "UNAUTHENTICATED") {
         window.location.href = "/login?callbackUrl=/special/phone";
+        return;
+      }
+      if (data.code === "NO_PROFILE") {
+        window.location.href = "/dashboard";
         return;
       }
       if (!res.ok || !data.reading) {
@@ -155,7 +161,7 @@ export function FortunePhonePage() {
 
   const reading = loaded?.reading;
   const locked = Boolean(loaded?.asked && reading);
-  const leftMs = useBangkokMidnightCountdown(locked);
+  const leftMs = useWeekCountdown(locked);
   const canAskAgain = locked && leftMs <= 0;
   const draftDigits = normalizePhoneInput(draft);
   const canSubmit = isValidThaiMobile(draftDigits);
@@ -257,7 +263,7 @@ export function FortunePhonePage() {
             }}
           >
             <Smartphone className="h-3.5 w-3.5" strokeWidth={2.2} />
-            วันละ 1 ครั้ง · 00:00 น.
+            อาทิตย์ละ 1 ครั้ง · จันทร์ 00:00 น.
           </span>
         </header>
 
@@ -309,7 +315,7 @@ export function FortunePhonePage() {
                   className="text-[15px] font-semibold tracking-[0.06em]"
                   style={{ color: GOLD }}
                 >
-                  {locked ? "เบอร์ที่ถามวันนี้" : "เบอร์มือถือ"}
+                  {locked ? "เบอร์ที่ถามสัปดาห์นี้" : "เบอร์มือถือ"}
                 </span>
                 <input
                   value={
@@ -343,7 +349,7 @@ export function FortunePhonePage() {
                     {busy ? "แม่กำลังเปิดตำรา…" : "วิเคราะห์เบอร์นี้"}
                   </span>
                   <span className="mt-0.5 block text-[15px] font-medium leading-tight opacity-70">
-                    อ่านพลังตัวเลขวันละครั้ง
+                    เทียบกับโปรไฟล์ · อ่านผลครบด้าน
                   </span>
                 </span>
                 <span
@@ -403,64 +409,149 @@ export function FortunePhonePage() {
 
 function PhoneResult({ reading }: { reading: PhoneReading }) {
   const visible = useRevealMounted(60);
+  const fitTone =
+    reading.birthFit.verdict.includes("ตี")
+      ? CAUTION
+      : reading.birthFit.verdict.includes("หนุน")
+        ? "#b9ebdc"
+        : GOLD_SOFT;
 
   return (
-    <section className="mt-8">
+    <section className="mt-8 space-y-7">
       <Reveal visible={visible} delay={40} className="text-center">
         <p
           className="text-[15px] font-semibold tracking-[0.16em]"
           style={{ color: GOLD }}
         >
-          คำทำนาย
+          ภาพรวมเบอร์
+        </p>
+        <p className="mt-3 text-[2.4rem] font-bold tabular-nums leading-none text-white">
+          {reading.score}
+          <span className="ml-1 text-[1rem] font-medium text-white/45">/100</span>
         </p>
         <h2
-          className="mae-gold-text mt-2 text-[1.55rem] font-bold leading-[1.35]"
+          className="mae-gold-text mt-3 text-[1.4rem] font-bold leading-[1.35]"
           style={{ paddingTop: "0.08em", paddingBottom: "0.04em" }}
         >
           {reading.title}
         </h2>
         <p
-          className="mx-auto mt-3.5 max-w-[22rem] text-[16px] font-medium leading-[1.7]"
+          className="mx-auto mt-2.5 max-w-[21rem] text-[16px] font-medium leading-[1.55]"
           style={{ color: TEXT }}
+        >
+          {reading.scoreLabel}
+        </p>
+        <p
+          className="mx-auto mt-3 max-w-[22rem] text-[15px] font-medium leading-[1.65]"
+          style={{ color: MUTED }}
         >
           {reading.meaning}
         </p>
       </Reveal>
 
-      <Reveal visible={visible} delay={120} className="mt-6 text-center">
+      <Reveal visible={visible} delay={100}>
         <p
           className="text-[15px] font-semibold tracking-[0.12em]"
           style={{ color: GOLD }}
         >
-          เลขเด่นในเบอร์
+          เลขคู่ที่เด่น
         </p>
-        <p className="mt-3 text-[1.55rem] font-bold tabular-nums tracking-[0.18em] text-white">
-          {reading.highlights.join("  ·  ")}
-        </p>
+        <div className="mt-3 space-y-3">
+          {reading.pairs.map((row) => (
+            <div key={`${row.pair}-${row.meaning}`} className="flex gap-3">
+              <span
+                className="shrink-0 text-[1.25rem] font-bold tabular-nums leading-none"
+                style={{ color: GOLD_SOFT }}
+              >
+                {row.pair}
+              </span>
+              <p className="text-[15px] font-medium leading-[1.5] text-white">
+                {row.meaning}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      <Reveal visible={visible} delay={160}>
         <p
-          className="mx-auto mt-3 max-w-[20rem] text-[15px] font-medium leading-[1.55]"
-          style={{ color: MUTED }}
+          className="text-[15px] font-semibold tracking-[0.12em]"
+          style={{ color: GOLD }}
         >
-          {reading.energy}
+          ผลต่อ 4 ด้าน
         </p>
+        <div className="mt-3 space-y-3.5">
+          <AspectLine label="งาน" body={reading.aspects.work} />
+          <AspectLine label="เงิน" body={reading.aspects.money} />
+          <AspectLine label="ความรัก" body={reading.aspects.love} />
+          <AspectLine label="การสื่อสาร" body={reading.aspects.social} />
+        </div>
       </Reveal>
 
-      <Reveal visible={visible} delay={200} className="mt-7 space-y-5">
-        <TipRow
-          label="วันนี้ลอง"
-          labelColor={GOLD_SOFT}
-          accent="rgba(232,209,154,0.7)"
-          body={reading.doToday}
+      <Reveal visible={visible} delay={220} className="space-y-5">
+        <BulletBlock
+          label="จุดแข็ง"
+          color={GOLD_SOFT}
+          items={reading.strengths}
         />
-        <TipRow
+        <BulletBlock
           label="ควรระวัง"
-          labelColor={CAUTION}
-          accent="rgba(240,168,176,0.75)"
-          body={reading.holdOff}
+          color={CAUTION}
+          items={reading.cautions}
         />
       </Reveal>
 
-      <Reveal visible={visible} delay={300} className="mt-6 text-center">
+      <Reveal visible={visible} delay={280} className="space-y-4">
+        <div>
+          <p
+            className="text-[15px] font-semibold tracking-[0.12em]"
+            style={{ color: GOLD }}
+          >
+            เลขท้าย {reading.tailDigits}
+          </p>
+          <p className="mt-2 text-[15px] font-medium leading-[1.55] text-white">
+            {reading.tailMeaning}
+          </p>
+        </div>
+        <div>
+          <p
+            className="text-[15px] font-semibold tracking-[0.12em]"
+            style={{ color: GOLD }}
+          >
+            {reading.repeated}
+          </p>
+          <p className="mt-2 text-[15px] font-medium leading-[1.55] text-white">
+            {reading.repeatedMeaning}
+          </p>
+        </div>
+      </Reveal>
+
+      <Reveal visible={visible} delay={340} className="space-y-4">
+        <div>
+          <p
+            className="text-[15px] font-semibold tracking-[0.12em]"
+            style={{ color: GOLD }}
+          >
+            แนะนำการใช้เบอร์
+          </p>
+          <p className="mt-2 text-[15px] font-medium leading-[1.55] text-white">
+            {reading.usageAdvice}
+          </p>
+        </div>
+        <div>
+          <p
+            className="text-[15px] font-semibold tracking-[0.12em]"
+            style={{ color: fitTone }}
+          >
+            เทียบพื้นดวง · {reading.birthFit.verdict}
+          </p>
+          <p className="mt-2 text-[15px] font-medium leading-[1.55] text-white">
+            {reading.birthFit.detail}
+          </p>
+        </div>
+      </Reveal>
+
+      <Reveal visible={visible} delay={400} className="text-center">
         <p
           className="text-[16px] font-medium leading-[1.6]"
           style={{ color: TEXT }}
@@ -478,35 +569,54 @@ function PhoneResult({ reading }: { reading: PhoneReading }) {
   );
 }
 
-function TipRow({
+function AspectLine({ label, body }: { label: string; body: string }) {
+  return (
+    <div className="flex gap-3">
+      <span
+        className="w-[4.5rem] shrink-0 text-[15px] font-bold"
+        style={{ color: GOLD_SOFT }}
+      >
+        {label}
+      </span>
+      <p className="min-w-0 flex-1 text-[15px] font-medium leading-[1.5] text-white">
+        {body}
+      </p>
+    </div>
+  );
+}
+
+function BulletBlock({
   label,
-  labelColor,
-  accent,
-  body,
+  color,
+  items,
 }: {
   label: string;
-  labelColor: string;
-  accent: string;
-  body: string;
+  color: string;
+  items: string[];
 }) {
   return (
-    <div className="flex gap-3.5">
-      <span
-        aria-hidden
-        className="mt-1.5 h-[2.6rem] w-[3px] shrink-0 rounded-full"
-        style={{ background: accent }}
-      />
-      <div className="min-w-0 flex-1">
-        <p
-          className="text-[15px] font-bold tracking-wide"
-          style={{ color: labelColor }}
-        >
-          {label}
-        </p>
-        <p className="mt-1.5 text-[15px] font-medium leading-[1.55] text-white">
-          {body}
-        </p>
-      </div>
+    <div>
+      <p
+        className="text-[15px] font-bold tracking-wide"
+        style={{ color }}
+      >
+        {label}
+      </p>
+      <ul className="mt-2 space-y-2">
+        {items.map((item) => (
+          <li
+            key={item}
+            className="flex items-start gap-2.5 text-[15px] font-medium leading-[1.5] text-white"
+          >
+            <span
+              className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ background: color }}
+              aria-hidden
+            />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

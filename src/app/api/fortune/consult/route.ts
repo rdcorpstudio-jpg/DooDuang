@@ -1,0 +1,288 @@
+import { and, desc, eq, ne } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { requireDb } from "@/lib/db";
+import { consultSessions } from "@/lib/db/schema";
+import {
+  getFortuneProfileForUser,
+  normalizeFortuneProfileInput,
+  rowToFortuneProfilePayload,
+  type FortuneProfilePayload,
+} from "@/lib/fortune/fortune-profile-db";
+import {
+  bangkokDayKey,
+  CONSULT_DAILY_SESSIONS,
+  CONSULT_MAX_INPUT,
+  CONSULT_MAX_USER_TURNS,
+  generateConsultReply,
+  parseConsultMessages,
+  type ConsultMessage,
+} from "@/lib/fortune/consult-reading";
+import { hasPremiumAccess } from "@/lib/premium-entitlement";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
+
+async function resolveProfile(
+  userId: string,
+  rawProfile: unknown,
+): Promise<FortuneProfilePayload | null> {
+  const row = await getFortuneProfileForUser(userId);
+  if (row) return rowToFortuneProfilePayload(row);
+  return normalizeFortuneProfileInput(
+    rawProfile as Partial<FortuneProfilePayload> | null,
+  );
+}
+
+function dailyLimit() {
+  return CONSULT_DAILY_SESSIONS;
+}
+
+async function daySessions(userId: string, dayKey: string) {
+  const db = requireDb();
+  return db
+    .select()
+    .from(consultSessions)
+    .where(
+      and(eq(consultSessions.userId, userId), eq(consultSessions.dayKey, dayKey)),
+    )
+    .orderBy(desc(consultSessions.createdAt));
+}
+
+function sessionPayload(row: typeof consultSessions.$inferSelect) {
+  const messages = parseConsultMessages(row.messages);
+  return {
+    id: row.id,
+    messages,
+    userTurns: row.userTurns,
+    maxTurns: CONSULT_MAX_USER_TURNS,
+    remainingTurns: Math.max(0, CONSULT_MAX_USER_TURNS - row.userTurns),
+    closed: row.userTurns >= CONSULT_MAX_USER_TURNS,
+  };
+}
+
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ user: null });
+  }
+
+  try {
+    const premium = hasPremiumAccess({
+      status: session.user.subscriptionStatus,
+      until: session.user.premiumUntil,
+    });
+    const dayKey = bangkokDayKey();
+    const rows = await daySessions(session.user.id, dayKey);
+    const limit = dailyLimit();
+    const used = rows.length;
+    const active = rows.find((r) => r.userTurns < CONSULT_MAX_USER_TURNS) ?? null;
+
+    return NextResponse.json({
+      user: true,
+      premium,
+      dayKey,
+      limit,
+      used,
+      remainingSessions: Math.max(0, limit - used),
+      resets: "00:00 น.",
+      activeSession: active ? sessionPayload(active) : null,
+    });
+  } catch (err) {
+    console.error("consult GET failed:", err);
+    return NextResponse.json({
+      user: true,
+      error: "เปิดห้องคุยไม่สำเร็จ ลองรีเฟรชอีกครั้ง",
+    });
+  }
+}
+
+export async function POST(request: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: "ต้องเข้าสู่ระบบก่อน", code: "UNAUTHENTICATED" },
+      { status: 401 },
+    );
+  }
+
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: "ยังเปิดปรึกษาแม่ไม่ได้", code: "NO_API_KEY" },
+      { status: 503 },
+    );
+  }
+
+  let action = "";
+  let text = "";
+  let sessionId = "";
+  let rawProfile: unknown = null;
+  try {
+    const body = (await request.json()) as {
+      action?: string;
+      text?: string;
+      sessionId?: string;
+      profile?: unknown;
+    };
+    action = body.action?.trim() ?? "";
+    text = body.text?.trim() ?? "";
+    sessionId = body.sessionId?.trim() ?? "";
+    rawProfile = body.profile ?? null;
+  } catch {
+    return NextResponse.json({ error: "คำขอไม่ถูกต้อง" }, { status: 400 });
+  }
+
+  const premium = hasPremiumAccess({
+    status: session.user.subscriptionStatus,
+    until: session.user.premiumUntil,
+  });
+  const limit = dailyLimit();
+  const dayKey = bangkokDayKey();
+  const db = requireDb();
+  const profile = await resolveProfile(session.user.id, rawProfile);
+
+  try {
+    if (action === "start") {
+      // Drop older days — consult quota resets every Bangkok day
+      await db
+        .delete(consultSessions)
+        .where(
+          and(
+            eq(consultSessions.userId, session.user.id),
+            ne(consultSessions.dayKey, dayKey),
+          ),
+        );
+
+      const rows = await daySessions(session.user.id, dayKey);
+      const open = rows.find((r) => r.userTurns < CONSULT_MAX_USER_TURNS);
+      if (open) {
+        return NextResponse.json({
+          premium,
+          limit,
+          used: rows.length,
+          remainingSessions: Math.max(0, limit - rows.length),
+          session: sessionPayload(open),
+        });
+      }
+      if (rows.length >= limit) {
+        return NextResponse.json(
+          {
+            error: "วันนี้ถามครบ 3 คำถามแล้ว กลับมาใหม่หลัง 00:00 น.",
+            code: "QUOTA",
+            limit,
+            used: rows.length,
+            remainingSessions: 0,
+          },
+          { status: 429 },
+        );
+      }
+
+      const greeting =
+        "แม่อยู่นี่แล้ว เล่าได้เลยว่าตอนนี้อยู่ในใจเรื่องอะไร เป็นความรัก งาน เงิน หรืออะไรก็ได้ แม่ฟังก่อนนะ";
+      const messages: ConsultMessage[] = [
+        { role: "assistant", content: greeting },
+      ];
+      const [created] = await db
+        .insert(consultSessions)
+        .values({
+          userId: session.user.id,
+          dayKey,
+          messages: JSON.stringify(messages),
+          userTurns: 0,
+        })
+        .returning();
+
+      const all = await daySessions(session.user.id, dayKey);
+      return NextResponse.json({
+        premium,
+        limit,
+        used: all.length,
+        remainingSessions: Math.max(0, limit - all.length),
+        session: created ? sessionPayload(created) : null,
+      });
+    }
+
+    if (action === "message") {
+      if (!sessionId) {
+        return NextResponse.json({ error: "ไม่พบห้องคุย" }, { status: 400 });
+      }
+      if (text.length < 2) {
+        return NextResponse.json(
+          { error: "พิมพ์อีกนิด ให้แม่จับเรื่องได้" },
+          { status: 400 },
+        );
+      }
+      if (text.length > CONSULT_MAX_INPUT) {
+        return NextResponse.json(
+          { error: "สั้นลงนิด เล่าใจความสำคัญพอ" },
+          { status: 400 },
+        );
+      }
+
+      const [row] = await db
+        .select()
+        .from(consultSessions)
+        .where(
+          and(
+            eq(consultSessions.id, sessionId),
+            eq(consultSessions.userId, session.user.id),
+          ),
+        )
+        .limit(1);
+
+      if (!row || row.dayKey !== dayKey) {
+        return NextResponse.json(
+          { error: "ห้องคุยนี้หมดอายุแล้ว เปิดรอบใหม่ได้" },
+          { status: 404 },
+        );
+      }
+      if (row.userTurns >= CONSULT_MAX_USER_TURNS) {
+        return NextResponse.json(
+          {
+            error: "รอบนี้คุยครบแล้ว เปิดรอบใหม่ได้ถ้ายังมีโควต้า",
+            code: "SESSION_FULL",
+            session: sessionPayload(row),
+          },
+          { status: 429 },
+        );
+      }
+
+      const messages = parseConsultMessages(row.messages);
+      messages.push({ role: "user", content: text });
+      const reply = await generateConsultReply({ messages, profile });
+      if (!reply) {
+        return NextResponse.json(
+          { error: "แม่ตอบไม่ทัน ลองอีกครั้ง" },
+          { status: 502 },
+        );
+      }
+      messages.push({ role: "assistant", content: reply });
+      const nextTurns = row.userTurns + 1;
+
+      const [updated] = await db
+        .update(consultSessions)
+        .set({
+          messages: JSON.stringify(messages),
+          userTurns: nextTurns,
+          updatedAt: new Date(),
+        })
+        .where(eq(consultSessions.id, row.id))
+        .returning();
+
+      const all = await daySessions(session.user.id, dayKey);
+      return NextResponse.json({
+        premium,
+        limit,
+        used: all.length,
+        remainingSessions: Math.max(0, limit - all.length),
+        session: updated ? sessionPayload(updated) : null,
+      });
+    }
+
+    return NextResponse.json({ error: "คำขอไม่ถูกต้อง" }, { status: 400 });
+  } catch (err) {
+    console.error("consult POST failed:", err);
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  }
+}

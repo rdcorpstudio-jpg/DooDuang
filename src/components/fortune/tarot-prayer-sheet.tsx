@@ -19,6 +19,13 @@ const GOLD_SOFT = "#d5b16f";
 
 const CARD_BACK = "/images/tarot/card-back.webp?v=4";
 
+const GOLD_RING_OUTER =
+  "linear-gradient(145deg, #fff6d4 0%, #f0d78a 18%, #c9a24a 42%, #8a6a2e 68%, #5c451c 88%, #3d2e12 100%)";
+const GOLD_RING_MID =
+  "linear-gradient(145deg, #6b5224 0%, #a07a38 35%, #d4b56a 55%, #7a5c28 100%)";
+const GOLD_RING_INNER =
+  "linear-gradient(145deg, #fff8e0 0%, #e8d19a 40%, #b8924f 100%)";
+
 function FanCard({
   rotate,
   x,
@@ -38,7 +45,7 @@ function FanCard({
 }) {
   return (
     <span
-      className="absolute overflow-hidden rounded-[12px]"
+      className="absolute overflow-hidden rounded-[3px] p-[2.5px]"
       style={{
         left: x,
         top: y,
@@ -46,20 +53,42 @@ function FanCard({
         height: h,
         zIndex: z,
         transform: `translateX(-50%) rotate(${rotate}deg)`,
+        background: GOLD_RING_OUTER,
         boxShadow:
-          "0 14px 32px rgba(0,0,0,0.48), 0 0 0 1px rgba(232,209,154,0.32)",
-        background: "#05070c",
+          "0 14px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.32)",
       }}
     >
-      <Image
-        src={CARD_BACK}
-        alt=""
-        fill
-        className="object-cover"
-        sizes={`${w}px`}
-        unoptimized
-        priority={priority}
-      />
+      <span
+        className="relative block h-full w-full overflow-hidden rounded-[2px] p-[1.5px]"
+        style={{
+          background: GOLD_RING_MID,
+          boxShadow: "inset 0 0 0 1px rgba(40,28,10,0.45)",
+        }}
+      >
+        <span
+          className="relative block h-full w-full overflow-hidden rounded-[1px] p-px"
+          style={{
+            background: GOLD_RING_INNER,
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5)",
+          }}
+        >
+          <span
+            className="relative block h-full w-full overflow-hidden rounded-[1px]"
+            style={{ background: "#05070c" }}
+          >
+            <Image
+              src={CARD_BACK}
+              alt=""
+              fill
+              className="object-cover"
+              style={{ transform: "scale(1.04)" }}
+              sizes={`${w}px`}
+              unoptimized
+              priority={priority}
+            />
+          </span>
+        </span>
+      </span>
     </span>
   );
 }

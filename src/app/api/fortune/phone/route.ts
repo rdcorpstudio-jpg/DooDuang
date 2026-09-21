@@ -4,7 +4,13 @@ import { auth } from "@/lib/auth";
 import { requireDb } from "@/lib/db";
 import { phoneAsks } from "@/lib/db/schema";
 import {
-  bangkokDayKey,
+  getFortuneProfileForUser,
+  normalizeFortuneProfileInput,
+  rowToFortuneProfilePayload,
+  type FortuneProfilePayload,
+} from "@/lib/fortune/fortune-profile-db";
+import {
+  bangkokWeekKey,
   generatePhoneReading,
   isValidThaiMobile,
   normalizePhoneInput,
@@ -14,7 +20,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 20;
+export const maxDuration = 30;
 
 function payload(phone: string, reading: PhoneReading, alreadyAsked: boolean) {
   return {
@@ -22,19 +28,30 @@ function payload(phone: string, reading: PhoneReading, alreadyAsked: boolean) {
     alreadyAsked,
     phone,
     reading,
-    resets: "00:00 น.",
+    resets: "วันจันทร์ 00:00 น.",
   };
 }
 
-async function todayRow(userId: string) {
+async function weekRow(userId: string) {
   const db = requireDb();
-  const dayKey = bangkokDayKey();
+  const dayKey = bangkokWeekKey();
   const rows = await db
     .select()
     .from(phoneAsks)
     .where(and(eq(phoneAsks.userId, userId), eq(phoneAsks.dayKey, dayKey)))
     .limit(1);
   return { db, dayKey, row: rows[0] ?? null };
+}
+
+async function resolveProfile(
+  userId: string,
+  rawProfile: unknown,
+): Promise<FortuneProfilePayload | null> {
+  const row = await getFortuneProfileForUser(userId);
+  if (row) return rowToFortuneProfilePayload(row);
+  return normalizeFortuneProfileInput(
+    rawProfile as Partial<FortuneProfilePayload> | null,
+  );
 }
 
 export async function GET() {
@@ -44,13 +61,13 @@ export async function GET() {
   }
 
   try {
-    const { row } = await todayRow(session.user.id);
+    const { row } = await weekRow(session.user.id);
     if (!row) {
       return NextResponse.json({ user: true, asked: false });
     }
     const reading = parsePhoneReading(row.result);
     if (!reading) {
-      return NextResponse.json({ user: true, asked: false });
+      return NextResponse.json({ user: true, asked: false, stale: true });
     }
     return NextResponse.json({
       user: true,
@@ -82,15 +99,20 @@ export async function POST(request: Request) {
     );
   }
 
-  let raw = "";
+  let rawPhone = "";
+  let rawProfile: unknown = null;
   try {
-    const body = (await request.json()) as { phone?: string };
-    raw = body.phone?.trim() ?? "";
+    const body = (await request.json()) as {
+      phone?: string;
+      profile?: unknown;
+    };
+    rawPhone = body.phone?.trim() ?? "";
+    rawProfile = body.profile ?? null;
   } catch {
-    raw = "";
+    rawPhone = "";
   }
 
-  const phone = normalizePhoneInput(raw);
+  const phone = normalizePhoneInput(rawPhone);
   if (!isValidThaiMobile(phone)) {
     return NextResponse.json(
       { error: "ใส่เบอร์มือถือไทย 10 หลัก เช่น 08x-xxx-xxxx" },
@@ -98,22 +120,36 @@ export async function POST(request: Request) {
     );
   }
 
+  const profile = await resolveProfile(session.user.id, rawProfile);
+  if (!profile) {
+    return NextResponse.json(
+      {
+        error: "กรอกโปรไฟล์ชื่อและวันเกิดก่อน แม่จะเทียบกับพื้นดวงได้",
+        code: "NO_PROFILE",
+      },
+      { status: 400 },
+    );
+  }
+
   try {
-    const { db, dayKey, row } = await todayRow(session.user.id);
+    const { db, dayKey, row } = await weekRow(session.user.id);
     if (row) {
-      const reading = parsePhoneReading(row.result);
-      if (reading) {
-        return NextResponse.json(payload(row.phone, reading, true));
+      const existing = parsePhoneReading(row.result);
+      if (existing) {
+        return NextResponse.json(payload(row.phone, existing, true));
       }
     }
 
-    const reading = await generatePhoneReading(phone);
+    const reading = await generatePhoneReading(phone, profile);
     if (!reading) {
       return NextResponse.json(
         { error: "แม่เปิดตำราไม่สำเร็จ ลองอีกครั้ง" },
         { status: 502 },
       );
     }
+
+    // Keep only the latest ask — drop older weeks when a new one is created
+    await db.delete(phoneAsks).where(eq(phoneAsks.userId, session.user.id));
 
     const inserted = await db
       .insert(phoneAsks)
@@ -123,17 +159,13 @@ export async function POST(request: Request) {
         phone,
         result: JSON.stringify(reading),
       })
-      .onConflictDoNothing({
-        target: [phoneAsks.userId, phoneAsks.dayKey],
-      })
       .returning();
 
     if (inserted.length === 0) {
-      const again = await todayRow(session.user.id);
-      const saved = again.row ? parsePhoneReading(again.row.result) : null;
-      if (again.row && saved) {
-        return NextResponse.json(payload(again.row.phone, saved, true));
-      }
+      return NextResponse.json(
+        { error: "บันทึกไม่สำเร็จ ลองอีกครั้ง" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json(payload(phone, reading, false));

@@ -3,7 +3,7 @@ import { APP_NAME } from "@/lib/site";
 
 export const metadata = {
   title: `วิเคราะห์เบอร์ — ${APP_NAME}`,
-  description: "ใส่เบอร์มือถือ แม่วิเคราะห์พลังตัวเลขให้วันละครั้ง",
+  description: "วิเคราะห์เบอร์มือถือเทียบโปรไฟล์ งาน เงิน ความรัก และการใช้เบอร์",
 };
 
 export default function PhoneReadingPage() {
