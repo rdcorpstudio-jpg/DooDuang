@@ -2,17 +2,58 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Moon, Sparkles } from "lucide-react";
+import { Moon, RefreshCw, Sparkles } from "lucide-react";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
+import { MaePageLoading } from "@/components/layout/mae-page-loading";
 import { PageBackButton } from "@/components/ui/page-back-button";
-import type { DreamReading } from "@/lib/fortune/dream-reading";
+import {
+  bangkokDayKey,
+  type DreamReading,
+} from "@/lib/fortune/dream-reading";
+import { MAE_GLASS } from "@/lib/mae-glass";
 
 const GOLD = "#e8d19a";
 const GOLD_SOFT = "#efc36c";
 const TEXT = "rgba(240,244,250,0.92)";
 const MUTED = "rgba(186,204,230,0.78)";
-const GOLD_RING =
-  "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)";
+const GLASS = MAE_GLASS;
+
+function pad2(n: number) {
+  return String(Math.max(0, n)).padStart(2, "0");
+}
+
+function msUntilNextBangkokMidnight(now = Date.now()) {
+  const dayKey = bangkokDayKey(new Date(now));
+  const start = new Date(`${dayKey}T00:00:00+07:00`).getTime();
+  return Math.max(0, start + 86_400_000 - now);
+}
+
+function formatCountdown(ms: number) {
+  const total = Math.ceil(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+}
+
+function useBangkokMidnightCountdown(active: boolean) {
+  const [leftMs, setLeftMs] = useState(() =>
+    active ? msUntilNextBangkokMidnight() : 0
+  );
+
+  useEffect(() => {
+    if (!active) {
+      setLeftMs(0);
+      return;
+    }
+    const tick = () => setLeftMs(msUntilNextBangkokMidnight());
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [active]);
+
+  return leftMs;
+}
 
 const TITLE_GOLD = {
   background:
@@ -112,6 +153,51 @@ export function FortuneDreamPage() {
 
   const reading = loaded?.reading;
   const locked = Boolean(loaded?.asked && reading);
+  const leftMs = useBangkokMidnightCountdown(locked);
+  const canAskAgain = locked && leftMs <= 0;
+
+  useEffect(() => {
+    if (!canAskAgain) return;
+    let alive = true;
+    async function refresh() {
+      try {
+        const res = await fetch("/api/fortune/dream", { cache: "no-store" });
+        const data = (await res.json()) as {
+          user?: boolean | null;
+          asked?: boolean;
+          dream?: string;
+          reading?: DreamReading;
+        };
+        if (!alive) return;
+        setLoaded({
+          signedIn: Boolean(data.user),
+          asked: Boolean(data.asked && data.reading),
+          dream: data.dream ?? "",
+          reading: data.reading ?? null,
+        });
+        setDraft("");
+      } catch {
+        /* keep locked UI until next tick / manual retry */
+      }
+    }
+    void refresh();
+    return () => {
+      alive = false;
+    };
+  }, [canAskAgain]);
+
+  if (loaded === null || busy) {
+    return (
+      <MaePageLoading
+        label={busy ? "แม่กำลังเปิดตำรา…" : "กำลังเปิดตำราฝัน…"}
+        hint={
+          busy
+            ? "กำลังตีความฝันและจัดเลขเด็ดให้"
+            : "รอสักครู่ แม่กำลังจัดหน้าให้"
+        }
+      />
+    );
+  }
 
   return (
     <div className="relative mx-auto min-h-full w-full max-w-[480px] text-white">
@@ -136,35 +222,12 @@ export function FortuneDreamPage() {
           >
             ทำนายฝัน
           </h1>
-          <span
-            aria-hidden
-            className="mx-auto mt-2.5 block h-px w-20"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, rgba(232,209,154,0.75), transparent)",
-            }}
-          />
-          <p
-            className="mx-auto mt-3 max-w-[19rem] text-[15px] font-medium leading-[1.55]"
-            style={{ color: TEXT }}
-          >
-            เล่าภาพที่จำได้ แม่จะตีความให้
-            <br />
-            พร้อมเลขเด็ดที่ผูกกับสัญลักษณ์ในฝัน
-          </p>
           <p className="mt-2 text-[13px] font-medium" style={{ color: MUTED }}>
             วันละ 1 ครั้ง · รีเซ็ต 00:00 น.
           </p>
         </header>
 
-        {loaded === null ? (
-          <p
-            className="mt-10 text-center text-[15px] font-medium"
-            style={{ color: MUTED }}
-          >
-            กำลังเปิดตำรา…
-          </p>
-        ) : !loaded.signedIn ? (
+        {!loaded.signedIn ? (
           <div
             className="mt-8 rounded-[22px] px-5 py-6 text-center"
             style={{
@@ -190,14 +253,16 @@ export function FortuneDreamPage() {
         ) : (
           <>
             <div
-              className="mt-7 rounded-[20px] p-[1.5px]"
+              className="mt-7 rounded-[22px] px-4 py-4"
               style={{
-                background: locked
-                  ? "linear-gradient(155deg, rgba(232,209,154,0.45), rgba(143,110,56,0.25))"
-                  : GOLD_RING,
+                background: GLASS.bg,
+                border: GLASS.border,
+                boxShadow: `${GLASS.shadow}, ${GLASS.highlight}`,
+                backdropFilter: GLASS.blur,
+                WebkitBackdropFilter: GLASS.blur,
               }}
             >
-              <label className="block rounded-[18.5px] px-4 py-4" style={{ background: "rgba(6,12,24,0.88)" }}>
+              <label className="block">
                 <span
                   className="text-[13.5px] font-semibold tracking-[0.1em]"
                   style={{ color: GOLD }}
@@ -216,14 +281,7 @@ export function FortuneDreamPage() {
               </label>
             </div>
 
-            {locked ? (
-              <p
-                className="mt-3 text-center text-[13.5px] font-medium"
-                style={{ color: MUTED }}
-              >
-                ถามไปแล้ววันนี้ · ถามใหม่ได้หลัง 00:00 น.
-              </p>
-            ) : (
+            {!locked && (
               <button
                 type="button"
                 disabled={busy || draft.trim().length < 4}
@@ -255,6 +313,40 @@ export function FortuneDreamPage() {
             ) : null}
 
             {reading ? <DreamResult reading={reading} /> : null}
+
+            {locked ? (
+              <button
+                type="button"
+                disabled={!canAskAgain}
+                onClick={() => {
+                  if (!canAskAgain) return;
+                  setLoaded({
+                    signedIn: true,
+                    asked: false,
+                    dream: "",
+                    reading: null,
+                  });
+                  setDraft("");
+                  setError("");
+                }}
+                className="mx-auto mt-6 flex h-11 items-center justify-center gap-2 rounded-full px-5 text-[14.5px] font-semibold tabular-nums outline-none transition active:scale-[0.99] disabled:opacity-100"
+                style={{
+                  color: GOLD,
+                  background: "rgba(6,14,30,0.55)",
+                  boxShadow: `inset 0 0 0 1px ${GOLD}`,
+                }}
+              >
+                <RefreshCw className="h-4 w-4 shrink-0" strokeWidth={2.2} />
+                <span>
+                  ทำนายฝันใหม่
+                  {leftMs > 0 ? (
+                    <span className="ml-1.5 opacity-90">
+                      {formatCountdown(leftMs)}
+                    </span>
+                  ) : null}
+                </span>
+              </button>
+            ) : null}
           </>
         )}
       </div>
@@ -265,145 +357,120 @@ export function FortuneDreamPage() {
 function DreamResult({ reading }: { reading: DreamReading }) {
   return (
     <section
-      className="mt-6 rounded-[22px] p-[2px]"
+      className="mt-6 overflow-hidden rounded-[22px] px-4 py-5 sm:px-5"
       style={{
-        background: GOLD_RING,
-        boxShadow:
-          "0 14px 36px rgba(0,0,0,0.34), 0 0 0 1px rgba(232,209,154,0.2)",
+        background: GLASS.bg,
+        border: GLASS.border,
+        boxShadow: `${GLASS.shadow}, ${GLASS.highlight}`,
+        backdropFilter: GLASS.blur,
+        WebkitBackdropFilter: GLASS.blur,
       }}
     >
-      <div
-        className="rounded-[20px] px-4 py-5 sm:px-5"
-        style={{
-          background:
-            "linear-gradient(160deg, rgba(10,20,38,0.96) 0%, rgba(5,12,26,0.94) 100%)",
-          boxShadow:
-            "inset 0 1px 0 rgba(255,248,228,0.16), inset 0 0 0 1px rgba(8,12,24,0.5)",
-        }}
-      >
-        <div className="flex items-center justify-between gap-3">
-          <p
-            className="text-[12.5px] font-semibold tracking-[0.14em]"
-            style={{ color: GOLD }}
-          >
-            ตำราแม่มั่งมี
-          </p>
-          <Moon className="h-4 w-4 shrink-0" style={{ color: GOLD_SOFT }} strokeWidth={2} />
-        </div>
-
-        <h2
-          className="mt-3 text-[1.45rem] font-bold leading-[1.35]"
-          style={{
-            ...TITLE_GOLD,
-            paddingTop: "0.08em",
-            paddingBottom: "0.04em",
-          }}
-        >
-          {reading.title}
-        </h2>
+      <div className="flex items-center gap-2">
+        <Moon className="h-4 w-4 shrink-0" style={{ color: GOLD_SOFT }} strokeWidth={2} />
         <p
-          className="mt-3 text-[16px] font-medium leading-[1.65]"
-          style={{ color: TEXT }}
+          className="text-[13px] font-semibold tracking-[0.14em]"
+          style={{ color: GOLD }}
         >
-          {reading.meaning}
-        </p>
-
-        <div className="mt-4 grid grid-cols-1 gap-2.5">
-          <div
-            className="rounded-[16px] px-3.5 py-3"
-            style={{
-              background: "rgba(40,110,90,0.14)",
-              boxShadow: "inset 0 0 0 1px rgba(120,210,180,0.22)",
-            }}
-          >
-            <p
-              className="text-[13px] font-semibold tracking-wide"
-              style={{ color: "#b9ebdc" }}
-            >
-              วันนี้ควรทำ
-            </p>
-            <p className="mt-1 text-[15px] font-medium leading-[1.5] text-white">
-              {reading.doToday}
-            </p>
-          </div>
-          <div
-            className="rounded-[16px] px-3.5 py-3"
-            style={{
-              background: "rgba(120,48,58,0.16)",
-              boxShadow: "inset 0 0 0 1px rgba(255,154,154,0.22)",
-            }}
-          >
-            <p
-              className="text-[13px] font-semibold tracking-wide"
-              style={{ color: "#f0a8b0" }}
-            >
-              อย่าเพิ่ง
-            </p>
-            <p className="mt-1 text-[15px] font-medium leading-[1.5] text-white">
-              {reading.holdOff}
-            </p>
-          </div>
-        </div>
-
-        <div
-          className="mt-5 rounded-[18px] px-4 py-4"
-          style={{
-            background:
-              "linear-gradient(145deg, rgba(232,209,154,0.14) 0%, rgba(8,14,28,0.45) 100%)",
-            boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.32)",
-          }}
-        >
-          <p
-            className="text-[12.5px] font-semibold tracking-[0.14em]"
-            style={{ color: GOLD }}
-          >
-            เลขเด็ด
-          </p>
-          <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
-            <span className="text-[2.15rem] font-bold tabular-nums leading-none tracking-tight text-white">
-              {reading.numbers.main}
-            </span>
-            <span className="pb-1 text-[1.1rem] font-medium text-white/35">·</span>
-            <span className="text-[2.15rem] font-bold tabular-nums leading-none tracking-tight text-white">
-              {reading.numbers.secondary}
-            </span>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {reading.numbers.triples.map((n) => (
-              <span
-                key={n}
-                className="rounded-full px-3 py-[0.4em] text-[15px] font-bold tabular-nums leading-none"
-                style={{
-                  color: "#1a1408",
-                  background: GOLD_RING,
-                  boxShadow: "0 6px 14px rgba(0,0,0,0.22)",
-                }}
-              >
-                {n}
-              </span>
-            ))}
-          </div>
-          <p
-            className="mt-3 text-[14px] font-medium leading-[1.5]"
-            style={{ color: MUTED }}
-          >
-            {reading.numbers.why}
-          </p>
-        </div>
-
-        <p
-          className="mt-5 text-center text-[15.5px] font-medium leading-[1.55]"
-          style={{ color: TEXT }}
-        >
-          {reading.closing}
-        </p>
-        <p
-          className="mt-3 text-center text-[12.5px] font-medium leading-snug"
-          style={{ color: MUTED }}
-        >
-          เลขเป็นความเชื่อประกอบ ไม่การันตีผล
+          ตำราแม่มั่งมี
         </p>
       </div>
+
+      <h2
+        className="mt-3 text-[1.4rem] font-bold leading-[1.35]"
+        style={{
+          ...TITLE_GOLD,
+          paddingTop: "0.08em",
+          paddingBottom: "0.04em",
+        }}
+      >
+        {reading.title}
+      </h2>
+      <p
+        className="mt-3 text-[16px] font-medium leading-[1.65]"
+        style={{ color: TEXT }}
+      >
+        {reading.meaning}
+      </p>
+
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <div
+          className="rounded-[18px] px-3.5 py-3.5"
+          style={{
+            background: GLASS.bgSoft,
+            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)",
+          }}
+        >
+          <p
+            className="text-[13.5px] font-bold tracking-wide"
+            style={{ color: GOLD_SOFT }}
+          >
+            วันนี้ลอง
+          </p>
+          <p className="mt-1.5 text-[14.5px] font-medium leading-[1.5] text-white">
+            {reading.doToday}
+          </p>
+        </div>
+        <div
+          className="rounded-[18px] px-3.5 py-3.5"
+          style={{
+            background: GLASS.bgSoft,
+            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)",
+          }}
+        >
+          <p
+            className="text-[13.5px] font-bold tracking-wide"
+            style={{ color: GOLD_SOFT }}
+          >
+            ควรระวัง
+          </p>
+          <p className="mt-1.5 text-[14.5px] font-medium leading-[1.5] text-white">
+            {reading.holdOff}
+          </p>
+        </div>
+      </div>
+
+      <div
+        className="mt-5 rounded-[18px] px-4 py-4"
+        style={{
+          background: "rgba(8,14,28,0.4)",
+          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)",
+        }}
+      >
+        <p
+          className="text-[13px] font-semibold tracking-[0.14em]"
+          style={{ color: GOLD }}
+        >
+          เลขเด็ด
+        </p>
+        <p className="mt-2.5 text-[2.05rem] font-bold tabular-nums leading-none tracking-tight text-white">
+          {reading.numbers.main}
+          <span className="mx-2 text-[1.15rem] font-medium text-white/40">·</span>
+          {reading.numbers.secondary}
+        </p>
+        <p className="mt-2.5 text-[1.15rem] font-semibold tabular-nums tracking-[0.1em] text-white/88">
+          {reading.numbers.triples.join("   ")}
+        </p>
+        <p
+          className="mt-2.5 text-[14px] font-medium leading-[1.5]"
+          style={{ color: MUTED }}
+        >
+          {reading.numbers.why}
+        </p>
+      </div>
+
+      <p
+        className="mt-5 text-[15.5px] font-medium leading-[1.55]"
+        style={{ color: TEXT }}
+      >
+        {reading.closing}
+      </p>
+      <p
+        className="mt-3 text-[12.5px] font-medium leading-snug"
+        style={{ color: MUTED }}
+      >
+        เลขเป็นความเชื่อประกอบ ไม่การันตีผล
+      </p>
     </section>
   );
 }
