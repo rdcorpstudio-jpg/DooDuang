@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   Ban,
   ChevronRight,
-  Crown,
   MessageCircle,
   Moon,
   Sparkles,
@@ -196,99 +195,81 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
   return (
     <Link
       href={item.href}
-      className="group relative block w-full overflow-hidden rounded-[24px] outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+      className="group relative block w-full overflow-hidden rounded-[18px] text-left outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
       style={{
+        aspectRatio: "2.35 / 1",
         boxShadow:
-          "0 18px 40px rgba(0,0,0,0.38), 0 0 0 1px rgba(232,209,154,0.28)",
+          "inset 0 0 0 1px rgba(255,255,255,0.14), 0 10px 24px rgba(0,0,0,0.26)",
       }}
       aria-label={item.title}
     >
+      <Image
+        src={item.art}
+        alt=""
+        fill
+        unoptimized
+        className="object-cover object-[88%_center] transition duration-500 group-hover:scale-[1.03]"
+        sizes="(max-width: 480px) 100vw, 960px"
+      />
       <div
-        className="relative overflow-hidden rounded-[24px]"
-        style={{ minHeight: 220 }}
-      >
-        <Image
-          src={item.art}
-          alt=""
-          fill
-          unoptimized
-          className="object-cover object-[82%_center] transition duration-500 group-hover:scale-[1.03]"
-          sizes="(max-width: 480px) 100vw, 960px"
-        />
-        <div
-          className="pointer-events-none absolute inset-0"
-          aria-hidden
-          style={{
-            background:
-              "linear-gradient(160deg, rgba(4,8,18,0.55) 0%, rgba(4,8,18,0.72) 42%, rgba(4,8,18,0.94) 100%)",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute inset-[1.5px] rounded-[22.5px]"
-          aria-hidden
-          style={{
-            boxShadow:
-              "inset 0 0 0 1px rgba(232,209,154,0.35), inset 0 1px 0 rgba(255,248,228,0.2)",
-          }}
-        />
+        className="pointer-events-none absolute inset-0"
+        aria-hidden
+        style={{
+          background:
+            "linear-gradient(105deg, rgba(8,14,28,0.94) 0%, rgba(8,14,28,0.72) 42%, rgba(8,14,28,0.18) 66%, transparent 82%)",
+        }}
+      />
 
-        <span
-          className="absolute right-3.5 top-3.5 z-[2] rounded-full px-3 py-[0.4em] text-[15px] font-semibold leading-none"
+      <span
+        className="absolute right-3 top-3 z-[2] inline-flex items-center rounded-full px-2.5 text-[15px] font-semibold leading-[1.45]"
+        style={{
+          color: GOLD,
+          background: "rgba(8,12,24,0.72)",
+          boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.45)",
+          paddingTop: "0.32em",
+          paddingBottom: "0.26em",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+        }}
+      >
+        วันละ 1 ครั้ง
+      </span>
+
+      <div className="relative z-[1] flex h-full flex-col justify-center gap-1.5 px-4 py-3.5 pr-[4.5rem]">
+        <p
+          className="text-[15px] font-semibold tracking-[0.12em]"
+          style={{ color: GOLD }}
+        >
+          ตำราแม่มั่งมี
+        </p>
+        <p
+          className="max-w-[16.5rem] text-[1.35rem] font-bold leading-[1.3]"
           style={{
-            color: GOLD,
-            background: "rgba(8,12,24,0.72)",
-            boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.45)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
+            ...TITLE_GOLD,
+            paddingTop: "0.08em",
+            paddingBottom: "0.04em",
           }}
         >
-          วันละ 1 ครั้ง
-        </span>
-
-        <div className="relative z-[1] flex min-h-[220px] flex-col justify-end px-4 pb-4 pt-14 sm:px-5">
-          <p
-            className="text-[15px] font-semibold tracking-[0.14em]"
-            style={{ color: GOLD }}
-          >
-            ตำราแม่มั่งมี
-          </p>
-          <p
-            className="mt-1.5 text-[1.55rem] font-bold leading-[1.25]"
+          {item.title}
+        </p>
+        <p
+          className="max-w-[16.5rem] text-[15px] font-medium leading-[1.45] line-clamp-2"
+          style={{ color: "rgba(245,247,255,0.92)" }}
+        >
+          {item.blurb}
+        </p>
+        <div className="mt-1">
+          <span
+            className="inline-flex w-fit items-center gap-0.5 rounded-full px-3.5 py-[0.45em] text-[15px] font-bold leading-none"
             style={{
-              ...TITLE_GOLD,
-              paddingTop: "0.08em",
-              paddingBottom: "0.04em",
+              color: "#1a1408",
+              background: GOLD_RING,
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.35), 0 6px 14px rgba(0,0,0,0.25)",
             }}
           >
-            {item.title}
-          </p>
-          <p
-            className="mt-2 max-w-[18rem] text-[15px] font-medium leading-[1.5]"
-            style={{ color: "rgba(240,244,250,0.9)" }}
-          >
-            {item.blurb}
-          </p>
-
-          <span className="wallpaper-dl-btn group/btn relative mt-4 flex h-[3.35rem] w-full items-center gap-3 overflow-hidden rounded-[16px] px-2.5 text-left">
-            <span className="wallpaper-dl-btn__icon relative z-[1] flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px]">
-              <Moon className="h-[17px] w-[17px]" strokeWidth={2.2} />
-            </span>
-            <span className="relative z-[1] min-w-0 flex-1">
-              <span className="dd-btn-label block text-[15.5px] font-bold leading-tight tracking-wide">
-                เปิดตำราฝัน
-              </span>
-              <span className="mt-0.5 block text-[15px] font-medium leading-tight opacity-70">
-                ตีความฝัน · ได้เลขเด็ด
-              </span>
-            </span>
-            <ChevronRight
-              className="relative z-[1] mr-1 h-5 w-5 shrink-0 opacity-80"
-              strokeWidth={2.4}
-            />
-            <span
-              className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
-              aria-hidden
-            />
+            เปิดตำราฝัน
+            <ChevronRight className="h-4 w-4" strokeWidth={2.6} />
           </span>
         </div>
       </div>
@@ -363,22 +344,20 @@ export function SpecialDraft() {
             </div>
             {premium ? (
               <span
-                className="mt-1 inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-[0.45em] text-[15px] font-semibold leading-[1.4]"
+                className="mt-1 inline-flex shrink-0 items-center rounded-full px-3 py-[0.35em] text-[15px] font-semibold leading-none"
                 style={{
                   color: GOLD_SOFT,
                   background: "rgba(201,163,90,0.16)",
                   boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.35)",
                 }}
               >
-                <Crown className="h-3.5 w-3.5" strokeWidth={2.2} />
                 พรีเมียม
               </span>
             ) : (
               <Link
                 href="/premium/pay?return=/special"
-                className="mae-gold-cta mt-1 inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-[15px] font-bold tracking-wide outline-none transition active:scale-[0.98]"
+                className="mae-gold-cta mt-1 inline-flex h-9 shrink-0 items-center justify-center rounded-full px-3.5 text-[15px] font-semibold tracking-wide outline-none transition active:scale-[0.98]"
               >
-                <Crown className="h-3.5 w-3.5" strokeWidth={2.3} />
                 <span className="dd-btn-label">สมัครพรีเมียม</span>
               </Link>
             )}
