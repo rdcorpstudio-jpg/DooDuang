@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RefreshCw, Smartphone, Sparkles } from "lucide-react";
@@ -307,63 +307,67 @@ export function FortunePhonePage() {
           </div>
         ) : (
           <>
-            <div
-              className="mt-8 rounded-[24px] px-4 py-4"
-              style={{
-                background: GLASS.bg,
-                border: GLASS.border,
-                boxShadow: GLASS.shadow,
-                backdropFilter: GLASS.blur,
-                WebkitBackdropFilter: GLASS.blur,
-              }}
-            >
-              <label className="block">
-                <span
-                  className="text-[15px] font-semibold tracking-[0.06em]"
-                  style={{ color: GOLD }}
+            {!locked ? (
+              <>
+                <div
+                  className="mt-8 rounded-[24px] px-4 py-4"
+                  style={{
+                    background: GLASS.bg,
+                    border: GLASS.border,
+                    boxShadow: GLASS.shadow,
+                    backdropFilter: GLASS.blur,
+                    WebkitBackdropFilter: GLASS.blur,
+                  }}
                 >
-                  {locked ? "เบอร์ที่ถามสัปดาห์นี้" : "เบอร์มือถือ"}
-                </span>
-                <input
-                  value={
-                    locked
-                      ? formatPhoneDisplay(loaded.phone)
-                      : draft
-                  }
-                  readOnly={locked}
-                  inputMode="tel"
-                  autoComplete="tel"
-                  maxLength={16}
-                  onChange={(e) => setDraft(e.target.value)}
-                  placeholder="08x-xxx-xxxx"
-                  className="mt-3 w-full bg-transparent text-[1.35rem] font-semibold tabular-nums tracking-wide text-white outline-none placeholder:text-white/35"
-                />
-              </label>
-            </div>
+                  <label className="block">
+                    <span
+                      className="text-[15px] font-semibold tracking-[0.06em]"
+                      style={{ color: GOLD }}
+                    >
+                      เบอร์มือถือ
+                    </span>
+                    <input
+                      value={draft}
+                      inputMode="tel"
+                      autoComplete="tel"
+                      maxLength={16}
+                      onChange={(e) => setDraft(e.target.value)}
+                      placeholder="08x-xxx-xxxx"
+                      className="mt-3 w-full bg-transparent text-[1.35rem] font-semibold tabular-nums tracking-wide text-white outline-none placeholder:text-white/35"
+                    />
+                  </label>
+                </div>
 
-            {!locked && (
-              <button
-                type="button"
-                disabled={busy || !canSubmit}
-                onClick={() => void ask()}
-                className="wallpaper-dl-btn group relative mt-4 flex h-[3.65rem] w-full items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] disabled:opacity-50"
+                <button
+                  type="button"
+                  disabled={busy || !canSubmit}
+                  onClick={() => void ask()}
+                  className="wallpaper-dl-btn group relative mt-4 flex h-[3.65rem] w-full items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] disabled:opacity-50"
+                >
+                  <span className="wallpaper-dl-btn__icon relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]">
+                    <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                  </span>
+                  <span className="relative z-[1] min-w-0 flex-1">
+                    <span className="dd-btn-label block text-[16px] font-bold leading-tight tracking-wide">
+                      {busy ? "แม่กำลังเปิดตำรา…" : "วิเคราะห์เบอร์นี้"}
+                    </span>
+                    <span className="mt-0.5 block text-[15px] font-medium leading-tight opacity-70">
+                      เทียบกับโปรไฟล์ · อ่านผลครบด้าน
+                    </span>
+                  </span>
+                  <span
+                    className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
+                    aria-hidden
+                  />
+                </button>
+              </>
+            ) : (
+              <p
+                className="mt-8 text-center text-[15px] font-semibold tabular-nums tracking-[0.14em]"
+                style={{ color: GOLD_SOFT }}
               >
-                <span className="wallpaper-dl-btn__icon relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]">
-                  <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
-                </span>
-                <span className="relative z-[1] min-w-0 flex-1">
-                  <span className="dd-btn-label block text-[16px] font-bold leading-tight tracking-wide">
-                    {busy ? "แม่กำลังเปิดตำรา…" : "วิเคราะห์เบอร์นี้"}
-                  </span>
-                  <span className="mt-0.5 block text-[15px] font-medium leading-tight opacity-70">
-                    เทียบกับโปรไฟล์ · อ่านผลครบด้าน
-                  </span>
-                </span>
-                <span
-                  className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
-                  aria-hidden
-                />
-              </button>
+                {formatPhoneDisplay(loaded.phone)}
+              </p>
             )}
 
             {error ? (
@@ -389,7 +393,7 @@ export function FortunePhonePage() {
                   setDraft("");
                   setError("");
                 }}
-                className="mx-auto mt-8 flex h-12 items-center justify-center gap-2.5 rounded-full px-6 text-[15px] font-semibold tabular-nums outline-none transition active:scale-[0.99] disabled:opacity-100"
+                className="mx-auto mt-10 flex h-12 items-center justify-center gap-2.5 rounded-full px-7 text-[15px] font-semibold tabular-nums outline-none transition active:scale-[0.99] disabled:opacity-100"
                 style={{
                   color: GOLD,
                   background: "rgba(6,14,30,0.62)",
@@ -416,63 +420,86 @@ export function FortunePhonePage() {
 
 function PhoneResult({ reading }: { reading: PhoneReading }) {
   const visible = useRevealMounted(60);
-  const fitTone =
-    reading.birthFit.verdict.includes("ตี")
-      ? CAUTION
-      : reading.birthFit.verdict.includes("หนุน")
-        ? "#b9ebdc"
-        : GOLD_SOFT;
+  const fitTone = reading.birthFit.verdict.includes("ตี")
+    ? CAUTION
+    : reading.birthFit.verdict.includes("หนุน")
+      ? "#b9ebdc"
+      : GOLD_SOFT;
 
   return (
-    <section className="mt-8 space-y-7">
+    <section className="mt-7 space-y-0">
+      {/* Hero score */}
       <Reveal visible={visible} delay={40} className="text-center">
         <p
-          className="text-[15px] font-semibold tracking-[0.16em]"
+          className="text-[13px] font-semibold tracking-[0.22em]"
           style={{ color: GOLD }}
         >
           ภาพรวมเบอร์
         </p>
-        <p className="mt-3 text-[2.4rem] font-bold tabular-nums leading-none text-white">
-          {reading.score}
-          <span className="ml-1 text-[1rem] font-medium text-white/45">/100</span>
-        </p>
+
+        <div className="relative mx-auto mt-5 flex h-[7.25rem] w-[7.25rem] items-center justify-center">
+          <span
+            aria-hidden
+            className="absolute inset-0 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(232,209,154,0.18) 0%, rgba(232,209,154,0.04) 55%, transparent 70%)",
+              boxShadow:
+                "inset 0 0 0 1px rgba(232,209,154,0.38), 0 0 28px rgba(232,209,154,0.12)",
+            }}
+          />
+          <p className="relative text-[2.75rem] font-bold tabular-nums leading-none tracking-tight text-white">
+            {reading.score}
+            <span className="ml-0.5 align-baseline text-[0.95rem] font-medium text-white/40">
+              /100
+            </span>
+          </p>
+        </div>
+
         <h2
-          className="mae-gold-text mt-3 text-[1.4rem] font-bold leading-[1.35]"
+          className="mae-gold-text mx-auto mt-5 max-w-[20rem] text-[1.35rem] font-bold leading-[1.4]"
           style={{ paddingTop: "0.08em", paddingBottom: "0.04em" }}
         >
           {reading.title}
         </h2>
+
+        {reading.scoreLabel ? (
+          <p
+            className="mx-auto mt-2.5 max-w-[20rem] text-[15px] font-semibold leading-[1.45]"
+            style={{ color: GOLD_SOFT }}
+          >
+            {reading.scoreLabel}
+          </p>
+        ) : null}
+
         <p
-          className="mx-auto mt-2.5 max-w-[21rem] text-[16px] font-medium leading-[1.55]"
-          style={{ color: TEXT }}
-        >
-          {reading.scoreLabel}
-        </p>
-        <p
-          className="mx-auto mt-3 max-w-[22rem] text-[15px] font-medium leading-[1.65]"
+          className="mx-auto mt-3.5 max-w-[22rem] text-[15px] font-medium leading-[1.7]"
           style={{ color: MUTED }}
         >
+          {reading.summary}
+          {reading.summary && reading.meaning ? " · " : null}
           {reading.meaning}
         </p>
       </Reveal>
 
-      <Reveal visible={visible} delay={100}>
-        <p
-          className="text-[15px] font-semibold tracking-[0.12em]"
-          style={{ color: GOLD }}
-        >
-          เลขคู่ที่เด่น
-        </p>
-        <div className="mt-3 space-y-3">
+      <SectionRule delay={90} visible={visible} />
+
+      {/* Pairs */}
+      <Reveal visible={visible} delay={110}>
+        <SectionTitle>เลขคู่ที่เด่น</SectionTitle>
+        <div className="mt-4 space-y-4">
           {reading.pairs.map((row) => (
-            <div key={`${row.pair}-${row.meaning}`} className="flex gap-3">
+            <div
+              key={`${row.pair}-${row.meaning}`}
+              className="grid grid-cols-[3.25rem_1fr] items-start gap-3"
+            >
               <span
-                className="shrink-0 text-[1.25rem] font-bold tabular-nums leading-none"
+                className="pt-0.5 text-[1.35rem] font-bold tabular-nums leading-none"
                 style={{ color: GOLD_SOFT }}
               >
                 {row.pair}
               </span>
-              <p className="text-[15px] font-medium leading-[1.5] text-white">
+              <p className="text-[15px] font-medium leading-[1.55] text-white">
                 {row.meaning}
               </p>
             </div>
@@ -480,22 +507,52 @@ function PhoneResult({ reading }: { reading: PhoneReading }) {
         </div>
       </Reveal>
 
-      <Reveal visible={visible} delay={160}>
-        <p
-          className="text-[15px] font-semibold tracking-[0.12em]"
-          style={{ color: GOLD }}
+      <SectionRule delay={150} visible={visible} />
+
+      {/* Four aspects */}
+      <Reveal visible={visible} delay={170}>
+        <SectionTitle>ผลต่อ 4 ด้าน</SectionTitle>
+        <div
+          className="mt-4 overflow-hidden rounded-[20px]"
+          style={{
+            background: "rgba(8,16,32,0.45)",
+            boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.16)",
+          }}
         >
-          ผลต่อ 4 ด้าน
-        </p>
-        <div className="mt-3 space-y-3.5">
-          <AspectLine label="งาน" body={reading.aspects.work} />
-          <AspectLine label="เงิน" body={reading.aspects.money} />
-          <AspectLine label="ความรัก" body={reading.aspects.love} />
-          <AspectLine label="การสื่อสาร" body={reading.aspects.social} />
+          {(
+            [
+              ["งาน", reading.aspects.work],
+              ["เงิน", reading.aspects.money],
+              ["ความรัก", reading.aspects.love],
+              ["การสื่อสาร", reading.aspects.social],
+            ] as const
+          ).map(([label, body], i) => (
+            <div
+              key={label}
+              className="grid grid-cols-[5.25rem_1fr] gap-3 px-4 py-3.5"
+              style={{
+                borderTop:
+                  i === 0 ? undefined : "1px solid rgba(255,255,255,0.06)",
+              }}
+            >
+              <span
+                className="text-[15px] font-bold leading-[1.45]"
+                style={{ color: GOLD_SOFT }}
+              >
+                {label}
+              </span>
+              <p className="min-w-0 text-[15px] font-medium leading-[1.55] text-white">
+                {body}
+              </p>
+            </div>
+          ))}
         </div>
       </Reveal>
 
-      <Reveal visible={visible} delay={220} className="space-y-5">
+      <SectionRule delay={210} visible={visible} />
+
+      {/* Strengths / cautions */}
+      <Reveal visible={visible} delay={230} className="space-y-7">
         <BulletBlock
           label="จุดแข็ง"
           color={GOLD_SOFT}
@@ -508,66 +565,35 @@ function PhoneResult({ reading }: { reading: PhoneReading }) {
         />
       </Reveal>
 
-      <Reveal visible={visible} delay={280} className="space-y-4">
-        <div>
-          <p
-            className="text-[15px] font-semibold tracking-[0.12em]"
-            style={{ color: GOLD }}
-          >
-            เลขท้าย {reading.tailDigits}
-          </p>
-          <p className="mt-2 text-[15px] font-medium leading-[1.55] text-white">
-            {reading.tailMeaning}
-          </p>
-        </div>
-        <div>
-          <p
-            className="text-[15px] font-semibold tracking-[0.12em]"
-            style={{ color: GOLD }}
-          >
-            {reading.repeated}
-          </p>
-          <p className="mt-2 text-[15px] font-medium leading-[1.55] text-white">
-            {reading.repeatedMeaning}
-          </p>
-        </div>
+      <SectionRule delay={270} visible={visible} />
+
+      {/* Digits + advice */}
+      <Reveal visible={visible} delay={290} className="space-y-6">
+        <NoteBlock
+          title={`เลขท้าย ${reading.tailDigits}`}
+          body={reading.tailMeaning}
+        />
+        <NoteBlock title={reading.repeated} body={reading.repeatedMeaning} />
+        <NoteBlock title="แนะนำการใช้เบอร์" body={reading.usageAdvice} />
+        <NoteBlock
+          title={`เทียบพื้นดวง · ${reading.birthFit.verdict}`}
+          titleColor={fitTone}
+          body={reading.birthFit.detail}
+        />
       </Reveal>
 
-      <Reveal visible={visible} delay={340} className="space-y-4">
-        <div>
-          <p
-            className="text-[15px] font-semibold tracking-[0.12em]"
-            style={{ color: GOLD }}
-          >
-            แนะนำการใช้เบอร์
-          </p>
-          <p className="mt-2 text-[15px] font-medium leading-[1.55] text-white">
-            {reading.usageAdvice}
-          </p>
-        </div>
-        <div>
-          <p
-            className="text-[15px] font-semibold tracking-[0.12em]"
-            style={{ color: fitTone }}
-          >
-            เทียบพื้นดวง · {reading.birthFit.verdict}
-          </p>
-          <p className="mt-2 text-[15px] font-medium leading-[1.55] text-white">
-            {reading.birthFit.detail}
-          </p>
-        </div>
-      </Reveal>
+      <SectionRule delay={330} visible={visible} />
 
-      <Reveal visible={visible} delay={400} className="text-center">
+      <Reveal visible={visible} delay={350} className="pb-1 text-center">
         <p
-          className="text-[16px] font-medium leading-[1.6]"
+          className="mx-auto max-w-[21rem] text-[16px] font-medium leading-[1.65]"
           style={{ color: TEXT }}
         >
           {reading.closing}
         </p>
         <p
-          className="mt-3 text-[15px] font-medium leading-snug"
-          style={{ color: MUTED }}
+          className="mt-3 text-[13px] font-medium tracking-wide"
+          style={{ color: "rgba(160,176,198,0.72)" }}
         >
           เป็นความเชื่อประกอบ ไม่การันตีผล
         </p>
@@ -576,16 +602,56 @@ function PhoneResult({ reading }: { reading: PhoneReading }) {
   );
 }
 
-function AspectLine({ label, body }: { label: string; body: string }) {
+function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <div className="flex gap-3">
-      <span
-        className="w-[4.5rem] shrink-0 text-[15px] font-bold"
-        style={{ color: GOLD_SOFT }}
+    <p
+      className="text-[13px] font-semibold tracking-[0.18em]"
+      style={{ color: GOLD }}
+    >
+      {children}
+    </p>
+  );
+}
+
+function SectionRule({
+  visible,
+  delay,
+}: {
+  visible: boolean;
+  delay: number;
+}) {
+  return (
+    <Reveal visible={visible} delay={delay} className="py-7">
+      <div
+        aria-hidden
+        className="mx-auto h-px w-full max-w-[14rem]"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(232,209,154,0.35), transparent)",
+        }}
+      />
+    </Reveal>
+  );
+}
+
+function NoteBlock({
+  title,
+  body,
+  titleColor = GOLD,
+}: {
+  title: string;
+  body: string;
+  titleColor?: string;
+}) {
+  return (
+    <div className="pl-3" style={{ borderLeft: `2px solid ${titleColor}55` }}>
+      <p
+        className="text-[15px] font-semibold tracking-[0.06em]"
+        style={{ color: titleColor }}
       >
-        {label}
-      </span>
-      <p className="min-w-0 flex-1 text-[15px] font-medium leading-[1.5] text-white">
+        {title}
+      </p>
+      <p className="mt-2 text-[15px] font-medium leading-[1.6] text-white">
         {body}
       </p>
     </div>
@@ -603,20 +669,17 @@ function BulletBlock({
 }) {
   return (
     <div>
-      <p
-        className="text-[15px] font-bold tracking-wide"
-        style={{ color }}
-      >
+      <p className="text-[15px] font-bold tracking-wide" style={{ color }}>
         {label}
       </p>
-      <ul className="mt-2 space-y-2">
+      <ul className="mt-3 space-y-2.5">
         {items.map((item) => (
           <li
             key={item}
-            className="flex items-start gap-2.5 text-[15px] font-medium leading-[1.5] text-white"
+            className="flex items-start gap-2.5 text-[15px] font-medium leading-[1.55] text-white"
           >
             <span
-              className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full"
+              className="mt-[0.5em] h-1.5 w-1.5 shrink-0 rounded-full"
               style={{ background: color }}
               aria-hidden
             />
