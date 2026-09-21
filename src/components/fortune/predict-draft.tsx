@@ -188,7 +188,7 @@ function PredictCard({
       onClick={onOpen}
       className="group relative block w-full overflow-hidden rounded-[16px] text-left outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4"
       style={{
-        aspectRatio: "3.2 / 1",
+        aspectRatio: "2.85 / 1",
         boxShadow:
           "inset 0 0 0 1px rgba(255,255,255,0.14), 0 8px 20px rgba(0,0,0,0.24)",
       }}
@@ -210,64 +210,62 @@ function PredictCard({
         aria-hidden
         style={{
           background: light
-            ? "linear-gradient(105deg, rgba(250,246,238,0.88) 0%, rgba(250,246,238,0.55) 38%, rgba(250,246,238,0.12) 62%, transparent 78%)"
-            : "linear-gradient(105deg, rgba(8,14,28,0.88) 0%, rgba(8,14,28,0.55) 38%, rgba(8,14,28,0.14) 62%, transparent 78%)",
+            ? "linear-gradient(105deg, rgba(250,246,238,0.9) 0%, rgba(250,246,238,0.58) 40%, rgba(250,246,238,0.12) 64%, transparent 80%)"
+            : "linear-gradient(105deg, rgba(8,14,28,0.9) 0%, rgba(8,14,28,0.58) 40%, rgba(8,14,28,0.14) 64%, transparent 80%)",
         }}
       />
 
-      <div className="relative z-[1] flex h-full flex-col px-3.5 py-2.5">
-        {locked ? (
-          <span
-            className="mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-[0.28em] text-[10.5px] font-semibold leading-[1.55]"
-            style={{
-              color: light ? "#1f1a14" : GOLD_SOFT,
-              background: light
-                ? "rgba(255,255,255,0.72)"
-                : "rgba(8,12,24,0.65)",
-              boxShadow: light
-                ? "inset 0 0 0 1px rgba(31,26,20,0.1)"
-                : "inset 0 0 0 1px rgba(255,255,255,0.12)",
-              paddingTop: "0.32em",
-            }}
-          >
-            <Lock className="h-2.5 w-2.5" strokeWidth={2.4} />
-            พรีเมียม
-          </span>
-        ) : null}
+      {locked ? (
+        <span
+          className="absolute right-2.5 top-2.5 z-[2] inline-flex items-center gap-1 rounded-full px-2 py-[0.28em] text-[10.5px] font-semibold leading-[1.45]"
+          style={{
+            color: light ? "#1f1a14" : GOLD_SOFT,
+            background: light
+              ? "rgba(255,255,255,0.82)"
+              : "rgba(8,12,24,0.72)",
+            boxShadow: light
+              ? "inset 0 0 0 1px rgba(31,26,20,0.1)"
+              : "inset 0 0 0 1px rgba(255,255,255,0.14)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+          }}
+        >
+          <Lock className="h-2.5 w-2.5" strokeWidth={2.4} />
+          พรีเมียม
+        </span>
+      ) : null}
 
-        <div className="flex min-h-0 flex-1 flex-col justify-center">
-          <div className="max-w-[15.5rem]">
-            <p
-              className="text-[1.18rem] font-bold leading-[1.55]"
-              style={
-                light
-                  ? {
-                      color: "#1a1408",
-                      textShadow: "0 1px 0 rgba(255,255,255,0.4)",
-                      paddingTop: "0.18em",
-                    }
-                  : {
-                      ...TITLE_GOLD,
-                      paddingTop: "0.18em",
-                    }
-              }
-            >
-              {item.title}
-            </p>
-            <p
-              className="mt-0.5 text-[12.5px] font-medium leading-[1.55]"
-              style={{
-                color: light ? "rgba(40,34,28,0.82)" : "rgba(245,247,255,0.88)",
-              }}
-            >
-              {item.blurb}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-1 flex items-center justify-between gap-2">
+      <div className="relative z-[1] flex h-full flex-col justify-center gap-1 px-3.5 py-3 pr-16">
+        <p
+          className="max-w-[15.5rem] text-[1.15rem] font-bold leading-[1.35]"
+          style={
+            light
+              ? {
+                  color: "#1a1408",
+                  textShadow: "0 1px 0 rgba(255,255,255,0.4)",
+                  paddingTop: "0.1em",
+                  paddingBottom: "0.04em",
+                }
+              : {
+                  ...TITLE_GOLD,
+                  paddingTop: "0.1em",
+                  paddingBottom: "0.04em",
+                }
+          }
+        >
+          {item.title}
+        </p>
+        <p
+          className="max-w-[15.5rem] text-[12.5px] font-medium leading-[1.4] line-clamp-2"
+          style={{
+            color: light ? "rgba(40,34,28,0.82)" : "rgba(245,247,255,0.88)",
+          }}
+        >
+          {item.blurb}
+        </p>
+        <div className="mt-0.5 flex items-center gap-2">
           <span
-            className="inline-flex items-center gap-0.5 text-[12px] font-semibold leading-[1.5] tracking-wide"
+            className="inline-flex items-center gap-0.5 text-[12px] font-semibold leading-[1.4] tracking-wide"
             style={{ color: light ? "#6b4f1f" : GOLD_SOFT }}
           >
             {locked ? "ปลดล็อกเพื่ออ่าน" : "แตะเพื่อเปิด"}
@@ -276,33 +274,31 @@ function PredictCard({
 
           {item.badge ? (
             <span
-              className="inline-flex shrink-0 items-center rounded-full px-2.5 text-[11px] font-bold leading-[1.55] tracking-wide"
+              className="inline-flex shrink-0 items-center rounded-full px-2.5 text-[11px] font-bold leading-[1.45] tracking-wide"
               style={{
                 color: "#1a1408",
                 background: GOLD_BTN,
-                paddingTop: "0.34em",
-                paddingBottom: "0.26em",
+                paddingTop: "0.28em",
+                paddingBottom: "0.22em",
               }}
             >
               {item.badge}
             </span>
           ) : !locked ? (
             <span
-              className="inline-flex shrink-0 items-center rounded-full px-2.5 text-[11px] font-semibold leading-[1.55]"
+              className="inline-flex shrink-0 items-center rounded-full px-2.5 text-[11px] font-semibold leading-[1.45]"
               style={{
                 color: light ? "#1f1a14" : "rgba(245,247,255,0.9)",
                 background: light
                   ? "rgba(255,255,255,0.55)"
                   : "rgba(255,255,255,0.1)",
-                paddingTop: "0.34em",
-                paddingBottom: "0.26em",
+                paddingTop: "0.28em",
+                paddingBottom: "0.22em",
               }}
             >
               เปิดได้เลย
             </span>
-          ) : (
-            <span aria-hidden className="w-[4.5rem]" />
-          )}
+          ) : null}
         </div>
       </div>
     </button>
