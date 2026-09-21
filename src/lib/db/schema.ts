@@ -230,6 +230,27 @@ export const consultSessions = pgTable(
   ],
 );
 
+/** Bazi cycle AI reading — one analysis per user account */
+export const baziCycleAsks = pgTable(
+  "bazi_cycle_asks",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** e.g. 甲申|2026|丙午 */
+    cycleKey: text("cycle_key").notNull(),
+    annualYear: integer("annual_year").notNull(),
+    result: text("result").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("bazi_cycle_asks_user_idx").on(table.userId),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type PhoneOtp = typeof phoneOtps.$inferSelect;
 export type Reading = typeof readings.$inferSelect;
@@ -239,3 +260,4 @@ export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
 export type DreamAsk = typeof dreamAsks.$inferSelect;
 export type PhoneAsk = typeof phoneAsks.$inferSelect;
 export type ConsultSession = typeof consultSessions.$inferSelect;
+export type BaziCycleAsk = typeof baziCycleAsks.$inferSelect;

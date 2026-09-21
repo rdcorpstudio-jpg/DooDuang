@@ -4,6 +4,7 @@ import { useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import type { BaziChart, BaziElement } from "@/lib/fortune/bazi";
 import { elementColor } from "@/lib/fortune/bazi";
+import { BaziCycleCard } from "@/components/fortune/bazi/bazi-cycle-card";
 import { MaeBrandLink } from "@/components/layout/mae-brand-link";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { MAE_GLASS } from "@/lib/mae-glass";
@@ -113,10 +114,8 @@ export function BaziResultView({
   nickname?: string;
 }) {
   const [yearIdx, setYearIdx] = useState(0);
-  const [cycleOpen, setCycleOpen] = useState(false);
   const selectedYear = chart.annual[yearIdx] ?? chart.annual[0];
   const maxEl = Math.max(...chart.elements.map((e) => e.count), 1);
-  const cycle = chart.currentCycleMeaning;
 
   return (
     <div
@@ -533,131 +532,7 @@ export function BaziResultView({
           </div>
         </SectionCard>
 
-        <section className="rounded-[22px] px-4 py-5 text-center" style={glassStyle()}>
-          <p className="mae-gold-text text-[21px] font-bold">
-            ดวงจรช่วงนี้ (วัยจร + ปีจร)
-          </p>
-          <p
-            className="mx-auto mt-2 max-w-[20rem] text-[17.5px] leading-[1.45]"
-            style={{ color: TEXT_MUTED }}
-          >
-            {chart.currentCycleNote}
-          </p>
-          <div
-            className="my-4 h-px"
-            style={{ background: "rgba(130, 205, 255, 0.18)" }}
-          />
-          <button
-            type="button"
-            aria-expanded={cycleOpen}
-            className="inline-flex h-12 w-full items-center justify-center gap-1.5 rounded-full text-[17.5px] font-semibold outline-none transition active:scale-[0.99]"
-            style={{
-              color: "#1a1408",
-              background: GOLD_BTN,
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.28)",
-            }}
-            onClick={() => {
-              setCycleOpen((open) => {
-                const next = !open;
-                if (next) {
-                  requestAnimationFrame(() => {
-                    document
-                      .getElementById("bazi-cycle-meaning")
-                      ?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "nearest",
-                      });
-                  });
-                }
-                return next;
-              });
-            }}
-          >
-            {cycleOpen ? "ปิดความหมายดวงจร" : "อ่านความหมายจากดวงจร"}
-          </button>
-
-          {cycleOpen && cycle ? (
-            <div id="bazi-cycle-meaning" className="mt-4 space-y-4 text-left">
-              {cycle.luck ? (
-                <div>
-                  <p
-                    className="text-[13.5px] font-semibold tracking-wide"
-                    style={{ color: GOLD_SOFT }}
-                  >
-                    ธีม 10 ปี
-                  </p>
-                  <p
-                    className="mt-1 text-[18px] font-semibold leading-snug"
-                    style={{ color: TEXT }}
-                  >
-                    {cycle.luck.title}
-                  </p>
-                  <p className="mt-0.5 text-[15px]" style={{ color: TEXT_MUTED }}>
-                    ช่วงอายุ {cycle.luck.ageFrom.toFixed(1)}–
-                    {cycle.luck.ageTo.toFixed(1)} ปี
-                  </p>
-                  <p
-                    className="mt-2 text-[17px] leading-[1.6]"
-                    style={{ color: TEXT }}
-                  >
-                    {cycle.luck.body}
-                  </p>
-                </div>
-              ) : null}
-              {cycle.luck ? (
-                <div
-                  className="h-px"
-                  style={{ background: "rgba(130, 205, 255, 0.18)" }}
-                />
-              ) : null}
-              <div>
-                <p
-                  className="text-[13.5px] font-semibold tracking-wide"
-                  style={{ color: GOLD_SOFT }}
-                >
-                  ปีนี้บนธีมนั้น
-                </p>
-                <p
-                  className="mt-1 text-[18px] font-semibold leading-snug"
-                  style={{ color: TEXT }}
-                >
-                  {cycle.annual.title}
-                </p>
-                <p className="mt-0.5 text-[15px]" style={{ color: TEXT_MUTED }}>
-                  ปีจร {cycle.annual.year} · เริ่มที่立春
-                </p>
-                <p
-                  className="mt-2 text-[17px] leading-[1.6]"
-                  style={{ color: TEXT }}
-                >
-                  {cycle.annual.body}
-                </p>
-              </div>
-              <div
-                className="h-px"
-                style={{ background: "rgba(130, 205, 255, 0.18)" }}
-              />
-              <div>
-                <p
-                  className="text-[13.5px] font-semibold tracking-wide"
-                  style={{ color: GOLD_SOFT }}
-                >
-                  สรุปการใช้ช่วงนี้
-                </p>
-                <p
-                  className="mt-2 whitespace-pre-line text-[17px] leading-[1.65]"
-                  style={{ color: TEXT }}
-                >
-                  {cycle.combo}
-                </p>
-              </div>
-            </div>
-          ) : null}
-
-          <p className="mt-3 text-[15px]" style={{ color: TEXT_MUTED }}>
-            คำนวณจากวัน–เวลาเกิดในโปรไฟล์ · อ่านเป็นจังหวะชีวิต ไม่ใช่ท่องศัพท์จีน
-          </p>
-        </section>
+        <BaziCycleCard chart={chart} />
 
         <Link
           href="/home"

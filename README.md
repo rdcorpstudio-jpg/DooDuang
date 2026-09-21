@@ -119,6 +119,24 @@ CREATE INDEX IF NOT EXISTS consult_sessions_user_day_idx
   ON consult_sessions (user_id, day_key);
 ```
 
+#### Bazi cycle AI reading (`bazi_cycle_asks`)
+
+One AI cycle reading (**วัยจร + ปีจร**) per user account.
+
+```sql
+CREATE TABLE IF NOT EXISTS bazi_cycle_asks (
+  id text PRIMARY KEY,
+  user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  cycle_key text NOT NULL,
+  annual_year integer NOT NULL,
+  result text NOT NULL,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS bazi_cycle_asks_user_idx
+  ON bazi_cycle_asks (user_id);
+```
+
 #### Fortune profile — gender note (`gender_note`)
 
 ```sql
