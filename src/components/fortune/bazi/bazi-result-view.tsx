@@ -114,6 +114,7 @@ export function BaziResultView({
   nickname?: string;
 }) {
   const [yearIdx, setYearIdx] = useState(0);
+  const [deepOpen, setDeepOpen] = useState(false);
   const selectedYear = chart.annual[yearIdx] ?? chart.annual[0];
   const maxEl = Math.max(...chart.elements.map((e) => e.count), 1);
 
@@ -506,29 +507,52 @@ export function BaziResultView({
                 {chart.deepMeaning.dayMasterTitle}
               </p>
               <p
-                className="mt-1.5 text-[17.5px] leading-[1.55]"
+                className={
+                  deepOpen
+                    ? "mt-1.5 text-[17.5px] leading-[1.55]"
+                    : "mt-1.5 line-clamp-3 text-[17.5px] leading-[1.55]"
+                }
                 style={{ color: TEXT }}
               >
                 {chart.deepMeaning.dayMasterBody}
               </p>
             </div>
-            <div
-              className="h-px"
-              style={{ background: "rgba(130, 205, 255, 0.18)" }}
-            />
-            <p className="text-[17.5px] font-semibold" style={{ color: GOLD_SOFT }}>
-              สิบเทพในดวงของคุณ
-            </p>
-            <ul className="space-y-2.5">
-              {chart.deepMeaning.gods.map((g) => (
-                <li key={g.title} className="text-[17.5px] leading-[1.55]">
-                  <span className="font-semibold" style={{ color: TEXT }}>
-                    {g.title}
-                  </span>
-                  <span style={{ color: TEXT_MUTED }}> — {g.body}</span>
-                </li>
-              ))}
-            </ul>
+
+            {deepOpen ? (
+              <>
+                <div
+                  className="h-px"
+                  style={{ background: "rgba(130, 205, 255, 0.18)" }}
+                />
+                <p className="text-[17.5px] font-semibold" style={{ color: GOLD_SOFT }}>
+                  สิบเทพในดวงของคุณ
+                </p>
+                <ul className="space-y-2.5">
+                  {chart.deepMeaning.gods.map((g) => (
+                    <li key={g.title} className="text-[17.5px] leading-[1.55]">
+                      <span className="font-semibold" style={{ color: TEXT }}>
+                        {g.title}
+                      </span>
+                      <span style={{ color: TEXT_MUTED }}> — {g.body}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
+
+            <button
+              type="button"
+              aria-expanded={deepOpen}
+              onClick={() => setDeepOpen((v) => !v)}
+              className="mt-1 inline-flex h-11 w-full items-center justify-center rounded-full text-[15px] font-semibold outline-none transition active:scale-[0.99]"
+              style={{
+                color: GOLD,
+                background: "rgba(201,163,90,0.1)",
+                boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.4)",
+              }}
+            >
+              {deepOpen ? "ย่อข้อความ" : "อ่านเพิ่มเติม"}
+            </button>
           </div>
         </SectionCard>
 
