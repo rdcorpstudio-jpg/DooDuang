@@ -56,8 +56,13 @@ export async function GET() {
       user: true,
       ...payload(row.dream, reading, true),
     });
-  } catch {
-    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  } catch (err) {
+    console.error("dream GET failed:", err);
+    return NextResponse.json({
+      user: true,
+      asked: false,
+      error: "เปิดตำราไม่สำเร็จ ลองรีเฟรชอีกครั้ง",
+    });
   }
 }
 

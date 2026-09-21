@@ -14,6 +14,8 @@ import { readFortuneProfile } from "@/lib/fortune/profile-storage";
 const GOLD = "#e8d19a";
 const GOLD_SOFT = "#efc36c";
 const TEXT_MUTED = "rgba(240, 244, 250, 0.82)";
+const GOLD_RING =
+  "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)";
 
 const TITLE_GOLD = {
   background:
@@ -114,7 +116,7 @@ function ComingSoonCard({ item }: { item: ComingSoonItem }) {
     <div
       className="relative w-full overflow-hidden rounded-[20px]"
       style={{
-        aspectRatio: "2.05 / 1",
+        aspectRatio: "2.35 / 1",
         background: "linear-gradient(118deg, #152038 0%, #0c1528 48%, #08101e 100%)",
         boxShadow:
           "inset 0 0 0 1px rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.26)",
@@ -185,61 +187,95 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
   return (
     <Link
       href={item.href}
-      className="group relative block w-full overflow-hidden rounded-[22px] text-left outline-none transition active:scale-[0.99]"
+      className="group relative block w-full rounded-[20px] p-[2px] text-left outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
       style={{
-        aspectRatio: "1.85 / 1",
+        background: GOLD_RING,
         boxShadow:
-          "inset 0 0 0 1px rgba(232,209,154,0.28), 0 14px 32px rgba(0,0,0,0.32)",
+          "0 10px 28px rgba(0,0,0,0.34), 0 0 0 1px rgba(232,209,154,0.22)",
       }}
       aria-label={item.title}
     >
-      <Image
-        src={item.art}
-        alt=""
-        fill
-        unoptimized
-        className="object-cover object-[88%_center] transition duration-500 group-hover:scale-[1.03]"
-        sizes="(max-width: 480px) 100vw, 960px"
-      />
       <div
-        className="pointer-events-none absolute inset-0"
-        aria-hidden
+        className="relative overflow-hidden rounded-[18px]"
         style={{
-          background:
-            "linear-gradient(100deg, rgba(6,12,24,0.92) 0%, rgba(6,12,24,0.72) 42%, rgba(6,12,24,0.12) 68%, transparent 84%)",
+          aspectRatio: "2.35 / 1",
+          boxShadow: "inset 0 0 0 1px rgba(8,12,24,0.55)",
         }}
-      />
-      <div className="relative z-[1] flex h-full max-w-[62%] flex-col justify-end px-4 py-4">
-        <p
-          className="text-[12.5px] font-semibold tracking-[0.12em]"
-          style={{ color: GOLD }}
-        >
-          วันละ 1 ครั้ง
-        </p>
-        <p
-          className="mt-1 text-[1.4rem] font-bold leading-[1.25]"
-          style={{ ...TITLE_GOLD, paddingTop: "0.06em", paddingBottom: "0.04em" }}
-        >
-          {item.title}
-        </p>
-        <p
-          className="mt-1 text-[14.5px] font-medium leading-[1.4]"
-          style={{ color: "rgba(240,244,250,0.9)" }}
-        >
-          {item.blurb}
-        </p>
-        <span
-          className="mt-3 inline-flex w-fit items-center gap-1 rounded-full px-3.5 py-[0.45em] text-[13.5px] font-bold leading-none"
+      >
+        <Image
+          src={item.art}
+          alt=""
+          fill
+          unoptimized
+          className="object-cover object-[88%_center] transition duration-500 group-hover:scale-[1.03]"
+          sizes="(max-width: 480px) 100vw, 960px"
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden
           style={{
-            color: "#1a1408",
             background:
-              "linear-gradient(155deg, #fff8e4 0%, #e8d19a 42%, #d5b16f 100%)",
-            boxShadow: "0 8px 18px rgba(0,0,0,0.28)",
+              "linear-gradient(102deg, rgba(5,10,20,0.94) 0%, rgba(5,10,20,0.78) 38%, rgba(5,10,20,0.2) 64%, transparent 80%)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-[5px] rounded-[14px]"
+          aria-hidden
+          style={{
+            boxShadow:
+              "inset 0 0 0 1px rgba(232,209,154,0.28), inset 0 1px 0 rgba(255,248,228,0.18)",
+          }}
+        />
+
+        <span
+          className="absolute right-3.5 top-3.5 z-[2] rounded-full px-2.5 py-[0.34em] text-[12px] font-bold leading-[1.45]"
+          style={{
+            color: GOLD,
+            background: "rgba(8,12,24,0.72)",
+            boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.45)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
           }}
         >
-          เปิดตำราฝัน
-          <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.6} />
+          วันละ 1 ครั้ง
         </span>
+
+        <div className="relative z-[1] flex h-full max-w-[60%] flex-col justify-center px-4 py-3.5 sm:px-5">
+          <p
+            className="text-[12.5px] font-semibold tracking-[0.14em]"
+            style={{ color: GOLD }}
+          >
+            ตำราแม่มั่งมี
+          </p>
+          <p
+            className="mt-1 text-[1.4rem] font-bold leading-[1.25]"
+            style={{
+              ...TITLE_GOLD,
+              paddingTop: "0.06em",
+              paddingBottom: "0.04em",
+            }}
+          >
+            {item.title}
+          </p>
+          <p
+            className="mt-1.5 max-w-[15.5rem] text-[14.5px] font-medium leading-[1.45]"
+            style={{ color: "rgba(240,244,250,0.9)" }}
+          >
+            {item.blurb}
+          </p>
+          <span
+            className="mt-3 inline-flex w-fit items-center gap-1 rounded-full px-3.5 py-[0.48em] text-[13px] font-bold leading-none"
+            style={{
+              color: "#1a1408",
+              background: GOLD_RING,
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.35), 0 8px 16px rgba(0,0,0,0.28)",
+            }}
+          >
+            เปิดตำราฝัน
+            <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.6} />
+          </span>
+        </div>
       </div>
     </Link>
   );

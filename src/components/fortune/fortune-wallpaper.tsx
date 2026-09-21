@@ -138,7 +138,7 @@ export function FortuneWallpaper({ className }: { className?: string }) {
         className,
       )}
     >
-      <MaePageBackground />
+      <MaePageBackground blur={14} scrollBlur={false} />
       <div className="relative z-[1] mx-auto flex h-full w-full max-w-[480px] flex-col px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 sm:px-6">
         <div className="flex shrink-0 items-center justify-between gap-3">
           <MaeBrandLink />
