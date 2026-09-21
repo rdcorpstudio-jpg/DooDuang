@@ -128,12 +128,19 @@ export function FortunePhonePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, profile }),
       });
-      const data = (await res.json()) as {
+      const raw = await res.text();
+      let data: {
         error?: string;
         code?: string;
         phone?: string;
         reading?: PhoneReading;
-      };
+      } = {};
+      try {
+        data = raw ? (JSON.parse(raw) as typeof data) : {};
+      } catch {
+        setError("เชื่อมต่อไม่ได้ ลองอีกครั้ง");
+        return;
+      }
       if (res.status === 401 || data.code === "UNAUTHENTICATED") {
         window.location.href = "/login?callbackUrl=/special/phone";
         return;

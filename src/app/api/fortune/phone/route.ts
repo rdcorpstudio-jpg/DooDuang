@@ -47,11 +47,32 @@ async function resolveProfile(
   userId: string,
   rawProfile: unknown,
 ): Promise<FortuneProfilePayload | null> {
-  const row = await getFortuneProfileForUser(userId);
-  if (row) return rowToFortuneProfilePayload(row);
+  try {
+    const row = await getFortuneProfileForUser(userId);
+    if (row) return rowToFortuneProfilePayload(row);
+  } catch (err) {
+    console.error("phone profile lookup failed:", err);
+  }
   return normalizeFortuneProfileInput(
     rawProfile as Partial<FortuneProfilePayload> | null,
   );
+}
+
+function dbErrorPayload(err: unknown) {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (/phone_asks/i.test(msg) && /does not exist|undefined_table/i.test(msg)) {
+    return {
+      error: "ยังไม่ได้สร้างตาราง phone_asks ในฐานข้อมูล",
+      code: "NO_TABLE" as const,
+    };
+  }
+  if (/getaddrinfo|ENOTFOUND|ECONNREFUSED|connect/i.test(msg)) {
+    return {
+      error: "เชื่อมต่อฐานข้อมูลไม่ได้",
+      code: "DB_CONNECT" as const,
+    };
+  }
+  return { error: "เกิดข้อผิดพลาด", code: "SERVER" as const };
 }
 
 export async function GET() {
@@ -75,10 +96,12 @@ export async function GET() {
     });
   } catch (err) {
     console.error("phone GET failed:", err);
+    const detail = dbErrorPayload(err);
     return NextResponse.json({
       user: true,
       asked: false,
-      error: "เปิดตำราไม่สำเร็จ ลองรีเฟรชอีกครั้ง",
+      ...detail,
+      error: detail.error || "เปิดตำราไม่สำเร็จ ลองรีเฟรชอีกครั้ง",
     });
   }
 }
@@ -109,7 +132,7 @@ export async function POST(request: Request) {
     rawPhone = body.phone?.trim() ?? "";
     rawProfile = body.profile ?? null;
   } catch {
-    rawPhone = "";
+    return NextResponse.json({ error: "คำขอไม่ถูกต้อง" }, { status: 400 });
   }
 
   const phone = normalizePhoneInput(rawPhone);
@@ -120,18 +143,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const profile = await resolveProfile(session.user.id, rawProfile);
-  if (!profile) {
-    return NextResponse.json(
-      {
-        error: "กรอกโปรไฟล์ชื่อและวันเกิดก่อน แม่จะเทียบกับพื้นดวงได้",
-        code: "NO_PROFILE",
-      },
-      { status: 400 },
-    );
-  }
-
   try {
+    const profile = await resolveProfile(session.user.id, rawProfile);
+    if (!profile) {
+      return NextResponse.json(
+        {
+          error: "กรอกโปรไฟล์ชื่อและวันเกิดก่อน แม่จะเทียบกับพื้นดวงได้",
+          code: "NO_PROFILE",
+        },
+        { status: 400 },
+      );
+    }
+
     const { db, dayKey, row } = await weekRow(session.user.id);
     if (row) {
       const existing = parsePhoneReading(row.result);
@@ -143,7 +166,7 @@ export async function POST(request: Request) {
     const reading = await generatePhoneReading(phone, profile);
     if (!reading) {
       return NextResponse.json(
-        { error: "แม่เปิดตำราไม่สำเร็จ ลองอีกครั้ง" },
+        { error: "แม่เปิดตำราไม่สำเร็จ ลองอีกครั้ง", code: "AI_FAILED" },
         { status: 502 },
       );
     }
@@ -169,7 +192,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(payload(phone, reading, false));
-  } catch {
-    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
+  } catch (err) {
+    console.error("phone POST failed:", err);
+    return NextResponse.json(dbErrorPayload(err), { status: 500 });
   }
 }
