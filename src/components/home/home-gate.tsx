@@ -14,7 +14,7 @@ import {
 
 /**
  * `/` — marketing landing for new users.
- * CTA → /login → /welcome → /reading → /home (3-day trial).
+ * CTA → /welcome → /welcome/preview → ทดลองฟรี → /login → /reading → /home.
  * After trial expires (and not premium) → /premium/pay.
  */
 export function HomeGate() {

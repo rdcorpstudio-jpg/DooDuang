@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Lock } from "lucide-react";
@@ -12,29 +11,9 @@ import { PageBackButton } from "@/components/ui/page-back-button";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { PHONE_AUTH_ENABLED } from "@/lib/auth-features";
 
-function AuthDivider({ label = "หรือ" }: { label?: string }) {
-  return (
-    <div className="my-1 flex items-center gap-2.5">
-      <span
-        className="h-px flex-1"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(247,244,236,0.28), transparent)",
-        }}
-      />
-      <span className="text-[12px] font-medium tracking-wide text-white/45">
-        {label}
-      </span>
-      <span
-        className="h-px flex-1"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(247,244,236,0.28), transparent)",
-        }}
-      />
-    </div>
-  );
-}
+const GOLD = "#e8d19a";
+const TEXT = "#f5f7ff";
+const MUTED = "rgba(186, 204, 230, 0.78)";
 
 function isCheckoutLogin(callbackUrl: string) {
   const next = callbackUrl.trim();
@@ -45,7 +24,16 @@ function isCheckoutLogin(callbackUrl: string) {
   );
 }
 
-/** Login — atmospheric sky + auth gate (matched to v3) */
+function isFunnelLogin(callbackUrl: string) {
+  const next = callbackUrl.trim();
+  return (
+    next.startsWith("/reading") ||
+    next.startsWith("/home") ||
+    next.startsWith("/welcome")
+  );
+}
+
+/** Login — Mae glass gate: compact providers, gold hierarchy */
 export function LoginScreen({
   callbackUrl = "/dashboard",
   autoStartGoogle = false,
@@ -60,6 +48,10 @@ export function LoginScreen({
   const forCheckout = useMemo(
     () => isCheckoutLogin(callbackUrl),
     [callbackUrl],
+  );
+  const forFunnel = useMemo(
+    () => !forCheckout && isFunnelLogin(callbackUrl),
+    [callbackUrl, forCheckout],
   );
 
   const lineErrorMessage =
@@ -86,30 +78,48 @@ export function LoginScreen({
     }
   }, [autoStartGoogle]);
 
+  const title = forCheckout
+    ? "เข้าสู่ระบบเพื่อชำระ"
+    : forFunnel
+      ? "ทดลองใช้ฟรี 3 วัน"
+      : "เก็บคำทำนายไว้กับคุณ";
+
+  const subtitle = forCheckout
+    ? null
+    : forFunnel
+      ? "เลือกช่องทางสมัคร แล้วเริ่มดูดวงได้ทันที"
+      : "บันทึกผลไว้กับคุณ · กลับมาอ่านได้ทุกเมื่อ";
+
   return (
-    <AnimatedPage className="login-screen relative flex min-h-full flex-col overflow-x-hidden overflow-y-auto bg-[#0a1420] px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
+    <AnimatedPage className="login-screen relative flex min-h-full flex-col overflow-x-hidden overflow-y-auto bg-[#0a1a2e] px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
       <div
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         aria-hidden
       >
-        <Image
-          src="/images/brand/login-gate-sky.png?v=gate4"
-          alt=""
-          fill
-          priority
-          unoptimized
-          sizes="100vw"
-          className="object-cover opacity-[0.32]"
-          style={{ objectPosition: "50% 38%" }}
-        />
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: "50% 32%" }}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/images/bg/mae-bg-poster.webp?v=new1"
+        >
+          <source src="/videos/mae-bg.mp4?v=new1" type="video/mp4" />
+        </video>
+        {/* Soft veil only — keep Mae video visible, not a black plate */}
         <div
           className="absolute inset-0"
           style={{
-            background: `linear-gradient(180deg,
-              rgba(10,14,24,0.58) 0%,
-              rgba(10,14,24,0.68) 34%,
-              rgba(10,14,24,0.84) 72%,
-              rgba(10,14,24,0.92) 100%)`,
+            background: `
+              linear-gradient(180deg,
+                rgba(8,20,40,0.22) 0%,
+                rgba(8,20,40,0.06) 22%,
+                transparent 42%,
+                rgba(8,20,40,0.28) 68%,
+                rgba(8,20,40,0.55) 100%)
+            `,
           }}
         />
       </div>
@@ -121,97 +131,135 @@ export function LoginScreen({
         />
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[22rem] min-h-0 flex-1 flex-col items-center text-center">
-        <div className="h-11 w-full shrink-0" aria-hidden />
-
-        <h1 className="max-w-[16rem] shrink-0 text-[1.55rem] font-semibold leading-[1.45] tracking-wide text-[#f7f4ec]">
-          {forCheckout ? "เข้าสู่ระบบเพื่อชำระ" : "ทดลองใช้ฟรี 3 วัน"}
-        </h1>
-        {forCheckout ? null : (
-          <p className="mt-3 shrink-0 text-[15px] leading-[1.7] text-[#9aa3b2]">
-            สมัครด้วย Google · LINE หรือเบอร์
-            <br />
-            แล้วกรอกข้อมูลเพื่อเริ่มดูดวง
-          </p>
-        )}
+      <div className="relative z-10 mx-auto flex w-full max-w-[22rem] min-h-0 flex-1 flex-col justify-center pb-4 pt-[26vh]">
+        <div className="text-center">
+          <h1
+            className="mae-gold-text mx-auto max-w-[20rem] text-[2rem] font-bold tracking-tight sm:text-[2.15rem]"
+            style={{
+              lineHeight: 1.4,
+              paddingTop: "0.14em",
+              paddingBottom: "0.08em",
+            }}
+          >
+            {title}
+          </h1>
+          {subtitle ? (
+            <p
+              className="mx-auto mt-2.5 max-w-[19rem] text-[16px] font-medium leading-[1.55] text-white/90"
+              style={{
+                textShadow: "0 1px 8px rgba(6,16,28,0.55)",
+              }}
+            >
+              {subtitle}
+            </p>
+          ) : null}
+        </div>
 
         {lineErrorMessage ? (
-          <p className="mt-3 text-[12px] leading-snug text-[#ff8fa3]">
+          <p className="mt-3 text-center text-[14px] leading-snug text-[#ff8fa3]">
             {lineErrorMessage}
           </p>
         ) : null}
 
-        <div className="mt-6 w-full shrink-0 space-y-2.5">
-          <GoogleSignInButton
-            callbackUrl={callbackUrl}
-            coloredIcon
-            label="ใช้ Google"
-            className="w-full"
-            buttonClassName="login-outline-btn h-11 min-h-11 !rounded-2xl !bg-transparent !text-[#f7f4ec] border-0 text-[15px] hover:!bg-white/6 hover:!text-[#f7f4ec]"
-          />
+        <div
+          className="mt-5 rounded-[22px] px-4 py-4"
+          style={{
+            background: "rgba(8, 18, 34, 0.52)",
+            border: "1px solid rgba(232,209,154,0.22)",
+            boxShadow: "0 12px 32px rgba(0,0,0,0.28)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+          }}
+        >
+          <div className="space-y-2.5">
+            <GoogleSignInButton
+              callbackUrl={callbackUrl}
+              coloredIcon
+              label="ดำเนินการต่อด้วย Google"
+              className="w-full"
+              buttonClassName="login-google-solid !flex h-11 w-full min-w-0 flex-row flex-nowrap items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full border-0 !bg-white px-3 py-0 text-[15px] font-semibold !leading-[1.35] !text-[#1f1f1f] shadow-[0_4px_14px_rgba(0,0,0,0.18)] outline-none transition hover:!bg-[#f4f4f4] hover:!text-[#1f1f1f] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4 active:scale-[0.99]"
+            />
 
-          <LineSignInButton
-            callbackUrl={callbackUrl}
-            variant="outline"
-            label="ใช้ LINE"
-            buttonClassName="!rounded-2xl h-11 min-h-11 text-[15px] focus-visible:ring-[#f7f4ec]/35"
-          />
+            <LineSignInButton
+              callbackUrl={callbackUrl}
+              variant="brand"
+              label="ดำเนินการต่อด้วย LINE"
+              buttonClassName="!h-11 !rounded-full text-[15px] font-semibold"
+            />
+          </div>
+
+          {PHONE_AUTH_ENABLED ? (
+            <div className="login-keyboard-hide mt-3.5">
+              {showPhone ? (
+                <div
+                  className="rounded-[16px] px-3 py-3"
+                  style={{
+                    background: "rgba(8,16,32,0.45)",
+                    boxShadow: "inset 0 0 0 1px rgba(130,205,255,0.14)",
+                  }}
+                >
+                  <p
+                    className="text-[15px] font-semibold"
+                    style={{ color: TEXT }}
+                  >
+                    ใช้เบอร์มือถือ
+                  </p>
+                  <p
+                    className="mt-0.5 text-[14px] leading-snug"
+                    style={{ color: MUTED }}
+                  >
+                    ส่งรหัส OTP เพื่อยืนยันเบอร์ของคุณ
+                  </p>
+                  <div className="mt-2.5 text-left">
+                    <PhoneLoginForm callbackUrl={callbackUrl} compact />
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowPhone(true)}
+                  className="mx-auto flex h-10 w-full items-center justify-center gap-1 rounded-full text-[15px] font-medium outline-none transition hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
+                  style={{ color: GOLD }}
+                >
+                  ใช้เบอร์มือถือแทน
+                  <ChevronRight className="h-4 w-4" strokeWidth={2.2} />
+                </button>
+              )}
+            </div>
+          ) : null}
         </div>
 
-        {PHONE_AUTH_ENABLED ? (
-          <div className="login-keyboard-hide mt-5 w-full shrink-0">
-            <AuthDivider />
-            {showPhone ? (
-              <div className="mt-3">
-                <p className="text-[15px] font-medium leading-snug text-[#f7f4ec]">
-                  ใช้เบอร์มือถือ
-                </p>
-                <p className="mt-1 text-[13px] leading-[1.65] text-[#9aa3b2]">
-                  เราจะส่งรหัส OTP เพื่อยืนยันเบอร์ของคุณ
-                </p>
-                <div className="mt-3 text-left">
-                  <PhoneLoginForm callbackUrl={callbackUrl} compact />
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowPhone(true)}
-                className="mx-auto mt-1 flex min-h-11 w-full items-center justify-center gap-1 text-[15px] font-medium text-[#f7f4ec] outline-none transition hover:text-white focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
-              >
-                ใช้เบอร์มือถือ
-                <ChevronRight className="h-4 w-4" strokeWidth={2.2} />
-              </button>
-            )}
-          </div>
-        ) : null}
-
-        <p className="mt-5 flex items-center justify-center gap-1.5 text-[12px] leading-snug text-white/45">
-          <Lock className="h-3 w-3 shrink-0" strokeWidth={2.2} />
+        <p
+          className="mt-4 flex items-center justify-center gap-1.5 text-[13.5px] leading-snug"
+          style={{ color: "rgba(186,204,230,0.72)" }}
+        >
+          <Lock className="h-3.5 w-3.5 shrink-0" strokeWidth={2.2} />
           ใช้สำหรับเก็บคำทำนายของคุณ
         </p>
 
-        <p className="mt-4 text-[11px] leading-[1.65] text-white/40">
-          การเข้าสู่ระบบถือว่าคุณยอมรับ
-          <br />
+        <p
+          className="mt-3 text-center text-[13px] leading-[1.65]"
+          style={{ color: "rgba(186,204,230,0.58)" }}
+        >
+          การเข้าสู่ระบบถือว่าคุณยอมรับ{" "}
           <Link
             href="/terms"
-            className="text-white/55 underline-offset-2 hover:underline"
+            className="underline-offset-2 hover:underline"
+            style={{ color: "rgba(232,209,154,0.85)" }}
           >
-            เงื่อนไขการใช้งาน
+            เงื่อนไข
           </Link>
-          <span className="mx-1 text-white/20" aria-hidden>
+          <span className="mx-1 opacity-40" aria-hidden>
             ·
           </span>
           <Link
             href="/privacy"
-            className="text-white/55 underline-offset-2 hover:underline"
+            className="underline-offset-2 hover:underline"
+            style={{ color: "rgba(232,209,154,0.85)" }}
           >
-            นโยบายความเป็นส่วนตัว
+            ความเป็นส่วนตัว
           </Link>
         </p>
-
-        <div className="min-h-6 w-full flex-1" aria-hidden />
       </div>
     </AnimatedPage>
   );

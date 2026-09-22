@@ -754,6 +754,32 @@
   -webkit-text-fill-color: #f7f4ec !important;
 }
 
+/* Solid white Google CTA on redesigned login gate */
+.login-screen .google-white-btn.login-google-solid,
+.phone-frame--mae .login-screen .google-white-btn.login-google-solid,
+.phone-frame--mae .login-screen button.google-white-btn.login-google-solid {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #1f1f1f !important;
+  -webkit-text-fill-color: #1f1f1f !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
+}
+
+.login-screen .google-white-btn.login-google-solid:hover,
+.phone-frame--mae .login-screen .google-white-btn.login-google-solid:hover,
+.phone-frame--mae .login-screen button.google-white-btn.login-google-solid:hover {
+  background-color: #f4f4f4 !important;
+  color: #1f1f1f !important;
+  -webkit-text-fill-color: #1f1f1f !important;
+}
+
+.login-screen .google-white-btn.login-google-solid span,
+.phone-frame--mae .login-screen .google-white-btn.login-google-solid span {
+  color: #1f1f1f !important;
+  -webkit-text-fill-color: #1f1f1f !important;
+}
+
 .phone-frame--mae .ring-\[\#9B7FE8\]\/12,
 .phone-frame--mae .ring-\[\#9B7FE8\]\/15,
 .phone-frame--mae .ring-\[\#9B7FE8\]\/2,

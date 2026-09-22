@@ -72,10 +72,10 @@ function delayStyle(ms: number): CSSProperties {
 }
 
 /**
- * ฟอร์มสั้นหลังล็อกอิน — 2 หน้า
+ * ฟอร์มสั้นหลังกดเริ่ม — 2 หน้า
  * 1) ชื่อที่อยากให้เรียก
  * 2) เรื่องที่อยากดู
- * แล้วไปหน้ากรอกวันเกิด (/reading) ก่อนเข้าใช้ทดลอง 3 วัน
+ * แล้วไปหน้าโชว์ตัวอย่าง → ปุ่มทดลองฟรี → ล็อกอิน
  */
 export function OnboardingIntakeForm() {
   const router = useRouter();
@@ -87,46 +87,18 @@ export function OnboardingIntakeForm() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const res = await fetch("/api/premium/status", { cache: "no-store" });
-        const data = (await res.json()) as {
-          authenticated?: boolean;
-          canUseApp?: boolean;
-          premium?: boolean;
-        };
-        if (!alive) return;
-        if (!data.authenticated) {
-          startMaeNavigation();
-          router.replace("/login?callbackUrl=/welcome");
-          return;
-        }
-        if (!data.canUseApp && !data.premium) {
-          startMaeNavigation();
-          router.replace("/premium/pay?reason=trial");
-          return;
-        }
-      } catch {
-        /* continue — form still usable offline-ish */
-      }
-
-      if (hasFreeReadingBasics(readFortuneProfile())) {
-        startMaeNavigation();
-        router.replace("/home");
-        return;
-      }
-      const saved = readIntake();
-      if (saved) {
-        setNickname(saved.nickname);
-        const allowed = new Set(FOCUS_CHOICES.map((c) => c.id));
-        setFocus(allowed.has(saved.focus) ? saved.focus : "life");
-      }
-      if (alive) setReady(true);
-    })();
-    return () => {
-      alive = false;
-    };
+    if (hasFreeReadingBasics(readFortuneProfile())) {
+      startMaeNavigation();
+      router.replace("/home");
+      return;
+    }
+    const saved = readIntake();
+    if (saved) {
+      setNickname(saved.nickname);
+      const allowed = new Set(FOCUS_CHOICES.map((c) => c.id));
+      setFocus(allowed.has(saved.focus) ? saved.focus : "life");
+    }
+    setReady(true);
   }, [router]);
 
   function goToFocus() {
@@ -137,7 +109,7 @@ export function OnboardingIntakeForm() {
     setStep("focus");
   }
 
-  function goPreview() {
+  function goContinue() {
     const name = nickname.trim();
     if (!name) {
       setDir("back");
@@ -147,7 +119,9 @@ export function OnboardingIntakeForm() {
     writeIntake({ nickname: name, focus });
     const raw = (searchParams.get("next") || "").trim();
     const next =
-      raw.startsWith("/") && !raw.startsWith("//") ? raw : "/reading";
+      raw.startsWith("/") && !raw.startsWith("//")
+        ? raw
+        : "/welcome/preview";
     startMaeNavigation();
     router.push(next);
   }
@@ -370,7 +344,7 @@ export function OnboardingIntakeForm() {
               >
                 <button
                   type="button"
-                  onClick={goPreview}
+                  onClick={goContinue}
                   className="group relative flex h-[3.35rem] w-full items-center justify-center gap-2 overflow-hidden rounded-full outline-none transition active:scale-[0.98]"
                   style={{
                     color: "#1a1408",

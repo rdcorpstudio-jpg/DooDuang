@@ -317,7 +317,7 @@ export function MaeLanding() {
           </p>
 
           <Link
-            href="/login?callbackUrl=%2Fwelcome"
+            href="/welcome"
             className="wallpaper-dl-btn mae-cta-nudge group relative mx-auto mt-3.5 flex h-[3.4rem] w-full max-w-[280px] items-center gap-2.5 overflow-hidden rounded-[16px] px-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
           >
             <span className="wallpaper-dl-btn__icon relative z-[1] flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]">
@@ -325,10 +325,10 @@ export function MaeLanding() {
             </span>
             <span className="relative z-[1] flex min-w-0 flex-1 flex-col justify-center gap-0.5 overflow-visible">
               <span className="block text-[14.5px] font-bold leading-[1.3] tracking-wide">
-                ทดลองใช้ฟรี 3 วัน
+                เลือกเรื่องที่อยากรู้
               </span>
               <span className="block text-[11.5px] font-medium leading-[1.3] opacity-70">
-                สมัครก่อน · แล้วค่อยกรอกข้อมูล
+                เริ่มอ่านดวงกับแม่มั่งมี
               </span>
             </span>
             <ChevronRight
@@ -663,7 +663,7 @@ export function MaeLanding() {
             </div>
 
             <Link
-              href="/login?callbackUrl=%2Fwelcome"
+              href="/welcome"
               className="mae-gold-cta group relative mx-auto mt-5 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98]"
             >
               <span className="text-[15px] font-semibold tracking-wide">
@@ -868,7 +868,7 @@ export function MaeLanding() {
             เริ่มจากเรื่องที่อยู่ในใจ แล้วค่อย ๆ มองทางข้างหน้าไปด้วยกัน
           </p>
           <Link
-            href="/login?callbackUrl=%2Fwelcome"
+            href="/welcome"
             className="mae-gold-cta group relative mx-auto mt-6 flex h-12 w-full max-w-[280px] items-center justify-center gap-2 overflow-hidden rounded-full px-6 outline-none transition active:scale-[0.98]"
           >
             <span className="text-[14px] font-semibold tracking-wide">

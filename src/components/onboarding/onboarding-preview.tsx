@@ -9,15 +9,13 @@ import {
   type TransitionEvent as ReactTransitionEvent,
 } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { startMaeNavigation } from "@/components/layout/navigation-loading";
 import { readIntake } from "@/lib/fortune/intake-storage";
 
 const MAE_GOLD = "#e8d19a";
-const GOLD_BTN =
-  "linear-gradient(155deg, #fff8e4 0%, #e8d19a 28%, #d5b16f 58%, #b8924f 82%, #8f6e38 100%)";
 
 /** แผ่นพรีเมียมจากดีไซน์ — ปัดดูทีละรูป */
 const SHOWCASE = [
@@ -278,7 +276,7 @@ function ShowcaseStackCarousel({
           </div>
           <button
             type="button"
-            aria-label="สมัครพรีเมียม"
+            aria-label="ทดลองใช้ฟรี"
             className="absolute inset-x-[6%] bottom-[4.5%] z-10 h-[16%] cursor-pointer rounded-full"
             onClick={() => {
               onInteract();
@@ -389,7 +387,7 @@ function ShowcaseStackCarousel({
                 {activeSlide ? (
                   <button
                     type="button"
-                    aria-label="สมัครพรีเมียม"
+                    aria-label="ทดลองใช้ฟรี"
                     className="absolute inset-x-[6%] bottom-[4.5%] z-10 h-[16%] cursor-pointer rounded-full"
                     onPointerDown={(e) => {
                       e.stopPropagation();
@@ -436,9 +434,31 @@ export function OnboardingPreview() {
     return () => window.clearInterval(id);
   }, [autoPlay]);
 
-  function goPay() {
+  function goTrial() {
     startMaeNavigation();
-    router.push("/premium/pay?return=/welcome/preview");
+    void (async () => {
+      try {
+        const res = await fetch("/api/premium/status", { cache: "no-store" });
+        const data = (await res.json()) as {
+          authenticated?: boolean;
+          canUseApp?: boolean;
+          premium?: boolean;
+        };
+        if (data.authenticated) {
+          if (!data.canUseApp && !data.premium) {
+            router.push("/premium/pay?reason=trial");
+            return;
+          }
+          router.push("/reading");
+          return;
+        }
+      } catch {
+        /* fall through to login */
+      }
+      router.push(
+        `/login?callbackUrl=${encodeURIComponent("/reading")}`,
+      );
+    })();
   }
 
   return (
@@ -478,7 +498,7 @@ export function OnboardingPreview() {
           active={active}
           onActiveChange={setActive}
           onInteract={stopAutoPlay}
-          onPayClick={goPay}
+          onPayClick={goTrial}
         />
 
         <div className="mt-3 flex items-center justify-center gap-1.5">
@@ -500,36 +520,47 @@ export function OnboardingPreview() {
             ))}
         </div>
 
-      <div
-          className="mt-auto shrink-0 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
-        >
+      <div className="mt-auto shrink-0 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <button
             type="button"
-          onClick={goPay}
-          className="group relative flex h-[3.4rem] w-full items-center justify-center gap-2 overflow-hidden rounded-full outline-none transition active:scale-[0.98]"
+            onClick={goTrial}
+            className="group relative flex h-[3.35rem] w-full items-center justify-center gap-2 overflow-hidden rounded-full outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/55"
             style={{
               color: "#1a1408",
-              background: GOLD_BTN,
+              background:
+                "linear-gradient(100deg, #fff8e4 0%, #f0d078 28%, #e8d19a 52%, #d5b16f 78%, #b8924f 100%)",
               boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.35), 0 10px 24px rgba(143,110,56,0.42)",
+                "inset 0 1px 0 rgba(255,255,255,0.55), 0 10px 28px rgba(143,110,56,0.45), 0 0 0 1px rgba(232,209,154,0.35)",
           }}
         >
           <span
-            className="pointer-events-none absolute inset-0 opacity-40"
+              className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.35) 50%, transparent 65%)",
+                  "linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 48%)",
             }}
             aria-hidden
           />
-          <span className="relative text-[17px] font-bold tracking-wide">
-            เปิดดูดวงกับแม่เลย
+            <Sparkles
+              className="relative z-[1] h-[17px] w-[17px] shrink-0"
+              strokeWidth={2.3}
+              aria-hidden
+            />
+            <span className="relative z-[1] text-[15.5px] font-bold leading-[1.4] tracking-wide">
+              ทดลองใช้ฟรี 3 วัน
             </span>
             <ChevronRight
-            className="relative h-[18px] w-[18px] transition-transform group-hover:translate-x-0.5"
-              strokeWidth={2.6}
+              className="relative z-[1] h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+              strokeWidth={2.5}
+              aria-hidden
             />
           </button>
+          <p
+            className="mt-2.5 text-center text-[12.5px] font-medium leading-snug"
+            style={{ color: "rgba(232,209,154,0.7)" }}
+          >
+            สมัครก่อน · เริ่มดูดวงได้ทันที
+        </p>
       </div>
       </AnimatedPage>
     </div>

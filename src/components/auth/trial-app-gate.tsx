@@ -4,11 +4,12 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { startMaeNavigation } from "@/components/layout/navigation-loading";
 
-/** Paths that stay reachable after trial expires (paywall / legal / auth). */
+/** Paths that stay reachable after trial expires (paywall / legal / auth / marketing). */
 function isTrialExemptPath(pathname: string) {
   if (pathname === "/") return true;
   if (pathname.startsWith("/login")) return true;
   if (pathname.startsWith("/auth")) return true;
+  if (pathname.startsWith("/welcome")) return true;
   if (pathname.startsWith("/premium/pay")) return true;
   if (pathname.startsWith("/premium/thanks")) return true;
   if (pathname.startsWith("/terms")) return true;
@@ -19,8 +20,8 @@ function isTrialExemptPath(pathname: string) {
 }
 
 /**
- * When a logged-in user's 3-day trial ends and they are not premium,
- * bounce into `/premium/pay` as soon as they enter an app route.
+ * Only when logged-in trial ends (and not premium) → bounce to `/premium/pay`.
+ * Does not force login on landing / home — login sits after the first form (old pay step).
  */
 export function TrialAppGate() {
   const pathname = usePathname() || "/";
