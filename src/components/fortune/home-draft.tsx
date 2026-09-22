@@ -8,7 +8,6 @@ import {
   Bell,
   CalendarDays,
   ChevronRight,
-  Crown,
   Lock,
   Sparkles,
   UserRound,
@@ -35,7 +34,7 @@ import {
 import {
   getDayProfile,
 } from "@/lib/fortune/auspicious-calendar";
-import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE, LINE_OA_ADD_URL } from "@/lib/site";
+import { LINE_OA_ADD_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { poloShirtSrcForColorName } from "@/lib/fortune/polo-shirt-asset";
 import { MAE_GLASS } from "@/lib/mae-glass";
@@ -160,11 +159,6 @@ const TEXT_MUTED = "#f0f4fa";
 const GLASS = MAE_GLASS;
 
 const GOLD_SOFT = "#efc36c";
-/** สีปุ่มจาก .primary ใน HTML ต้นฉบับ */
-const GOLD_BTN =
-  "linear-gradient(100deg, #ffe999 0%, #e5b84d 50%, #cda451 100%)";
-const GOLD_BTN_SHADOW =
-  "0 12px 30px rgba(198, 151, 55, 0.2)";
 
 type AspectCardRow = {
   id: FortuneAspectId | "luck";
@@ -1029,68 +1023,6 @@ export function HomeDraft() {
             })}
           </div>
         </section>
-
-        {/* การ์ดพรีเมียม — ซ่อนถ้าสมัครแล้ว */}
-        {!premium ? (
-          <section className="mx-5 mt-7 sm:mx-6">
-          <div
-              className="rounded-[22px]"
-            style={{
-                boxShadow: "0 14px 32px rgba(0,0,0,0.32)",
-              }}
-            >
-              <Link
-                href="/premium/pay?return=/home"
-                className="mae-premium-banner relative flex items-center gap-3 overflow-visible rounded-[22px] px-3.5 py-3.5 outline-none transition active:scale-[0.99]"
-              >
-              <span
-                  className="relative z-[1] flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
-                style={{
-                    background: "rgba(20, 16, 12, 0.92)",
-                  color: GOLD_SOFT,
-                }}
-                aria-hidden
-              >
-                  <Crown className="h-6 w-6" strokeWidth={2.2} />
-              </span>
-
-                <div className="relative z-[1] min-w-0 flex-1">
-                  <p className="text-[15px] font-semibold leading-snug text-white">
-                    พรีเมียม {FORTUNE_PACKAGE_LABEL}เต็ม
-                  </p>
-                  {trialActive && trialDaysLeft > 0 ? (
-                    <p className="mt-1 text-[12.5px] font-medium text-[#e8d19a]/85">
-                      ทดลองฟรีเหลือ {trialDaysLeft} วัน · อัปเกรดได้เลย
-                    </p>
-                  ) : null}
-                  <p className="mae-premium-price mt-1 flex flex-wrap items-baseline gap-x-1.5 leading-none">
-                <span
-                      className="text-[1.85rem] font-bold tabular-nums tracking-tight"
-                      style={{ color: GOLD_SOFT }}
-                >
-                  ฿{FORTUNE_UNLOCK_PRICE}
-                </span>
-                    <span className="text-[15px] font-semibold text-white/90">
-                      / ปี
-                </span>
-                  </p>
-              </div>
-
-                <span
-                  className="relative z-[1] inline-flex h-12 shrink-0 items-center justify-center gap-0.5 rounded-full px-4 text-[17px] font-bold tracking-wide"
-                style={{
-                  color: "#1a1408",
-                  background: GOLD_BTN,
-                  boxShadow: GOLD_BTN_SHADOW,
-                }}
-              >
-                  <span className="dd-btn-label">สมัครเลย</span>
-                  <ChevronRight className="h-5 w-5" strokeWidth={2.8} aria-hidden />
-                </span>
-              </Link>
-          </div>
-        </section>
-        ) : null}
 
         {/* คำทำนายวันนี้ — กลางชัด ข้างเบลอ ปัดวนลูป */}
         <section className="relative mt-7 overflow-visible">

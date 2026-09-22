@@ -22,10 +22,12 @@ import { cn } from "@/lib/utils";
 
 function scrollFieldIntoView(event: FocusEvent<HTMLInputElement>) {
   const el = event.currentTarget;
-  const scroller = el.closest<HTMLElement>("[data-wizard-scroll]");
+  const scroller =
+    el.closest<HTMLElement>("[data-wizard-scroll]") ||
+    document.querySelector<HTMLElement>(".phone-frame .overflow-y-auto");
 
   const align = () => {
-    if (scroller) {
+    if (scroller && scroller !== el && scroller.scrollHeight > scroller.clientHeight) {
       const parentRect = scroller.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
       const targetTop = parentRect.top + Math.min(96, parentRect.height * 0.18);
@@ -456,12 +458,12 @@ export function ReadingWizard() {
   return (
     <div
       data-wizard-scroll
-      className="mae-wizard relative mx-auto flex h-full min-h-full w-full max-w-[480px] flex-col overflow-hidden text-white"
+      className="mae-wizard relative mx-auto flex min-h-full w-full max-w-[480px] flex-col overflow-x-hidden text-white"
       style={{ background: "transparent" }}
     >
       <MaePageBackground blur={14} scrollBlur={false} />
 
-      <div className="relative z-[2] flex min-h-0 flex-1 flex-col px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+      <div className="relative z-[2] flex flex-1 flex-col px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
         {/* Top bar */}
         <div
           className="wizard-anim-item flex shrink-0 items-center justify-between gap-3"
@@ -498,7 +500,7 @@ export function ReadingWizard() {
         <div
           key={step}
           className={cn(
-            "wizard-step-panel flex min-h-0 flex-1 flex-col",
+            "wizard-step-panel flex flex-col",
             dir === "forward" ? "wizard-step-forward" : "wizard-step-back",
           )}
         >
@@ -524,11 +526,8 @@ export function ReadingWizard() {
             </p>
           </div>
 
-          {/* Body */}
-          <div
-            className="wizard-anim-item mt-6 min-h-0 flex-1 overflow-y-auto overscroll-contain"
-            style={delayStyle(140)}
-          >
+          {/* Body — page scroll (phone-frame), not a nested locked pane */}
+          <div className="wizard-anim-item mt-6" style={delayStyle(140)}>
             {step === "identity" ? (
               <div className="space-y-6">
                 <label className="block">
@@ -664,7 +663,7 @@ export function ReadingWizard() {
 
           {/* CTA */}
           <div
-            className="wizard-anim-item mt-4 shrink-0 pt-1"
+            className="wizard-anim-item mt-5 shrink-0 pb-2 pt-1"
             style={delayStyle(220)}
           >
             <button

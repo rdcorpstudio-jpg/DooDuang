@@ -278,7 +278,7 @@ export function OnboardingIntakeForm() {
               </div>
 
               <div
-                className="wizard-anim-item mt-6 flex-1 overflow-y-auto overscroll-contain px-0.5"
+                className="wizard-anim-item mt-6 flex-1 px-0.5"
                 style={delayStyle(140)}
               >
                 <div className="grid grid-cols-2 gap-3 pb-2">

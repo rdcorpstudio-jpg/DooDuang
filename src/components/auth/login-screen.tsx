@@ -134,7 +134,7 @@ export function LoginScreen({
       <div className="relative z-10 mx-auto flex w-full max-w-[22rem] min-h-0 flex-1 flex-col justify-center pb-4 pt-[26vh]">
         <div className="text-center">
           <h1
-            className="mae-gold-text mx-auto max-w-[20rem] text-[2rem] font-bold tracking-tight sm:text-[2.15rem]"
+            className="mae-gold-text login-trial-title mx-auto max-w-[20rem] text-[2rem] font-bold tracking-tight sm:text-[2.15rem]"
             style={{
               lineHeight: 1.4,
               paddingTop: "0.14em",

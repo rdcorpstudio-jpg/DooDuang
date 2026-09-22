@@ -110,7 +110,8 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
   const allowPageScroll =
     adminShell ||
     pathname === "/home" ||
-    pathname.startsWith("/reading/tarot") ||
+    pathname === "/reading" ||
+    pathname.startsWith("/reading/") ||
     pathname.startsWith("/welcome") ||
     pathname.startsWith("/premium/pay") ||
     pathname.startsWith("/login") ||
