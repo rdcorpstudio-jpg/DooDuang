@@ -362,7 +362,7 @@ export function PremiumPayPage() {
                   WebkitBackdropFilter: "blur(12px)",
                 }}
               >
-                <p className="text-[15.5px] font-medium text-white/85">
+                <p className="shrink-0 whitespace-nowrap text-[15.5px] font-medium text-white/85">
                   สิทธิ์ที่ได้รับ
                 </p>
                 <p className="mae-gold-text text-[14px] font-semibold">

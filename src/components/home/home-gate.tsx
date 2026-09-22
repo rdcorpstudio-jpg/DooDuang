@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { MaeLanding } from "@/components/home/mae-landing";
 import { MaePageLoading } from "@/components/layout/mae-page-loading";
 import { startMaeNavigation } from "@/components/layout/navigation-loading";
-import { clearPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import {
+  ensureFreshFunnelLocalState,
+  signOutForFreshStart,
+} from "@/lib/fortune/funnel-reset";
 import {
   hasFreeReadingBasics,
   hydrateFortuneProfileFromWizard,
@@ -15,7 +18,8 @@ import {
 /**
  * `/` — marketing landing for new users.
  * CTA → /welcome → /welcome/preview → ทดลองฟรี → /login → /reading → /home.
- * After trial expires (and not premium) → /premium/pay.
+ * After a started trial expires (and not premium) → /premium/pay.
+ * Never-started / guest leftovers → clear and show landing like a first visit.
  */
 export function HomeGate() {
   const router = useRouter();
@@ -23,11 +27,11 @@ export function HomeGate() {
 
   useEffect(() => {
     let alive = true;
+    ensureFreshFunnelLocalState();
     hydrateFortuneProfileFromWizard();
 
     const fromLogout =
       new URLSearchParams(window.location.search).get("from") === "logout";
-    if (fromLogout) clearPremiumUnlocked();
 
     (async () => {
       try {
@@ -36,10 +40,16 @@ export function HomeGate() {
           authenticated?: boolean;
           canUseApp?: boolean;
           premium?: boolean;
+          trialEndsAtMs?: number | null;
         };
         if (!alive) return;
 
         if (data.authenticated && !data.canUseApp && !data.premium) {
+          if (data.trialEndsAtMs == null) {
+            await signOutForFreshStart();
+            if (alive) setShowLanding(true);
+            return;
+          }
           startMaeNavigation();
           router.replace("/premium/pay?reason=trial");
           return;

@@ -20,7 +20,7 @@ export function hasTrialAccess(trialEndsAt?: Date | null) {
 /**
  * Can use the app (free tier + locks): premium OR still in trial.
  * AI / wallpaper stay behind premium as before.
- * `trialEndsAt == null` = legacy row before migration — keep access until SQL backfill.
+ * `trialEndsAt == null` = never started (must sign up / log in to start trial).
  */
 export function hasAppAccess(opts: {
   status?: string | null;
@@ -28,8 +28,40 @@ export function hasAppAccess(opts: {
   trialEndsAt?: Date | null;
 }) {
   if (hasPremiumAccess({ status: opts.status, until: opts.until })) return true;
-  if (opts.trialEndsAt == null) return true;
   return hasTrialAccess(opts.trialEndsAt);
+}
+
+/**
+ * One-shot trial start: only when `trial_ends_at` is still NULL (reset / never started).
+ * Does not renew an expired trial — that goes to paywall.
+ */
+export async function grantTrialIfUnset(userId: string) {
+  const db = requireDb();
+  const [row] = await db
+    .select({
+      trialEndsAt: users.trialEndsAt,
+      premiumUntil: users.premiumUntil,
+      subscriptionStatus: users.subscriptionStatus,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (!row) return null;
+  if (
+    hasPremiumAccess({
+      status: row.subscriptionStatus,
+      until: row.premiumUntil,
+    })
+  ) {
+    return row.trialEndsAt;
+  }
+  if (row.trialEndsAt != null) return row.trialEndsAt;
+  const ends = trialEndsAtFrom();
+  await db
+    .update(users)
+    .set({ trialEndsAt: ends })
+    .where(eq(users.id, userId));
+  return ends;
 }
 
 export function subscriptionPeriodEnd(sub: Stripe.Subscription): Date | null {

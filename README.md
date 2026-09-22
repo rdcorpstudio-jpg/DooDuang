@@ -141,15 +141,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS bazi_cycle_asks_user_idx
 
 After signup (Gmail / LINE / OTP), users get **3 days** of free app access (same free locks: AI / wallpaper still need premium). When the trial ends and they are not premium, the app redirects to `/premium/pay`.
 
+`trial_ends_at IS NULL` = never started — next login grants a fresh 3-day window. Do **not** backfill `NOW() + 3 days` for everyone (that skips the signup funnel).
+
 ```sql
 ALTER TABLE users
   ADD COLUMN IF NOT EXISTS trial_ends_at timestamp;
 
--- New/existing free users: start a 3-day window from now (re-run safe)
+-- Reset free users so they start like brand-new (login → 3-day trial)
 UPDATE users
-SET trial_ends_at = NOW() + INTERVAL '3 days'
-WHERE trial_ends_at IS NULL
-  AND (premium_until IS NULL OR premium_until <= NOW());
+SET trial_ends_at = NULL
+WHERE premium_until IS NULL OR premium_until <= NOW();
 ```
 
 #### Fortune profile — gender note (`gender_note`)

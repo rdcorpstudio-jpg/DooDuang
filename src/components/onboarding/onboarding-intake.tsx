@@ -7,11 +7,8 @@ import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { MaePageLoading } from "@/components/layout/mae-page-loading";
 import { startMaeNavigation } from "@/components/layout/navigation-loading";
 import type { FortuneFocus } from "@/lib/fortune/analyze";
+import { ensureFreshFunnelLocalState } from "@/lib/fortune/funnel-reset";
 import { readIntake, writeIntake } from "@/lib/fortune/intake-storage";
-import {
-  hasFreeReadingBasics,
-  readFortuneProfile,
-} from "@/lib/fortune/profile-storage";
 import { cn } from "@/lib/utils";
 
 const MAE = {
@@ -87,11 +84,7 @@ export function OnboardingIntakeForm() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (hasFreeReadingBasics(readFortuneProfile())) {
-      startMaeNavigation();
-      router.replace("/home");
-      return;
-    }
+    ensureFreshFunnelLocalState();
     const saved = readIntake();
     if (saved) {
       setNickname(saved.nickname);
@@ -99,7 +92,7 @@ export function OnboardingIntakeForm() {
       setFocus(allowed.has(saved.focus) ? saved.focus : "life");
     }
     setReady(true);
-  }, [router]);
+  }, []);
 
   function goToFocus() {
     const name = nickname.trim();

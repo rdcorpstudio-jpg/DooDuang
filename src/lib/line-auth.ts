@@ -2,7 +2,10 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { eq } from "drizzle-orm";
 import { requireDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { trialEndsAtFrom } from "@/lib/premium-entitlement";
+import {
+  grantTrialIfUnset,
+  trialEndsAtFrom,
+} from "@/lib/premium-entitlement";
 import { getSiteUrl } from "@/lib/site";
 
 export const LINE_STATE_COOKIE = "dd_line_state";
@@ -196,6 +199,7 @@ export async function upsertUserByLineId(profile: {
         image: profile.image,
       })
       .where(eq(users.id, existing.id));
+    await grantTrialIfUnset(existing.id);
     return { userId: existing.id, isNewUser: false };
   }
 
@@ -217,6 +221,7 @@ export async function upsertUserByLineId(profile: {
       .where(eq(users.lineUserId, profile.lineUserId))
       .limit(1);
     if (race) {
+      await grantTrialIfUnset(race.id);
       return { userId: race.id, isNewUser: false };
     }
     throw err;

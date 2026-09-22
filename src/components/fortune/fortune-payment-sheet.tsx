@@ -329,7 +329,7 @@ export function FortunePaymentSheet({
               borderBottom: "1px solid rgba(213, 177, 111, 0.14)",
             }}
           >
-            <p className="text-[14.5px] font-medium text-white/90">
+            <p className="shrink-0 whitespace-nowrap text-[14.5px] font-medium text-white/90">
               สิทธิ์ที่ได้รับ
             </p>
             <p className="text-[13px] font-bold" style={goldTextStyle}>
