@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, Send, Sparkles } from "lucide-react";
+import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { MaePageLoading } from "@/components/layout/mae-page-loading";
 import { AnimatedPage, Reveal, useRevealMounted } from "@/components/ui/reveal";
@@ -14,6 +15,10 @@ import {
   CONSULT_MAX_INPUT,
   type ConsultMessage,
 } from "@/lib/fortune/consult-reading";
+import {
+  requirePremiumFromServer,
+  setPremiumUnlocked,
+} from "@/lib/fortune/premium-unlock";
 import { readFortuneProfile } from "@/lib/fortune/profile-storage";
 import { MAE_GLASS } from "@/lib/mae-glass";
 
@@ -88,12 +93,23 @@ export function FortuneConsultPage() {
   const [busy, setBusy] = useState(false);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
+  const [payOpen, setPayOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
     async function load() {
       try {
-        const res = await fetch("/api/fortune/consult", { cache: "no-store" });
+        const [res, access] = await Promise.all([
+          fetch("/api/fortune/consult", { cache: "no-store" }),
+          requirePremiumFromServer(
+            (() => {
+              const profile = readFortuneProfile();
+              return profile
+                ? { birthDate: profile.birthDate, nickname: profile.nickname }
+                : null;
+            })(),
+          ),
+        ]);
         const data = (await res.json()) as {
           user?: boolean | null;
           premium?: boolean;
@@ -117,7 +133,7 @@ export function FortuneConsultPage() {
         }
         setLoaded({
           signedIn: true,
-          premium: Boolean(data.premium),
+          premium: Boolean(data.premium) || access.ok,
           limit: data.limit ?? CONSULT_DAILY_SESSIONS,
           used: data.used ?? 0,
           remainingSessions: data.remainingSessions ?? 0,
@@ -227,6 +243,12 @@ export function FortuneConsultPage() {
         window.location.href = "/login?callbackUrl=/special/consult";
         return;
       }
+      if (res.status === 403 || data.code === "PREMIUM_REQUIRED") {
+        setLoaded((prev) => (prev ? { ...prev, premium: false } : prev));
+        setPayOpen(true);
+        setError(data.error || "ต้องเป็นสมาชิกพรีเมียม");
+        return;
+      }
       if (!res.ok || !data.session) {
         setError(data.error || "เปิดห้องคุยไม่สำเร็จ");
         if (data.limit != null) {
@@ -295,6 +317,13 @@ export function FortuneConsultPage() {
       };
       if (res.status === 401 || data.code === "UNAUTHENTICATED") {
         window.location.href = "/login?callbackUrl=/special/consult";
+        return;
+      }
+      if (res.status === 403 || data.code === "PREMIUM_REQUIRED") {
+        setDraft(text);
+        setLoaded((prev) => (prev ? { ...prev, premium: false } : prev));
+        setPayOpen(true);
+        setError(data.error || "ต้องเป็นสมาชิกพรีเมียม");
         return;
       }
       if (!res.ok || !data.session) {
@@ -456,6 +485,39 @@ export function FortuneConsultPage() {
             >
               เข้าสู่ระบบ
             </Link>
+          </div>
+        ) : !loaded.premium ? (
+          <div
+            className="mt-8 rounded-[26px] px-5 py-8 text-center"
+            style={{
+              background: GLASS.bg,
+              border: GLASS.border,
+              boxShadow: `${GLASS.shadow}, inset 0 1px 0 rgba(255,255,255,0.12)`,
+              backdropFilter: GLASS.blur,
+              WebkitBackdropFilter: GLASS.blur,
+            }}
+          >
+            <span
+              className="mx-auto flex h-14 w-14 items-center justify-center rounded-full"
+              style={{
+                background: "rgba(232,209,154,0.12)",
+                boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.4)",
+              }}
+            >
+              <Sparkles className="h-7 w-7" style={{ color: GOLD }} strokeWidth={1.8} />
+            </span>
+            <p className="mt-5 text-[16.5px] font-medium leading-[1.55]" style={{ color: TEXT }}>
+              ปรึกษาแม่เป็นฟีเจอร์พรีเมียม
+              <br />
+              <span style={{ color: MUTED }}>สมัครแล้วคุยกับแม่ได้ทันที</span>
+            </p>
+            <button
+              type="button"
+              onClick={() => setPayOpen(true)}
+              className="mae-gold-cta mt-6 inline-flex h-12 items-center justify-center rounded-full px-8 text-[15px] font-bold"
+            >
+              สมัครพรีเมียม
+            </button>
           </div>
         ) : (
           <div className="mt-6 flex min-h-0 flex-1 flex-col gap-3.5">
@@ -832,6 +894,23 @@ export function FortuneConsultPage() {
           </div>
         )}
       </AnimatedPage>
+
+      <FortunePaymentSheet
+        open={payOpen}
+        onClose={() => setPayOpen(false)}
+        onPaid={() => {
+          const profile = readFortuneProfile();
+          setPremiumUnlocked(
+            profile
+              ? { birthDate: profile.birthDate, nickname: profile.nickname }
+              : null,
+          );
+          setLoaded((prev) => (prev ? { ...prev, premium: true } : prev));
+          setPayOpen(false);
+          setError("");
+        }}
+        returnPath="/special/consult"
+      />
     </div>
   );
 }

@@ -174,6 +174,16 @@ export async function POST(request: Request) {
     status: session.user.subscriptionStatus,
     until: session.user.premiumUntil,
   });
+  if (!premium) {
+    return NextResponse.json(
+      {
+        error: "ปรึกษาแม่ใช้ได้เฉพาะสมาชิกพรีเมียม",
+        code: "PREMIUM_REQUIRED",
+        premium: false,
+      },
+      { status: 403 },
+    );
+  }
   const limit = dailyLimit();
   const dayKey = bangkokDayKey();
 

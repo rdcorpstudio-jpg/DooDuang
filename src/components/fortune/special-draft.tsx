@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Ban,
   ChevronRight,
   Crown,
+  Lock,
   MessageCircle,
   Moon,
   Smartphone,
@@ -14,11 +16,16 @@ import {
   Star,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { FixedAppBottomNav } from "@/components/layout/bottom-nav";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { AnimatedPage } from "@/components/ui/reveal";
-import { requirePremiumFromServer } from "@/lib/fortune/premium-unlock";
+import {
+  requirePremiumFromServer,
+  setPremiumUnlocked,
+} from "@/lib/fortune/premium-unlock";
 import { readFortuneProfile } from "@/lib/fortune/profile-storage";
+import { startMaeNavigation } from "@/components/layout/navigation-loading";
 
 const GOLD = "#e8d19a";
 const GOLD_SOFT = "#efc36c";
@@ -46,6 +53,8 @@ type ComingSoonItem = {
   badge?: string;
   /** object-position when art has baked-in copy on the left */
   artFocus?: string;
+  /** AI features — require paid premium */
+  premium?: boolean;
 };
 
 const NEW_ITEMS: ComingSoonItem[] = [
@@ -69,6 +78,7 @@ const NEW_ITEMS: ComingSoonItem[] = [
     cta: "เปิดห้องคุย",
     badge: "3 คำถามต่อวัน",
     artFocus: "72% center",
+    premium: true,
   },
   {
     id: "dream",
@@ -79,6 +89,7 @@ const NEW_ITEMS: ComingSoonItem[] = [
     href: "/special/dream",
     cta: "เปิดตำราฝัน",
     badge: "วันละ 1 ครั้ง",
+    premium: true,
   },
   {
     id: "phone",
@@ -88,6 +99,7 @@ const NEW_ITEMS: ComingSoonItem[] = [
     Icon: Smartphone,
     href: "/special/phone",
     cta: "เปิดตำราเบอร์",
+    premium: true,
   },
 ];
 
@@ -212,12 +224,21 @@ function ComingSoonCard({ item }: { item: ComingSoonItem }) {
   );
 }
 
-function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
+function OpenFeatureCard({
+  item,
+  locked,
+  onOpen,
+}: {
+  item: ComingSoonItem;
+  locked: boolean;
+  onOpen: () => void;
+}) {
   if (!item.href) return null;
 
   return (
-    <Link
-      href={item.href}
+    <button
+      type="button"
+      onClick={onOpen}
       className="group relative block w-full overflow-hidden rounded-[16px] text-left outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
       style={{
         aspectRatio: "2.75 / 1",
@@ -225,7 +246,7 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
         boxShadow:
           "inset 0 0 0 1px rgba(255,255,255,0.14), 0 8px 20px rgba(0,0,0,0.24)",
       }}
-      aria-label={item.title}
+      aria-label={locked ? `${item.title} · ต้องเป็นพรีเมียม` : item.title}
     >
       <Image
         src={item.art}
@@ -245,7 +266,21 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
         }}
       />
 
-      {item.badge ? (
+      {locked ? (
+        <span
+          className="absolute right-2.5 top-2.5 z-[2] inline-flex items-center gap-1 rounded-full px-2 py-[0.28em] text-[12px] font-semibold leading-[1.35]"
+          style={{
+            color: GOLD_SOFT,
+            background: "rgba(8,12,24,0.76)",
+            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.14)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+          }}
+        >
+          <Lock className="h-3 w-3" strokeWidth={2.4} />
+          พรีเมียม
+        </span>
+      ) : item.badge ? (
         <span
           className="absolute right-2.5 top-2.5 z-[2] inline-flex items-center rounded-full px-2 text-[12px] font-semibold leading-[1.35]"
           style={{
@@ -284,12 +319,12 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
             className="inline-flex w-fit items-center gap-0.5 text-[15px] font-semibold leading-none"
             style={{ color: GOLD_SOFT }}
           >
-            {item.cta ?? "แตะเพื่อเปิด"}
+            {locked ? "ปลดล็อกเพื่อใช้" : (item.cta ?? "แตะเพื่อเปิด")}
             <ChevronRight className="h-4 w-4" strokeWidth={2.6} />
           </span>
         </div>
       </div>
-    </Link>
+    </button>
   );
 }
 
@@ -298,7 +333,10 @@ function OpenFeatureCard({ item }: { item: ComingSoonItem }) {
  * โชว์ฟีเจอร์ที่กำลังจะเข้า (รายการเปิดใช้ไปอยู่หน้าทำนายแล้ว)
  */
 export function SpecialDraft() {
+  const router = useRouter();
   const [premium, setPremium] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -321,6 +359,34 @@ export function SpecialDraft() {
       window.removeEventListener("dooduang-premium-changed", onChange);
     };
   }, []);
+
+  function openItem(item: ComingSoonItem) {
+    if (!item.href) return;
+    if (item.premium && !premium) {
+      setPendingHref(item.href);
+      setPayOpen(true);
+      return;
+    }
+    startMaeNavigation();
+    router.push(item.href);
+  }
+
+  function applyUnlock() {
+    const profile = readFortuneProfile();
+    setPremiumUnlocked(
+      profile
+        ? { birthDate: profile.birthDate, nickname: profile.nickname }
+        : null,
+    );
+    setPremium(true);
+    setPayOpen(false);
+    const next = pendingHref;
+    setPendingHref(null);
+    if (next) {
+      startMaeNavigation();
+      router.push(next);
+    }
+  }
 
   return (
     <div
@@ -384,7 +450,11 @@ export function SpecialDraft() {
           <ul className="space-y-3.5">
             {NEW_ITEMS.map((item) => (
               <li key={item.id}>
-                <OpenFeatureCard item={item} />
+                <OpenFeatureCard
+                  item={item}
+                  locked={Boolean(item.premium) && !premium}
+                  onOpen={() => openItem(item)}
+                />
               </li>
             ))}
           </ul>
@@ -404,6 +474,16 @@ export function SpecialDraft() {
 
         <FixedAppBottomNav activeId="special" />
       </div>
+
+      <FortunePaymentSheet
+        open={payOpen}
+        onClose={() => {
+          setPayOpen(false);
+          setPendingHref(null);
+        }}
+        onPaid={applyUnlock}
+        returnPath={pendingHref ?? "/special"}
+      />
     </div>
   );
 }

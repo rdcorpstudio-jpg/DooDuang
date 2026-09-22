@@ -17,6 +17,7 @@ import {
   parsePhoneReading,
   type PhoneReading,
 } from "@/lib/fortune/phone-reading";
+import { hasPremiumAccess } from "@/lib/premium-entitlement";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -78,20 +79,31 @@ function dbErrorPayload(err: unknown) {
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ user: null, asked: false });
+    return NextResponse.json({ user: null, asked: false, premium: false });
   }
+
+  const premium = hasPremiumAccess({
+    status: session.user.subscriptionStatus,
+    until: session.user.premiumUntil,
+  });
 
   try {
     const { row } = await weekRow(session.user.id);
     if (!row) {
-      return NextResponse.json({ user: true, asked: false });
+      return NextResponse.json({ user: true, asked: false, premium });
     }
     const reading = parsePhoneReading(row.result);
     if (!reading) {
-      return NextResponse.json({ user: true, asked: false, stale: true });
+      return NextResponse.json({
+        user: true,
+        asked: false,
+        premium,
+        stale: true,
+      });
     }
     return NextResponse.json({
       user: true,
+      premium,
       ...payload(row.phone, reading, true),
     });
   } catch (err) {
@@ -99,6 +111,7 @@ export async function GET() {
     const detail = dbErrorPayload(err);
     return NextResponse.json({
       user: true,
+      premium,
       asked: false,
       ...detail,
       error: detail.error || "เปิดตำราไม่สำเร็จ ลองรีเฟรชอีกครั้ง",
@@ -112,6 +125,21 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "ต้องเข้าสู่ระบบก่อน", code: "UNAUTHENTICATED" },
       { status: 401 },
+    );
+  }
+
+  const premium = hasPremiumAccess({
+    status: session.user.subscriptionStatus,
+    until: session.user.premiumUntil,
+  });
+  if (!premium) {
+    return NextResponse.json(
+      {
+        error: "วิเคราะห์เบอร์ใช้ได้เฉพาะสมาชิกพรีเมียม",
+        code: "PREMIUM_REQUIRED",
+        premium: false,
+      },
+      { status: 403 },
     );
   }
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Moon, RefreshCw, Sparkles } from "lucide-react";
+import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { MaePageLoading } from "@/components/layout/mae-page-loading";
 import { AnimatedPage, Reveal, useRevealMounted } from "@/components/ui/reveal";
@@ -12,6 +13,11 @@ import {
   bangkokDayKey,
   type DreamReading,
 } from "@/lib/fortune/dream-reading";
+import {
+  requirePremiumFromServer,
+  setPremiumUnlocked,
+} from "@/lib/fortune/premium-unlock";
+import { readFortuneProfile } from "@/lib/fortune/profile-storage";
 import { MAE_GLASS } from "@/lib/mae-glass";
 
 const GOLD = "#e8d19a";
@@ -61,6 +67,7 @@ function useBangkokMidnightCountdown(active: boolean) {
 
 type Loaded = {
   signedIn: boolean;
+  premium: boolean;
   asked: boolean;
   dream: string;
   reading: DreamReading | null;
@@ -71,14 +78,24 @@ export function FortuneDreamPage() {
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [payOpen, setPayOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
     async function load() {
       try {
-        const res = await fetch("/api/fortune/dream", { cache: "no-store" });
+        const profile = readFortuneProfile();
+        const [res, access] = await Promise.all([
+          fetch("/api/fortune/dream", { cache: "no-store" }),
+          requirePremiumFromServer(
+            profile
+              ? { birthDate: profile.birthDate, nickname: profile.nickname }
+              : null,
+          ),
+        ]);
         const data = (await res.json()) as {
           user?: boolean | null;
+          premium?: boolean;
           asked?: boolean;
           dream?: string;
           reading?: DreamReading;
@@ -87,6 +104,7 @@ export function FortuneDreamPage() {
         if (!alive) return;
         setLoaded({
           signedIn: Boolean(data.user),
+          premium: Boolean(data.premium) || access.ok,
           asked: Boolean(data.asked && data.reading),
           dream: data.dream ?? "",
           reading: data.reading ?? null,
@@ -96,6 +114,7 @@ export function FortuneDreamPage() {
         if (!alive) return;
         setLoaded({
           signedIn: false,
+          premium: false,
           asked: false,
           dream: "",
           reading: null,
@@ -129,12 +148,19 @@ export function FortuneDreamPage() {
         window.location.href = "/login?callbackUrl=/special/dream";
         return;
       }
+      if (res.status === 403 || data.code === "PREMIUM_REQUIRED") {
+        setLoaded((prev) => (prev ? { ...prev, premium: false } : prev));
+        setPayOpen(true);
+        setError(data.error || "ต้องเป็นสมาชิกพรีเมียม");
+        return;
+      }
       if (!res.ok || !data.reading) {
         setError(data.error || "แม่เปิดตำราไม่สำเร็จ ลองอีกครั้ง");
         return;
       }
       setLoaded({
         signedIn: true,
+        premium: true,
         asked: true,
         dream: data.dream ?? draft,
         reading: data.reading,
@@ -159,6 +185,7 @@ export function FortuneDreamPage() {
         const res = await fetch("/api/fortune/dream", { cache: "no-store" });
         const data = (await res.json()) as {
           user?: boolean | null;
+          premium?: boolean;
           asked?: boolean;
           dream?: string;
           reading?: DreamReading;
@@ -166,6 +193,7 @@ export function FortuneDreamPage() {
         if (!alive) return;
         setLoaded({
           signedIn: Boolean(data.user),
+          premium: Boolean(data.premium),
           asked: Boolean(data.asked && data.reading),
           dream: data.dream ?? "",
           reading: data.reading ?? null,
@@ -296,6 +324,38 @@ export function FortuneDreamPage() {
               <span className="dd-btn-label">เข้าสู่ระบบ</span>
             </Link>
           </div>
+        ) : !loaded.premium ? (
+          <div
+            className="mt-10 rounded-[24px] px-5 py-7 text-center"
+            style={{
+              background: GLASS.bg,
+              border: GLASS.border,
+              boxShadow: GLASS.shadow,
+              backdropFilter: GLASS.blur,
+              WebkitBackdropFilter: GLASS.blur,
+            }}
+          >
+            <Sparkles
+              className="mx-auto h-8 w-8"
+              style={{ color: GOLD }}
+              strokeWidth={1.8}
+            />
+            <p
+              className="mt-4 text-[16px] font-medium leading-[1.55]"
+              style={{ color: TEXT }}
+            >
+              ทำนายฝันเป็นฟีเจอร์พรีเมียม
+              <br />
+              สมัครแล้วแม่ตีความให้ได้ทันที
+            </p>
+            <button
+              type="button"
+              onClick={() => setPayOpen(true)}
+              className="wallpaper-dl-btn mt-6 inline-flex h-12 items-center justify-center rounded-full px-8 text-[15px] font-bold"
+            >
+              <span className="dd-btn-label">สมัครพรีเมียม</span>
+            </button>
+          </div>
         ) : (
           <>
             <div
@@ -376,6 +436,7 @@ export function FortuneDreamPage() {
                   if (!canAskAgain) return;
                   setLoaded({
                     signedIn: true,
+                    premium: true,
                     asked: false,
                     dream: "",
                     reading: null,
@@ -404,6 +465,23 @@ export function FortuneDreamPage() {
           </>
         )}
       </AnimatedPage>
+
+      <FortunePaymentSheet
+        open={payOpen}
+        onClose={() => setPayOpen(false)}
+        onPaid={() => {
+          const profile = readFortuneProfile();
+          setPremiumUnlocked(
+            profile
+              ? { birthDate: profile.birthDate, nickname: profile.nickname }
+              : null,
+          );
+          setLoaded((prev) => (prev ? { ...prev, premium: true } : prev));
+          setPayOpen(false);
+          setError("");
+        }}
+        returnPath="/special/dream"
+      />
     </div>
   );
 }

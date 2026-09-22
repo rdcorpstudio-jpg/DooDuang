@@ -10,6 +10,7 @@ import {
   repairDreamNumbers,
   type DreamReading,
 } from "@/lib/fortune/dream-reading";
+import { hasPremiumAccess } from "@/lib/premium-entitlement";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,26 +42,33 @@ async function todayRow(userId: string) {
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ user: null, asked: false });
+    return NextResponse.json({ user: null, asked: false, premium: false });
   }
+
+  const premium = hasPremiumAccess({
+    status: session.user.subscriptionStatus,
+    until: session.user.premiumUntil,
+  });
 
   try {
     const { row } = await todayRow(session.user.id);
     if (!row) {
-      return NextResponse.json({ user: true, asked: false });
+      return NextResponse.json({ user: true, asked: false, premium });
     }
     const reading = parseDreamReading(row.result);
     if (!reading) {
-      return NextResponse.json({ user: true, asked: false });
+      return NextResponse.json({ user: true, asked: false, premium });
     }
     return NextResponse.json({
       user: true,
+      premium,
       ...payload(row.dream, repairDreamNumbers(row.dream, reading), true),
     });
   } catch (err) {
     console.error("dream GET failed:", err);
     return NextResponse.json({
       user: true,
+      premium,
       asked: false,
       error: "เปิดตำราไม่สำเร็จ ลองรีเฟรชอีกครั้ง",
     });
@@ -73,6 +81,21 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "ต้องเข้าสู่ระบบก่อน", code: "UNAUTHENTICATED" },
       { status: 401 },
+    );
+  }
+
+  const premium = hasPremiumAccess({
+    status: session.user.subscriptionStatus,
+    until: session.user.premiumUntil,
+  });
+  if (!premium) {
+    return NextResponse.json(
+      {
+        error: "ทำนายฝันใช้ได้เฉพาะสมาชิกพรีเมียม",
+        code: "PREMIUM_REQUIRED",
+        premium: false,
+      },
+      { status: 403 },
     );
   }
 

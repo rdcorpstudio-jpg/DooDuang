@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RefreshCw, Smartphone, Sparkles } from "lucide-react";
+import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { MaePageLoading } from "@/components/layout/mae-page-loading";
 import { AnimatedPage, Reveal, useRevealMounted } from "@/components/ui/reveal";
@@ -15,6 +16,10 @@ import {
   normalizePhoneInput,
   type PhoneReading,
 } from "@/lib/fortune/phone-reading";
+import {
+  requirePremiumFromServer,
+  setPremiumUnlocked,
+} from "@/lib/fortune/premium-unlock";
 import { readFortuneProfile } from "@/lib/fortune/profile-storage";
 import { MAE_GLASS } from "@/lib/mae-glass";
 
@@ -61,6 +66,7 @@ function useWeekCountdown(active: boolean) {
 
 type Loaded = {
   signedIn: boolean;
+  premium: boolean;
   asked: boolean;
   phone: string;
   reading: PhoneReading | null;
@@ -71,14 +77,24 @@ export function FortunePhonePage() {
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [payOpen, setPayOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
     async function load() {
       try {
-        const res = await fetch("/api/fortune/phone", { cache: "no-store" });
+        const profile = readFortuneProfile();
+        const [res, access] = await Promise.all([
+          fetch("/api/fortune/phone", { cache: "no-store" }),
+          requirePremiumFromServer(
+            profile
+              ? { birthDate: profile.birthDate, nickname: profile.nickname }
+              : null,
+          ),
+        ]);
         const data = (await res.json()) as {
           user?: boolean | null;
+          premium?: boolean;
           asked?: boolean;
           phone?: string;
           reading?: PhoneReading;
@@ -87,6 +103,7 @@ export function FortunePhonePage() {
         if (!alive) return;
         setLoaded({
           signedIn: Boolean(data.user),
+          premium: Boolean(data.premium) || access.ok,
           asked: Boolean(data.asked && data.reading),
           phone: data.phone ?? "",
           reading: data.reading ?? null,
@@ -96,6 +113,7 @@ export function FortunePhonePage() {
         if (!alive) return;
         setLoaded({
           signedIn: false,
+          premium: false,
           asked: false,
           phone: "",
           reading: null,
@@ -145,6 +163,12 @@ export function FortunePhonePage() {
         window.location.href = "/login?callbackUrl=/special/phone";
         return;
       }
+      if (res.status === 403 || data.code === "PREMIUM_REQUIRED") {
+        setLoaded((prev) => (prev ? { ...prev, premium: false } : prev));
+        setPayOpen(true);
+        setError(data.error || "ต้องเป็นสมาชิกพรีเมียม");
+        return;
+      }
       if (data.code === "NO_PROFILE") {
         window.location.href = "/dashboard";
         return;
@@ -155,6 +179,7 @@ export function FortunePhonePage() {
       }
       setLoaded({
         signedIn: true,
+        premium: true,
         asked: true,
         phone: data.phone ?? phone,
         reading: data.reading,
@@ -181,6 +206,7 @@ export function FortunePhonePage() {
         const res = await fetch("/api/fortune/phone", { cache: "no-store" });
         const data = (await res.json()) as {
           user?: boolean | null;
+          premium?: boolean;
           asked?: boolean;
           phone?: string;
           reading?: PhoneReading;
@@ -188,6 +214,7 @@ export function FortunePhonePage() {
         if (!alive) return;
         setLoaded({
           signedIn: Boolean(data.user),
+          premium: Boolean(data.premium),
           asked: Boolean(data.asked && data.reading),
           phone: data.phone ?? "",
           reading: data.reading ?? null,
@@ -311,6 +338,38 @@ export function FortunePhonePage() {
               <span className="dd-btn-label">เข้าสู่ระบบ</span>
             </Link>
           </div>
+        ) : !loaded.premium ? (
+          <div
+            className="mt-10 rounded-[24px] px-5 py-7 text-center"
+            style={{
+              background: GLASS.bg,
+              border: GLASS.border,
+              boxShadow: GLASS.shadow,
+              backdropFilter: GLASS.blur,
+              WebkitBackdropFilter: GLASS.blur,
+            }}
+          >
+            <Sparkles
+              className="mx-auto h-8 w-8"
+              style={{ color: GOLD }}
+              strokeWidth={1.8}
+            />
+            <p
+              className="mt-4 text-[16px] font-medium leading-[1.55]"
+              style={{ color: TEXT }}
+            >
+              วิเคราะห์เบอร์เป็นฟีเจอร์พรีเมียม
+              <br />
+              สมัครแล้วแม่วิเคราะห์ให้ได้ทันที
+            </p>
+            <button
+              type="button"
+              onClick={() => setPayOpen(true)}
+              className="wallpaper-dl-btn mt-6 inline-flex h-12 items-center justify-center rounded-full px-8 text-[15px] font-bold"
+            >
+              <span className="dd-btn-label">สมัครพรีเมียม</span>
+            </button>
+          </div>
         ) : (
           <>
             {!locked ? (
@@ -392,6 +451,7 @@ export function FortunePhonePage() {
                   if (!canAskAgain) return;
                   setLoaded({
                     signedIn: true,
+                    premium: true,
                     asked: false,
                     phone: "",
                     reading: null,
@@ -420,6 +480,23 @@ export function FortunePhonePage() {
           </>
         )}
       </AnimatedPage>
+
+      <FortunePaymentSheet
+        open={payOpen}
+        onClose={() => setPayOpen(false)}
+        onPaid={() => {
+          const profile = readFortuneProfile();
+          setPremiumUnlocked(
+            profile
+              ? { birthDate: profile.birthDate, nickname: profile.nickname }
+              : null,
+          );
+          setLoaded((prev) => (prev ? { ...prev, premium: true } : prev));
+          setPayOpen(false);
+          setError("");
+        }}
+        returnPath="/special/phone"
+      />
     </div>
   );
 }
