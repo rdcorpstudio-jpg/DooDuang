@@ -83,7 +83,9 @@ export function FortuneLuckyNumbersPage() {
 
   useEffect(() => {
     const profile = readFortuneProfile();
-    const seed = [profile.nickname, profile.birthDate].filter(Boolean).join("|");
+    const seed = [profile?.nickname, profile?.birthDate]
+      .filter(Boolean)
+      .join("|");
     setPack(pickDailyLuckyNumbers(seed));
   }, []);
 
