@@ -1,7 +1,7 @@
 "use client";
 
 import type { ButtonHTMLAttributes } from "react";
-import { ChevronRight, Loader2 } from "lucide-react";
+import { ChevronRight, Crown, Loader2 } from "lucide-react";
 import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ type PremiumBuyCtaProps = Omit<
   subtitle?: string;
 };
 
-/** Primary buy CTA — slim gold pill, single clear action line */
+/** Primary buy CTA — slim gold pill with crown + Premium label */
 export function PremiumBuyCta({
   loading = false,
   loadingLabel = "กำลังดำเนินการ…",
@@ -29,31 +29,37 @@ export function PremiumBuyCta({
       type={type}
       disabled={disabled || loading}
       className={cn(
-        "mae-gold-cta group relative flex min-h-[2.75rem] w-full items-center justify-center gap-1.5 overflow-hidden rounded-full px-5 py-2 outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60",
+        "mae-gold-cta group relative flex min-h-[2.85rem] w-full items-center justify-center gap-2 overflow-hidden rounded-full px-5 py-2.5 outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60",
         className,
       )}
       {...rest}
     >
       {loading ? (
         <Loader2
-          className="relative z-[1] h-4 w-4 shrink-0 animate-spin"
+          className="relative z-[1] h-4 w-4 shrink-0 animate-spin text-[#1a1408]"
           strokeWidth={2.2}
           aria-hidden
         />
-      ) : null}
+      ) : (
+        <Crown
+          className="relative z-[1] h-4 w-4 shrink-0 text-[#1a1408]"
+          strokeWidth={2.2}
+          aria-hidden
+        />
+      )}
       <span className="relative z-[1] flex min-w-0 flex-col items-center justify-center">
-        <span className="dd-btn-label text-[14.5px] font-semibold tracking-wide">
-          {loading ? loadingLabel : "สมัครพรีเมียม"}
+        <span className="dd-btn-label text-[15px] font-bold tracking-[0.06em]">
+          {loading ? loadingLabel : "Premium"}
         </span>
         {!loading ? (
-          <span className="mt-px text-[11.5px] font-medium leading-none opacity-70">
+          <span className="mt-0.5 text-[11.5px] font-medium leading-none tracking-wide opacity-70">
             {subtitle}
           </span>
         ) : null}
       </span>
       {!loading ? (
         <ChevronRight
-          className="relative z-[1] h-4 w-4 shrink-0 opacity-75 transition-transform duration-200 group-hover:translate-x-0.5"
+          className="relative z-[1] h-4 w-4 shrink-0 text-[#1a1408]/75 transition-transform duration-200 group-hover:translate-x-0.5"
           strokeWidth={2.4}
           aria-hidden
         />

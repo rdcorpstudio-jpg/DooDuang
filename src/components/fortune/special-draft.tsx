@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   Ban,
   ChevronRight,
+  Crown,
   MessageCircle,
   Moon,
   Smartphone,
@@ -362,9 +363,16 @@ export function SpecialDraft() {
             ) : (
               <Link
                 href="/premium/pay?return=/special"
-                className="mae-gold-cta mt-1 inline-flex h-8 shrink-0 items-center justify-center rounded-full px-3.5 text-[13.5px] font-semibold tracking-wide outline-none transition active:scale-[0.98]"
+                className="mae-gold-cta mt-1 inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-3.5 outline-none transition active:scale-[0.98]"
               >
-                <span className="dd-btn-label">สมัครพรีเมียม</span>
+                <Crown
+                  className="h-3.5 w-3.5 shrink-0 text-[#1a1408]"
+                  strokeWidth={2.25}
+                  aria-hidden
+                />
+                <span className="dd-btn-label text-[13px] font-bold tracking-[0.04em]">
+                  Premium
+                </span>
               </Link>
             )}
           </header>

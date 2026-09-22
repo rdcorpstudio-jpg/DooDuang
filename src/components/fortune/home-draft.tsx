@@ -40,6 +40,10 @@ import { cn } from "@/lib/utils";
 import { poloShirtSrcForColorName } from "@/lib/fortune/polo-shirt-asset";
 import { MAE_GLASS } from "@/lib/mae-glass";
 import { HomeDailyTarotCard } from "@/components/fortune/home-daily-tarot-card";
+import {
+  HomeAnalyzingLoader,
+  shouldShowHomeAnalyze,
+} from "@/components/fortune/home-analyzing-loader";
 
 /** สวัสดีตามช่วงเวลา — เช้า / บ่าย / เย็น */
 function greetingByHour(hour: number) {
@@ -493,6 +497,11 @@ export function HomeDraft() {
   const [gender, setGender] = useState<"" | "female" | "male" | "other" | "unspecified">("");
   const [genderNote, setGenderNote] = useState<string | undefined>();
   const [focus, setFocus] = useState<"life" | "work" | "money" | "love" | "health">("life");
+  /** Session-once analyze screen; default true on SSR to avoid home flash. */
+  const [analyzing, setAnalyzing] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return shouldShowHomeAnalyze();
+  });
   const greeting = useMemo(() => greetingByHour(new Date().getHours()), []);
 
   useEffect(() => {
@@ -510,6 +519,7 @@ export function HomeDraft() {
       setFocus(profile?.focus || "life");
     }
     syncProfile();
+    if (!shouldShowHomeAnalyze()) setAnalyzing(false);
     window.addEventListener("dooduang-profile-changed", syncProfile);
     window.addEventListener("storage", syncProfile);
     window.addEventListener("focus", syncProfile);
@@ -648,6 +658,21 @@ export function HomeDraft() {
       startMaeNavigation();
       router.push(next);
     }
+  }
+
+  if (analyzing) {
+    return (
+      <HomeAnalyzingLoader
+        profile={{
+          birthDate,
+          nickname: displayName,
+          birthTime,
+          birthPlace,
+          focus,
+        }}
+        onDone={() => setAnalyzing(false)}
+      />
+    );
   }
 
   return (
