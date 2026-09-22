@@ -1,6 +1,17 @@
 "use client";
 
-import { useState, type CSSProperties, type ReactNode } from "react";
+import {
+  Children,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+  type TransitionEvent as ReactTransitionEvent,
+} from "react";
 import Link from "next/link";
 import type { BaziChart, BaziElement } from "@/lib/fortune/bazi";
 import { elementColor } from "@/lib/fortune/bazi";
@@ -99,6 +110,249 @@ function SectionCard({
       ) : null}
       <div className="mt-4">{children}</div>
     </section>
+  );
+}
+
+/** ปัดแบบคำทำนายวันนี้ — ลากกลางชัด ข้างเบลอ · วนลูป */
+function FocusLoopCarousel({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const items = useMemo(
+    () => Children.toArray(children).filter(Boolean),
+    [children]
+  );
+  const n = items.length;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState(1);
+  const [dragX, setDragX] = useState(0);
+  const [anim, setAnim] = useState(false);
+  const [metrics, setMetrics] = useState({ vw: 360, cardW: 320, step: 268 });
+  const [slideH, setSlideH] = useState(320);
+  const phaseRef = useRef<"idle" | "drag" | "snap">("idle");
+  const startX = useRef(0);
+  const lastX = useRef(0);
+  const snapTimer = useRef(0);
+  const pendingPos = useRef(1);
+  const settling = useRef(false);
+  const posRef = useRef(pos);
+  posRef.current = pos;
+  const slideEls = useRef<(HTMLDivElement | null)[]>([]);
+
+  const slides = useMemo(() => {
+    if (n === 0) return [] as ReactNode[];
+    if (n === 1) return [items[0]!];
+    return [items[n - 1]!, ...items, items[0]!];
+  }, [items, n]);
+
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const measure = () => {
+      const vw = el.clientWidth || 360;
+      const cardW = Math.round(Math.min(vw * 0.9, 368));
+      const step = Math.round(cardW * 0.84);
+      setMetrics({ vw, cardW, step });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      window.clearTimeout(snapTimer.current);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    let max = 0;
+    for (const el of slideEls.current) {
+      if (el) max = Math.max(max, el.offsetHeight);
+    }
+    if (max > 0) setSlideH(max);
+  }, [metrics.cardW, slides.length, n]);
+
+  if (n === 0) return null;
+
+  const { cardW, step } = metrics;
+  const pad = (metrics.vw - cardW) / 2;
+  const translateX = pad - pos * step + dragX;
+
+  function onPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    if (phaseRef.current === "snap") return;
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    startX.current = e.clientX;
+    lastX.current = e.clientX;
+    settling.current = false;
+    phaseRef.current = "drag";
+    setAnim(false);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function onPointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    if (phaseRef.current !== "drag") return;
+    lastX.current = e.clientX;
+    const dx = e.clientX - startX.current;
+    const max = step * 1.2;
+    setDragX(Math.max(-max, Math.min(max, dx)));
+  }
+
+  function settle(at: number) {
+    if (settling.current) return;
+    if (phaseRef.current !== "snap") return;
+    settling.current = true;
+    window.clearTimeout(snapTimer.current);
+    setAnim(false);
+    setDragX(0);
+    if (at <= 0) setPos(n);
+    else if (at >= n + 1) setPos(1);
+    else setPos(at);
+    phaseRef.current = "idle";
+    window.setTimeout(() => {
+      settling.current = false;
+    }, 40);
+  }
+
+  function goTo(next: number) {
+    const cur = posRef.current;
+    phaseRef.current = "snap";
+    pendingPos.current = next;
+    setAnim(true);
+    setDragX(-(next - cur) * step);
+    window.clearTimeout(snapTimer.current);
+    snapTimer.current = window.setTimeout(() => settle(next), 450);
+  }
+
+  function endDrag(e: ReactPointerEvent<HTMLDivElement>) {
+    if (phaseRef.current !== "drag") return;
+    const dx = lastX.current - startX.current;
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      /* ignore */
+    }
+    const threshold = Math.min(48, step * 0.16);
+    const cur = posRef.current;
+    if (dx <= -threshold) goTo(cur + 1);
+    else if (dx >= threshold) goTo(cur - 1);
+    else goTo(cur);
+  }
+
+  function onTrackTransitionEnd(e: ReactTransitionEvent<HTMLDivElement>) {
+    if (e.target !== e.currentTarget) return;
+    if (e.propertyName !== "transform") return;
+    settle(pendingPos.current);
+  }
+
+  if (n === 1) {
+    return (
+      <div className={cn("relative flex justify-center", className)}>
+        <div className="w-full max-w-[368px]">{items[0]}</div>
+      </div>
+    );
+  }
+
+  const realIdx = ((pos - 1) % n + n) % n;
+
+  return (
+    <div className={cn("relative -mx-5 overflow-x-hidden sm:-mx-6", className)}>
+      <div
+        ref={viewportRef}
+        className="relative mx-auto w-full max-w-[480px] cursor-grab select-none overflow-visible active:cursor-grabbing"
+        style={{ height: slideH + 8, touchAction: "pan-y" }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
+        <div
+          className="absolute top-0 left-0"
+          onTransitionEnd={onTrackTransitionEnd}
+          style={{
+            width: slides.length * step,
+            height: slideH,
+            transform: `translate3d(${translateX}px, 0, 0)`,
+            transition: anim
+              ? "transform 400ms cubic-bezier(0.25, 0.8, 0.25, 1)"
+              : "none",
+          }}
+        >
+          {slides.map((child, i) => {
+            const dist = Math.abs(i * step - pos * step + dragX);
+            const progress = Math.min(1, dist / Math.max(1, step));
+            const scale = 1 - progress * 0.06;
+            const opacity = Math.max(0.72, 1 - progress * 0.22);
+            const active = progress < 0.4;
+            const blurPx = Number((progress * 2.4).toFixed(2));
+            return (
+              <div
+                key={i}
+                ref={(el) => {
+                  slideEls.current[i] = el;
+                }}
+                className="absolute top-0 box-border"
+                style={{
+                  left: i * step,
+                  width: cardW,
+                  transform: `scale(${scale})`,
+                  transformOrigin: "center top",
+                  opacity,
+                  filter: `blur(${blurPx}px)`,
+                  zIndex: active ? 5 : 1,
+                  pointerEvents: active ? "auto" : "none",
+                }}
+              >
+                {child}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="mt-2.5 flex items-center justify-center gap-1.5">
+        {Array.from({ length: n }, (_, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`ไปสไลด์ ${i + 1}`}
+            aria-current={i === realIdx}
+            onClick={() => goTo(i + 1)}
+            className="h-1.5 rounded-full outline-none transition-all"
+            style={{
+              width: i === realIdx ? 18 : 6,
+              background:
+                i === realIdx ? GOLD : "rgba(186, 204, 230, 0.35)",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HScrollRow({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "no-h-scrollbar -mx-1 flex gap-2 overflow-x-auto overscroll-x-contain px-1 pb-0.5 touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        className
+      )}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -206,136 +460,158 @@ export function BaziResultView({
           </div>
         </SectionCard>
 
-        <SectionCard
-          title="เจ้าชะตา & นักษัตร"
-          subtitle="ธาตุประจำตัวและปีนักษัตรของคุณ"
-        >
-          <div className="space-y-3 text-center">
-            <div className="flex items-center justify-center gap-3">
-              <span
-                className="text-[1.75rem] font-bold leading-none"
-                style={{ color: elementColor(chart.dayMaster.element) }}
-              >
-                {chart.dayMaster.char}
-              </span>
-              <div className="text-left">
-                <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
-                  เจ้าชะตา
-                </p>
-                <p className="text-[17.5px] font-semibold" style={{ color: TEXT }}>
-                  {chart.dayMaster.pinyin} — {chart.dayMaster.th}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center justify-center gap-3">
-              <span
-                className="text-[1.75rem] font-bold leading-none"
-                style={{ color: elementColor(chart.zodiac.element) }}
-              >
-                {chart.zodiac.char}
-              </span>
-              <div className="text-left">
-                <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
-                  นักษัตร
-                </p>
-                <p className="text-[17.5px] font-semibold" style={{ color: TEXT }}>
-                  {chart.zodiac.animal}
-                </p>
-              </div>
-            </div>
-            <p className="text-[15.5px] font-medium" style={{ color: GOLD_SOFT }}>
-              จันทรคติจีน · {chart.lunarDate}
-            </p>
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          title="สมดุลธาตุห้า (Five Elements)"
-          subtitle="สัดส่วนธาตุจากตัวอักษร 8 ตัวในดวง"
-        >
-          <ul className="space-y-2.5">
-            {chart.elements.map((el) => (
-              <li key={el.id} className="flex items-center gap-2.5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={ELEMENT_ICON[el.id]}
-                  alt=""
-                  className="h-6 w-6 shrink-0 object-contain"
-                />
-                <span
-                  className="w-10 shrink-0 text-[17.5px] font-semibold"
-                  style={{ color: el.color }}
-                >
-                  {el.label}
-                </span>
-                <div
-                  className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full"
-                  style={{ background: "rgba(130, 205, 255, 0.12)" }}
-                >
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{
-                      width: `${(el.count / maxEl) * 100}%`,
-                      background: el.color,
-                      minWidth: el.count > 0 ? 6 : 0,
-                    }}
-                  />
+        <FocusLoopCarousel>
+          {[
+            <SectionCard
+              key="day"
+              title="เจ้าชะตา & นักษัตร"
+              subtitle="ธาตุประจำตัวและปีนักษัตรของคุณ"
+              className="h-full"
+            >
+              <div className="space-y-3 text-center">
+                <div className="flex items-center justify-center gap-3">
+                  <span
+                    className="text-[1.75rem] font-bold leading-none"
+                    style={{ color: elementColor(chart.dayMaster.element) }}
+                  >
+                    {chart.dayMaster.char}
+                  </span>
+                  <div className="text-left">
+                    <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
+                      เจ้าชะตา
+                    </p>
+                    <p
+                      className="text-[17.5px] font-semibold"
+                      style={{ color: TEXT }}
+                    >
+                      {chart.dayMaster.pinyin} — {chart.dayMaster.th}
+                    </p>
+                  </div>
                 </div>
-                <span
-                  className="w-8 text-right text-[17.5px] font-semibold tabular-nums"
-                  style={{ color: GOLD }}
+                <div className="flex items-center justify-center gap-3">
+                  <span
+                    className="text-[1.75rem] font-bold leading-none"
+                    style={{ color: elementColor(chart.zodiac.element) }}
+                  >
+                    {chart.zodiac.char}
+                  </span>
+                  <div className="text-left">
+                    <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
+                      นักษัตร
+                    </p>
+                    <p
+                      className="text-[17.5px] font-semibold"
+                      style={{ color: TEXT }}
+                    >
+                      {chart.zodiac.animal}
+                    </p>
+                  </div>
+                </div>
+                <p
+                  className="text-[15.5px] font-medium"
+                  style={{ color: GOLD_SOFT }}
                 >
-                  {el.count}
+                  จันทรคติจีน · {chart.lunarDate}
+                </p>
+              </div>
+            </SectionCard>,
+            <SectionCard
+              key="elements"
+              title="สมดุลธาตุห้า (Five Elements)"
+              subtitle="สัดส่วนธาตุจากตัวอักษร 8 ตัวในดวง"
+              className="h-full"
+            >
+              <ul className="space-y-2.5">
+                {chart.elements.map((el) => (
+                  <li key={el.id} className="flex items-center gap-2.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={ELEMENT_ICON[el.id]}
+                      alt=""
+                      className="h-6 w-6 shrink-0 object-contain"
+                    />
+                    <span
+                      className="w-10 shrink-0 text-[17.5px] font-semibold"
+                      style={{ color: el.color }}
+                    >
+                      {el.label}
+                    </span>
+                    <div
+                      className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full"
+                      style={{ background: "rgba(130, 205, 255, 0.12)" }}
+                    >
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${(el.count / maxEl) * 100}%`,
+                          background: el.color,
+                          minWidth: el.count > 0 ? 6 : 0,
+                        }}
+                      />
+                    </div>
+                    <span
+                      className="w-8 text-right text-[17.5px] font-semibold tabular-nums"
+                      style={{ color: GOLD }}
+                    >
+                      {el.count}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </SectionCard>,
+            <SectionCard
+              key="strength"
+              title="ความแข็ง–อ่อน & ธาตุที่เป็นประโยชน์"
+              className="h-full"
+            >
+              <p
+                className="text-center text-[17.5px] font-semibold"
+                style={{ color: GOLD }}
+              >
+                สถานะ: {chart.strength.status}{" "}
+                <span style={{ color: "rgba(232,209,154,0.75)" }}>
+                  ({chart.strength.statusZh})
                 </span>
-              </li>
-            ))}
-          </ul>
-        </SectionCard>
-
-        <SectionCard title="ความแข็ง–อ่อน & ธาตุที่เป็นประโยชน์">
-          <p className="text-center text-[17.5px] font-semibold" style={{ color: GOLD }}>
-            สถานะ: {chart.strength.status}{" "}
-            <span style={{ color: "rgba(232,209,154,0.75)" }}>
-              ({chart.strength.statusZh})
-            </span>
-          </p>
-          <p
-            className="mt-1 text-center text-[15.5px]"
-            style={{ color: TEXT_MUTED }}
-          >
-            {chart.strength.scoreLabel}
-          </p>
-          <div className="mt-4 text-center">
-            <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
-              ควรเสริม
-            </p>
-            <div className="mt-2 flex flex-wrap justify-center gap-2">
-              {chart.strength.favor.map((f) => (
-                <span
-                  key={f.id}
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[15.5px] font-semibold"
-                  style={{
-                    color: f.color,
-                    background: `${f.color}22`,
-                    boxShadow: `inset 0 0 0 1px ${f.color}55`,
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={ELEMENT_ICON[f.id]}
-                    alt=""
-                    className="h-4 w-4 object-contain"
-                  />
-                  {f.label}
-                </span>
-              ))}
-            </div>
-            <p className="mt-3 text-[15.5px]" style={{ color: TEXT_MUTED }}>
-              ควรเลี่ยง ·{" "}
-              <span style={{ color: TEXT }}>{chart.strength.avoid}</span>
-            </p>
-          </div>
-        </SectionCard>
+              </p>
+              <p
+                className="mt-1 text-center text-[15.5px]"
+                style={{ color: TEXT_MUTED }}
+              >
+                {chart.strength.scoreLabel}
+              </p>
+              <div className="mt-4 text-center">
+                <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
+                  ควรเสริม
+                </p>
+                <div className="mt-2 flex flex-wrap justify-center gap-2">
+                  {chart.strength.favor.map((f) => (
+                    <span
+                      key={f.id}
+                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[15.5px] font-semibold"
+                      style={{
+                        color: f.color,
+                        background: `${f.color}22`,
+                        boxShadow: `inset 0 0 0 1px ${f.color}55`,
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={ELEMENT_ICON[f.id]}
+                        alt=""
+                        className="h-4 w-4 object-contain"
+                      />
+                      {f.label}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-3 text-[15.5px]" style={{ color: TEXT_MUTED }}>
+                  ควรเลี่ยง ·{" "}
+                  <span style={{ color: TEXT }}>{chart.strength.avoid}</span>
+                </p>
+              </div>
+            </SectionCard>,
+          ]}
+        </FocusLoopCarousel>
 
         <SectionCard title="ดาวพิเศษ (神煞)">
           <ul className="space-y-2.5">
@@ -412,11 +688,11 @@ export function BaziResultView({
           title="วัยจร (大運)"
           subtitle="รอบโชค 10 ปี คำนวณจากอายุและเพศ"
         >
-          <div className="grid grid-cols-4 gap-2">
+          <HScrollRow>
             {chart.luckPillars.map((lp) => (
               <div
                 key={lp.age}
-                className="flex flex-col items-center rounded-[14px] px-1 py-2.5 text-center"
+                className="flex w-[4.6rem] shrink-0 flex-col items-center rounded-[14px] px-1 py-2.5 text-center"
                 style={CELL.idle}
               >
                 <p
@@ -445,20 +721,20 @@ export function BaziResultView({
                 </p>
               </div>
             ))}
-          </div>
+          </HScrollRow>
         </SectionCard>
 
         <SectionCard
           title="ปีจร (流年) — ดวงรายปี"
           subtitle="แนวโน้มรายปีจากสิบเทพเทียบเจ้าชะตา"
         >
-          <div className="grid grid-cols-4 gap-2">
+          <HScrollRow>
             {chart.annual.map((y, i) => (
               <button
                 key={y.year}
                 type="button"
                 onClick={() => setYearIdx(i)}
-                className="rounded-[14px] px-1 py-2.5 text-center outline-none transition active:scale-[0.98]"
+                className="w-[4.6rem] shrink-0 rounded-[14px] px-1 py-2.5 text-center outline-none transition active:scale-[0.98]"
                 style={i === yearIdx ? CELL.active : CELL.idle}
               >
                 <p className="text-[13px]" style={{ color: TEXT_MUTED }}>
@@ -484,7 +760,7 @@ export function BaziResultView({
                 </p>
               </button>
             ))}
-          </div>
+          </HScrollRow>
           {selectedYear ? (
             <p
               className="mt-3 text-center text-[17.5px] leading-[1.45]"

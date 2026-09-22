@@ -14,24 +14,57 @@ import {
 
 /**
  * `/` — marketing landing for new users.
- * CTA → /welcome (ฟอร์มสั้น) → preview → pay.
- * After birth/name basics are saved, skip landing → daily fortune home.
+ * CTA → /login → /welcome → /reading → /home (3-day trial).
+ * After trial expires (and not premium) → /premium/pay.
  */
 export function HomeGate() {
   const router = useRouter();
   const [showLanding, setShowLanding] = useState(false);
 
   useEffect(() => {
+    let alive = true;
     hydrateFortuneProfileFromWizard();
+
     const fromLogout =
       new URLSearchParams(window.location.search).get("from") === "logout";
     if (fromLogout) clearPremiumUnlocked();
-    if (!fromLogout && hasFreeReadingBasics(readFortuneProfile())) {
-      startMaeNavigation();
-      router.replace("/home");
-      return;
-    }
-    setShowLanding(true);
+
+    (async () => {
+      try {
+        const res = await fetch("/api/premium/status", { cache: "no-store" });
+        const data = (await res.json()) as {
+          authenticated?: boolean;
+          canUseApp?: boolean;
+          premium?: boolean;
+        };
+        if (!alive) return;
+
+        if (data.authenticated && !data.canUseApp && !data.premium) {
+          startMaeNavigation();
+          router.replace("/premium/pay?reason=trial");
+          return;
+        }
+
+        if (
+          data.authenticated &&
+          (data.canUseApp || data.premium) &&
+          !fromLogout &&
+          hasFreeReadingBasics(readFortuneProfile())
+        ) {
+          startMaeNavigation();
+          router.replace("/home");
+          return;
+        }
+      } catch {
+        /* fall through to landing */
+      }
+
+      if (alive) setShowLanding(true);
+    })();
+
+    return () => {
+      alive = false;
+    };
   }, [router]);
 
   if (!showLanding) {

@@ -33,7 +33,7 @@ export default function ReviewsPage() {
       </div>
 
       <Link
-        href="/welcome"
+        href="/login?callbackUrl=%2Fwelcome"
         className="wallpaper-dl-btn group relative mx-auto mt-8 flex h-[3.55rem] w-full max-w-[300px] items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
       >
         <span className="wallpaper-dl-btn__icon relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]">

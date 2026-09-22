@@ -137,6 +137,21 @@ CREATE UNIQUE INDEX IF NOT EXISTS bazi_cycle_asks_user_idx
   ON bazi_cycle_asks (user_id);
 ```
 
+#### Free trial window (`users.trial_ends_at`)
+
+After signup (Gmail / LINE / OTP), users get **3 days** of free app access (same free locks: AI / wallpaper still need premium). When the trial ends and they are not premium, the app redirects to `/premium/pay`.
+
+```sql
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS trial_ends_at timestamp;
+
+-- New/existing free users: start a 3-day window from now (re-run safe)
+UPDATE users
+SET trial_ends_at = NOW() + INTERVAL '3 days'
+WHERE trial_ends_at IS NULL
+  AND (premium_until IS NULL OR premium_until <= NOW());
+```
+
 #### Fortune profile — gender note (`gender_note`)
 
 ```sql

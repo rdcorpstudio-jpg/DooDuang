@@ -125,6 +125,7 @@ export function PremiumPayPage() {
   const searchParams = useSearchParams();
   const returnPath = safeReturnPath(searchParams.get("return"));
   const cancelled = searchParams.get("payment") === "cancelled";
+  const trialExpired = searchParams.get("reason") === "trial";
   const localSim = isLocalPremiumBypass();
 
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -260,18 +261,25 @@ export function PremiumPayPage() {
               />
             </div>
 
-            <div className="mt-4 max-w-[20rem]">
+            <div className="mt-4 max-w-[20rem] overflow-visible pt-1">
               <h1
                 id={titleId}
-                className="mae-gold-text mae-pay-title text-[2.05rem] font-bold leading-[1.3] tracking-tight"
-                style={{ fontWeight: 700 }}
+                className="mae-gold-text mae-pay-title text-[2.05rem] font-bold tracking-tight"
+                style={{
+                  fontWeight: 700,
+                  lineHeight: 1.55,
+                  paddingTop: "0.28em",
+                  paddingBottom: "0.12em",
+                }}
               >
                 พรีเมียม {FORTUNE_PACKAGE_LABEL}
               </h1>
               <p
                 className="mt-2 text-[15.5px] font-medium leading-[1.45] text-white"
               >
-                ดูดวงได้เต็มที่ ตลอดทั้งปี
+                {trialExpired
+                  ? "ครบ 3 วันทดลองแล้ว · สมัครพรีเมียมเพื่อใช้ต่อ"
+                  : "ดูดวงได้เต็มที่ ตลอดทั้งปี"}
               </p>
             </div>
           </div>

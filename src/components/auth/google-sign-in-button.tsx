@@ -27,7 +27,7 @@ export function authCompletePath(callbackUrl: string) {
 }
 
 /** After login → account dashboard (checkout only when callback has checkout=1) */
-export const DEFAULT_LOGIN_CALLBACK = "/dashboard";
+export const DEFAULT_LOGIN_CALLBACK = "/welcome";
 
 export function safeCallback(callbackUrl: string) {
   const raw = (callbackUrl || DEFAULT_LOGIN_CALLBACK).trim() || DEFAULT_LOGIN_CALLBACK;

@@ -29,6 +29,8 @@ export const users = pgTable("users", {
   stripeSubscriptionId: text("stripe_subscription_id"),
   subscriptionStatus: text("subscription_status"),
   premiumUntil: timestamp("premium_until", { mode: "date" }),
+  /** Free trial window after signup (login → try free features). */
+  trialEndsAt: timestamp("trial_ends_at", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 

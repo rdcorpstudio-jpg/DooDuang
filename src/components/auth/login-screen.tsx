@@ -125,13 +125,13 @@ export function LoginScreen({
         <div className="h-11 w-full shrink-0" aria-hidden />
 
         <h1 className="max-w-[16rem] shrink-0 text-[1.55rem] font-semibold leading-[1.45] tracking-wide text-[#f7f4ec]">
-          {forCheckout ? "เข้าสู่ระบบเพื่อชำระ" : "เก็บคำทำนายไว้กับคุณ"}
+          {forCheckout ? "เข้าสู่ระบบเพื่อชำระ" : "ทดลองใช้ฟรี 3 วัน"}
         </h1>
         {forCheckout ? null : (
           <p className="mt-3 shrink-0 text-[15px] leading-[1.7] text-[#9aa3b2]">
-            เข้าสู่ระบบเพื่อบันทึกผล
+            สมัครด้วย Google · LINE หรือเบอร์
             <br />
-            และกลับมาอ่านได้ทุกเมื่อ
+            แล้วกรอกข้อมูลเพื่อเริ่มดูดวง
           </p>
         )}
 

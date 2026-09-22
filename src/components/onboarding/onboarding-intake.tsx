@@ -72,10 +72,10 @@ function delayStyle(ms: number): CSSProperties {
 }
 
 /**
- * ฟอร์มสั้นก่อนซื้อ — 2 หน้า
+ * ฟอร์มสั้นหลังล็อกอิน — 2 หน้า
  * 1) ชื่อที่อยากให้เรียก
  * 2) เรื่องที่อยากดู
- * แล้วไปหน้าพรีวิวสิทธิ์พรีเมียม
+ * แล้วไปหน้ากรอกวันเกิด (/reading) ก่อนเข้าใช้ทดลอง 3 วัน
  */
 export function OnboardingIntakeForm() {
   const router = useRouter();
@@ -87,18 +87,46 @@ export function OnboardingIntakeForm() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (hasFreeReadingBasics(readFortuneProfile())) {
-      startMaeNavigation();
-      router.replace("/home");
-      return;
-    }
-    const saved = readIntake();
-    if (saved) {
-      setNickname(saved.nickname);
-      const allowed = new Set(FOCUS_CHOICES.map((c) => c.id));
-      setFocus(allowed.has(saved.focus) ? saved.focus : "life");
-    }
-    setReady(true);
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/premium/status", { cache: "no-store" });
+        const data = (await res.json()) as {
+          authenticated?: boolean;
+          canUseApp?: boolean;
+          premium?: boolean;
+        };
+        if (!alive) return;
+        if (!data.authenticated) {
+          startMaeNavigation();
+          router.replace("/login?callbackUrl=/welcome");
+          return;
+        }
+        if (!data.canUseApp && !data.premium) {
+          startMaeNavigation();
+          router.replace("/premium/pay?reason=trial");
+          return;
+        }
+      } catch {
+        /* continue — form still usable offline-ish */
+      }
+
+      if (hasFreeReadingBasics(readFortuneProfile())) {
+        startMaeNavigation();
+        router.replace("/home");
+        return;
+      }
+      const saved = readIntake();
+      if (saved) {
+        setNickname(saved.nickname);
+        const allowed = new Set(FOCUS_CHOICES.map((c) => c.id));
+        setFocus(allowed.has(saved.focus) ? saved.focus : "life");
+      }
+      if (alive) setReady(true);
+    })();
+    return () => {
+      alive = false;
+    };
   }, [router]);
 
   function goToFocus() {
@@ -119,7 +147,7 @@ export function OnboardingIntakeForm() {
     writeIntake({ nickname: name, focus });
     const raw = (searchParams.get("next") || "").trim();
     const next =
-      raw.startsWith("/") && !raw.startsWith("//") ? raw : "/welcome/preview";
+      raw.startsWith("/") && !raw.startsWith("//") ? raw : "/reading";
     startMaeNavigation();
     router.push(next);
   }

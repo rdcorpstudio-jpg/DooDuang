@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { auth, SESSION_COOKIE } from "@/lib/auth";
-import { hasPremiumAccess } from "@/lib/premium-entitlement";
+import {
+  hasAppAccess,
+  hasPremiumAccess,
+  hasTrialAccess,
+} from "@/lib/premium-entitlement";
 
 export const runtime = "nodejs";
 
@@ -10,6 +14,9 @@ const GUEST_BODY = {
   premium: false,
   untilMs: null,
   status: null,
+  trialActive: false,
+  trialEndsAtMs: null,
+  canUseApp: false,
 } as const;
 
 export async function GET() {
@@ -38,7 +45,10 @@ export async function GET() {
 
   const until = session.user.premiumUntil ?? null;
   const status = session.user.subscriptionStatus ?? null;
+  const trialEndsAt = session.user.trialEndsAt ?? null;
   const premium = hasPremiumAccess({ status, until });
+  const trialActive = hasTrialAccess(trialEndsAt);
+  const canUseApp = hasAppAccess({ status, until, trialEndsAt });
 
   return NextResponse.json(
     {
@@ -47,6 +57,10 @@ export async function GET() {
       untilMs: premium && until ? until.getTime() : null,
       until: premium && until ? until.toISOString() : null,
       status,
+      trialActive,
+      trialEndsAtMs: trialEndsAt ? trialEndsAt.getTime() : null,
+      trialEndsAt: trialEndsAt ? trialEndsAt.toISOString() : null,
+      canUseApp,
     },
     {
       headers: {

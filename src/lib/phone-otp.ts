@@ -2,6 +2,7 @@ import { createHmac, randomInt, timingSafeEqual } from "crypto";
 import { and, count, desc, eq, gte, isNull } from "drizzle-orm";
 import { requireDb } from "@/lib/db";
 import { phoneOtps, users } from "@/lib/db/schema";
+import { trialEndsAtFrom } from "@/lib/premium-entitlement";
 
 export const OTP_EXPIRES_SEC = 5 * 60;
 export const OTP_RESEND_COOLDOWN_SEC = 60;
@@ -188,6 +189,7 @@ export async function upsertUserByPhone(phone: string) {
       id: userId,
       phone,
       credits: 0,
+      trialEndsAt: trialEndsAtFrom(),
     });
     return { userId, isNewUser: true };
   } catch (err) {

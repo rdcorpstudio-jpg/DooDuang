@@ -2,12 +2,13 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { eq } from "drizzle-orm";
 import { requireDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import { trialEndsAtFrom } from "@/lib/premium-entitlement";
 import { getSiteUrl } from "@/lib/site";
 
 export const LINE_STATE_COOKIE = "dd_line_state";
 export const LINE_RETURN_COOKIE = "dd_line_return";
 export const LINE_LINK_COOKIE = "dd_line_link";
-const DEFAULT_RETURN = "/dashboard";
+const DEFAULT_RETURN = "/welcome";
 const STATE_TTL_MS = 15 * 60 * 1000;
 
 export function isLineLoginConfigured() {
@@ -206,6 +207,7 @@ export async function upsertUserByLineId(profile: {
       name: profile.name,
       image: profile.image,
       credits: 0,
+      trialEndsAt: trialEndsAtFrom(),
     });
     return { userId, isNewUser: true };
   } catch (err) {

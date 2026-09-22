@@ -9,6 +9,7 @@ import { db, requireDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { createPremiumCheckoutUrl } from "@/lib/stripe";
 import { PREMIUM_UNLOCK } from "@/lib/stripe-catalog";
+import { trialEndsAtFrom } from "@/lib/premium-entitlement";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -144,6 +145,7 @@ export async function POST(request: Request) {
           ...profile,
           firebaseUid: profile.id,
           credits: 0,
+          trialEndsAt: trialEndsAtFrom(),
         });
         isNewUser = true;
       }
@@ -152,6 +154,7 @@ export async function POST(request: Request) {
         ...profile,
         firebaseUid: profile.id,
         credits: 0,
+        trialEndsAt: trialEndsAtFrom(),
       });
       isNewUser = true;
     }

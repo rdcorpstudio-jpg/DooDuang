@@ -98,7 +98,7 @@ export function IntroScreen() {
           className="mt-5 w-full max-w-[320px]"
         >
           <Link
-            href="/welcome"
+            href="/login?callbackUrl=%2Fwelcome"
             className="group relative flex w-full items-center justify-between overflow-hidden rounded-full px-6 py-3.5 outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
             style={{
               background:

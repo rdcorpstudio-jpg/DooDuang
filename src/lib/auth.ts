@@ -18,6 +18,7 @@ export type SessionUser = {
   credits: number;
   premiumUntil?: Date | null;
   subscriptionStatus?: string | null;
+  trialEndsAt?: Date | null;
 };
 
 export type Session = {
@@ -84,6 +85,7 @@ export async function auth(): Promise<Session | null> {
         credits: users.credits,
         premiumUntil: users.premiumUntil,
         subscriptionStatus: users.subscriptionStatus,
+        trialEndsAt: users.trialEndsAt,
       })
       .from(users)
       .where(eq(users.id, uid))

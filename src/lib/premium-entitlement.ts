@@ -6,6 +6,32 @@ import { payments, users, fortuneProfiles } from "@/lib/db/schema";
 
 const ACCESS_STATUSES = new Set(["active", "trialing", "past_due"]);
 
+/** Free trial length after signup (login → try free features). */
+export const APP_TRIAL_DAYS = 3;
+
+export function trialEndsAtFrom(start: Date = new Date()) {
+  return new Date(start.getTime() + APP_TRIAL_DAYS * 86_400_000);
+}
+
+export function hasTrialAccess(trialEndsAt?: Date | null) {
+  return Boolean(trialEndsAt && trialEndsAt.getTime() > Date.now());
+}
+
+/**
+ * Can use the app (free tier + locks): premium OR still in trial.
+ * AI / wallpaper stay behind premium as before.
+ * `trialEndsAt == null` = legacy row before migration — keep access until SQL backfill.
+ */
+export function hasAppAccess(opts: {
+  status?: string | null;
+  until?: Date | null;
+  trialEndsAt?: Date | null;
+}) {
+  if (hasPremiumAccess({ status: opts.status, until: opts.until })) return true;
+  if (opts.trialEndsAt == null) return true;
+  return hasTrialAccess(opts.trialEndsAt);
+}
+
 export function subscriptionPeriodEnd(sub: Stripe.Subscription): Date | null {
   const unix =
     typeof sub.current_period_end === "number" ? sub.current_period_end : null;

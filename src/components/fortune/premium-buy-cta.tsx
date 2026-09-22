@@ -1,7 +1,7 @@
 "use client";
 
 import type { ButtonHTMLAttributes } from "react";
-import { ChevronRight, Loader2, Sparkles } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
 import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ type PremiumBuyCtaProps = Omit<
   subtitle?: string;
 };
 
-/** Primary buy CTA — gold card button with icon + two-line label */
+/** Primary buy CTA — slim gold pill, single clear action line */
 export function PremiumBuyCta({
   loading = false,
   loadingLabel = "กำลังดำเนินการ…",
@@ -29,38 +29,35 @@ export function PremiumBuyCta({
       type={type}
       disabled={disabled || loading}
       className={cn(
-        "wallpaper-dl-btn group relative flex h-[3.55rem] w-full items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60",
+        "mae-gold-cta group relative flex min-h-[2.75rem] w-full items-center justify-center gap-1.5 overflow-hidden rounded-full px-5 py-2 outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45 disabled:opacity-60",
         className,
       )}
       {...rest}
     >
-      <span className="wallpaper-dl-btn__icon relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]">
-        {loading ? (
-          <Loader2 className="h-[18px] w-[18px] animate-spin" strokeWidth={2.2} />
-        ) : (
-          <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
-        )}
-      </span>
-      <span className="relative z-[1] flex min-w-0 flex-1 flex-col justify-center gap-0.5 overflow-visible py-0.5">
-        <span className="block text-[15.5px] font-bold leading-[1.35] tracking-wide">
-          {loading ? loadingLabel : "ซื้อพรีเมียม"}
+      {loading ? (
+        <Loader2
+          className="relative z-[1] h-4 w-4 shrink-0 animate-spin"
+          strokeWidth={2.2}
+          aria-hidden
+        />
+      ) : null}
+      <span className="relative z-[1] flex min-w-0 flex-col items-center justify-center">
+        <span className="dd-btn-label text-[14.5px] font-semibold tracking-wide">
+          {loading ? loadingLabel : "สมัครพรีเมียม"}
         </span>
         {!loading ? (
-          <span className="block text-[12px] font-medium leading-[1.35] opacity-70">
+          <span className="mt-px text-[11.5px] font-medium leading-none opacity-70">
             {subtitle}
           </span>
         ) : null}
       </span>
       {!loading ? (
         <ChevronRight
-          className="relative z-[1] mr-1 h-5 w-5 shrink-0 opacity-80 transition-transform duration-200 group-hover:translate-x-0.5"
+          className="relative z-[1] h-4 w-4 shrink-0 opacity-75 transition-transform duration-200 group-hover:translate-x-0.5"
           strokeWidth={2.4}
+          aria-hidden
         />
       ) : null}
-      <span
-        className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
-        aria-hidden
-      />
     </button>
   );
 }
