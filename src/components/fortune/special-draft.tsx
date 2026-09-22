@@ -50,6 +50,16 @@ type ComingSoonItem = {
 
 const NEW_ITEMS: ComingSoonItem[] = [
   {
+    id: "lucky-numbers",
+    title: "เลขมงคล",
+    blurb: "เลข 3 ตัวประจำวัน พร้อมความหมายและคู่เลขนำโชค",
+    art: "/images/special/coming-soon/01-lucky-numbers.webp?v=2",
+    Icon: Sparkles,
+    href: "/special/lucky-numbers",
+    cta: "เปิดตำราเลข",
+    badge: "อัปเดตรายวัน",
+  },
+  {
     id: "consult-mae",
     title: "ปรึกษาแม่",
     blurb: "คุยกับแม่เรื่องที่อยู่ในใจ",
@@ -82,13 +92,6 @@ const NEW_ITEMS: ComingSoonItem[] = [
 ];
 
 const COMING_SOON_ITEMS: ComingSoonItem[] = [
-  {
-    id: "lucky-numbers",
-    title: "เลขมงคล",
-    blurb: "กำลังเตรียมเปิดใช้งาน",
-    art: "/images/special/coming-soon/01-lucky-numbers.webp?v=2",
-    Icon: Sparkles,
-  },
   {
     id: "civil-exam",
     title: "ดวงสอบราชการ",

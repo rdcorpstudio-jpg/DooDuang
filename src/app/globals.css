@@ -437,6 +437,14 @@
   line-height: 1.5 !important;
 }
 
+/* สระ/วรรณยุกต์ไทย — อย่าให้กฎขนาดตัวอักษรบีบ line-height จนติด/หาย */
+.phone-frame .mae-thai-safe {
+  line-height: 1.55 !important;
+  padding-top: 0.14em;
+  padding-bottom: 0.08em;
+  overflow: visible !important;
+}
+
 /* กราฟ — ป้ายพออ่าน ไม่เบียดจุดข้อมูล */
 .phone-frame svg text,
 .phone-frame svg tspan {
@@ -5958,10 +5966,29 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   animation: mae-bg-fade-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.lucky-digit-seal {
+  opacity: 0;
+  transform: translateY(12px) scale(0.94);
+  animation: lucky-digit-rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes lucky-digit-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mae-page-bg-enter {
     animation: none !important;
     opacity: 1 !important;
+  }
+
+  .lucky-digit-seal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 

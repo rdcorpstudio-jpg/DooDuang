@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { ChevronDown, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,10 +24,6 @@ const NUMBER_MEANINGS = [
   "ชวนเก็บเกี่ยว",
   "ชวนปล่อยวาง",
 ] as const;
-
-function numberSrc(n: number) {
-  return `/images/numbers/${n}.webp`;
-}
 
 /** Compact lucky numbers only (shirts moved to calendar preview row) */
 export function FortuneLuckyExtras({
@@ -61,17 +56,16 @@ export function FortuneLuckyExtras({
           {numbers.map((n, i) => (
             <span
               key={`${n}-${i}`}
-              className="relative block h-9 w-9"
+              className="flex h-9 w-9 items-center justify-center rounded-full font-sacred text-[1.15rem] font-bold leading-none"
+              style={{
+                color: "#1a1428",
+                background:
+                  "linear-gradient(165deg, #fff8e4 0%, #e8d19a 55%, #d5b16f 100%)",
+                boxShadow: "0 4px 10px rgba(143,110,56,0.28)",
+              }}
               data-slot="lucky-ball"
             >
-              <Image
-                src={numberSrc(n)}
-                alt={String(n)}
-                width={72}
-                height={72}
-                unoptimized
-                className="h-full w-full object-contain"
-              />
+              {n}
             </span>
           ))}
         </div>

@@ -75,9 +75,10 @@ function glassStyle(soft = false): CSSProperties {
   return {
     background: soft ? GLASS.bgSoft : GLASS.bg,
     border: GLASS.border,
-    boxShadow: `${GLASS.shadow}, ${GLASS.highlight}`,
-    backdropFilter: GLASS.blur,
-    WebkitBackdropFilter: GLASS.blur,
+    /* เงาเบา — ไม่ให้กรอบดูพอง */
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+    backdropFilter: "blur(14px) saturate(1.1)",
+    WebkitBackdropFilter: "blur(14px) saturate(1.1)",
   };
 }
 
@@ -94,21 +95,21 @@ function SectionCard({
 }) {
   return (
     <section
-      className={cn("rounded-[22px] px-4 py-5", className)}
+      className={cn("overflow-hidden rounded-[14px] px-3 py-2.5", className)}
       style={glassStyle()}
     >
-      <h2 className="mae-gold-text text-center text-[21px] font-bold tracking-wide">
+      <h2 className="mae-gold-text mae-thai-safe text-center text-[16px] font-bold tracking-wide">
         {title}
       </h2>
       {subtitle ? (
         <p
-          className="mx-auto mt-1.5 max-w-[22rem] text-center text-[17.5px] font-medium leading-[1.45]"
+          className="mae-thai-safe mx-auto mt-0.5 max-w-[22rem] text-center text-[13.5px] font-medium"
           style={{ color: TEXT_MUTED }}
         >
           {subtitle}
         </p>
       ) : null}
-      <div className="mt-4">{children}</div>
+      <div className="mt-2">{children}</div>
     </section>
   );
 }
@@ -153,8 +154,9 @@ function FocusLoopCarousel({
     if (!el) return;
     const measure = () => {
       const vw = el.clientWidth || 360;
-      const cardW = Math.round(Math.min(vw * 0.9, 368));
-      const step = Math.round(cardW * 0.84);
+      /* เต็มความกว้างคอลัมน์ — ไม่เว้นข้างแบบ coverflow */
+      const cardW = Math.round(vw);
+      const step = cardW;
       setMetrics({ vw, cardW, step });
     };
     measure();
@@ -254,8 +256,8 @@ function FocusLoopCarousel({
 
   if (n === 1) {
     return (
-      <div className={cn("relative flex justify-center", className)}>
-        <div className="w-full max-w-[368px]">{items[0]}</div>
+      <div className={cn("relative w-full", className)}>
+        <div className="w-full">{items[0]}</div>
       </div>
     );
   }
@@ -263,11 +265,11 @@ function FocusLoopCarousel({
   const realIdx = ((pos - 1) % n + n) % n;
 
   return (
-    <div className={cn("relative -mx-5 overflow-x-hidden sm:-mx-6", className)}>
+    <div className={cn("relative w-full overflow-x-hidden", className)}>
       <div
         ref={viewportRef}
-        className="relative mx-auto w-full max-w-[480px] cursor-grab select-none overflow-visible active:cursor-grabbing"
-        style={{ height: slideH + 8, touchAction: "pan-y" }}
+        className="relative w-full cursor-grab select-none overflow-hidden active:cursor-grabbing"
+        style={{ height: slideH + 4, touchAction: "pan-y" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
@@ -288,10 +290,8 @@ function FocusLoopCarousel({
           {slides.map((child, i) => {
             const dist = Math.abs(i * step - pos * step + dragX);
             const progress = Math.min(1, dist / Math.max(1, step));
-            const scale = 1 - progress * 0.06;
-            const opacity = Math.max(0.72, 1 - progress * 0.22);
+            const opacity = Math.max(0.55, 1 - progress * 0.4);
             const active = progress < 0.4;
-            const blurPx = Number((progress * 2.4).toFixed(2));
             return (
               <div
                 key={i}
@@ -302,10 +302,7 @@ function FocusLoopCarousel({
                 style={{
                   left: i * step,
                   width: cardW,
-                  transform: `scale(${scale})`,
-                  transformOrigin: "center top",
                   opacity,
-                  filter: `blur(${blurPx}px)`,
                   zIndex: active ? 5 : 1,
                   pointerEvents: active ? "auto" : "none",
                 }}
@@ -316,7 +313,7 @@ function FocusLoopCarousel({
           })}
         </div>
       </div>
-      <div className="mt-2.5 flex items-center justify-center gap-1.5">
+      <div className="mt-2.5 flex items-center justify-center gap-1.5 px-4">
         {Array.from({ length: n }, (_, i) => (
           <button
             key={i}
@@ -337,6 +334,191 @@ function FocusLoopCarousel({
   );
 }
 
+/** ดาวพิเศษ — ทีละดวง ปัดขึ้น–ลง นุ่ม ไม่ซ้อนกรอบ/เงา */
+function StarsPager({
+  stars,
+}: {
+  stars: { name: string; meaning: string }[];
+}) {
+  const n = stars.length;
+  const [idx, setIdx] = useState(0);
+  const [dragY, setDragY] = useState(0);
+  const [anim, setAnim] = useState(true);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const startY = useRef(0);
+  const lastY = useRef(0);
+  const dragging = useRef(false);
+  const wheelLock = useRef(0);
+  const STEP = 104;
+
+  useEffect(() => {
+    setIdx(0);
+    setDragY(0);
+  }, [n]);
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || n <= 1) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const now = Date.now();
+      if (now - wheelLock.current < 300) return;
+      if (e.deltaY > 10) {
+        wheelLock.current = now;
+        setAnim(true);
+        setIdx((i) => Math.min(n - 1, i + 1));
+      } else if (e.deltaY < -10) {
+        wheelLock.current = now;
+        setAnim(true);
+        setIdx((i) => Math.max(0, i - 1));
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [n]);
+
+  if (n === 0) return null;
+
+  const safeIdx = Math.min(idx, n - 1);
+  const translateY = n <= 1 ? 0 : -safeIdx * STEP + dragY;
+
+  function onPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    if (n <= 1) return;
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    dragging.current = true;
+    setAnim(false);
+    startY.current = e.clientY;
+    lastY.current = e.clientY;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function onPointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    if (!dragging.current) return;
+    lastY.current = e.clientY;
+    const dy = e.clientY - startY.current;
+    setDragY(Math.max(-STEP * 0.85, Math.min(STEP * 0.85, dy)));
+  }
+
+  function onPointerUp() {
+    if (!dragging.current) return;
+    dragging.current = false;
+    const dy = lastY.current - startY.current;
+    setAnim(true);
+    setDragY(0);
+    if (dy < -32) setIdx((i) => Math.min(n - 1, i + 1));
+    else if (dy > 32) setIdx((i) => Math.max(0, i - 1));
+  }
+
+  return (
+    <section
+      ref={rootRef}
+      className="overflow-hidden rounded-[14px]"
+      style={glassStyle()}
+    >
+      <div className="px-3 pb-0.5 pt-2.5 text-center">
+        <h2 className="mae-gold-text mae-thai-safe text-[16px] font-bold tracking-wide">
+          ดาวพิเศษ (神煞)
+        </h2>
+      </div>
+
+      {/* ไม่ซ้อนกรอบใน — สไลด์ข้อความอย่างเดียว */}
+      <div
+        className={cn(
+          "relative overflow-hidden px-3",
+          n > 1 && "cursor-grab active:cursor-grabbing",
+        )}
+        style={{
+          height: n > 1 ? STEP + 20 : undefined,
+          touchAction: n > 1 ? "none" : undefined,
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        <div
+          style={{
+            transform: `translate3d(0, ${translateY}px, 0)`,
+            transition: anim
+              ? "transform 420ms cubic-bezier(0.22, 1, 0.36, 1)"
+              : "none",
+            willChange: n > 1 ? "transform" : undefined,
+          }}
+        >
+          {stars.map((s, i) => {
+            const dist = Math.abs(i - safeIdx - dragY / STEP);
+            const opacity = n <= 1 ? 1 : Math.max(0.2, 1 - dist * 0.65);
+            return (
+              <div
+                key={s.name}
+                className="flex flex-col items-center justify-center px-0.5 py-1 text-center"
+                style={{
+                  height: STEP,
+                  opacity,
+                  transition: anim
+                    ? "opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)"
+                    : "none",
+                }}
+              >
+                <p
+                  className="mae-thai-safe text-[15px] font-semibold"
+                  style={{ color: GOLD }}
+                >
+                  {s.name}
+                </p>
+                <p
+                  className="mae-thai-safe mt-1 max-w-[20rem] text-[13px] font-medium"
+                  style={{ color: TEXT_MUTED }}
+                >
+                  {s.meaning}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {n > 1 ? (
+        <div className="flex flex-col items-center gap-1 px-3 pb-2 pt-0.5">
+          <div className="flex items-center justify-center gap-1.5">
+            {stars.map((s, i) => (
+              <button
+                key={s.name}
+                type="button"
+                aria-label={`ดาวที่ ${i + 1}`}
+                aria-current={i === safeIdx}
+                onClick={() => {
+                  setAnim(true);
+                  setIdx(i);
+                }}
+                className="h-1.5 rounded-full outline-none transition-all duration-300"
+                style={{
+                  width: i === safeIdx ? 14 : 5,
+                  background:
+                    i === safeIdx ? GOLD : "rgba(186, 204, 230, 0.35)",
+                }}
+              />
+            ))}
+          </div>
+          <p
+            className="mae-thai-safe text-[12px] font-medium tabular-nums"
+            style={{ color: "rgba(186,204,230,0.55)" }}
+          >
+            {safeIdx + 1}/{n} · ปัดขึ้น–ลง
+          </p>
+        </div>
+      ) : (
+        <div className="h-3" />
+      )}
+    </section>
+  );
+}
+
 function HScrollRow({
   children,
   className,
@@ -347,11 +529,14 @@ function HScrollRow({
   return (
     <div
       className={cn(
-        "no-h-scrollbar -mx-1 flex gap-2 overflow-x-auto overscroll-x-contain px-1 pb-0.5 touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        "no-h-scrollbar overflow-x-auto overscroll-x-contain pb-1 touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         className
       )}
     >
-      {children}
+      <div className="flex w-max min-w-full gap-1.5 px-0.5 pr-3">
+        {children}
+        <span className="w-1 shrink-0" aria-hidden />
+      </div>
     </div>
   );
 }
@@ -381,7 +566,7 @@ export function BaziResultView({
     >
       <MaePageBackground />
 
-      <div className="relative z-[1] mx-auto flex min-h-full max-w-[430px] flex-col gap-4 px-5 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] pt-5 sm:px-6">
+      <div className="relative z-[1] mx-auto flex min-h-full w-full max-w-[480px] flex-col gap-3 px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] pt-4 sm:px-5">
         <header className="flex items-center justify-between gap-3">
           <MaeBrandLink />
         </header>
@@ -403,7 +588,7 @@ export function BaziResultView({
             {chart.pillars.map((p) => (
               <div
                 key={p.key}
-                className="flex flex-col items-center rounded-[16px] px-1.5 py-2.5 text-center"
+                className="flex flex-col items-center rounded-[12px] px-1 py-2 text-center"
                 style={p.isDayMaster ? CELL.active : CELL.idle}
               >
                 <p
@@ -468,39 +653,39 @@ export function BaziResultView({
               subtitle="ธาตุประจำตัวและปีนักษัตรของคุณ"
               className="h-full"
             >
-              <div className="space-y-3 text-center">
-                <div className="flex items-center justify-center gap-3">
+              <div className="space-y-2 text-center">
+                <div className="flex items-center justify-center gap-2.5">
                   <span
-                    className="text-[1.75rem] font-bold leading-none"
+                    className="text-[1.5rem] font-bold leading-none"
                     style={{ color: elementColor(chart.dayMaster.element) }}
                   >
                     {chart.dayMaster.char}
                   </span>
                   <div className="text-left">
-                    <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
+                    <p className="text-[14px]" style={{ color: TEXT_MUTED }}>
                       เจ้าชะตา
                     </p>
                     <p
-                      className="text-[17.5px] font-semibold"
+                      className="text-[15.5px] font-semibold"
                       style={{ color: TEXT }}
                     >
                       {chart.dayMaster.pinyin} — {chart.dayMaster.th}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-center gap-2.5">
                   <span
-                    className="text-[1.75rem] font-bold leading-none"
+                    className="text-[1.5rem] font-bold leading-none"
                     style={{ color: elementColor(chart.zodiac.element) }}
                   >
                     {chart.zodiac.char}
                   </span>
                   <div className="text-left">
-                    <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
+                    <p className="text-[14px]" style={{ color: TEXT_MUTED }}>
                       นักษัตร
                     </p>
                     <p
-                      className="text-[17.5px] font-semibold"
+                      className="text-[15.5px] font-semibold"
                       style={{ color: TEXT }}
                     >
                       {chart.zodiac.animal}
@@ -508,7 +693,7 @@ export function BaziResultView({
                   </div>
                 </div>
                 <p
-                  className="text-[15.5px] font-medium"
+                  className="text-[14px] font-medium"
                   style={{ color: GOLD_SOFT }}
                 >
                   จันทรคติจีน · {chart.lunarDate}
@@ -565,7 +750,7 @@ export function BaziResultView({
               className="h-full"
             >
               <p
-                className="text-center text-[17.5px] font-semibold"
+                className="text-center text-[15.5px] font-semibold"
                 style={{ color: GOLD }}
               >
                 สถานะ: {chart.strength.status}{" "}
@@ -574,20 +759,20 @@ export function BaziResultView({
                 </span>
               </p>
               <p
-                className="mt-1 text-center text-[15.5px]"
+                className="mt-0.5 text-center text-[13.5px]"
                 style={{ color: TEXT_MUTED }}
               >
                 {chart.strength.scoreLabel}
               </p>
-              <div className="mt-4 text-center">
-                <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
+              <div className="mt-2.5 text-center">
+                <p className="text-[14px]" style={{ color: TEXT_MUTED }}>
                   ควรเสริม
                 </p>
-                <div className="mt-2 flex flex-wrap justify-center gap-2">
+                <div className="mt-1.5 flex flex-wrap justify-center gap-1.5">
                   {chart.strength.favor.map((f) => (
                     <span
                       key={f.id}
-                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[15.5px] font-semibold"
+                      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[14px] font-semibold"
                       style={{
                         color: f.color,
                         background: `${f.color}22`,
@@ -598,13 +783,13 @@ export function BaziResultView({
                       <img
                         src={ELEMENT_ICON[f.id]}
                         alt=""
-                        className="h-4 w-4 object-contain"
+                        className="h-3.5 w-3.5 object-contain"
                       />
                       {f.label}
                     </span>
                   ))}
                 </div>
-                <p className="mt-3 text-[15.5px]" style={{ color: TEXT_MUTED }}>
+                <p className="mt-2 text-[13.5px]" style={{ color: TEXT_MUTED }}>
                   ควรเลี่ยง ·{" "}
                   <span style={{ color: TEXT }}>{chart.strength.avoid}</span>
                 </p>
@@ -613,27 +798,7 @@ export function BaziResultView({
           ]}
         </FocusLoopCarousel>
 
-        <SectionCard title="ดาวพิเศษ (神煞)">
-          <ul className="space-y-2.5">
-            {chart.stars.map((s) => (
-              <li
-                key={s.name}
-                className="rounded-[16px] px-3.5 py-3 text-center"
-                style={CELL.idle}
-              >
-                <p className="text-[17.5px] font-semibold" style={{ color: GOLD }}>
-                  {s.name}
-                </p>
-                <p
-                  className="mt-1 text-[17.5px] leading-[1.45]"
-                  style={{ color: TEXT_MUTED }}
-                >
-                  {s.meaning}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </SectionCard>
+        <StarsPager stars={chart.stars} />
 
         <SectionCard
           title="ความสัมพันธ์ในดวง"
@@ -657,24 +822,24 @@ export function BaziResultView({
         </SectionCard>
 
         <SectionCard title="จุดพิเศษ" subtitle="จุดสำคัญเพิ่มเติมในดวง">
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2">
             {chart.specials.map((s) => (
               <div
                 key={s.label}
-                className="rounded-[16px] px-3 py-3 text-center"
+                className="rounded-[12px] px-2.5 py-2 text-center"
                 style={CELL.idle}
               >
-                <p className="text-[15.5px]" style={{ color: TEXT_MUTED }}>
+                <p className="text-[13.5px]" style={{ color: TEXT_MUTED }}>
                   {s.label}
                 </p>
                 <p
-                  className="mt-1 text-[1.25rem] font-bold leading-none"
+                  className="mt-0.5 text-[1.15rem] font-bold leading-none"
                   style={{ color: TEXT }}
                 >
                   {s.value}
                 </p>
                 <p
-                  className="mt-1.5 text-[15.5px] leading-snug"
+                  className="mt-1 text-[13.5px] leading-snug"
                   style={{ color: TEXT_MUTED }}
                 >
                   {s.note}
@@ -692,7 +857,7 @@ export function BaziResultView({
             {chart.luckPillars.map((lp) => (
               <div
                 key={lp.age}
-                className="flex w-[4.6rem] shrink-0 flex-col items-center rounded-[14px] px-1 py-2.5 text-center"
+                className="flex w-[4.15rem] shrink-0 flex-col items-center rounded-[12px] px-1 py-2 text-center"
                 style={CELL.idle}
               >
                 <p
@@ -734,7 +899,7 @@ export function BaziResultView({
                 key={y.year}
                 type="button"
                 onClick={() => setYearIdx(i)}
-                className="w-[4.6rem] shrink-0 rounded-[14px] px-1 py-2.5 text-center outline-none transition active:scale-[0.98]"
+                className="w-[4.15rem] shrink-0 rounded-[12px] px-1 py-2 text-center outline-none transition active:scale-[0.98]"
                 style={i === yearIdx ? CELL.active : CELL.idle}
               >
                 <p className="text-[13px]" style={{ color: TEXT_MUTED }}>

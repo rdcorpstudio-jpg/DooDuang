@@ -139,14 +139,14 @@ function SectionLabel({
   hint?: string;
 }) {
   return (
-    <div className="mb-3.5 mt-8">
+    <div className="mb-2.5 mt-6">
       <div className="flex items-center gap-2.5">
         <Sparkles
           className="h-4 w-4 shrink-0"
           style={{ color: GOLD }}
           strokeWidth={2.2}
         />
-        <h2 className="text-[1.2rem] font-bold tracking-wide text-white">
+        <h2 className="text-[1.05rem] font-bold tracking-wide text-white">
           {label}
         </h2>
         <span
@@ -159,7 +159,7 @@ function SectionLabel({
       </div>
       {hint ? (
         <p
-          className="mt-2 pl-[1.75rem] text-[15px] font-medium leading-snug"
+          className="mt-1 pl-[1.75rem] text-[14px] font-medium leading-snug"
           style={{ color: "rgba(210,222,240,0.78)" }}
         >
           {hint}
@@ -186,11 +186,12 @@ function PredictCard({
     <button
       type="button"
       onClick={onOpen}
-      className="group relative block w-full overflow-hidden rounded-[18px] text-left outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4"
+      className="group relative block w-full overflow-hidden rounded-[16px] text-left outline-none transition duration-200 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/4"
       style={{
-        aspectRatio: "2.35 / 1",
+        aspectRatio: "3.15 / 1",
+        minHeight: "5.35rem",
         boxShadow:
-          "inset 0 0 0 1px rgba(255,255,255,0.14), 0 10px 24px rgba(0,0,0,0.26)",
+          "inset 0 0 0 1px rgba(255,255,255,0.14), 0 8px 18px rgba(0,0,0,0.24)",
       }}
       aria-label={locked ? `${item.title} · ต้องเป็นพรีเมียม` : item.title}
     >
@@ -217,7 +218,7 @@ function PredictCard({
 
       {locked ? (
         <span
-          className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-full px-2.5 py-[0.32em] text-[12px] font-semibold leading-[1.45]"
+          className="absolute right-2.5 top-2.5 z-[2] inline-flex items-center gap-1 rounded-full px-2 py-[0.28em] text-[11.5px] font-semibold leading-[1.4]"
           style={{
             color: light ? "#1f1a14" : GOLD_SOFT,
             background: light
@@ -235,20 +236,20 @@ function PredictCard({
         </span>
       ) : item.badge ? (
         <span
-          className="absolute right-3 top-3 z-[2] inline-flex items-center rounded-full px-2.5 text-[12px] font-bold leading-[1.45] tracking-wide"
+          className="absolute right-2.5 top-2.5 z-[2] inline-flex items-center rounded-full px-2 text-[11.5px] font-bold leading-[1.4] tracking-wide"
           style={{
             color: "#1a1408",
             background: GOLD_BTN,
-            paddingTop: "0.32em",
-            paddingBottom: "0.26em",
-            boxShadow: "0 6px 14px rgba(0,0,0,0.22)",
+            paddingTop: "0.28em",
+            paddingBottom: "0.22em",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
           }}
         >
           {item.badge}
         </span>
       ) : (
         <span
-          className="absolute right-3 top-3 z-[2] inline-flex items-center rounded-full px-2.5 text-[12px] font-semibold leading-[1.45]"
+          className="absolute right-2.5 top-2.5 z-[2] inline-flex items-center rounded-full px-2 text-[11.5px] font-semibold leading-[1.4]"
           style={{
             color: light ? "#1f1a14" : "rgba(245,247,255,0.92)",
             background: light
@@ -257,8 +258,8 @@ function PredictCard({
             boxShadow: light
               ? "inset 0 0 0 1px rgba(31,26,20,0.1)"
               : "inset 0 0 0 1px rgba(255,255,255,0.14)",
-            paddingTop: "0.32em",
-            paddingBottom: "0.26em",
+            paddingTop: "0.28em",
+            paddingBottom: "0.22em",
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
           }}
@@ -267,37 +268,37 @@ function PredictCard({
         </span>
       )}
 
-      <div className="relative z-[1] flex h-full flex-col justify-center gap-1.5 px-4 py-3.5 pr-[4.5rem]">
+      <div className="relative z-[1] flex h-full flex-col justify-center gap-0.5 px-3.5 py-2.5 pr-[4.25rem]">
         <p
-          className="max-w-[16.5rem] text-[1.35rem] font-bold leading-[1.3]"
+          className="max-w-[15rem] text-[1.12rem] font-bold leading-[1.25]"
           style={
             light
               ? {
                   color: "#1a1408",
                   textShadow: "0 1px 0 rgba(255,255,255,0.4)",
-                  paddingTop: "0.08em",
-                  paddingBottom: "0.04em",
+                  paddingTop: "0.06em",
+                  paddingBottom: "0.03em",
                 }
               : {
                   ...TITLE_GOLD,
-                  paddingTop: "0.08em",
-                  paddingBottom: "0.04em",
+                  paddingTop: "0.06em",
+                  paddingBottom: "0.03em",
                 }
           }
         >
           {item.title}
         </p>
         <p
-          className="max-w-[16.5rem] text-[15px] font-medium leading-[1.45] line-clamp-2"
+          className="max-w-[15rem] text-[13.5px] font-medium leading-[1.4] line-clamp-2"
           style={{
-            color: light ? "rgba(32,28,22,0.88)" : "rgba(245,247,255,0.92)",
+            color: light ? "rgba(32,28,22,0.88)" : "rgba(245,247,255,0.9)",
           }}
         >
           {item.blurb}
         </p>
-        <div className="mt-1">
+        <div className="mt-0.5">
           <span
-            className="inline-flex items-center gap-0.5 text-[13.5px] font-semibold leading-[1.4] tracking-wide"
+            className="inline-flex items-center gap-0.5 text-[12.5px] font-semibold leading-[1.35] tracking-wide"
             style={{ color: light ? "#6b4f1f" : GOLD_SOFT }}
           >
             {locked ? "ปลดล็อกเพื่ออ่าน" : "แตะเพื่อเปิด"}
@@ -408,7 +409,7 @@ export function PredictDraft() {
             label="เปิดได้เลยวันนี้"
             hint="เปิดดูได้ทันที ไม่ต้องรอ"
           />
-          <ul className="space-y-3">
+          <ul className="space-y-2.5">
             {FREE_ITEMS.map((item, i) => (
               <li key={item.id}>
                 <PredictCard
@@ -425,7 +426,7 @@ export function PredictDraft() {
             label="อ่านลึกแบบพรีเมียม"
             hint="จ่ายครั้งเดียว เปิดได้ทั้งปี"
           />
-          <ul className="space-y-3">
+          <ul className="space-y-2.5">
             {PREMIUM_ITEMS.map((item) => (
               <li key={item.id}>
                 <PredictCard
