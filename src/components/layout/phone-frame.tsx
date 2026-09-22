@@ -112,7 +112,8 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     pathname === "/home" ||
     pathname === "/reading" ||
     pathname.startsWith("/reading/") ||
-    pathname.startsWith("/welcome") ||
+    /* /welcome intake is one screen — outer scroll lets content disappear on desktop */
+    pathname.startsWith("/welcome/preview") ||
     pathname.startsWith("/premium/pay") ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/auth") ||
@@ -209,7 +210,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
                 useCustomHomeBg
                   ? "overflow-y-hidden"
                   : allowPageScroll
-                    ? "overflow-y-auto"
+                    ? "overflow-y-auto overscroll-contain"
                     : "overflow-y-hidden",
               )}
             >

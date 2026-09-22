@@ -10,8 +10,10 @@ export const metadata = {
 
 export default function WelcomePage() {
   return (
-    <Suspense fallback={<MaePageLoading label="กำลังเปิด…" />}>
-      <OnboardingIntakeForm />
-    </Suspense>
+    <div className="h-full min-h-0">
+      <Suspense fallback={<MaePageLoading label="กำลังเปิด…" />}>
+        <OnboardingIntakeForm />
+      </Suspense>
+    </div>
   );
 }

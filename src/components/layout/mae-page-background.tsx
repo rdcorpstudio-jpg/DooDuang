@@ -169,10 +169,17 @@ export function MaePageBackground({
     );
   }
 
+  /* Sticky plate: real viewport height + negative margin so it does NOT inflate
+     scrollHeight (h-0 + overflow-visible let abspos art extend the scroller and
+     content could wheel/scrollIntoView off-screen on desktop). */
   return (
     <div
       ref={rootRef}
-      className="pointer-events-none sticky top-0 z-0 h-0 w-full overflow-visible"
+      className="pointer-events-none sticky top-0 z-0 w-full overflow-hidden"
+      style={{
+        height: "var(--vv-height, 100dvh)",
+        marginBottom: "calc(-1 * var(--vv-height, 100dvh))",
+      }}
       aria-hidden
     >
       {plate}

@@ -9,13 +9,15 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-full flex-col sacred-page-bg">
+    <div className="flex h-full min-h-0 flex-col sacred-page-bg">
       <Suspense fallback={null}>
         <SiteVisitTracker />
         <FeatureOpenTracker />
         <TrialAppGate />
       </Suspense>
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">{children}</main>
+      <main className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
+        {children}
+      </main>
     </div>
   );
 }

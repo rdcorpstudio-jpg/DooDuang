@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function CalendarPage() {
   return (
-    <div className="preview-page-scroll relative h-full overflow-y-auto overscroll-contain">
+    <div className="preview-page-scroll relative h-full min-h-0 overflow-y-auto overscroll-contain">
       <CalendarDraft />
     </div>
   );

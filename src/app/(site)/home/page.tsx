@@ -12,7 +12,7 @@ export const metadata = {
 export default function HomeAppPage() {
   return (
     <Suspense fallback={<MaePageLoading />}>
-      <div className="preview-page-scroll relative h-full overflow-y-auto overscroll-contain">
+      <div className="preview-page-scroll relative h-full min-h-0 overflow-y-auto overscroll-contain">
         <HomeDraft />
       </div>
     </Suspense>

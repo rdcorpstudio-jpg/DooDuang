@@ -10,6 +10,11 @@ import { PhoneLoginForm } from "@/components/auth/phone-login-form";
 import { PageBackButton } from "@/components/ui/page-back-button";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { PHONE_AUTH_ENABLED } from "@/lib/auth-features";
+import {
+  enableLocalAuthBypass,
+  isLocalDevUi,
+} from "@/lib/local-auth-bypass";
+import { startMaeNavigation } from "@/components/layout/navigation-loading";
 
 const GOLD = "#e8d19a";
 const TEXT = "#f5f7ff";
@@ -228,6 +233,29 @@ export function LoginScreen({
             </div>
           ) : null}
         </div>
+
+        {isLocalDevUi() ? (
+          <button
+            type="button"
+            onClick={() => {
+              enableLocalAuthBypass();
+              startMaeNavigation();
+              const next =
+                callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+                  ? callbackUrl
+                  : "/reading";
+              router.push(next);
+            }}
+            className="mt-3 flex h-10 w-full items-center justify-center rounded-full text-[14px] font-semibold outline-none transition hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/35"
+            style={{
+              color: "rgba(186,204,230,0.92)",
+              border: "1px dashed rgba(232,209,154,0.45)",
+              background: "rgba(8,18,34,0.35)",
+            }}
+          >
+            ข้ามล็อกอิน · ทดสอบ local
+          </button>
+        ) : null}
 
         <p
           className="mt-4 flex items-center justify-center gap-1.5 text-[13.5px] leading-snug"

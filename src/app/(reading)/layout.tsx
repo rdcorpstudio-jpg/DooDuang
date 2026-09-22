@@ -9,7 +9,7 @@ export default function ReadingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-full sacred-page-bg">
+    <div className="relative h-full min-h-0 sacred-page-bg">
       <Suspense fallback={null}>
         <SiteVisitTracker />
         <FeatureOpenTracker />

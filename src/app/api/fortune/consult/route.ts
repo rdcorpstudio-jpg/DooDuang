@@ -13,7 +13,6 @@ import {
   bangkokDayKey,
   CONSULT_DAILY_SESSIONS,
   CONSULT_MAX_INPUT,
-  CONSULT_MAX_USER_TURNS,
   generateConsultReply,
   parseConsultMessages,
   type ConsultMessage,
@@ -41,6 +40,10 @@ async function resolveProfile(
 
 function dailyLimit() {
   return CONSULT_DAILY_SESSIONS;
+}
+
+function dayUsedTurns(rows: { userTurns: number }[]) {
+  return rows.reduce((sum, row) => sum + Math.max(0, row.userTurns), 0);
 }
 
 function dbErrorPayload(err: unknown) {
@@ -71,15 +74,20 @@ async function daySessions(userId: string, dayKey: string) {
     .orderBy(desc(consultSessions.createdAt));
 }
 
-function sessionPayload(row: typeof consultSessions.$inferSelect) {
+function sessionPayload(
+  row: typeof consultSessions.$inferSelect,
+  dailyUsed: number,
+  limit: number,
+) {
   const messages = parseConsultMessages(row.messages);
+  const remaining = Math.max(0, limit - dailyUsed);
   return {
     id: row.id,
     messages,
-    userTurns: row.userTurns,
-    maxTurns: CONSULT_MAX_USER_TURNS,
-    remainingTurns: Math.max(0, CONSULT_MAX_USER_TURNS - row.userTurns),
-    closed: row.userTurns >= CONSULT_MAX_USER_TURNS,
+    userTurns: dailyUsed,
+    maxTurns: limit,
+    remainingTurns: remaining,
+    closed: remaining <= 0,
   };
 }
 
@@ -97,8 +105,9 @@ export async function GET() {
     const dayKey = bangkokDayKey();
     const rows = await daySessions(session.user.id, dayKey);
     const limit = dailyLimit();
-    const used = rows.length;
-    const active = rows.find((r) => r.userTurns < CONSULT_MAX_USER_TURNS) ?? null;
+    const used = dayUsedTurns(rows);
+    // One continuous thread per day — keep chatting on the latest session
+    const thread = rows[0] ?? null;
 
     return NextResponse.json({
       user: true,
@@ -108,7 +117,7 @@ export async function GET() {
       used,
       remainingSessions: Math.max(0, limit - used),
       resets: "00:00 น.",
-      activeSession: active ? sessionPayload(active) : null,
+      activeSession: thread ? sessionPayload(thread, used, limit) : null,
     });
   } catch (err) {
     console.error("consult GET failed:", err);
@@ -183,24 +192,28 @@ export async function POST(request: Request) {
         );
 
       const rows = await daySessions(session.user.id, dayKey);
-      const open = rows.find((r) => r.userTurns < CONSULT_MAX_USER_TURNS);
-      if (open) {
+      const used = dayUsedTurns(rows);
+      const latest = rows[0] ?? null;
+
+      // Continue today's thread — never force a new "round" mid-day
+      if (latest && used < limit) {
         return NextResponse.json({
           premium,
           limit,
-          used: rows.length,
-          remainingSessions: Math.max(0, limit - rows.length),
-          session: sessionPayload(open),
+          used,
+          remainingSessions: Math.max(0, limit - used),
+          session: sessionPayload(latest, used, limit),
         });
       }
-      if (rows.length >= limit) {
+      if (used >= limit || latest) {
         return NextResponse.json(
           {
             error: "วันนี้ถามครบ 3 คำถามแล้ว กลับมาใหม่หลัง 00:00 น.",
             code: "QUOTA",
             limit,
-            used: rows.length,
+            used,
             remainingSessions: 0,
+            session: latest ? sessionPayload(latest, used, limit) : null,
           },
           { status: 429 },
         );
@@ -228,13 +241,12 @@ export async function POST(request: Request) {
         );
       }
 
-      const all = await daySessions(session.user.id, dayKey);
       return NextResponse.json({
         premium,
         limit,
-        used: all.length,
-        remainingSessions: Math.max(0, limit - all.length),
-        session: sessionPayload(created),
+        used: 0,
+        remainingSessions: limit,
+        session: sessionPayload(created, 0, limit),
       });
     }
 
@@ -256,6 +268,8 @@ export async function POST(request: Request) {
       }
 
       const profile = await resolveProfile(session.user.id, rawProfile);
+      const rows = await daySessions(session.user.id, dayKey);
+      const used = dayUsedTurns(rows);
 
       const [row] = await db
         .select()
@@ -270,16 +284,16 @@ export async function POST(request: Request) {
 
       if (!row || row.dayKey !== dayKey) {
         return NextResponse.json(
-          { error: "ห้องคุยนี้หมดอายุแล้ว เปิดรอบใหม่ได้" },
+          { error: "ห้องคุยนี้หมดอายุแล้ว เปิดรอบใหม่ได้หลัง 00:00 น." },
           { status: 404 },
         );
       }
-      if (row.userTurns >= CONSULT_MAX_USER_TURNS) {
+      if (used >= limit) {
         return NextResponse.json(
           {
-            error: "คำถามนี้ตอบแล้ว เปิดคำถามใหม่ได้ถ้ายังมีโควต้า",
-            code: "SESSION_FULL",
-            session: sessionPayload(row),
+            error: "วันนี้ถามครบ 3 คำถามแล้ว กลับมาใหม่หลัง 00:00 น.",
+            code: "QUOTA",
+            session: sessionPayload(row, used, limit),
           },
           { status: 429 },
         );
@@ -307,13 +321,15 @@ export async function POST(request: Request) {
         .where(eq(consultSessions.id, row.id))
         .returning();
 
-      const all = await daySessions(session.user.id, dayKey);
+      const nextUsed = used + 1;
       return NextResponse.json({
         premium,
         limit,
-        used: all.length,
-        remainingSessions: Math.max(0, limit - all.length),
-        session: updated ? sessionPayload(updated) : null,
+        used: nextUsed,
+        remainingSessions: Math.max(0, limit - nextUsed),
+        session: updated
+          ? sessionPayload(updated, nextUsed, limit)
+          : null,
       });
     }
 

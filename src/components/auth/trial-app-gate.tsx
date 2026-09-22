@@ -7,6 +7,7 @@ import {
   ensureFreshFunnelLocalState,
   signOutForFreshStart,
 } from "@/lib/fortune/funnel-reset";
+import { hasLocalAuthBypass } from "@/lib/local-auth-bypass";
 
 /** Paths reachable without an active trial (marketing / auth / paywall / legal). */
 function isTrialExemptPath(pathname: string) {
@@ -14,6 +15,7 @@ function isTrialExemptPath(pathname: string) {
   if (pathname.startsWith("/login")) return true;
   if (pathname.startsWith("/auth")) return true;
   if (pathname.startsWith("/welcome")) return true;
+  if (pathname.startsWith("/preview")) return true;
   if (pathname.startsWith("/premium/pay")) return true;
   if (pathname.startsWith("/premium/thanks")) return true;
   if (pathname.startsWith("/pricing")) return true;
@@ -28,6 +30,7 @@ function isTrialExemptPath(pathname: string) {
  * App routes need login + active trial (or premium).
  * - Guest / never-started trial → clear + landing (เริ่มเหมือนคนใหม่)
  * - Trial used and expired → `/premium/pay`
+ * - local `next dev` bypass → allow UI walkthrough without a real session
  */
 export function TrialAppGate() {
   const pathname = usePathname() || "/";
@@ -37,6 +40,7 @@ export function TrialAppGate() {
   useEffect(() => {
     ensureFreshFunnelLocalState();
     if (isTrialExemptPath(pathname)) return;
+    if (hasLocalAuthBypass()) return;
     if (checking.current) return;
     let alive = true;
     checking.current = true;

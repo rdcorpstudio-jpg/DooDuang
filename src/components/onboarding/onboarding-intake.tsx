@@ -60,7 +60,9 @@ const FOCUS_CHOICES: {
 function scrollFieldIntoView(event: FocusEvent<HTMLInputElement>) {
   const el = event.currentTarget;
   window.setTimeout(() => {
-    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    const scroller = el.closest<HTMLElement>(".overflow-y-auto, .overflow-y-scroll");
+    if (!scroller || scroller.scrollHeight <= scroller.clientHeight + 2) return;
+    el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
   }, 120);
 }
 
@@ -129,12 +131,12 @@ export function OnboardingIntakeForm() {
 
   return (
     <div
-      className="mae-wizard relative mx-auto min-h-full w-full max-w-[480px] text-white"
+      className="mae-wizard relative mx-auto h-full min-h-0 w-full max-w-[480px] overflow-hidden text-white"
       style={{ background: "transparent" }}
     >
-      <MaePageBackground blur={14} scrollBlur={false} />
+      <MaePageBackground mode="fill" blur={14} scrollBlur={false} />
 
-      <div className="relative z-[2] flex min-h-full flex-col px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
+      <div className="relative z-[2] flex h-full min-h-0 flex-col px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
         <div
           className="wizard-anim-item flex shrink-0 items-center justify-end gap-3"
           style={delayStyle(20)}

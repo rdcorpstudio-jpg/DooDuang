@@ -4,6 +4,7 @@ import {
   WIZARD_CACHE_KEY,
 } from "@/lib/fortune/profile-storage";
 import { clearPremiumUnlocked } from "@/lib/fortune/premium-unlock";
+import { clearLocalAuthBypass } from "@/lib/local-auth-bypass";
 
 /** Bump to force every browser to clear old guest/local profile once. */
 export const FUNNEL_RESET_KEY = "dd-funnel-reset-v1";
@@ -13,6 +14,7 @@ export function resetLocalFunnelState() {
   clearFortuneProfile();
   clearIntake();
   clearPremiumUnlocked();
+  clearLocalAuthBypass();
   try {
     sessionStorage.removeItem(WIZARD_CACHE_KEY);
   } catch {
