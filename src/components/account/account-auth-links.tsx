@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { Loader2, Phone, X } from "lucide-react";
+import { Loader2, Phone, Check, ChevronRight, X } from "lucide-react";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
 import { normalizeThaiMobile } from "@/lib/phone";
 import type { AccountLinkStatus } from "@/lib/account-links";
 import { PHONE_AUTH_ENABLED } from "@/lib/auth-features";
+import { MAE_GLASS } from "@/lib/mae-glass";
 import { cn } from "@/lib/utils";
 
 function digitsOnly(value: string) {
@@ -81,7 +82,7 @@ function LinkChip({
 }) {
   const label =
     variant === "google" ? "Google" : variant === "line" ? "LINE" : "เบอร์มือถือ";
-  const status = linked ? "เชื่อมแล้ว" : busy ? "กำลังเชื่อม…" : null;
+  const status = linked ? "เชื่อมแล้ว" : busy ? "กำลังเชื่อม…" : "ยังไม่เชื่อม";
 
   return (
     <button
@@ -90,51 +91,74 @@ function LinkChip({
       onClick={onClick}
       aria-label={linked ? `${label} เชื่อมแล้ว` : `เชื่อม ${label}`}
       className={cn(
-        "flex h-12 w-full items-center gap-3 rounded-full px-3.5 text-left outline-none transition active:scale-[0.99] disabled:active:scale-100",
-        linked && "cursor-default"
+        "group flex min-h-[3.35rem] w-full items-center gap-3 rounded-[16px] px-3.5 py-2.5 text-left outline-none transition active:scale-[0.99] disabled:active:scale-100",
+        linked && "cursor-default",
+        !linked && !busy && "hover:brightness-[1.04]"
       )}
       style={{
-        background: "rgba(16, 24, 39, 0.72)",
+        background: linked
+          ? "linear-gradient(135deg, rgba(232,209,154,0.14) 0%, rgba(16,24,39,0.78) 48%)"
+          : MAE_GLASS.bg,
         boxShadow: linked
-          ? "inset 0 0 0 1.5px rgba(232, 209, 154, 0.55)"
-          : "inset 0 0 0 1px rgba(213, 177, 111, 0.32)",
+          ? "inset 0 0 0 1.5px rgba(232,209,154,0.55), 0 6px 18px rgba(0,0,0,0.18)"
+          : "inset 0 0 0 1px rgba(213,177,111,0.28), 0 4px 14px rgba(0,0,0,0.14)",
+        backdropFilter: MAE_GLASS.blur,
+        WebkitBackdropFilter: MAE_GLASS.blur,
       }}
     >
       <span
         className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-          variant === "google" && "bg-white",
-          variant === "line" && "bg-[#06C755]",
-          variant === "phone" && "bg-[rgba(213,177,111,0.18)]"
+          "flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px]",
+          variant === "google" && "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18)]",
+          variant === "line" && "bg-[#06C755] shadow-[0_2px_10px_rgba(6,199,85,0.28)]",
+          variant === "phone" && "bg-[rgba(213,177,111,0.16)]"
         )}
+        style={
+          variant === "phone"
+            ? { boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)" }
+            : undefined
+        }
       >
         {busy ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin text-[#e8d19a]" strokeWidth={2.2} />
+          <Loader2 className="h-4 w-4 animate-spin text-[#e8d19a]" strokeWidth={2.2} />
         ) : variant === "google" ? (
-          <GoogleMark className="h-4 w-4" />
+          <GoogleMark className="h-[1.15rem] w-[1.15rem]" />
         ) : variant === "line" ? (
-          <LineMark className="h-4 w-4 text-white" />
+          <LineMark className="h-[1.15rem] w-[1.15rem] text-white" />
         ) : (
-          <Phone className="h-4 w-4 text-[#d5b16f]" strokeWidth={2} />
+          <Phone className="h-[1.05rem] w-[1.05rem] text-[#e8d19a]" strokeWidth={2} />
         )}
       </span>
 
-      <span className="min-w-0 flex-1 text-[14px] font-semibold leading-none text-[#f7f4ec]">
-        {label}
-        {status ? (
-          <span className="mt-1 block text-[11px] font-medium text-[#e8d19a]">
-            {status}
-          </span>
-        ) : null}
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-semibold leading-none text-[#f7f4ec]">
+          {label}
+        </span>
+        <span
+          className={cn(
+            "mt-1.5 block text-[12px] font-medium leading-none",
+            linked ? "text-[#e8d19a]" : "text-[rgba(186,204,230,0.65)]"
+          )}
+        >
+          {status}
+        </span>
       </span>
 
-      {!linked && !busy ? (
-        <span className="shrink-0 text-[12px] font-semibold text-[#d5b16f]">
-          เชื่อม →
+      {linked ? (
+        <span
+          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+          style={{
+            background: "rgba(232,209,154,0.18)",
+            boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.45)",
+          }}
+          aria-hidden
+        >
+          <Check className="h-3.5 w-3.5 text-[#e8d19a]" strokeWidth={2.6} />
         </span>
-      ) : linked ? (
-        <span className="shrink-0 text-[12px] font-semibold text-[#e8d19a]">
-          ✓
+      ) : !busy ? (
+        <span className="inline-flex shrink-0 items-center gap-0.5 text-[12.5px] font-semibold text-[#d5b16f] transition group-hover:text-[#e8d19a]">
+          เชื่อม
+          <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.4} />
         </span>
       ) : null}
     </button>
@@ -483,7 +507,7 @@ export function AccountAuthLinks({ className }: { className?: string }) {
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="flex w-full flex-col gap-2">
+      <div className="flex w-full flex-col gap-2.5">
         <LinkChip
           variant="google"
           linked={google}
@@ -509,12 +533,12 @@ export function AccountAuthLinks({ className }: { className?: string }) {
         ) : null}
       </div>
       {showPhone && links?.phoneMasked ? (
-        <p className="mt-1.5 px-1 text-[11px] text-[#e8d19a]/70">
-          {links.phoneMasked}
+        <p className="mt-2 px-1 text-[12px] text-[#e8d19a]/75">
+          เบอร์ที่เชื่อม · {links.phoneMasked}
         </p>
       ) : null}
       {message ? (
-        <p className="mt-1.5 px-1 text-[11px] leading-snug text-[#e8d19a]">
+        <p className="mt-2 px-1 text-[12px] leading-snug text-[#e8d19a]">
           {message}
         </p>
       ) : null}

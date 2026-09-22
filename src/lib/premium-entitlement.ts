@@ -17,6 +17,14 @@ export function hasTrialAccess(trialEndsAt?: Date | null) {
   return Boolean(trialEndsAt && trialEndsAt.getTime() > Date.now());
 }
 
+/** Whole days left in free trial (1 while any time remains today). */
+export function trialDaysRemaining(trialEndsAt?: Date | null) {
+  if (!trialEndsAt) return 0;
+  const ms = trialEndsAt.getTime() - Date.now();
+  if (ms <= 0) return 0;
+  return Math.max(1, Math.ceil(ms / 86_400_000));
+}
+
 /**
  * Can use the app (free tier + locks): premium OR still in trial.
  * AI / wallpaper stay behind premium as before.

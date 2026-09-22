@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CalendarDays,
+  ChevronRight,
   Clock,
   Crown,
   LogOut,
@@ -43,6 +44,7 @@ import {
   setPremiumUnlocked,
   syncPremiumFromServer,
 } from "@/lib/fortune/premium-unlock";
+import { MAE_GLASS, maeGlassStyle } from "@/lib/mae-glass";
 import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_PRICE, LINE_OA_ADD_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { trackClientEvent } from "@/lib/analytics/client";
@@ -54,6 +56,15 @@ const TITLE_GOLD = {
   backgroundClip: "text",
   color: "transparent",
   WebkitTextFillColor: "transparent",
+} as const;
+
+const GOLD = "#e8d19a";
+const GOLD_SOFT = "#efc36c";
+const MUTED = "rgba(186, 204, 230, 0.72)";
+
+const TILE = {
+  background: "rgba(255,255,255,0.04)",
+  boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)",
 } as const;
 
 type AccountUser = {
@@ -103,6 +114,8 @@ export function AccountDashboard({
   const [profile, setProfile] = useState<FortuneUserProfile | null>(null);
   const [premium, setPremium] = useState(false);
   const [premiumUntil, setPremiumUntil] = useState<Date | null>(null);
+  const [trialActive, setTrialActive] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState(0);
   const [payOpen, setPayOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -131,6 +144,23 @@ export function AccountDashboard({
         );
         setPremium(premiumOn);
         setPremiumUntil(getPremiumUnlockedUntil());
+        try {
+          const res = await fetch("/api/premium/status", { cache: "no-store" });
+          const data = (await res.json()) as {
+            premium?: boolean;
+            trialActive?: boolean;
+            trialDaysLeft?: number;
+            untilMs?: number | null;
+          };
+          if (typeof data.premium === "boolean") setPremium(data.premium);
+          setTrialActive(Boolean(data.trialActive) && !data.premium);
+          setTrialDaysLeft(
+            typeof data.trialDaysLeft === "number" ? data.trialDaysLeft : 0
+          );
+          if (data.untilMs) setPremiumUntil(new Date(data.untilMs));
+        } catch {
+          /* ignore */
+        }
       })();
       if (loaded) {
         setDraft({
@@ -265,488 +295,523 @@ export function AccountDashboard({
     }
   }
 
+  const membershipLabel = premium
+    ? "Premium"
+    : trialActive
+      ? `ทดลองฟรี · เหลือ ${trialDaysLeft} วัน`
+      : "สมาชิกทั่วไป";
+
+  const premiumUntilLabel =
+    premiumUntil &&
+    new Intl.DateTimeFormat("th-TH", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(premiumUntil);
+
   return (
     <AnimatedPage className="relative mx-auto w-full max-w-[480px]">
       <MaePageBackground />
-      <div className="relative z-10 space-y-3.5 px-4 pb-10 pt-4">
-      <header className="space-y-3 px-0.5">
-        <MaeBrandLink />
-        <div className="text-center">
-          <p className="text-[12px] font-semibold tracking-[0.2em] text-[#e8d19a]/85">
+      <div className="relative z-10 space-y-4 px-4 pb-12 pt-3">
+        <header className="flex items-center justify-between gap-3 px-0.5">
+          <MaeBrandLink />
+          <p
+            className="text-[12px] font-semibold tracking-[0.18em]"
+            style={{ color: "rgba(232,209,154,0.8)" }}
+          >
             โปรไฟล์
           </p>
+        </header>
+
+        {/* Identity hero */}
+        <section
+          className="relative overflow-hidden rounded-[26px] px-5 pb-5 pt-6 text-center"
+          style={maeGlassStyle}
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(232,209,154,0.18) 0%, transparent 68%)",
+            }}
+          />
+          <div className="relative z-[1] mx-auto h-[5.25rem] w-[5.25rem]">
+            <div
+              className="relative h-full w-full overflow-hidden rounded-full"
+              style={{
+                boxShadow:
+                  "0 0 0 2px rgba(232,209,154,0.55), 0 0 0 6px rgba(232,209,154,0.12), 0 12px 28px rgba(0,0,0,0.28)",
+              }}
+            >
+              {user.image ? (
+                <Image
+                  src={user.image}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              ) : (
+                <span
+                  className="flex h-full w-full items-center justify-center"
+                  style={{ background: "rgba(232,209,154,0.12)" }}
+                >
+                  <UserRound className="h-9 w-9" style={{ color: GOLD }} strokeWidth={1.6} />
+                </span>
+              )}
+            </div>
+          </div>
+
           <h1
-            className="mt-1 text-[clamp(1.55rem,6.5vw,1.85rem)] font-bold tracking-tight"
+            className="relative z-[1] mt-4 text-[1.65rem] font-bold leading-tight tracking-tight"
             style={TITLE_GOLD}
           >
-            บัญชีของคุณ
+            คุณ{displayName}
           </h1>
-        </div>
-      </header>
-
-      {/* Identity */}
-      <section className="mae-aspect-card relative overflow-hidden rounded-[22px] px-4 py-5">
-        <div className="relative z-[1] flex items-start gap-3">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full shadow-[0_0_0_2px_rgba(213,177,111,0.45)]">
-            {user.image ? (
-              <Image
-                src={user.image}
-                alt=""
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            ) : (
-              <span className="flex h-full w-full items-center justify-center bg-[rgba(213,177,111,0.12)]">
-                <UserRound className="h-7 w-7 text-[#d5b16f]" strokeWidth={1.7} />
-              </span>
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate text-[1.25rem] font-semibold text-[#f7f4ec]">
-              คุณ{displayName}
-            </h2>
-            <p className="mt-0.5 truncate text-[13px] text-[#bacce6]/75">
-              {user.email ?? "เข้าสู่ระบบแล้ว"}
-            </p>
-            <p
-              className={cn(
-                "mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-                premium
-                  ? "bg-[rgba(213,177,111,0.18)] text-[#e8d19a]"
-                  : "bg-[rgba(213,177,111,0.1)] text-[#d5b16f]"
-              )}
-              style={{
-                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
-              }}
-            >
-              <Crown className="h-3 w-3" strokeWidth={2} />
-              {premium ? "พรีเมียมใช้งานอยู่" : "สมาชิกทั่วไป"}
-            </p>
-          </div>
-        </div>
-
-        <div className="relative z-[1] mt-4">
-          <p className="mb-2 text-[11px] font-medium tracking-wide text-[#e8d19a]/75">
-            เชื่อมบัญชี
+          <p className="relative z-[1] mt-1 truncate text-[13.5px]" style={{ color: MUTED }}>
+            {user.email ?? "เข้าสู่ระบบแล้ว"}
           </p>
-          <AccountAuthLinks />
-        </div>
 
-        <div className="relative z-[1] mt-4 grid grid-cols-2 gap-2">
-          <div
-            className="rounded-[14px] px-3 py-2.5"
+          <p
+            className="relative z-[1] mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-semibold"
             style={{
-              background: "rgba(213,177,111,0.08)",
-              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+              color: GOLD,
+              background: "rgba(232,209,154,0.12)",
+              boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.4)",
             }}
           >
-            <p className="text-[11px] text-[#e8d19a]/75">แพ็กเกจ</p>
-            <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
-              {premium ? `พรีเมียม ${FORTUNE_PACKAGE_LABEL}` : "ยังไม่มี"}
-            </p>
-            <p className="text-[11px] text-[#bacce6]/65">
-              {premium
-                ? premiumUntil
-                  ? `ถึง ${new Intl.DateTimeFormat("th-TH", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    }).format(premiumUntil)}`
-                  : "ใช้งานอยู่"
-                : `ปลดล็อก ${FORTUNE_UNLOCK_PRICE} บาท`}
-            </p>
-          </div>
-          {premium ? (
-            <Link
-              href="/premium"
-              className="rounded-[14px] px-3 py-2.5 outline-none transition active:scale-[0.99]"
-              style={{
-                background: "rgba(213,177,111,0.08)",
-                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-              }}
-            >
-              <p className="text-[11px] text-[#e8d19a]/75">สถานะ</p>
-              <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
-                ใช้งานอยู่
-              </p>
-              <p className="text-[11px] text-[#d5b16f]">จัดการพรีเมียม →</p>
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setPayOpen(true)}
-              className="rounded-[14px] px-3 py-2.5 text-left outline-none transition active:scale-[0.99]"
-              style={{
-                background: "rgba(213,177,111,0.08)",
-                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-              }}
-            >
-              <p className="text-[11px] text-[#e8d19a]/75">สถานะ</p>
-              <p className="mt-0.5 text-[15px] font-semibold text-[#f7f4ec]">
-                สมาชิกทั่วไป
-              </p>
-              <p className="text-[11px] text-[#d5b16f]">ดูพรีเมียม →</p>
-            </button>
-          )}
-        </div>
-      </section>
+            {premium || trialActive ? (
+              <Crown className="h-3.5 w-3.5" strokeWidth={2.2} />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.2} />
+            )}
+            {membershipLabel}
+          </p>
+        </section>
 
-      {/* Contact Mae via LINE OA — after membership, before profile edit */}
-      <section className="mae-aspect-card rounded-[20px] px-3.5 py-3.5">
-        <h2 className="text-center text-[15px] font-semibold leading-snug text-[#f7f4ec]">
-          รับข่าวจากแม่ และปรึกษาได้ในไลน์
-        </h2>
-        <a
-          href={LINE_OA_ADD_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => {
-            trackClientEvent({
-              name: "thanks_line_cta",
-              path: "/dashboard",
-              props: { source: "account" },
-            });
-          }}
-          className="mt-2.5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
-          style={{
-            background: "#06C755",
-            boxShadow:
-              "0 8px 20px rgba(6,199,85,0.28), 0 0 0 1px rgba(255,255,255,0.06)",
-          }}
+        {/* Membership / trial */}
+        <section
+          className="overflow-hidden rounded-[22px] px-4 py-4"
+          style={maeGlassStyle}
         >
-          <LineMark className="h-4 w-4" />
-          คุยกับแม่มั่งมี
-        </a>
-      </section>
-
-      {/* Fortune profile */}
-      <section className="mae-aspect-card rounded-[20px] px-3.5 py-4">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <div>
-            <h2 className="text-[17px] font-semibold" style={TITLE_GOLD}>
-              โปรไฟล์ดวง
-            </h2>
-            <p className="text-[12px] text-[#bacce6]/70">
-              ใช้ดูดวงทุกหน้าในแอป
-            </p>
-          </div>
-          {!editing ? (
-            editAllowed ? (
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p
+                className="text-[12px] font-semibold tracking-[0.12em]"
+                style={{ color: "rgba(232,209,154,0.78)" }}
+              >
+                สิทธิ์ใช้งาน
+              </p>
+              {premium ? (
+                <>
+                  <p className="mt-1.5 text-[1.15rem] font-semibold text-[#f7f4ec]">
+                    Premium {FORTUNE_PACKAGE_LABEL}
+                  </p>
+                  <p className="mt-0.5 text-[13px]" style={{ color: MUTED }}>
+                    {premiumUntilLabel ? `ใช้ได้ถึง ${premiumUntilLabel}` : "ใช้งานอยู่"}
+                  </p>
+                </>
+              ) : trialActive ? (
+                <>
+                  <p className="mt-1.5 flex items-baseline gap-2 text-[#f7f4ec]">
+                    <span
+                      className="text-[2.35rem] font-bold tabular-nums leading-none"
+                      style={TITLE_GOLD}
+                    >
+                      {trialDaysLeft}
+                    </span>
+                    <span className="text-[15px] font-semibold">วันทดลองเหลือ</span>
+                  </p>
+                  <p className="mt-1 text-[13px]" style={{ color: MUTED }}>
+                    ใช้ฟีเจอร์ฟรีได้จนกว่าจะครบ · AI / วอลเปเปอร์ยังล็อก
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-1.5 text-[1.15rem] font-semibold text-[#f7f4ec]">
+                    ยังไม่เปิดทดลอง / พรีเมียม
+                  </p>
+                  <p className="mt-0.5 text-[13px]" style={{ color: MUTED }}>
+                    ปลดล็อกครบทุกฟีเจอร์ ฿{FORTUNE_UNLOCK_PRICE}
+                  </p>
+                </>
+              )}
+            </div>
+            {!premium ? (
               <button
                 type="button"
-                onClick={openEdit}
-                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-medium text-[#e8d19a] outline-none transition active:scale-[0.98]"
-                style={{
-                  background: "rgba(213,177,111,0.12)",
-                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.35)",
-                }}
+                onClick={() => setPayOpen(true)}
+                className="mae-gold-cta inline-flex h-10 shrink-0 items-center gap-1 rounded-full px-3.5 text-[13px] font-bold tracking-wide outline-none transition active:scale-[0.98]"
               >
-                <Pencil className="h-3 w-3" strokeWidth={2} />
-                แก้ไข
+                <Crown className="h-3.5 w-3.5" strokeWidth={2.3} />
+                Premium
               </button>
             ) : (
-              <span
-                className="rounded-full px-2.5 py-1.5 text-[11px] font-medium text-[#e8d19a]/80"
+              <Link
+                href="/home"
+                className="inline-flex h-10 shrink-0 items-center gap-0.5 rounded-full px-3.5 text-[13px] font-semibold outline-none transition active:scale-[0.98]"
                 style={{
-                  background: "rgba(213,177,111,0.1)",
-                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                  color: GOLD,
+                  background: "rgba(232,209,154,0.1)",
+                  boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.35)",
                 }}
               >
-                แก้ได้อีกใน {cooldownDays} วัน
-              </span>
-            )
-          ) : null}
-        </div>
+                หน้าหลัก
+                <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.4} />
+              </Link>
+            )}
+          </div>
+        </section>
 
-        {saveError ? (
-          <p className="mb-2 text-center text-[12px] text-red-500/90">{saveError}</p>
-        ) : null}
+        {/* Account links */}
+        <section
+          className="rounded-[22px] px-4 py-4"
+          style={maeGlassStyle}
+        >
+          <p
+            className="text-[13px] font-semibold tracking-[0.08em]"
+            style={{ color: GOLD }}
+          >
+            เชื่อมบัญชี
+          </p>
+          <p className="mt-0.5 text-[12.5px]" style={{ color: MUTED }}>
+            ล็อกอินช่องทางอื่นได้โดยไม่สร้างบัญชีใหม่
+          </p>
+          <div className="mt-3">
+            <AccountAuthLinks />
+          </div>
+        </section>
 
-        {editing ? (
-          <div className="space-y-3">
-            <label className="block">
-              <span className="mb-1.5 block text-[13px] font-medium text-[#9aa3b2]">
-                ชื่อจริง (ไม่บังคับ)
-              </span>
-              <input
-                className="name-step-input"
-                value={draft.realName}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, realName: e.target.value }))
-                }
-                placeholder="ชื่อจริง"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 block text-[13px] font-medium text-[#9aa3b2]">
-                ชื่อเล่น
-              </span>
-              <input
-                className="name-step-input"
-                value={draft.nickname}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, nickname: e.target.value }))
-                }
-                placeholder="เช่น นัท"
-              />
-            </label>
+        {/* Fortune profile */}
+        <section
+          className="rounded-[22px] px-4 py-4"
+          style={maeGlassStyle}
+        >
+          <div className="mb-3.5 flex items-center justify-between gap-2">
             <div>
-              <span className="mb-1.5 block text-[13px] font-medium text-[#9aa3b2]">
-                วันเกิด
-              </span>
-              <BirthDatePicker
-                tone="mae"
-                value={draft.birthDate}
-                onChange={(birthDate) =>
-                  setDraft((d) => ({ ...d, birthDate }))
-                }
-              />
+              <h2 className="text-[17px] font-semibold" style={TITLE_GOLD}>
+                โปรไฟล์ดวง
+              </h2>
+              <p className="mt-0.5 text-[12.5px]" style={{ color: MUTED }}>
+                ใช้ดูดวงทุกหน้าในแอป
+              </p>
             </div>
-            <div>
-              <span className="mb-1.5 block text-[13px] font-medium text-[#9aa3b2]">
-                เพศ
-              </span>
-              <div className="grid grid-cols-2 gap-1.5">
-                {GENDER_OPTIONS.map((opt) => {
-                  const selected = draft.gender === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() =>
-                        setDraft((d) => ({
-                          ...d,
-                          gender: opt.id,
-                          genderNote:
-                            opt.id === "other" ? d.genderNote : "",
-                        }))
-                      }
-                      className={cn(
-                        "rounded-full py-2.5 text-[13px] font-medium outline-none transition active:scale-[0.98]",
-                        selected
-                          ? "mae-gold-cta"
-                          : "text-[#f7f4ec]/75"
-                      )}
-                      style={
-                        selected
-                          ? undefined
-                          : {
-                              background: "rgba(213,177,111,0.08)",
-                              boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-                            }
-                      }
-                    >
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-              {draft.gender === "other" ? (
-                <input
-                  type="text"
-                  value={draft.genderNote}
-                  onChange={(e) =>
-                    setDraft((d) => ({ ...d, genderNote: e.target.value }))
-                  }
-                  placeholder="ระบุเพิ่มเติม เช่น นอนไบนารี"
-                  maxLength={80}
-                  className="mt-2 h-11 w-full rounded-full px-4 text-[14px] text-[#f7f4ec] outline-none placeholder:text-[#9aa3b2]/55"
-                  style={{
-                    background: "rgba(213,177,111,0.08)",
-                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-                  }}
-                />
-              ) : null}
-            </div>
-            <p className="text-center text-[11px] text-[#f7f4ec]/55">
-              บันทึกแล้วจะแก้ไขได้อีกครั้งหลัง 3 สัปดาห์
-            </p>
-            <div className="flex gap-2 pt-1">
-              {profile ? (
+            {!editing ? (
+              editAllowed ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    setEditing(false);
-                    setSaveError(null);
-                  }}
-                  className="flex-1 rounded-full py-3 text-[14px] font-medium text-[#f7f4ec]/70"
+                  onClick={openEdit}
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[12px] font-semibold outline-none transition active:scale-[0.98]"
                   style={{
-                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
+                    color: GOLD,
+                    background: "rgba(232,209,154,0.1)",
+                    boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.35)",
                   }}
                 >
-                  ยกเลิก
+                  <Pencil className="h-3 w-3" strokeWidth={2.2} />
+                  แก้ไข
                 </button>
-              ) : null}
-              <button
-                type="button"
-                onClick={saveProfile}
-                disabled={
-                  !draft.nickname.trim() ||
-                  !draft.birthDate ||
-                  !draft.gender ||
-                  (draft.gender === "other" && !draft.genderNote.trim())
-                }
-                className="mae-gold-cta flex-1 rounded-full py-3 text-[14px] font-semibold disabled:opacity-50"
-              >
-                บันทึกโปรไฟล์
-              </button>
-            </div>
+              ) : (
+                <span
+                  className="rounded-full px-2.5 py-1.5 text-[11px] font-medium"
+                  style={{
+                    color: "rgba(232,209,154,0.8)",
+                    background: "rgba(232,209,154,0.08)",
+                    boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.25)",
+                  }}
+                >
+                  แก้ได้อีกใน {cooldownDays} วัน
+                </span>
+              )
+            ) : null}
           </div>
-        ) : profile ? (
-          <div className="space-y-2.5">
-            <div
-              className="flex items-center gap-3 rounded-[16px] px-3 py-3"
-              style={{
-                background: "rgba(213,177,111,0.08)",
-                boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-              }}
-            >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center">
-                {zodiac ? (
-                  <ZodiacSignImage
-                    sign={zodiac.id}
-                    variant="orb"
-                    size={48}
-                    alt={`ราศี${zodiac.thaiName}`}
+
+          {saveError ? (
+            <p className="mb-2 text-center text-[12px] text-[#ff9a9a]">{saveError}</p>
+          ) : null}
+
+          {editing ? (
+            <div className="space-y-3">
+              <label className="block">
+                <span className="mb-1.5 block text-[13px] font-medium" style={{ color: MUTED }}>
+                  ชื่อจริง (ไม่บังคับ)
+                </span>
+                <input
+                  className="name-step-input"
+                  value={draft.realName}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, realName: e.target.value }))
+                  }
+                  placeholder="ชื่อจริง"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-[13px] font-medium" style={{ color: MUTED }}>
+                  ชื่อเล่น
+                </span>
+                <input
+                  className="name-step-input"
+                  value={draft.nickname}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, nickname: e.target.value }))
+                  }
+                  placeholder="เช่น นัท"
+                />
+              </label>
+              <div>
+                <span className="mb-1.5 block text-[13px] font-medium" style={{ color: MUTED }}>
+                  วันเกิด
+                </span>
+                <BirthDatePicker
+                  tone="mae"
+                  value={draft.birthDate}
+                  onChange={(birthDate) =>
+                    setDraft((d) => ({ ...d, birthDate }))
+                  }
+                />
+              </div>
+              <div>
+                <span className="mb-1.5 block text-[13px] font-medium" style={{ color: MUTED }}>
+                  เพศ
+                </span>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {GENDER_OPTIONS.map((opt) => {
+                    const selected = draft.gender === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() =>
+                          setDraft((d) => ({
+                            ...d,
+                            gender: opt.id,
+                            genderNote:
+                              opt.id === "other" ? d.genderNote : "",
+                          }))
+                        }
+                        className={cn(
+                          "rounded-full py-2.5 text-[13px] font-medium outline-none transition active:scale-[0.98]",
+                          selected ? "mae-gold-cta" : "text-[#f7f4ec]/75"
+                        )}
+                        style={selected ? undefined : TILE}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {draft.gender === "other" ? (
+                  <input
+                    type="text"
+                    value={draft.genderNote}
+                    onChange={(e) =>
+                      setDraft((d) => ({ ...d, genderNote: e.target.value }))
+                    }
+                    placeholder="ระบุเพิ่มเติม เช่น นอนไบนารี"
+                    maxLength={80}
+                    className="mt-2 h-11 w-full rounded-full px-4 text-[14px] text-[#f7f4ec] outline-none placeholder:text-[#9aa3b2]/55"
+                    style={TILE}
                   />
-                ) : (
-                  <Sparkles className="h-5 w-5 text-[#d5b16f]" />
-                )}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] font-semibold text-[#f7f4ec]">
-                  ราศี{zodiac?.thaiName ?? "—"}
-                  {zodiac ? (
-                    <span className="ml-1.5 text-[12px] font-normal text-[#f7f4ec]/65">
-                      · ธาตุ{zodiac.element}
-                    </span>
-                  ) : null}
-                </p>
-                <p className="mt-0.5 text-[12px] text-[#f7f4ec]/55">
-                  {zodiac?.dateRange}
-                </p>
+                ) : null}
+              </div>
+              <p className="text-center text-[11px] text-[#f7f4ec]/55">
+                บันทึกแล้วจะแก้ไขได้อีกครั้งหลัง 3 สัปดาห์
+              </p>
+              <div className="flex gap-2 pt-1">
+                {profile ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditing(false);
+                      setSaveError(null);
+                    }}
+                    className="flex-1 rounded-full py-3 text-[14px] font-medium text-[#f7f4ec]/70"
+                    style={{
+                      boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.14)",
+                    }}
+                  >
+                    ยกเลิก
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={saveProfile}
+                  disabled={
+                    !draft.nickname.trim() ||
+                    !draft.birthDate ||
+                    !draft.gender ||
+                    (draft.gender === "other" && !draft.genderNote.trim())
+                  }
+                  className="mae-gold-cta flex-1 rounded-full py-3 text-[14px] font-semibold disabled:opacity-50"
+                >
+                  บันทึกโปรไฟล์
+                </button>
               </div>
             </div>
-
-            <dl className="grid grid-cols-2 gap-2">
+          ) : profile ? (
+            <div className="space-y-2.5">
               <div
-                className="rounded-[14px] px-3 py-2.5"
-                style={{
-                  background: "rgba(213,177,111,0.08)",
-                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-                }}
+                className="flex items-center gap-3 rounded-[18px] px-3.5 py-3.5"
+                style={TILE}
               >
-                <dt className="text-[11px] text-[#e8d19a]/75">ชื่อเล่น</dt>
-                <dd className="mt-0.5 truncate text-[14px] font-medium text-[#f7f4ec]">
-                  {profile.nickname}
-                </dd>
-              </div>
-              <div
-                className="rounded-[14px] px-3 py-2.5"
-                style={{
-                  background: "rgba(213,177,111,0.08)",
-                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-                }}
-              >
-                <dt className="text-[11px] text-[#e8d19a]/75">เพศ</dt>
-                <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
-                  {genderLabel(profile.gender, profile.genderNote)}
-                </dd>
-              </div>
-              <div
-                className="col-span-2 rounded-[14px] px-3 py-2.5"
-                style={{
-                  background: "rgba(213,177,111,0.08)",
-                  boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-                }}
-              >
-                <dt className="flex items-center gap-1 text-[11px] text-[#e8d19a]/75">
-                  <CalendarDays className="h-3 w-3" strokeWidth={1.9} />
-                  วันเกิด
-                </dt>
-                <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
-                  {formatBirthThai(profile.birthDate)}
-                </dd>
-              </div>
-              {profile.birthTime ? (
-                <div
-                  className="rounded-[14px] px-3 py-2.5"
-                  style={{
-                    background: "rgba(213,177,111,0.08)",
-                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-                  }}
-                >
-                  <dt className="flex items-center gap-1 text-[11px] text-[#e8d19a]/75">
-                    <Clock className="h-3 w-3" strokeWidth={1.9} />
-                    เวลาเกิด
-                  </dt>
-                  <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
-                    {profile.birthTime}
-                  </dd>
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center">
+                  {zodiac ? (
+                    <ZodiacSignImage
+                      sign={zodiac.id}
+                      variant="orb"
+                      size={48}
+                      alt={`ราศี${zodiac.thaiName}`}
+                    />
+                  ) : (
+                    <Sparkles className="h-5 w-5" style={{ color: GOLD_SOFT }} />
+                  )}
+                </span>
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-[15.5px] font-semibold text-[#f7f4ec]">
+                    ราศี{zodiac?.thaiName ?? "—"}
+                    {zodiac ? (
+                      <span className="ml-1.5 text-[12.5px] font-normal" style={{ color: MUTED }}>
+                        · ธาตุ{zodiac.element}
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="mt-0.5 text-[12.5px]" style={{ color: MUTED }}>
+                    {zodiac?.dateRange}
+                  </p>
                 </div>
-              ) : null}
-              {profile.birthPlace ? (
-                <div
-                  className="rounded-[14px] px-3 py-2.5"
-                  style={{
-                    background: "rgba(213,177,111,0.08)",
-                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-                  }}
-                >
-                  <dt className="flex items-center gap-1 text-[11px] text-[#e8d19a]/75">
-                    <MapPin className="h-3 w-3" strokeWidth={1.9} />
-                    สถานที่เกิด
+              </div>
+
+              <dl className="grid grid-cols-2 gap-2">
+                <div className="rounded-[16px] px-3 py-2.5" style={TILE}>
+                  <dt className="text-[11px]" style={{ color: "rgba(232,209,154,0.75)" }}>
+                    ชื่อเล่น
                   </dt>
                   <dd className="mt-0.5 truncate text-[14px] font-medium text-[#f7f4ec]">
-                    {profile.birthPlace}
+                    {profile.nickname}
                   </dd>
                 </div>
-              ) : null}
-              {profile.realName ? (
-                <div
-                  className="col-span-2 rounded-[14px] px-3 py-2.5"
-                  style={{
-                    background: "rgba(213,177,111,0.08)",
-                    boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-                  }}
-                >
-                  <dt className="text-[11px] text-[#e8d19a]/75">ชื่อจริง</dt>
+                <div className="rounded-[16px] px-3 py-2.5" style={TILE}>
+                  <dt className="text-[11px]" style={{ color: "rgba(232,209,154,0.75)" }}>
+                    เพศ
+                  </dt>
                   <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
-                    {profile.realName}
+                    {genderLabel(profile.gender, profile.genderNote)}
                   </dd>
                 </div>
-              ) : null}
-            </dl>
-          </div>
-        ) : (
-          <p className="py-4 text-center text-[13px] text-[#f7f4ec]/65">
-            ยังไม่มีโปรไฟล์ดวง — กรอกข้อมูลด้านบนเพื่อเริ่มต้น
-          </p>
-        )}
-      </section>
+                <div className="col-span-2 rounded-[16px] px-3 py-2.5" style={TILE}>
+                  <dt
+                    className="flex items-center gap-1 text-[11px]"
+                    style={{ color: "rgba(232,209,154,0.75)" }}
+                  >
+                    <CalendarDays className="h-3 w-3" strokeWidth={1.9} />
+                    วันเกิด
+                  </dt>
+                  <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
+                    {formatBirthThai(profile.birthDate)}
+                  </dd>
+                </div>
+                {profile.birthTime ? (
+                  <div className="rounded-[16px] px-3 py-2.5" style={TILE}>
+                    <dt
+                      className="flex items-center gap-1 text-[11px]"
+                      style={{ color: "rgba(232,209,154,0.75)" }}
+                    >
+                      <Clock className="h-3 w-3" strokeWidth={1.9} />
+                      เวลาเกิด
+                    </dt>
+                    <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
+                      {profile.birthTime}
+                    </dd>
+                  </div>
+                ) : null}
+                {profile.birthPlace ? (
+                  <div className="rounded-[16px] px-3 py-2.5" style={TILE}>
+                    <dt
+                      className="flex items-center gap-1 text-[11px]"
+                      style={{ color: "rgba(232,209,154,0.75)" }}
+                    >
+                      <MapPin className="h-3 w-3" strokeWidth={1.9} />
+                      สถานที่เกิด
+                    </dt>
+                    <dd className="mt-0.5 truncate text-[14px] font-medium text-[#f7f4ec]">
+                      {profile.birthPlace}
+                    </dd>
+                  </div>
+                ) : null}
+                {profile.realName ? (
+                  <div className="col-span-2 rounded-[16px] px-3 py-2.5" style={TILE}>
+                    <dt className="text-[11px]" style={{ color: "rgba(232,209,154,0.75)" }}>
+                      ชื่อจริง
+                    </dt>
+                    <dd className="mt-0.5 text-[14px] font-medium text-[#f7f4ec]">
+                      {profile.realName}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : (
+            <p className="py-4 text-center text-[13px]" style={{ color: MUTED }}>
+              ยังไม่มีโปรไฟล์ดวง — กรอกข้อมูลเพื่อเริ่มต้น
+            </p>
+          )}
+        </section>
 
-      <button
-        type="button"
-        onClick={handleSignOut}
-        disabled={signingOut}
-        className="flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[14px] font-medium text-[#f7f4ec]/65 outline-none transition active:scale-[0.99] disabled:opacity-60"
-        style={{
-          boxShadow: "inset 0 0 0 1px rgba(213,177,111,0.28)",
-        }}
-      >
-        <LogOut className="h-4 w-4" strokeWidth={1.9} />
-        {signingOut ? "กำลังออก…" : "ออกจากระบบ"}
-      </button>
+        {/* LINE */}
+        <section
+          className="rounded-[22px] px-4 py-4 text-center"
+          style={maeGlassStyle}
+        >
+          <h2 className="text-[15px] font-semibold leading-snug text-[#f7f4ec]">
+            รับข่าวจากแม่ และปรึกษาได้ในไลน์
+          </h2>
+          <a
+            href={LINE_OA_ADD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              trackClientEvent({
+                name: "thanks_line_cta",
+                path: "/dashboard",
+                props: { source: "account" },
+              });
+            }}
+            className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold text-white outline-none transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[#06C755]/45"
+            style={{
+              background: "#06C755",
+              boxShadow:
+                "0 8px 20px rgba(6,199,85,0.28), 0 0 0 1px rgba(255,255,255,0.06)",
+            }}
+          >
+            <LineMark className="h-4 w-4" />
+            คุยกับแม่มั่งมี
+          </a>
+        </section>
 
-      <Suspense fallback={null}>
-        <FortunePaymentSheet
-          open={payOpen}
-          onClose={() => setPayOpen(false)}
-          onPaid={applyPremiumUnlock}
-          returnPath="/dashboard"
-        />
-      </Suspense>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[14px] font-medium outline-none transition active:scale-[0.99] disabled:opacity-60"
+          style={{
+            color: "rgba(247,244,236,0.62)",
+            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)",
+            background: MAE_GLASS.bgSoft,
+          }}
+        >
+          <LogOut className="h-4 w-4" strokeWidth={1.9} />
+          {signingOut ? "กำลังออก…" : "ออกจากระบบ"}
+        </button>
+
+        <Suspense fallback={null}>
+          <FortunePaymentSheet
+            open={payOpen}
+            onClose={() => setPayOpen(false)}
+            onPaid={applyPremiumUnlock}
+            returnPath="/dashboard"
+          />
+        </Suspense>
       </div>
     </AnimatedPage>
   );

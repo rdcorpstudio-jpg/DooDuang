@@ -5,6 +5,7 @@ import {
   hasAppAccess,
   hasPremiumAccess,
   hasTrialAccess,
+  trialDaysRemaining,
 } from "@/lib/premium-entitlement";
 
 export const runtime = "nodejs";
@@ -16,6 +17,7 @@ const GUEST_BODY = {
   status: null,
   trialActive: false,
   trialEndsAtMs: null,
+  trialDaysLeft: 0,
   canUseApp: false,
 } as const;
 
@@ -49,6 +51,7 @@ export async function GET() {
   const premium = hasPremiumAccess({ status, until });
   const trialActive = hasTrialAccess(trialEndsAt);
   const canUseApp = hasAppAccess({ status, until, trialEndsAt });
+  const trialDaysLeft = trialActive ? trialDaysRemaining(trialEndsAt) : 0;
 
   return NextResponse.json(
     {
@@ -60,6 +63,7 @@ export async function GET() {
       trialActive,
       trialEndsAtMs: trialEndsAt ? trialEndsAt.getTime() : null,
       trialEndsAt: trialEndsAt ? trialEndsAt.toISOString() : null,
+      trialDaysLeft,
       canUseApp,
     },
     {

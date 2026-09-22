@@ -488,6 +488,8 @@ export function HomeDraft() {
   const { ref: shortcutsRef, didDrag } = useDragScroll();
   const [lineOpen, setLineOpen] = useState(true);
   const [premium, setPremium] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState(0);
+  const [trialActive, setTrialActive] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState(MOCK.realName);
@@ -620,7 +622,25 @@ export function HomeDraft() {
           ? { birthDate: profile.birthDate, nickname: profile.nickname }
           : null,
       );
-      if (alive) setPremium(access.ok);
+      if (!alive) return;
+      setPremium(access.ok);
+      try {
+        const res = await fetch("/api/premium/status", { cache: "no-store" });
+        const data = (await res.json()) as {
+          premium?: boolean;
+          trialActive?: boolean;
+          trialDaysLeft?: number;
+        };
+        if (!alive) return;
+        if (typeof data.premium === "boolean") setPremium(data.premium);
+        const onTrial = Boolean(data.trialActive) && !data.premium;
+        setTrialActive(onTrial);
+        setTrialDaysLeft(
+          typeof data.trialDaysLeft === "number" ? data.trialDaysLeft : 0
+        );
+      } catch {
+        /* ignore */
+      }
     }
     void syncPremium();
     const onChange = () => {
@@ -708,8 +728,21 @@ export function HomeDraft() {
             </h1>
             <p className="mae-home-greeting-tip-body mt-2.5 text-[16.5px] font-medium leading-[1.55]">
               {HOME_WISH}
-          </p>
-        </div>
+            </p>
+            {trialActive && trialDaysLeft > 0 ? (
+              <p
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12.5px] font-semibold"
+                style={{
+                  color: GOLD_SOFT,
+                  background: "rgba(232,209,154,0.12)",
+                  boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.35)",
+                }}
+              >
+                <Sparkles className="h-3 w-3" strokeWidth={2.2} />
+                ทดลองฟรี · เหลือ {trialDaysLeft} วัน
+              </p>
+            ) : null}
+          </div>
         </header>
 
         <section
@@ -1025,6 +1058,11 @@ export function HomeDraft() {
                   <p className="text-[15px] font-semibold leading-snug text-white">
                     พรีเมียม {FORTUNE_PACKAGE_LABEL}เต็ม
                   </p>
+                  {trialActive && trialDaysLeft > 0 ? (
+                    <p className="mt-1 text-[12.5px] font-medium text-[#e8d19a]/85">
+                      ทดลองฟรีเหลือ {trialDaysLeft} วัน · อัปเกรดได้เลย
+                    </p>
+                  ) : null}
                   <p className="mae-premium-price mt-1 flex flex-wrap items-baseline gap-x-1.5 leading-none">
                 <span
                       className="text-[1.85rem] font-bold tabular-nums tracking-tight"
