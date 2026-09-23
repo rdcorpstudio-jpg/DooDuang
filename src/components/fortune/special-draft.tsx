@@ -141,7 +141,7 @@ function SectionLabel({
       </div>
       {hint ? (
         <p
-          className="mt-1.5 pl-[1.6rem] text-[15px] font-medium leading-snug"
+          className="mae-thai-safe mt-2 pl-[1.6rem] text-[15px] font-medium leading-[1.65]"
           style={{ color: "rgba(210,222,240,0.82)" }}
         >
           {hint}
@@ -158,7 +158,7 @@ function ComingSoonCard({ item }: { item: ComingSoonItem }) {
     <div
       className="relative w-full overflow-hidden rounded-[16px]"
       style={{
-        aspectRatio: "2.75 / 1",
+        minHeight: "13.25rem",
         background:
           "linear-gradient(118deg, #152038 0%, #0c1528 48%, #08101e 100%)",
         boxShadow:
@@ -184,7 +184,7 @@ function ComingSoonCard({ item }: { item: ComingSoonItem }) {
         }}
       />
 
-      <div className="relative z-[1] flex h-full flex-col justify-between px-4 py-4">
+      <div className="relative z-[1] flex min-h-[13.25rem] flex-col justify-between gap-3 px-4 py-4">
         <div className="max-w-[64%]">
           <span
             className="inline-flex h-9 w-9 items-center justify-center rounded-full"

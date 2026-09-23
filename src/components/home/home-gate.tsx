@@ -17,7 +17,7 @@ import {
 
 /**
  * `/` — marketing landing for new users.
- * CTA → /welcome → /welcome/preview → ทดลองฟรี → /login → /reading → /home.
+ * CTA → /welcome/preview → ทดลองฟรี → /login → /reading → /home.
  * After a started trial expires (and not premium) → /premium/pay.
  * Never-started / guest leftovers → clear and show landing like a first visit.
  */

@@ -736,7 +736,7 @@ export function HomeDraft() {
                 ทดลองฟรี · เหลือ {trialDaysLeft} วัน
               </p>
             ) : null}
-          </div>
+        </div>
         </header>
 
         <section
@@ -1042,57 +1042,69 @@ export function HomeDraft() {
         {/* สีเสื้อมงคล */}
         <section
           className="relative mx-5 mt-7 overflow-hidden rounded-[22px] px-4 py-5 sm:mx-6"
-          style={{
-            background: GLASS.bg,
-            border: GLASS.border,
-            boxShadow: `${GLASS.shadow}, ${GLASS.highlight}`,
-            backdropFilter: GLASS.blur,
-            WebkitBackdropFilter: GLASS.blur,
-          }}
-        >
-          <div className="flex items-start justify-between gap-3">
+            style={{
+              background: GLASS.bg,
+              boxShadow: `${GLASS.shadow}, inset 0 1px 0 rgba(255,255,255,0.55)`,
+              backdropFilter: GLASS.blur,
+              WebkitBackdropFilter: GLASS.blur,
+            }}
+          >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-[22px]"
+                style={{
+              padding: "1.25px 1px 0",
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(220,230,246,0.4) 16%, rgba(176,196,224,0.14) 38%, rgba(176,196,224,0.04) 58%, transparent 76%)",
+              WebkitMask:
+                "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+              WebkitMaskComposite: "xor",
+              maskComposite: "exclude",
+            }}
+          />
+          <div className="relative flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p
                 className="text-[13.5px] font-semibold tracking-[0.14em]"
                   style={{ color: GOLD_SOFT }}
-              >
+                >
                 วันนี้ใส่สีไหนดี
               </p>
               <h2 className="mae-gold-text mt-1 text-[1.55rem] font-bold leading-tight">
                 สีเสื้อมงคล
               </h2>
-            </div>
+              </div>
             <Link
               href="/reading/shirt"
               className="inline-flex shrink-0 items-center gap-0.5 rounded-full px-3.5 py-2 text-[14.5px] font-semibold outline-none transition active:scale-[0.98]"
-              style={{
-                color: GOLD_SOFT,
+                  style={{
+                    color: GOLD_SOFT,
                 background: "rgba(8,14,28,0.45)",
                 boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)",
               }}
             >
               ดูทั้งหมด
               <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
-            </Link>
-          </div>
+              </Link>
+            </div>
 
           <div
-            className="mt-4 flex items-center gap-3.5 rounded-[18px] px-3.5 py-3.5"
-            style={{
+            className="relative mt-4 flex items-center gap-3.5 rounded-[18px] px-3.5 py-3.5"
+          style={{
               background:
                 "linear-gradient(135deg, rgba(232,209,154,0.14) 0%, rgba(8,14,28,0.35) 100%)",
               boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.22)",
             }}
           >
-            <Image
+                    <Image
               src={poloShirtSrcForColorName(maeDay.luckyShirt.todayColorName)}
-              alt=""
+                      alt=""
               width={72}
               height={72}
               className="h-16 w-16 shrink-0 object-contain"
-              unoptimized
-            />
-            <div className="min-w-0 flex-1">
+                      unoptimized
+                    />
+                  <div className="min-w-0 flex-1">
               <p
                 className="text-[14.5px] font-semibold tracking-wide"
                 style={{ color: GOLD_SOFT }}
@@ -1121,7 +1133,7 @@ export function HomeDraft() {
                     <div
                 key={group.id}
                       className="flex items-center gap-2.5 rounded-[14px] px-2.5 py-2.5"
-                      style={{
+            style={{
                         background: "rgba(8,14,28,0.4)",
                         boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)",
                       }}
@@ -1135,8 +1147,8 @@ export function HomeDraft() {
                         height={40}
                         className="h-10 w-10 shrink-0 object-contain"
                         unoptimized
-                      />
-                      <div className="min-w-0 flex-1">
+            />
+            <div className="min-w-0 flex-1">
                         <p
                           className="text-[13.5px] font-semibold tracking-wide"
                           style={{ color: GOLD_SOFT }}
@@ -1145,11 +1157,11 @@ export function HomeDraft() {
                         </p>
                         <p className="mt-0.5 truncate text-[15.5px] font-semibold text-white">
                           {group.colors[0]?.name ?? group.colorsText}
-                        </p>
-                      </div>
+              </p>
+            </div>
                     </div>
                   ))}
-                </div>
+          </div>
 
                 {forbidden ? (
                   <div
@@ -1192,14 +1204,14 @@ export function HomeDraft() {
         <div className="mx-5 mt-3.5 grid grid-cols-2 gap-3 sm:mx-6">
           <div
             className="rounded-[22px] px-3.5 py-3.5"
-            style={{
-              background: GLASS.bg,
+          style={{
+            background: GLASS.bg,
               border: "1px solid rgba(72, 200, 140, 0.55)",
-              boxShadow: `${GLASS.shadow}, ${GLASS.highlight}`,
-              backdropFilter: GLASS.blur,
-              WebkitBackdropFilter: GLASS.blur,
-            }}
-          >
+            boxShadow: `${GLASS.shadow}, ${GLASS.highlight}`,
+            backdropFilter: GLASS.blur,
+            WebkitBackdropFilter: GLASS.blur,
+          }}
+        >
             <p
               className="text-[15.5px] font-bold tracking-wide"
               style={{ color: "#b9ebdc" }}
@@ -1230,12 +1242,12 @@ export function HomeDraft() {
               {maeDay.dayCard.avoid}
             </p>
           </div>
-        </div>
+          </div>
 
         {/* ฤกษ์วันนี้ — ตัวอักษรล้วน ไม่กล่องสีซ้อน */}
         <section
           className="relative mx-5 mt-6 overflow-hidden rounded-[22px] px-4 py-5 sm:mx-6"
-          style={{
+              style={{
             background: GLASS.bg,
             border: GLASS.border,
             boxShadow: `${GLASS.shadow}, ${GLASS.highlight}`,
@@ -1271,7 +1283,7 @@ export function HomeDraft() {
 
           <div
             className="mt-4 h-px w-full"
-            style={{
+              style={{
               background:
                 "linear-gradient(90deg, rgba(232,209,154,0.35), rgba(255,255,255,0.06))",
             }}
@@ -1320,7 +1332,7 @@ export function HomeDraft() {
 
         <div className="mx-5 mt-5 sm:mx-6">
           <HomeDailyTarotCard />
-        </div>
+      </div>
 
       </AnimatedPage>
 

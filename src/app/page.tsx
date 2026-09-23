@@ -19,7 +19,7 @@ export default function HomePage() {
       <section className="sr-only">
         <h1>{APP_NAME}</h1>
         <p>{APP_PURPOSE}</p>
-        <Link href="/welcome">เริ่มดูดวง</Link>
+        <Link href="/welcome/preview">เริ่มดูดวง</Link>
         <Link href="/privacy">นโยบายความเป็นส่วนตัว</Link>
         <Link href="/terms">ข้อกำหนดการใช้งาน</Link>
       </section>

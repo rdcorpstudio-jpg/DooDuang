@@ -41,9 +41,22 @@ type PredictItem = {
   ink: ArtInk;
   badge?: string;
   premium?: boolean;
+  /** object-position ของอาร์ตการ์ด */
+  artFocus?: string;
 };
 
 const FREE_ITEMS: PredictItem[] = [
+  {
+    id: "seamsee",
+    title: "เซียมซี",
+    blurb: "ตั้งจิต เขย่ากระบอก แล้วเปิดคำทำนายวันละหนึ่งใบ",
+    href: "/reading/seamsee",
+    art: "/images/home/predict/seamsee.webp",
+    ink: "onDark",
+    badge: "วันละ 1 ใบ",
+    artFocus: "center",
+    premium: false,
+  },
   {
     id: "tarot",
     title: "ไพ่รายวัน",
@@ -201,7 +214,8 @@ function PredictCard({
         fill
         unoptimized
         priority={priority}
-        className="object-cover object-center transition duration-500 group-hover:scale-[1.03]"
+        className="object-cover transition duration-500 group-hover:scale-[1.03]"
+        style={{ objectPosition: item.artFocus ?? "center" }}
         sizes="(max-width: 480px) 100vw, 960px"
       />
 
@@ -374,7 +388,7 @@ export function PredictDraft() {
       className="relative mx-auto min-h-full w-full max-w-[480px] text-white"
       style={{ background: "transparent" }}
     >
-      <MaePageBackground />
+      <MaePageBackground blur={14} scrollBlur={false} />
 
       <div className="relative z-[2] overflow-x-hidden pb-[7.25rem] pt-4">
         <AnimatedPage className="px-4 sm:px-5">
