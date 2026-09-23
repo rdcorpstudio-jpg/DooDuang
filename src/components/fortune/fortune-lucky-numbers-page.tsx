@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
+import { MaeOpenLight, useMaeOpenLight } from "@/components/fortune/mae-open-light";
 import { AnimatedPage, Reveal, useRevealMounted } from "@/components/ui/reveal";
 import { PageBackButton } from "@/components/ui/page-back-button";
 import {
@@ -80,6 +81,7 @@ export function FortuneLuckyNumbersPage() {
   const [pack, setPack] = useState<DailyLuckyNumbers>(() =>
     pickDailyLuckyNumbers(),
   );
+  const { token, flash } = useMaeOpenLight();
 
   useEffect(() => {
     const profile = readFortuneProfile();
@@ -87,11 +89,13 @@ export function FortuneLuckyNumbersPage() {
       .filter(Boolean)
       .join("|");
     setPack(pickDailyLuckyNumbers(seed));
-  }, []);
+    flash();
+  }, [flash]);
 
   return (
     <div className="relative mx-auto flex min-h-full w-full max-w-[480px] flex-col text-white">
       <MaePageBackground blur={16} scrollBlur={false} />
+      {token > 0 ? <MaeOpenLight key={token} /> : null}
 
       <div
         aria-hidden

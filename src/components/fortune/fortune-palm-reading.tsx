@@ -9,6 +9,7 @@ import { GuidedScanCapture } from "@/components/fortune/guided-scan-capture";
 import { ScanAnalyzingPanel } from "@/components/fortune/scan-analyzing-panel";
 import { MaeBrandLink } from "@/components/layout/mae-brand-link";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
+import { MaeOpenLight, useMaeOpenLight } from "@/components/fortune/mae-open-light";
 import { AnimatedPage } from "@/components/ui/reveal";
 import {
   LockedPreviewTile,
@@ -86,6 +87,7 @@ export function FortunePalmReading({
   className?: string;
 }) {
   const router = useRouter();
+  const { token, flash } = useMaeOpenLight();
   const uploadRef = useRef<HTMLInputElement>(null);
   const [unlocked, setUnlocked] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -150,6 +152,7 @@ export function FortunePalmReading({
       refreshCooldown();
       await new Promise((r) => setTimeout(r, 700));
       setPhoto(null);
+      flash();
       setStep("result");
     } catch (err) {
       setError(
@@ -283,6 +286,7 @@ export function FortunePalmReading({
   return (
     <div className={cn("relative h-full overflow-y-auto text-white", className)}>
       <MaePageBackground />
+      {token > 0 ? <MaeOpenLight key={token} /> : null}
       <AnimatedPage
         key={step}
         className="relative z-[1] mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-12 pt-3 sm:px-5"

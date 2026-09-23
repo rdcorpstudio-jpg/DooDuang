@@ -13,6 +13,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Lock, Share2 } from "lucide-re
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { MaeBrandLink } from "@/components/layout/mae-brand-link";
+import { MaeOpenLight, useMaeOpenLight } from "@/components/fortune/mae-open-light";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { composeMaeDay } from "@/lib/fortune/content/compose-mae-day";
 import {
@@ -105,6 +106,7 @@ function glassCard(extra?: CSSProperties): CSSProperties {
  * สีเสื้อมงคล — สีเด่นฟรี · ทุกด้าน + ดูวันอื่นเป็นพรีเมียม
  */
 function LuckyShirtPageInner() {
+  const { token, flash } = useMaeOpenLight();
   const [ready, setReady] = useState(false);
   const [premium, setPremium] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -144,7 +146,8 @@ function LuckyShirtPageInner() {
 
   useEffect(() => {
     syncProfile();
-  }, []);
+    flash();
+  }, [flash]);
 
   useStripePaymentReturn(() => {
     const p = readFortuneProfile();
@@ -234,6 +237,7 @@ function LuckyShirtPageInner() {
   return (
     <div className="relative h-full overflow-y-auto overscroll-contain text-white">
       <MaePageBackground />
+      {token > 0 ? <MaeOpenLight key={token} /> : null}
 
       <div className="relative z-[1] mx-auto w-full max-w-[480px] px-4 pb-20 pt-1.5 sm:px-5">
         <header className="relative flex min-h-[3.5rem] items-start justify-between gap-3 pt-1">

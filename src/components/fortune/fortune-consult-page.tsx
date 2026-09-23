@@ -7,6 +7,7 @@ import { MessageCircle, Send, Sparkles } from "lucide-react";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { MaePageLoading } from "@/components/layout/mae-page-loading";
+import { MaeOpenLight, useMaeOpenLight } from "@/components/fortune/mae-open-light";
 import { AnimatedPage, Reveal, useRevealMounted } from "@/components/ui/reveal";
 import { PageBackButton } from "@/components/ui/page-back-button";
 import {
@@ -87,6 +88,7 @@ type Loaded = {
 
 export function FortuneConsultPage() {
   const reveal = useRevealMounted();
+  const { token, flash } = useMaeOpenLight();
   const listRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [draft, setDraft] = useState("");
@@ -94,6 +96,13 @@ export function FortuneConsultPage() {
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
   const [payOpen, setPayOpen] = useState(false);
+  const openedOnce = useRef(false);
+
+  useEffect(() => {
+    if (loaded === null || starting || openedOnce.current) return;
+    openedOnce.current = true;
+    flash();
+  }, [loaded, starting, flash]);
 
   useEffect(() => {
     let alive = true;
@@ -274,6 +283,7 @@ export function FortuneConsultPage() {
         remainingSessions: data.remainingSessions ?? 0,
         session: data.session,
       });
+      flash();
     } catch {
       setError("เชื่อมต่อไม่ได้ ลองอีกครั้ง");
     } finally {
@@ -351,6 +361,7 @@ export function FortuneConsultPage() {
         remainingSessions: data.remainingSessions ?? 0,
         session: data.session,
       });
+      flash();
     } catch {
       setDraft(text);
       setError("เชื่อมต่อไม่ได้ ลองอีกครั้ง");
@@ -379,6 +390,7 @@ export function FortuneConsultPage() {
   return (
     <div className="relative mx-auto flex min-h-full w-full max-w-[480px] flex-col text-white">
       <MaePageBackground blur={18} scrollBlur={false} />
+      {token > 0 ? <MaeOpenLight key={token} /> : null}
 
       {/* Hero art plane */}
       <div

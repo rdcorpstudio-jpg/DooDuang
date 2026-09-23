@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Download, Lock, Sparkles } from "lucide-react";
+import { Download, Lock } from "lucide-react";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { useStripePaymentReturn } from "@/components/fortune/use-stripe-payment-return";
 import { MaeBrandLink } from "@/components/layout/mae-brand-link";
@@ -20,11 +20,12 @@ import {
 } from "@/lib/fortune/premium-unlock";
 import { FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 import { MAE_GLASS } from "@/lib/mae-glass";
+import { MaeOpenLight, useMaeOpenLight } from "@/components/fortune/mae-open-light";
 import { cn } from "@/lib/utils";
 
 const LOAD_MS = 3200;
 
-type Phase = "pray" | "loading" | "reveal";
+type Phase = "loading" | "reveal";
 
 const LOAD_LINES = [
   "กำลังตั้งจิต…",
@@ -55,7 +56,7 @@ const glassPanel = {
 /** Premium wallpaper — 1 random HQ file per premium subscription */
 export function FortuneWallpaper({ className }: { className?: string }) {
   const router = useRouter();
-  const [phase, setPhase] = useState<Phase>("pray");
+  const [phase, setPhase] = useState<Phase>("loading");
   const [loadLine, setLoadLine] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -63,6 +64,7 @@ export function FortuneWallpaper({ className }: { className?: string }) {
     getPremiumWallpaperTeaser(),
   );
   const [downloading, setDownloading] = useState(false);
+  const { token, flash } = useMaeOpenLight();
 
   useEffect(() => {
     let cancelled = false;
@@ -89,13 +91,16 @@ export function FortuneWallpaper({ className }: { className?: string }) {
       window.setTimeout(() => setLoadLine(1), 900),
       window.setTimeout(() => setLoadLine(2), 1900),
     ];
-    const done = window.setTimeout(() => setPhase("reveal"), LOAD_MS);
+    const done = window.setTimeout(() => {
+      setPhase("reveal");
+      flash();
+    }, LOAD_MS);
 
     return () => {
       lineTimers.forEach((t) => window.clearTimeout(t));
       window.clearTimeout(done);
     };
-  }, [phase]);
+  }, [phase, flash]);
 
   function handlePaid() {
     setPremiumUnlocked();
@@ -139,15 +144,12 @@ export function FortuneWallpaper({ className }: { className?: string }) {
       )}
     >
       <MaePageBackground blur={14} scrollBlur={false} />
+      {token > 0 ? <MaeOpenLight key={token} /> : null}
       <div className="relative z-[1] mx-auto flex h-full w-full max-w-[480px] flex-col px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 sm:px-6">
         <div className="flex shrink-0 items-center justify-between gap-3">
           <MaeBrandLink />
           <PageBackButton onClick={() => router.back()} />
         </div>
-
-        {phase === "pray" ? (
-          <PrayStep onPray={() => setPhase("loading")} />
-        ) : null}
 
         {phase === "loading" ? (
           <LoadingStep
@@ -173,109 +175,6 @@ export function FortuneWallpaper({ className }: { className?: string }) {
         onPaid={handlePaid}
         returnPath="/reading/wallpaper"
       />
-    </div>
-  );
-}
-
-function MoonArc() {
-  return (
-    <svg
-      viewBox="0 0 160 72"
-      className="wallpaper-moon-arc mx-auto h-14 w-[10.5rem]"
-      aria-hidden
-    >
-      <defs>
-        <linearGradient id="wpMoonStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#8f6e38" stopOpacity="0.15" />
-          <stop offset="35%" stopColor="#e8d19a" stopOpacity="0.95" />
-          <stop offset="65%" stopColor="#fff8e4" stopOpacity="1" />
-          <stop offset="100%" stopColor="#8f6e38" stopOpacity="0.15" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M12 58 C 42 8, 118 8, 148 58"
-        fill="none"
-        stroke="url(#wpMoonStroke)"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <circle cx="80" cy="22" r="3.2" fill="#e8d19a" opacity="0.95" />
-    </svg>
-  );
-}
-
-function PrayStep({ onPray }: { onPray: () => void }) {
-  return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
-        <div
-          className="wallpaper-ceremony relative w-full max-w-[22rem] overflow-hidden rounded-[28px] px-5 pb-7 pt-8 text-center"
-          style={glassPanel}
-        >
-          <span className="wallpaper-ceremony-glow pointer-events-none absolute inset-x-8 top-0 h-24 rounded-full opacity-70" />
-
-          <MoonArc />
-
-          <p
-            className="mt-4 text-[13px] font-semibold tracking-[0.18em]"
-            style={{ color: GOLD }}
-          >
-            ของขวัญพรีเมียม
-          </p>
-          <h1
-            className="mt-2 text-[clamp(1.65rem,7vw,1.95rem)] font-bold leading-[1.35] tracking-tight"
-            style={TITLE_GOLD}
-          >
-            หลับตาอธิษฐาน
-          </h1>
-          <p
-            className="mx-auto mt-3 max-w-[17.5rem] text-[14.5px] font-medium leading-[1.55]"
-            style={{ color: TEXT_MUTED }}
-          >
-            สมัครพรีเมียมครั้งเดียว ได้วอลเปเปอร์มงคลสุ่ม 1 รูป
-            โหลดคุณภาพเต็มเฉพาะคุณ
-          </p>
-
-          <div className="mt-6 flex items-center justify-center gap-2.5">
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                className="wallpaper-breath-pill h-1.5 w-8 rounded-full"
-                style={{ animationDelay: `${i * 0.45}s` }}
-                aria-hidden
-              />
-            ))}
-          </div>
-          <p
-            className="mt-3 text-[13.5px] font-medium"
-            style={{ color: "rgba(186,204,230,0.7)" }}
-          >
-            หายใจเข้าลึก ๆ · หายใจออกช้า ๆ
-          </p>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={onPray}
-        className="wallpaper-dl-btn group relative mt-4 flex h-[3.6rem] w-full shrink-0 items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
-      >
-        <span className="wallpaper-dl-btn__icon relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]">
-          <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.2} />
-        </span>
-        <span className="relative z-[1] min-w-0 flex-1">
-          <span className="dd-btn-label block text-[15.5px] font-bold leading-tight tracking-wide">
-            กดอธิษฐาน
-          </span>
-          <span className="mt-0.5 block text-[12px] font-medium leading-tight opacity-70">
-            ตั้งจิตแล้วสุ่มวอลเปเปอร์มงคล
-          </span>
-        </span>
-        <span
-          className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
-          aria-hidden
-        />
-      </button>
     </div>
   );
 }

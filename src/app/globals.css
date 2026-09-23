@@ -4613,6 +4613,115 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   }
 }
 
+.tarot-open-veil {
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(255, 236, 196, 0.38) 0%,
+    rgba(226, 188, 112, 0.18) 30%,
+    rgba(92, 64, 28, 0.08) 54%,
+    transparent 76%
+  );
+  animation: tarot-open-veil 1.45s cubic-bezier(0.22, 0.61, 0.18, 1) forwards;
+}
+.tarot-open-veil::before,
+.tarot-open-veil::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  border-radius: 999px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(140, 98, 42, 0.2) 0deg,
+    rgba(255, 248, 226, 0.98) 24deg,
+    rgba(232, 197, 122, 0.72) 78deg,
+    rgba(120, 82, 36, 0.28) 150deg,
+    rgba(255, 236, 196, 0.55) 210deg,
+    rgba(184, 140, 62, 0.22) 270deg,
+    rgba(255, 246, 220, 0.92) 328deg,
+    rgba(140, 98, 42, 0.2) 360deg
+  );
+  filter: drop-shadow(0 0 12px rgba(232, 197, 122, 0.55));
+}
+.tarot-open-veil::before {
+  width: min(64vw, 268px);
+  height: min(64vw, 268px);
+  -webkit-mask-image: radial-gradient(
+    circle,
+    transparent 58%,
+    #000 62.5%,
+    #000 67.5%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(
+    circle,
+    transparent 58%,
+    #000 62.5%,
+    #000 67.5%,
+    transparent 72%
+  );
+  animation: tarot-open-ring 1.5s cubic-bezier(0.16, 0.8, 0.18, 1) forwards;
+}
+.tarot-open-veil::after {
+  width: min(84vw, 352px);
+  height: min(84vw, 352px);
+  -webkit-mask-image: radial-gradient(
+    circle,
+    transparent 66%,
+    #000 68.5%,
+    #000 71%,
+    transparent 74%
+  );
+  mask-image: radial-gradient(
+    circle,
+    transparent 66%,
+    #000 68.5%,
+    #000 71%,
+    transparent 74%
+  );
+  animation: tarot-open-ring-outer 1.6s cubic-bezier(0.16, 0.8, 0.18, 1) forwards;
+}
+
+@keyframes tarot-open-veil {
+  0% {
+    opacity: 0;
+  }
+  46% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tarot-open-ring {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-24deg) scale(0.84);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(78deg) scale(1.08);
+  }
+}
+
+@keyframes tarot-open-ring-outer {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(18deg) scale(0.9);
+  }
+  38% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-56deg) scale(1.14);
+  }
+}
+
 .wallpaper-pray-breathe {
   animation: tarot-prayer-breathe 3.4s ease-in-out infinite;
 }

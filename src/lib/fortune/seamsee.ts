@@ -1,6 +1,6 @@
 import { bangkokDayKey } from "@/lib/fortune/dream-reading";
 
-export const SEAMSEE_ART = "/images/home/predict/seamsee-cup.webp";
+export const SEAMSEE_ART = "/images/home/predict/seamsee-cup.webp?v=3";
 export const SEAMSEE_SHAKE_STEPS = 5;
 const STORAGE_KEY = "dooduang-seamsee-v1";
 

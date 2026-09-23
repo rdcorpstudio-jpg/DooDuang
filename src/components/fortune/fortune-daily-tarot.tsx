@@ -12,7 +12,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sparkles, Shuffle } from "lucide-react";
-import { TarotPrayerSheet } from "@/components/fortune/tarot-prayer-sheet";
 import {
   ShareReadingButton,
   buildTarotShareText,
@@ -447,8 +446,7 @@ export function FortuneDailyTarot({
   const [opened, setOpened] = useState(false);
   const [faceUp, setFaceUp] = useState(false);
   const [slot, setSlot] = useState(Math.floor(FAN_COUNT / 2));
-  const [prayerOpen, setPrayerOpen] = useState(false);
-  const [readyToDraw, setReadyToDraw] = useState(false);
+  const [readyToDraw, setReadyToDraw] = useState(true);
   const [flipping, setFlipping] = useState(false);
   const [revisiting, setRevisiting] = useState(false);
   const openTimerRef = useRef<number | null>(null);
@@ -492,19 +490,17 @@ export function FortuneDailyTarot({
           setFaceUp(true);
           setReadyToDraw(true);
           setFlipping(false);
-          setPrayerOpen(false);
           setRevisiting(true);
           return;
         }
       }
       setOpened(false);
       setFaceUp(false);
-      setReadyToDraw(false);
+      setReadyToDraw(true);
       setFlipping(false);
       setRevisiting(false);
-      setPrayerOpen(true);
     } catch {
-      setPrayerOpen(true);
+      setReadyToDraw(true);
     }
   }, [storageKey]);
 
@@ -543,19 +539,17 @@ export function FortuneDailyTarot({
       setOpened(true);
       setFaceUp(false);
       setRevisiting(false);
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-          setFaceUp(true);
-        });
-      });
       if (openTimerRef.current != null) {
         window.clearTimeout(openTimerRef.current);
       }
       openTimerRef.current = window.setTimeout(() => {
-        persistOpen(nextSlot);
-        setFlipping(false);
-        openTimerRef.current = null;
-      }, 700);
+        setFaceUp(true);
+        openTimerRef.current = window.setTimeout(() => {
+          persistOpen(nextSlot);
+          setFlipping(false);
+          openTimerRef.current = null;
+        }, 700);
+      }, 520);
     },
     [persistOpen]
   );
@@ -590,6 +584,9 @@ export function FortuneDailyTarot({
       className={cn("relative h-full overflow-y-auto text-white", className)}
     >
       <MaePageBackground blur={14} scrollBlur={false} />
+      {opened && flipping && !revisiting ? (
+        <div className="tarot-open-veil pointer-events-none absolute inset-0 z-20" aria-hidden />
+      ) : null}
       <AnimatedPage className="relative z-[1] mx-auto flex min-h-full w-full max-w-[400px] flex-col px-5 pb-10 pt-3 sm:px-6">
         <header className="flex items-center justify-between gap-3 pt-1">
           <MaeBrandLink />
@@ -808,13 +805,6 @@ export function FortuneDailyTarot({
         )}
       </AnimatedPage>
 
-      <TarotPrayerSheet
-        open={prayerOpen}
-        onReady={() => {
-          setPrayerOpen(false);
-          setReadyToDraw(true);
-        }}
-      />
     </div>
   );
 }

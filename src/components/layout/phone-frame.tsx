@@ -32,6 +32,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     pathname === "" ||
     pathname === "/home" ||
     pathname === "/reading" ||
+    pathname.startsWith("/reading/seamsee") ||
     pathname.startsWith("/welcome") ||
     pathname.startsWith("/premium/pay") ||
     pathname.startsWith("/premium/thanks") ||

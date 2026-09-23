@@ -12,6 +12,7 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import { FixedAppBottomNav } from "@/components/layout/bottom-nav";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { PageBackButton } from "@/components/ui/page-back-button";
 import { MAE_GLASS } from "@/lib/mae-glass";
@@ -72,6 +73,8 @@ export function FortuneSeamseePage() {
   const [stickNo, setStickNo] = useState<number | null>(null);
   const [shakes, setShakes] = useState(0);
   const [rattling, setRattling] = useState(false);
+  const [veil, setVeil] = useState<"off" | "in" | "out">("off");
+  const [stepDir, setStepDir] = useState<"forward" | "back">("forward");
   const shakesRef = useRef(0);
   const lockRef = useRef(false);
   const lastBump = useRef(0);
@@ -79,6 +82,12 @@ export function FortuneSeamseePage() {
   const topicRef = useRef<SeamseeTopicId>("life");
   phaseRef.current = phase;
   topicRef.current = topic;
+
+  function movePhase(next: Phase) {
+    const order = { intro: 0, topic: 1, shake: 2, result: 3 } as const;
+    setStepDir(order[next] < order[phaseRef.current] ? "back" : "forward");
+    setPhase(next);
+  }
 
   const bump = useRef(() => {});
   bump.current = () => {
@@ -99,7 +108,12 @@ export function FortuneSeamseePage() {
     }
     if (next >= SEAMSEE_SHAKE_STEPS) {
       lockRef.current = true;
-      window.setTimeout(() => reveal(), 640);
+      setVeil("in");
+      window.setTimeout(() => {
+        reveal();
+        setVeil("out");
+      }, 980);
+      window.setTimeout(() => setVeil("off"), 1460);
     }
   };
 
@@ -147,7 +161,8 @@ export function FortuneSeamseePage() {
     lockRef.current = false;
     lastBump.current = 0;
     setShakes(0);
-    setPhase("shake");
+    setVeil("off");
+    movePhase("shake");
     const motion = DeviceMotionEvent as unknown as {
       requestPermission?: () => Promise<string>;
     };
@@ -192,7 +207,27 @@ export function FortuneSeamseePage() {
 
   return (
     <div className="relative h-full overflow-x-hidden overflow-y-auto overscroll-contain text-white">
-      <MaePageBackground blur={8} scrollBlur={false} />
+      {phase === "shake" ? (
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <Image
+            src="/images/bg/seamsee-night.webp"
+            alt=""
+            fill
+            priority
+            unoptimized
+            className="object-cover object-center"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(3,8,20,0.38) 0%, rgba(3,8,20,0.08) 24%, rgba(3,8,20,0.04) 52%, rgba(3,8,20,0.22) 78%, rgba(3,8,20,0.5) 100%)",
+            }}
+          />
+        </div>
+      ) : (
+        <MaePageBackground blur={8} scrollBlur={false} />
+      )}
       <style>{`
         @keyframes seamsee-rattle {
           0%, 100% { transform: translate3d(0,0,0) rotate(0deg); }
@@ -201,18 +236,67 @@ export function FortuneSeamseePage() {
           54% { transform: translate3d(-6px, 0, 0) rotate(-3deg); }
           72% { transform: translate3d(5px, 1px, 0) rotate(3deg); }
         }
+        @keyframes seamsee-idle {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
         .seamsee-rattle { animation: seamsee-rattle 0.46s ease-in-out; }
+        .seamsee-idle { animation: seamsee-idle 3.4s ease-in-out infinite; }
+        @keyframes seamsee-glow {
+          0%, 100% { opacity: 0.7; }
+          50% { opacity: 1; }
+        }
+        .seamsee-glow {
+          animation: seamsee-glow 3.2s ease-in-out infinite;
+        }
+        @keyframes seamsee-burst {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.72); }
+          40% { opacity: 1; transform: translate(-50%, -50%) scale(0.96); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.16); }
+        }
+        .seamsee-burst { animation: seamsee-burst 0.9s cubic-bezier(0.22, 0.61, 0.18, 1) forwards; }
+        @keyframes seamsee-rays {
+          0% { opacity: 0; transform: translate(-50%, -50%) rotate(-20deg) scale(0.84); }
+          32% { opacity: 1; }
+          100% { opacity: 0; transform: translate(-50%, -50%) rotate(64deg) scale(1.08); }
+        }
+        .seamsee-rays { animation: seamsee-rays 0.95s cubic-bezier(0.16, 0.8, 0.18, 1) forwards; }
+        @keyframes seamsee-rays-outer {
+          0% { opacity: 0; transform: translate(-50%, -50%) rotate(16deg) scale(0.9); }
+          40% { opacity: 0.7; }
+          100% { opacity: 0; transform: translate(-50%, -50%) rotate(-48deg) scale(1.12); }
+        }
+        .seamsee-rays-outer { animation: seamsee-rays-outer 1.05s cubic-bezier(0.16, 0.8, 0.18, 1) forwards; }
+        @keyframes seamsee-open {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        .seamsee-open { animation: seamsee-open 0.95s cubic-bezier(0.22, 0.61, 0.18, 1) forwards; }
+        @keyframes seamsee-open-out {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
+        .seamsee-open-out { animation: seamsee-open-out 0.4s ease-out forwards; }
+        @keyframes seamsee-reveal {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: none; }
+        }
+        .seamsee-reveal { animation: seamsee-reveal 0.45s ease-out both; }
       `}</style>
 
-      <div className="relative z-[2] mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pb-16 pt-4 sm:px-5">
+      <div
+        className={cn(
+          "relative z-[2] mx-auto flex min-h-full w-full max-w-[480px] flex-col px-4 pt-4 sm:px-5 pb-28",
+        )}
+      >
         <div className="mb-3 flex items-center justify-between">
           <PageBackButton
             href={phase === "intro" || phase === "result" ? "/predict" : undefined}
             onClick={
               phase === "topic"
-                ? () => setPhase("intro")
+                ? () => movePhase("intro")
                 : phase === "shake"
-                  ? () => setPhase("topic")
+                  ? () => movePhase("topic")
                   : undefined
             }
           />
@@ -239,71 +323,151 @@ export function FortuneSeamseePage() {
           <p className="mt-16 text-center text-[15px]" style={{ color: MUTED }}>
             กำลังเปิดตำรา…
           </p>
-        ) : phase === "intro" ? (
-          <Intro onStart={() => setPhase("topic")} />
-        ) : phase === "topic" ? (
-          <TopicStep
-            topic={topic}
-            onPick={setTopic}
-            onNext={goShake}
-          />
-        ) : phase === "shake" ? (
-          <ShakeStep
-            shakes={shakes}
-            rattling={rattling}
-            onTap={() => bump.current()}
-          />
-        ) : stick && reading ? (
-          <Result
-            stickNo={stick.no}
-            poem={stick.poem}
-            title={reading.title}
-            paragraphs={reading.paragraphs}
-            onShare={() => void share()}
-          />
-        ) : null}
+        ) : (
+          <div
+            key={phase}
+            className={cn(
+              "flex min-h-0 flex-1 flex-col",
+              stepDir === "back" ? "wizard-step-back" : "wizard-step-forward",
+              "wizard-step-panel",
+            )}
+          >
+            {phase === "intro" ? (
+              <Intro onStart={() => movePhase("topic")} />
+            ) : phase === "topic" ? (
+              <TopicStep
+                topic={topic}
+                onPick={setTopic}
+                onNext={goShake}
+              />
+            ) : phase === "shake" ? (
+              <ShakeStep
+                shakes={shakes}
+                rattling={rattling}
+                onTap={() => bump.current()}
+              />
+            ) : stick && reading ? (
+              <Result
+                stickNo={stick.no}
+                poem={stick.poem}
+                title={reading.title}
+                paragraphs={reading.paragraphs}
+                onShare={() => void share()}
+              />
+            ) : null}
+          </div>
+        )}
       </div>
+      {veil !== "off" ? (
+        <div
+          className={cn(
+            "pointer-events-auto absolute inset-0 z-30",
+            veil === "in" ? "seamsee-open" : "seamsee-open-out",
+          )}
+          style={{
+            background:
+              "radial-gradient(circle at 50% 46%, rgba(255,236,196,0.55) 0%, rgba(214,176,98,0.28) 32%, rgba(70,48,18,0.16) 58%, transparent 78%)",
+          }}
+          aria-hidden
+        />
+      ) : null}
+      <FixedAppBottomNav activeId="predict" />
     </div>
   );
 }
 
 function Intro({ onStart }: { onStart: () => void }) {
   return (
-    <div className="flex flex-1 flex-col pt-6">
-      <p
-        className="mae-thai-safe text-center text-[12px] font-semibold tracking-[0.22em]"
-        style={{ color: GOLD_SOFT }}
-      >
-        วันละ 1 ใบ
-      </p>
-      <h1
-        className="mae-thai-safe mt-1 text-center text-[2rem] font-bold tracking-wide"
-        style={{ color: GOLD }}
-      >
-        เซียมซี
-      </h1>
-      <p
-        className="mae-thai-safe mx-auto mt-2 max-w-[18rem] text-center text-[15px] font-medium"
-        style={{ color: MUTED }}
-      >
-        ตั้งจิตถึงเรื่องที่อยากรู้
-        <br />
-        แล้วเขย่ากระบอกเพื่อเปิดคำทำนาย
-      </p>
+    <div className="flex flex-1 flex-col">
+      <div className="pt-3 text-center">
+        <GoldDiamond />
+        <p
+          className="mae-thai-safe mt-3 text-[12px] font-semibold tracking-[0.28em]"
+          style={{ color: GOLD_SOFT }}
+        >
+          วันละ 1 ใบ
+        </p>
+        <h1
+          className="mae-thai-safe mt-1 text-[2.35rem] font-bold tracking-wide"
+          style={{ color: GOLD, lineHeight: 1.35 }}
+        >
+          เซียมซี
+        </h1>
+        <p
+          className="mae-thai-safe mx-auto mt-2 max-w-[17rem] text-[15px] font-medium"
+          style={{ color: MUTED, lineHeight: 1.55 }}
+        >
+          ตั้งจิตถึงเรื่องที่อยากรู้
+          <br />
+          แล้วเขย่ากระบอกเพื่อเปิดคำทำนาย
+        </p>
+      </div>
 
-      <ol className="mx-auto mt-6 w-full max-w-[20rem] list-none space-y-3 pl-0">
-        <RitualStep n="01" title="เลือกเรื่อง" blurb="ภาพรวม หรือเจาะเรื่องที่สนใจ" />
-        <RitualStep n="02" title="เขย่าเปิดใบ" blurb="แตะหรือเขย่าโทรศัพท์ 5 ครั้ง" />
-      </ol>
+      <section
+        className="mt-7 rounded-[22px] px-4 pb-2 pt-4"
+        style={{
+          ...GLASS,
+          boxShadow:
+            "inset 0 0 0 1px rgba(232,209,154,0.28), 0 16px 36px rgba(0,0,0,0.22)",
+        }}
+      >
+        <p
+          className="mae-thai-safe text-center text-[13px] font-semibold tracking-[0.16em]"
+          style={{ color: GOLD_SOFT }}
+        >
+          ลำดับการเสี่ยง
+        </p>
+        <ol className="mt-3 list-none pl-0">
+          <RitualStep
+            n="01"
+            title="เลือกเรื่อง"
+            blurb="ภาพรวม หรือเจาะเรื่องที่สนใจ"
+            last={false}
+          />
+          <RitualStep
+            n="02"
+            title="เขย่าเปิดใบ"
+            blurb="แตะหรือเขย่าโทรศัพท์ 5 ครั้ง"
+            last
+          />
+        </ol>
+      </section>
 
       <button
         type="button"
         onClick={onStart}
-        className="mae-gold-cta mt-8 flex h-12 w-full items-center justify-center rounded-full text-[16px] font-bold"
+        className="mae-gold-cta mt-auto flex h-[3.25rem] w-full items-center justify-center rounded-full text-[16px] font-bold"
       >
         <span className="dd-btn-label">เริ่มเสี่ยงเซียมซี</span>
       </button>
+      <p
+        className="mae-thai-safe mt-3 text-center text-[13px] font-medium"
+        style={{ color: "rgba(186,204,230,0.62)" }}
+      >
+        เสี่ยงได้วันละหนึ่งใบ
+      </p>
     </div>
+  );
+}
+
+function GoldDiamond() {
+  return (
+    <svg aria-hidden viewBox="0 0 168 28" className="mx-auto h-7 w-[10.5rem]">
+      <path
+        d="M8 14 H74"
+        stroke="rgba(232,209,154,0.45)"
+        strokeWidth="0.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M94 14 H160"
+        stroke="rgba(232,209,154,0.45)"
+        strokeWidth="0.8"
+        strokeLinecap="round"
+      />
+      <path d="M84 4 L92 14 L84 24 L76 14 Z" fill="#e8d19a" />
+      <path d="M84 8 L88 14 L84 20 L80 14 Z" fill="#fff8e8" />
+    </svg>
   );
 }
 
@@ -311,28 +475,42 @@ function RitualStep({
   n,
   title,
   blurb,
+  last,
 }: {
   n: string;
   title: string;
   blurb: string;
+  last?: boolean;
 }) {
   return (
-    <li className="flex items-center gap-3">
-      <span
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[13px] font-bold"
-        style={{
-          color: "#1a1408",
-          background:
-            "linear-gradient(160deg, #fff4d2 0%, #e8d19a 42%, #b8924f 100%)",
-        }}
-      >
-        {n}
+    <li className="flex gap-3">
+      <span className="flex w-10 shrink-0 flex-col items-center">
+        <span
+          className="flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-bold"
+          style={{
+            color: "#1a1408",
+            background:
+              "linear-gradient(160deg, #fff4d2 0%, #e8d19a 42%, #b8924f 100%)",
+          }}
+        >
+          {n}
+        </span>
+        {last ? null : (
+          <span
+            aria-hidden
+            className="my-1 w-px flex-1"
+            style={{ background: "rgba(232,209,154,0.35)", minHeight: 18 }}
+          />
+        )}
       </span>
-      <span>
-        <span className="mae-thai-safe block text-[16px] font-semibold text-white">
+      <span className={cn("min-w-0 pt-1.5", last ? "pb-3" : "pb-1")}>
+        <span className="mae-thai-safe block text-[16.5px] font-semibold text-white">
           {title}
         </span>
-        <span className="mae-thai-safe block text-[13.5px]" style={{ color: MUTED }}>
+        <span
+          className="mae-thai-safe mt-0.5 block text-[14px]"
+          style={{ color: MUTED, lineHeight: 1.45 }}
+        >
           {blurb}
         </span>
       </span>
@@ -432,67 +610,161 @@ function ShakeStep({
   rattling: boolean;
   onTap: () => void;
 }) {
+  const left = Math.max(0, SEAMSEE_SHAKE_STEPS - shakes);
+
   return (
-    <button
-      type="button"
-      onClick={onTap}
-      className="flex flex-1 flex-col items-center px-1 pb-2 pt-4 text-center outline-none"
-    >
+    <div className="flex flex-1 flex-col items-center text-center">
       <p
-        className="mae-thai-safe text-[12px] font-semibold tracking-[0.2em]"
+        className="mae-thai-safe text-[15px] font-semibold tracking-[0.32em]"
         style={{ color: GOLD_SOFT }}
       >
-        ตั้งจิต
+        เซียมซี
       </p>
       <h1
-        className="mae-thai-safe mt-1 text-[1.7rem] font-bold"
-        style={{ color: GOLD }}
+        className="mae-thai-safe mt-1 font-sacred text-[2.45rem] font-bold leading-none"
+        style={{
+          ...TITLE_GOLD,
+          filter: "drop-shadow(0 8px 18px rgba(184,146,79,0.28))",
+        }}
       >
         เขย่ากระบอก
       </h1>
-      <p className="mae-thai-safe mt-1 text-[15px]" style={{ color: MUTED }}>
-        ทำใจให้สงบ แล้วแตะกระบอกหรือเขย่าโทรศัพท์
+      <span
+        aria-hidden
+        className="mt-3 h-px w-10"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(255,236,190,0.9), transparent)",
+        }}
+      />
+      <p className="mae-thai-safe mt-3 text-[15.5px] font-medium leading-[1.55] text-white/78">
+        แตะกระบอก{" "}
+        <span style={{ color: GOLD }}>5</span> ครั้ง
+        <br />
+        ใบจะเปิดให้เอง
       </p>
 
-      <span className="relative mt-1 flex w-full flex-1 items-center justify-center">
+      <button
+        type="button"
+        onClick={onTap}
+        className="relative mx-auto mt-1 h-[min(54vh,470px)] w-full max-w-[24rem] outline-none"
+        aria-label="แตะกระบอกเพื่อเขย่า"
+      >
+        {rattling ? (
+          <span key={shakes} aria-hidden className="pointer-events-none absolute inset-0 z-[2]">
+            <span
+              className="seamsee-burst absolute left-1/2 top-[40%] h-[min(78vw,320px)] w-[min(78vw,320px)] rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(255,236,196,0.42) 0%, rgba(214,176,98,0.16) 42%, transparent 70%)",
+              }}
+            />
+            <span
+              className="seamsee-rays absolute left-1/2 top-[40%] h-[min(62vw,250px)] w-[min(62vw,250px)] rounded-full"
+              style={{
+                background:
+                  "conic-gradient(from 0deg, rgba(140,98,42,0.2) 0deg, rgba(255,248,226,0.98) 24deg, rgba(232,197,122,0.72) 78deg, rgba(120,82,36,0.28) 150deg, rgba(255,236,196,0.55) 210deg, rgba(184,140,62,0.22) 270deg, rgba(255,246,220,0.92) 328deg, rgba(140,98,42,0.2) 360deg)",
+                maskImage:
+                  "radial-gradient(circle, transparent 58%, #000 63%, #000 68%, transparent 73%)",
+                WebkitMaskImage:
+                  "radial-gradient(circle, transparent 58%, #000 63%, #000 68%, transparent 73%)",
+                filter: "drop-shadow(0 0 12px rgba(232,197,122,0.55))",
+              }}
+            />
+            <span
+              className="seamsee-rays-outer absolute left-1/2 top-[40%] h-[min(82vw,330px)] w-[min(82vw,330px)] rounded-full"
+              style={{
+                background:
+                  "conic-gradient(from 120deg, rgba(140,98,42,0.15) 0deg, rgba(255,246,220,0.85) 40deg, rgba(184,140,62,0.25) 140deg, rgba(255,236,196,0.7) 230deg, rgba(140,98,42,0.15) 360deg)",
+                maskImage:
+                  "radial-gradient(circle, transparent 66%, #000 69%, #000 72%, transparent 75%)",
+                WebkitMaskImage:
+                  "radial-gradient(circle, transparent 66%, #000 69%, #000 72%, transparent 75%)",
+                filter: "drop-shadow(0 0 10px rgba(214,176,98,0.4))",
+              }}
+            />
+          </span>
+        ) : null}
         <span
-          aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(232,209,154,0.28) 0%, rgba(180,40,48,0.12) 42%, transparent 70%)",
-          }}
-        />
-        <Image
-          src={SEAMSEE_ART}
-          alt="กระบอกเซียมซี"
-          width={1254}
-          height={1254}
-          priority
-          unoptimized
           className={cn(
-            "relative h-auto w-[min(78vw,300px)] object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]",
-            rattling && "seamsee-rattle",
+            "absolute inset-0",
+            rattling ? "seamsee-rattle" : "seamsee-idle",
           )}
-        />
-      </span>
+        >
+          <span
+            aria-hidden
+            className="seamsee-glow pointer-events-none absolute left-1/2 top-[42%] h-[min(78vw,300px)] w-[min(78vw,300px)] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(255,214,140,0.34) 0%, rgba(232,186,96,0.14) 38%, rgba(232,186,96,0.04) 58%, transparent 72%)",
+            }}
+          />
+          <svg
+            aria-hidden
+            viewBox="0 0 360 96"
+            className="pointer-events-none absolute bottom-1 left-1/2 z-0 w-[min(84vw,320px)] -translate-x-1/2"
+          >
+            <defs>
+              <linearGradient id="seamsee-ring" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#8a6a32" stopOpacity="0.35" />
+                <stop offset="22%" stopColor="#fff6d4" />
+                <stop offset="50%" stopColor="#e8c56a" />
+                <stop offset="78%" stopColor="#fff6d4" />
+                <stop offset="100%" stopColor="#8a6a32" stopOpacity="0.35" />
+              </linearGradient>
+            </defs>
+            <ellipse cx="180" cy="58" rx="162" ry="22" fill="none" stroke="url(#seamsee-ring)" strokeWidth="2.4" />
+            <ellipse cx="180" cy="50" rx="132" ry="16" fill="none" stroke="url(#seamsee-ring)" strokeWidth="1.8" opacity="0.9" />
+            <ellipse cx="180" cy="43" rx="102" ry="11" fill="none" stroke="#fff6d4" strokeWidth="1.3" opacity="0.75" />
+            <ellipse cx="180" cy="38" rx="74" ry="7" fill="none" stroke="url(#seamsee-ring)" strokeWidth="1.1" opacity="0.55" />
+          </svg>
+          <Image
+            src={SEAMSEE_ART}
+            alt=""
+            width={575}
+            height={1244}
+            priority
+            unoptimized
+            className="absolute bottom-8 left-1/2 z-[1] h-[84%] w-auto max-w-[68%] -translate-x-1/2 object-contain object-bottom drop-shadow-[0_18px_16px_rgba(0,0,0,0.35)]"
+          />
+        </span>
+      </button>
 
-      <div className="mt-1 flex items-center justify-center gap-1.5">
+      <div className="mt-2 flex items-center justify-center gap-1.5">
         {Array.from({ length: SEAMSEE_SHAKE_STEPS }, (_, i) => (
           <span
             key={i}
-            className="h-1.5 rounded-full transition-all duration-300"
+            className="h-2 w-8 rounded-full transition-all duration-300"
             style={{
-              width: i < shakes ? 22 : 7,
-              background: i < shakes ? GOLD : "rgba(186,204,230,0.28)",
+              background:
+                i < shakes
+                  ? "linear-gradient(180deg, #fff6d4, #e8c56a 55%, #c4923a)"
+                  : "rgba(90,110,145,0.55)",
+              boxShadow: i < shakes ? "0 0 10px rgba(232,197,106,0.55)" : undefined,
             }}
           />
         ))}
       </div>
-      <p className="mae-thai-safe mt-2.5 text-[15px] font-medium" style={{ color: MUTED }}>
-        {shakes}/{SEAMSEE_SHAKE_STEPS} · แตะกระบอกเพื่อเขย่า
+      <p className="mae-thai-safe mt-3 text-[15.5px] font-medium text-white/88">
+        {shakes === 0
+          ? "ยังไม่ได้เขย่า"
+          : `เขย่าแล้ว ${shakes} จาก ${SEAMSEE_SHAKE_STEPS} ครั้ง`}
       </p>
-    </button>
+      <span
+        className="mae-thai-safe mt-2.5 inline-flex items-center rounded-full px-4 py-2 text-[15px] font-semibold"
+        style={{
+          color: GOLD_SOFT,
+          boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.72)",
+          background: "rgba(6,12,24,0.35)",
+        }}
+      >
+        {shakes === 0
+          ? "แตะกระบอกเพื่อเริ่ม"
+          : left === 0
+            ? "กำลังเปิดใบ"
+            : `แตะกระบอกอีก ${left} ครั้ง`}
+      </span>
+    </div>
   );
 }
 

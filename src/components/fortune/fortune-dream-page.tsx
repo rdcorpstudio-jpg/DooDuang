@@ -7,6 +7,7 @@ import { Moon, RefreshCw, Sparkles } from "lucide-react";
 import { FortunePaymentSheet } from "@/components/fortune/fortune-payment-sheet";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { MaePageLoading } from "@/components/layout/mae-page-loading";
+import { MaeOpenLight, useMaeOpenLight } from "@/components/fortune/mae-open-light";
 import { AnimatedPage, Reveal, useRevealMounted } from "@/components/ui/reveal";
 import { PageBackButton } from "@/components/ui/page-back-button";
 import {
@@ -79,6 +80,7 @@ export function FortuneDreamPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [payOpen, setPayOpen] = useState(false);
+  const { token, flash } = useMaeOpenLight();
 
   useEffect(() => {
     let alive = true;
@@ -165,6 +167,7 @@ export function FortuneDreamPage() {
         dream: data.dream ?? draft,
         reading: data.reading,
       });
+      flash();
     } catch {
       setError("เชื่อมต่อไม่ได้ ลองอีกครั้ง");
     } finally {
@@ -225,6 +228,7 @@ export function FortuneDreamPage() {
   return (
     <div className="relative mx-auto min-h-full w-full max-w-[480px] text-white">
       <MaePageBackground blur={16} scrollBlur={false} />
+      {token > 0 ? <MaeOpenLight key={token} /> : null}
 
       <div
         aria-hidden
