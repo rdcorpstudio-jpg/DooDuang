@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import {
   Briefcase,
   Clover,
@@ -19,6 +20,7 @@ import {
   drawSeamseeStick,
   readTodaySeamsee,
   saveTodaySeamsee,
+  SEAMSEE_ART,
   SEAMSEE_SHAKE_STEPS,
   SEAMSEE_TOPICS,
   seamseeReading,
@@ -423,6 +425,7 @@ function TopicStep({
 
 function ShakeStep({
   shakes,
+  rattling,
   onTap,
 }: {
   shakes: number;
@@ -433,7 +436,7 @@ function ShakeStep({
     <button
       type="button"
       onClick={onTap}
-      className="flex flex-1 flex-col items-center px-1 pb-2 pt-8 text-center outline-none"
+      className="flex flex-1 flex-col items-center px-1 pb-2 pt-4 text-center outline-none"
     >
       <p
         className="mae-thai-safe text-[12px] font-semibold tracking-[0.2em]"
@@ -447,9 +450,33 @@ function ShakeStep({
       >
         เขย่ากระบอก
       </h1>
-      <p className="mae-thai-safe mt-1 text-[14.5px]" style={{ color: MUTED }}>
-        ทำใจให้สงบ แล้วแตะหรือเขย่าโทรศัพท์
+      <p className="mae-thai-safe mt-1 text-[15px]" style={{ color: MUTED }}>
+        ทำใจให้สงบ แล้วแตะกระบอกหรือเขย่าโทรศัพท์
       </p>
+
+      <span className="relative mt-1 flex w-full flex-1 items-center justify-center">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(232,209,154,0.28) 0%, rgba(180,40,48,0.12) 42%, transparent 70%)",
+          }}
+        />
+        <Image
+          src={SEAMSEE_ART}
+          alt="กระบอกเซียมซี"
+          width={1254}
+          height={1254}
+          priority
+          unoptimized
+          className={cn(
+            "relative h-auto w-[min(78vw,300px)] object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]",
+            rattling && "seamsee-rattle",
+          )}
+        />
+      </span>
+
       <div className="mt-1 flex items-center justify-center gap-1.5">
         {Array.from({ length: SEAMSEE_SHAKE_STEPS }, (_, i) => (
           <span
@@ -462,7 +489,7 @@ function ShakeStep({
           />
         ))}
       </div>
-      <p className="mae-thai-safe mt-3 text-[14px] font-medium" style={{ color: MUTED }}>
+      <p className="mae-thai-safe mt-2.5 text-[15px] font-medium" style={{ color: MUTED }}>
         {shakes}/{SEAMSEE_SHAKE_STEPS} · แตะกระบอกเพื่อเขย่า
       </p>
     </button>
