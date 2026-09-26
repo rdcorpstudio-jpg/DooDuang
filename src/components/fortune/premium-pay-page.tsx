@@ -14,6 +14,7 @@ import {
   FORTUNE_PACKAGE_LABEL,
   FORTUNE_UNLOCK_LIST_PRICE,
   FORTUNE_UNLOCK_PRICE,
+  PREMIUM_PERKS,
 } from "@/lib/site";
 import {
   isLocalPremiumBypass,
@@ -73,21 +74,6 @@ const METHODS: {
     icon: QrCode,
   },
 ];
-
-const COMPARE_ROWS = [
-  "ดวงรายวันเบื้องต้น",
-  "ไพ่ทาโรต์",
-  "ดวงรายสัปดาห์ · แนวโน้มเดือน",
-  "ปฏิทินฤกษ์มงคลเต็ม",
-  "แผนที่ตัวตน · ราศีเชิงลึก",
-  "รายงานดวงปีเต็ม",
-  "โหงวเฮ้ง · ลายมือ · ดวงคู่",
-  "จังหวะงาน เงิน ความรัก",
-  "บันทึกโปรไฟล์ดูซ้ำได้ทั้งปี",
-  "อัปเดตคำแนะนำตามจังหวะชีวิต",
-  "ดูดวงไม่จำกัดตลอดปี",
-  "สิทธิ์ใหม่ก่อนใคร",
-] as const;
 
 function PremiumCheck() {
   return (
@@ -370,7 +356,7 @@ export function PremiumPayPage() {
                 </p>
               </div>
 
-              {COMPARE_ROWS.map((label) => (
+              {PREMIUM_PERKS.map((label) => (
                 <div
                   key={label}
                   className="flex items-center gap-2.5 py-2.5 last:border-b-0"

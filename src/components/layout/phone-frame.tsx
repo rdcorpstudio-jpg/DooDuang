@@ -30,6 +30,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     isAuthPath ||
     pathname === "/" ||
     pathname === "" ||
+    pathname === "/2" ||
     pathname === "/home" ||
     pathname === "/reading" ||
     pathname.startsWith("/reading/seamsee") ||
@@ -53,6 +54,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     keyboardOpen ||
     pathname === "/" ||
     pathname === "" ||
+    pathname === "/2" ||
     pathname === "/home" ||
     pathname.startsWith("/reading") ||
     pathname.startsWith("/welcome") ||

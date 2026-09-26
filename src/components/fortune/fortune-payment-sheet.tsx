@@ -11,6 +11,7 @@ import {
   FORTUNE_PACKAGE_LABEL,
   FORTUNE_UNLOCK_LIST_PRICE,
   FORTUNE_UNLOCK_PRICE,
+  PREMIUM_PERKS,
 } from "@/lib/site";
 import { trackOfferView } from "@/lib/analytics/client";
 import { featureFromPath } from "@/lib/analytics/events";
@@ -47,21 +48,6 @@ const goldTextStyle: CSSProperties = {
   color: "transparent",
   WebkitTextFillColor: "transparent",
 };
-
-const COMPARE_ROWS = [
-  "ดวงรายวันเบื้องต้น",
-  "ไพ่ทาโรต์",
-  "ดวงรายสัปดาห์ · แนวโน้มเดือน",
-  "ปฏิทินฤกษ์มงคลเต็ม",
-  "แผนที่ตัวตน · ราศีเชิงลึก",
-  "รายงานดวงปีเต็ม",
-  "โหงวเฮ้ง · ลายมือ · ดวงคู่",
-  "จังหวะงาน เงิน ความรัก",
-  "บันทึกโปรไฟล์ดูซ้ำได้ทั้งปี",
-  "อัปเดตคำแนะนำตามจังหวะชีวิต",
-  "ดูดวงไม่จำกัดตลอดปี",
-  "สิทธิ์ใหม่ก่อนใคร",
-] as const;
 
 function PremiumCheck() {
   return (
@@ -232,10 +218,11 @@ export function FortunePaymentSheet({
     <div
       className={cn(
         "relative z-[1] mx-auto w-full",
-        isPage || isInline ? "px-4 pb-5 pt-4" : "px-4 pb-5 pt-5"
+        isInline ? "px-0 pb-2 pt-0" : isPage ? "px-4 pb-5 pt-4" : "px-4 pb-5 pt-5"
       )}
     >
-      <div className={cn(!isPage && !isInline && "pr-7")}>
+      {isInline ? null : (
+      <div className={cn(!isPage && "pr-7")}>
         <h2
           id={titleId}
           className="mae-pay-title text-[1.65rem] font-bold leading-none tracking-tight"
@@ -250,10 +237,11 @@ export function FortunePaymentSheet({
           ดูดวงได้เต็มที่ ตลอดทั้งปี
         </p>
       </div>
+      )}
 
       {/* Offer card — glass โทนเดียวกับหน้าหลักใหม่ */}
       <div
-        className="mt-4 overflow-hidden rounded-[22px]"
+        className={cn("overflow-hidden rounded-[22px]", isInline ? "mt-0" : "mt-4")}
         style={{
           background: GLASS.bgSoft,
           border: GLASS.border,
@@ -337,7 +325,7 @@ export function FortunePaymentSheet({
             </p>
           </div>
 
-          {COMPARE_ROWS.map((label) => (
+          {PREMIUM_PERKS.map((label) => (
             <div
               key={label}
               className="flex items-center gap-2.5 py-2.5 last:border-b-0"
@@ -356,9 +344,11 @@ export function FortunePaymentSheet({
         {IS_LOCAL_DEV ? (
           <div className="space-y-2">
             <PremiumBuyCta onClick={() => onPaid()} />
+            {isInline ? null : (
             <p className="text-center text-[11px]" style={{ color: TEXT_MUTED }}>
               โหมดทดลอง · จำลองชำระสำเร็จ
             </p>
+            )}
           </div>
         ) : loadingSession ? (
           <div
@@ -402,6 +392,7 @@ export function FortunePaymentSheet({
           <p className="text-center text-[14px] text-rose-300">{error}</p>
         ) : null}
 
+        {isInline ? null : (
         <p
           className="flex items-center justify-center gap-1.5 pt-1 text-[14px] font-medium"
           style={{ color: TEXT_MUTED }}
@@ -409,18 +400,14 @@ export function FortunePaymentSheet({
           <Lock className="h-4 w-4 shrink-0" strokeWidth={2.2} style={{ color: GOLD_SOFT }} />
           ตรวจสอบรายการก่อนดำเนินการต่อ
         </p>
+        )}
       </div>
     </div>
   );
 
   if (isInline) {
     return (
-      <div
-        className="no-sky-lift relative overflow-hidden rounded-[24px]"
-        role="region"
-        aria-labelledby={titleId}
-        style={AIVA_PANEL}
-      >
+      <div className="no-sky-lift relative" role="region" aria-label="พรีเมียม">
         {body}
       </div>
     );

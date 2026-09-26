@@ -29,7 +29,8 @@ export function isMaeShellPath(pathname: string) {
     pathname.startsWith("/reviews") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/daily") ||
-    pathname.startsWith("/logout")
+    pathname.startsWith("/logout") ||
+    pathname === "/2"
   );
 }
 
