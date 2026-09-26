@@ -9,7 +9,6 @@ import {
   APP_PAGE_BG,
 } from "@/components/layout/bottom-nav";
 import { MaeBrandLink } from "@/components/layout/mae-brand-link";
-import { MaePageBackground } from "@/components/layout/mae-page-background";
 import {
   FORTUNE_PACKAGE_LABEL,
   FORTUNE_UNLOCK_LIST_PRICE,
@@ -236,7 +235,6 @@ export function PremiumPayPage() {
         role="main"
         aria-labelledby={titleId}
       >
-        <MaePageBackground priority />
         <div className="relative z-[1] flex min-h-full flex-1 flex-col px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(0.5rem,env(safe-area-inset-top))] sm:px-6">
           <div className="relative mb-1">
             <div className="flex items-center justify-between gap-3 pt-0.5">
