@@ -27,6 +27,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     isAuthPath ||
     pathname === "/" ||
     pathname === "" ||
+    pathname === "/2" ||
     pathname.startsWith("/premium/pay") ||
     pathname.startsWith("/preview/home") ||
     keyboardOpen;
@@ -38,6 +39,7 @@ export function PhoneFrame({ children, className }: PhoneFrameProps) {
     keyboardOpen ||
     pathname === "/" ||
     pathname === "" ||
+    pathname === "/2" ||
     pathname.startsWith("/preview/home");
 
   useEffect(() => {

@@ -9,7 +9,7 @@ export function isAdminPath(pathname: string) {
 export function isMaeShellPath(pathname: string) {
   if (isAdminPath(pathname)) return false;
   if (pathname === "/mae" || pathname.startsWith("/mae/")) return false;
-  if (pathname === "/" || pathname === "") return true;
+  if (pathname === "/" || pathname === "" || pathname === "/2") return true;
   return (
     pathname.startsWith("/reading") ||
     pathname.startsWith("/r/") ||
