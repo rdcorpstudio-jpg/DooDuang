@@ -13,6 +13,8 @@ import {
   readFortuneProfile,
 } from "@/lib/fortune/profile-storage";
 
+export const APP_PAGE_BG = "#06142a";
+
 type NavTab = {
   href: string;
   label: string;
