@@ -255,6 +255,13 @@
     0 1px 2px rgba(4, 12, 32, 0.95),
     0 4px 12px rgba(4, 16, 40, 0.88);
 }
+.phone-frame .story-hero h1 .mae-gold-text {
+  display: block;
+  font-size: 23px;
+  line-height: 1.45;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
 .story-hero h1 .mae-gold-text {
   background-image: linear-gradient(
     168deg,
@@ -1413,6 +1420,57 @@
   display: flex;
   justify-content: center;
   margin-top: 18px;
+}
+.phone-frame .story-landing .story-reviews {
+  padding: 40px 0 28px;
+}
+.phone-frame .story-landing .story-review-head h2 {
+  font-size: 26px;
+}
+.phone-frame .story-landing .story-review-lead {
+  font-size: 13px;
+}
+.phone-frame .story-landing .story-review-summary {
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+.phone-frame .story-landing .story-review-score {
+  font-size: 28px;
+}
+.phone-frame .story-landing .story-review-stat {
+  min-height: 58px;
+  padding: 6px 3px;
+  border-radius: 12px;
+}
+.phone-frame .story-landing .story-review-stat strong {
+  font-size: 16px;
+}
+.phone-frame .story-landing .story-review-stat span {
+  font-size: 10.5px;
+}
+.phone-frame .story-landing .story-review-list {
+  gap: 10px;
+  margin-top: 16px;
+}
+.phone-frame .story-landing .story-review-card {
+  padding: 12px 12px 13px;
+}
+.phone-frame .story-landing .story-review-card header {
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.phone-frame .story-landing .story-review-avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+}
+.phone-frame .story-landing .story-review-who b {
+  font-size: 14px;
+}
+.phone-frame .story-landing .story-review-quote {
+  font-size: 13px;
+  line-height: 1.55;
 }
 .story-offer {
   text-align: center;

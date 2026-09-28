@@ -109,8 +109,8 @@ const FEATURES = [
 
 function Chevron() {
   return (
-    <svg className="mmmp-chevron" viewBox="0 0 12 20" aria-hidden>
-      <path d="m3 3 6 7-6 7" />
+    <svg className="mmmp-chevron" viewBox="0 0 12 20" width="12" height="19" fill="none" stroke="currentColor" aria-hidden>
+      <path d="m3 3 6 7-6 7" fill="none" />
     </svg>
   );
 }
