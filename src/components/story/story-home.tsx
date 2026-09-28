@@ -7,7 +7,7 @@ import { StoryPremium } from "@/components/story/story-premium";
 import { StorySectionTwo } from "@/components/story/story-section-two";
 
 const STORY_IMAGES = {
-  hero: "/images/bg/story-moon.jpg",
+  hero: "/images/bg/story-moon.webp?v=orig",
   year: "/images/home/predict/year-banner.webp",
   bazi: "/images/home/predict/bazi-banner.webp",
   couple: "/images/home/predict/couple-banner.webp",
@@ -49,24 +49,24 @@ const FEATURES = [
   },
 ] as const;
 
-const PREMIUM_JOIN = "/premium/pay?return=/2";
+const JOIN_URL = "https://www.maemangmee.com/welcome/preview";
 
 const DAILY = [
   {
     href: "/reading/tarot",
-    image: "/images/story/tiles/tarot.jpg",
+    image: "/images/story/tiles/tarot.webp",
     title: "ไพ่รายวัน",
     body: "เปิดหนึ่งใบ อ่านเรื่องที่ควรใส่ใจวันนี้",
   },
   {
     href: "/reading/shirt",
-    image: "/images/story/tiles/shirt.jpg",
+    image: "/images/story/tiles/shirt.webp",
     title: "สีเสื้อมงคล",
     body: "วันนี้ใส่สีไหนดี",
   },
   {
     href: "/reading/seamsee",
-    image: "/images/story/tiles/seamsee.jpg",
+    image: "/images/story/tiles/seamsee.webp",
     title: "เซียมซี",
     body: "เปิดอ่านวันละใบ",
   },
@@ -76,50 +76,50 @@ const MORE = [
   {
     href: "/special/lucky-numbers",
     label: "เลขมงคล",
-    image: "/images/story/tiles/lucky.jpg",
+    image: "/images/story/tiles/lucky.webp",
   },
   {
     href: "/special/phone",
     label: "วิเคราะห์เบอร์",
-    image: "/images/story/tiles/phone.jpg",
+    image: "/images/story/tiles/phone.webp",
   },
   {
     href: "/special/dream",
     label: "ทำนายฝัน",
-    image: "/images/story/tiles/dream.jpg",
+    image: "/images/story/tiles/dream.webp",
   },
   {
     href: "/reading/face",
     label: "โหงวเฮ้ง",
-    image: "/images/story/tiles/face.jpg",
+    image: "/images/story/tiles/face.webp",
   },
   {
     href: "/reading/palm",
     label: "ลายมือ",
-    image: "/images/story/tiles/palm.jpg",
+    image: "/images/story/tiles/palm.webp",
   },
   {
     href: "/reading/wallpaper",
     label: "วอลเปเปอร์",
-    image: "/images/story/tiles/wallpaper.jpg",
+    image: "/images/story/tiles/wallpaper.webp",
   },
 ] as const;
 
 const HERO_SETS = [
   [
-    { title: "งานช่วงนี้", sub: "เรื่องที่กำลังรอคำตอบ", image: "/images/story/cards/work.jpg" },
-    { title: "จังหวะชีวิต", sub: "เดือนก่อน — วันนี้", image: "/images/story/cards/timing.jpg" },
-    { title: "การเงิน", sub: "ภาพรวมของคุณ", image: "/images/story/cards/money.jpg" },
+    { title: "งานช่วงนี้", sub: "เรื่องที่กำลังรอคำตอบ", image: "/images/story/cards/work.webp" },
+    { title: "จังหวะชีวิต", sub: "เดือนก่อน — วันนี้", image: "/images/story/cards/timing.webp" },
+    { title: "การเงิน", sub: "ภาพรวมของคุณ", image: "/images/story/cards/money.webp" },
   ],
   [
-    { title: "ไพ่รายวัน", sub: "ตัวอย่างพรีเมียม", image: "/images/story/cards/tarot.jpg" },
-    { title: "สีมงคลวันนี้", sub: "ตัวอย่างคำแนะนำวัน", image: "/images/story/cards/color.jpg" },
-    { title: "ฤกษ์วันนี้", sub: "ตัวอย่างปฏิทิน", image: "/images/story/cards/timing-day.jpg" },
+    { title: "ไพ่รายวัน", sub: "ตัวอย่างพรีเมียม", image: "/images/story/cards/tarot.webp" },
+    { title: "สีมงคลวันนี้", sub: "ตัวอย่างคำแนะนำวัน", image: "/images/story/cards/color.webp" },
+    { title: "ฤกษ์วันนี้", sub: "ตัวอย่างปฏิทิน", image: "/images/story/cards/timing-day.webp" },
   ],
   [
-    { title: "ตัวตนของคุณ", sub: "มองตัวเองให้ชัดขึ้น", image: "/images/story/cards/self.jpg" },
-    { title: "ดวงรายปี", sub: "ตัวอย่างพรีเมียม", image: "/images/story/cards/year.jpg" },
-    { title: "ความรัก", sub: "ภาพรวมของคุณ", image: "/images/story/cards/love.jpg" },
+    { title: "ตัวตนของคุณ", sub: "มองตัวเองให้ชัดขึ้น", image: "/images/story/cards/self.webp" },
+    { title: "ดวงรายปี", sub: "ตัวอย่างพรีเมียม", image: "/images/story/cards/year.webp" },
+    { title: "ความรัก", sub: "ภาพรวมของคุณ", image: "/images/story/cards/love.webp" },
   ],
 ] as const;
 
@@ -405,12 +405,12 @@ export function StoryHome() {
           <h1>
             บางเรื่องในชีวิต
             <br />
-            <span className="story-gold mae-gold-text">แค่รู้จังหวะ</span>
-            <br />
-            ก็กล้าเดินต่อ
+            <span className="story-gold mae-gold-text">แค่รู้จังหวะ ก็กล้าเดินต่อ</span>
           </h1>
           <p className="story-hero-sub">
-            ลองดูว่าช่วงนี้ เรื่องไหนควรไปต่อ เรื่องไหนควรรอก่อน
+            ลองดูว่าช่วงนี้ เรื่องไหนควรไปต่อ
+            <br />
+            เรื่องไหนควรรอก่อน
           </p>
           <div
             className="story-hero-gallery"
@@ -472,7 +472,7 @@ export function StoryHome() {
               </li>
             ))}
           </ul>
-          <Link className="story-button" href="/reading">
+          <Link className="story-button" href={JOIN_URL}>
             ลองดูดวงของฉันฟรี <span aria-hidden>→</span>
           </Link>
         </div>
@@ -516,7 +516,7 @@ export function StoryHome() {
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={JOIN_URL}
                   draggable={false}
                   className={`story-feature story-feature--${item.tone}`}
                 >
@@ -560,7 +560,7 @@ export function StoryHome() {
           </p>
           <div className="story-more" data-story-stagger aria-label="ฟีเจอร์อื่น">
             {MORE.map((item) => (
-              <Link key={item.label} href={PREMIUM_JOIN}>
+              <Link key={item.label} href={JOIN_URL}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.image} alt="" />
                 <span>{item.label}</span>
@@ -569,7 +569,7 @@ export function StoryHome() {
           </div>
           <div className="story-daily-list" data-story-stagger>
             {DAILY.map((item) => (
-              <Link key={item.title} href={PREMIUM_JOIN} className="story-daily-card">
+              <Link key={item.title} href={JOIN_URL} className="story-daily-card">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img className="story-mini-photo" src={item.image} alt="" />
                 <span>
@@ -639,7 +639,7 @@ export function StoryHome() {
               </article>
             ))}
           </div>
-          <Link className="story-review-more" href="/reviews">
+          <Link className="story-review-more" href={JOIN_URL}>
             ดูทั้งหมด {MAE_REVIEWS.length} รีวิว →
           </Link>
         </div>
@@ -648,7 +648,7 @@ export function StoryHome() {
       <StoryPremium />
 
       <div className={pastHero ? "story-cta-bar" : "story-cta-bar story-cta-bar--off"}>
-        <Link className="story-button" href="/welcome/preview">
+        <Link className="story-button" href={JOIN_URL}>
           ลองดูดวงของฉันฟรี <span aria-hidden>→</span>
         </Link>
       </div>

@@ -1,3 +1,5 @@
+"use client";
+
 import "./section-2.css";
 
 const ARTS = {
@@ -27,10 +29,10 @@ export function StorySectionTwo() {
 
           <div className="mmm-story__steps" data-story-stagger role="list" aria-label="จากข้อมูลเกิดสู่คำแนะนำ">
             <svg className="mmm-story__thread mmm-story__thread--wide" viewBox="0 0 1080 320" preserveAspectRatio="none" aria-hidden focusable="false">
-              <path d="M55 190 C170 290 195 83 347 125 S510 248 568 147 S765 96 840 172 S978 245 1030 104" />
+              <path fill="none" d="M55 190 C170 290 195 83 347 125 S510 248 568 147 S765 96 840 172 S978 245 1030 104" />
             </svg>
             <svg className="mmm-story__thread mmm-story__thread--mobile" viewBox="0 0 360 510" preserveAspectRatio="none" aria-hidden focusable="false">
-              <path d="M67 44 C30 100 92 152 171 153 S281 179 291 230 S289 324 182 327 S38 391 90 470" />
+              <path fill="none" d="M67 44 C30 100 92 152 171 153 S281 179 291 230 S289 324 182 327 S38 391 90 470" />
             </svg>
 
             <div className="mmm-story__step" role="listitem">

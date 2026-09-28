@@ -109,8 +109,8 @@ const FEATURES = [
 
 function Chevron() {
   return (
-    <svg className="mmmp-chevron" viewBox="0 0 12 20" aria-hidden>
-      <path d="m3 3 6 7-6 7" />
+    <svg className="mmmp-chevron" viewBox="0 0 12 20" width="12" height="19" fill="none" stroke="currentColor" aria-hidden>
+      <path d="m3 3 6 7-6 7" fill="none" />
     </svg>
   );
 }
@@ -143,7 +143,7 @@ export function StoryPremium() {
     <div className="mmm-premium-slot">
       <section className="mmm-premium" id="premium" aria-labelledby="mmm-premium-heading">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="mmmp-scenery" src="/images/story/premium/scenery.webp" width={900} height={1599} alt="" aria-hidden />
+        <img className="mmmp-scenery" src="/images/story/premium/scenery.webp?v=orig" width={900} height={1599} alt="" aria-hidden />
         <svg className="mmmp-celestial" viewBox="0 0 300 300" fill="none" aria-hidden>
           <g stroke="currentColor" strokeWidth="0.65">
             <circle cx="150" cy="150" r="146" />
@@ -245,7 +245,7 @@ export function StoryPremium() {
         </div>
 
         <div className="mmmp-action" data-story-reveal>
-          <Link className="mmmp-cta" href="/premium/pay?return=/2">
+          <Link className="mmmp-cta" href="https://www.maemangmee.com/welcome/preview">
             <svg className="mmmp-cta-lock" viewBox="0 0 28 36" aria-hidden>
               <path d="M6 15V9a8 8 0 0 1 16 0v6" fill="none" strokeWidth="3" />
               <rect x="2" y="14" width="24" height="21" rx="3" stroke="none" />
