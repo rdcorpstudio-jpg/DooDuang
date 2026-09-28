@@ -414,9 +414,7 @@ export function StoryHome() {
           <h1>
             บางเรื่องในชีวิต
             <br />
-            <span className="story-gold mae-gold-text">แค่รู้จังหวะ</span>
-            <br />
-            ก็กล้าเดินต่อ
+            <span className="story-gold mae-gold-text">แค่รู้จังหวะ ก็กล้าเดินต่อ</span>
           </h1>
           <p className="story-hero-sub">
             ลองดูว่าช่วงนี้ เรื่องไหนควรไปต่อ
