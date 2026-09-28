@@ -16,7 +16,7 @@ const storySerif = Noto_Serif_Thai({
 });
 
 const STORY_IMAGES = {
-  hero: "/images/bg/story-moon.jpg",
+  hero: "/images/bg/story-moon.webp",
   year: "/images/home/predict/year-banner.webp",
   bazi: "/images/home/predict/bazi-banner.webp",
   couple: "/images/home/predict/couple-banner.webp",
@@ -63,19 +63,19 @@ const JOIN_URL = "https://www.maemangmee.com/welcome/preview";
 const DAILY = [
   {
     href: "/reading/tarot",
-    image: "/images/story/tiles/tarot.jpg",
+    image: "/images/story/tiles/tarot.webp",
     title: "ไพ่รายวัน",
     body: "เปิดหนึ่งใบ อ่านเรื่องที่ควรใส่ใจวันนี้",
   },
   {
     href: "/reading/shirt",
-    image: "/images/story/tiles/shirt.jpg",
+    image: "/images/story/tiles/shirt.webp",
     title: "สีเสื้อมงคล",
     body: "วันนี้ใส่สีไหนดี",
   },
   {
     href: "/reading/seamsee",
-    image: "/images/story/tiles/seamsee.jpg",
+    image: "/images/story/tiles/seamsee.webp",
     title: "เซียมซี",
     body: "เปิดอ่านวันละใบ",
   },
@@ -85,50 +85,50 @@ const MORE = [
   {
     href: "/special/lucky-numbers",
     label: "เลขมงคล",
-    image: "/images/story/tiles/lucky.jpg",
+    image: "/images/story/tiles/lucky.webp",
   },
   {
     href: "/special/phone",
     label: "วิเคราะห์เบอร์",
-    image: "/images/story/tiles/phone.jpg",
+    image: "/images/story/tiles/phone.webp",
   },
   {
     href: "/special/dream",
     label: "ทำนายฝัน",
-    image: "/images/story/tiles/dream.jpg",
+    image: "/images/story/tiles/dream.webp",
   },
   {
     href: "/reading/face",
     label: "โหงวเฮ้ง",
-    image: "/images/story/tiles/face.jpg",
+    image: "/images/story/tiles/face.webp",
   },
   {
     href: "/reading/palm",
     label: "ลายมือ",
-    image: "/images/story/tiles/palm.jpg",
+    image: "/images/story/tiles/palm.webp",
   },
   {
     href: "/reading/wallpaper",
     label: "วอลเปเปอร์",
-    image: "/images/story/tiles/wallpaper.jpg",
+    image: "/images/story/tiles/wallpaper.webp",
   },
 ] as const;
 
 const HERO_SETS = [
   [
-    { title: "งานช่วงนี้", sub: "เรื่องที่กำลังรอคำตอบ", image: "/images/story/cards/work.jpg" },
-    { title: "จังหวะชีวิต", sub: "เดือนก่อน — วันนี้", image: "/images/story/cards/timing.jpg" },
-    { title: "การเงิน", sub: "ภาพรวมของคุณ", image: "/images/story/cards/money.jpg" },
+    { title: "งานช่วงนี้", sub: "เรื่องที่กำลังรอคำตอบ", image: "/images/story/cards/work.webp" },
+    { title: "จังหวะชีวิต", sub: "เดือนก่อน — วันนี้", image: "/images/story/cards/timing.webp" },
+    { title: "การเงิน", sub: "ภาพรวมของคุณ", image: "/images/story/cards/money.webp" },
   ],
   [
-    { title: "ไพ่รายวัน", sub: "ตัวอย่างพรีเมียม", image: "/images/story/cards/tarot.jpg" },
-    { title: "สีมงคลวันนี้", sub: "ตัวอย่างคำแนะนำวัน", image: "/images/story/cards/color.jpg" },
-    { title: "ฤกษ์วันนี้", sub: "ตัวอย่างปฏิทิน", image: "/images/story/cards/timing-day.jpg" },
+    { title: "ไพ่รายวัน", sub: "ตัวอย่างพรีเมียม", image: "/images/story/cards/tarot.webp" },
+    { title: "สีมงคลวันนี้", sub: "ตัวอย่างคำแนะนำวัน", image: "/images/story/cards/color.webp" },
+    { title: "ฤกษ์วันนี้", sub: "ตัวอย่างปฏิทิน", image: "/images/story/cards/timing-day.webp" },
   ],
   [
-    { title: "ตัวตนของคุณ", sub: "มองตัวเองให้ชัดขึ้น", image: "/images/story/cards/self.jpg" },
-    { title: "ดวงรายปี", sub: "ตัวอย่างพรีเมียม", image: "/images/story/cards/year.jpg" },
-    { title: "ความรัก", sub: "ภาพรวมของคุณ", image: "/images/story/cards/love.jpg" },
+    { title: "ตัวตนของคุณ", sub: "มองตัวเองให้ชัดขึ้น", image: "/images/story/cards/self.webp" },
+    { title: "ดวงรายปี", sub: "ตัวอย่างพรีเมียม", image: "/images/story/cards/year.webp" },
+    { title: "ความรัก", sub: "ภาพรวมของคุณ", image: "/images/story/cards/love.webp" },
   ],
 ] as const;
 
