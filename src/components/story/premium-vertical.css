@@ -161,14 +161,24 @@
   .mmm-premium .mmmp-feature-detail { margin-left: 76px; }
   .mmm-premium .mmmp-cta-text strong { font-size: 19px; }
 }
+@container mmmp (max-width: 480px) {
+  .mmm-premium .mmmp-title { font-size: 32px; }
+  .mmm-premium .mmmp-title > .mmmp-title-gold { font-size: 44px; }
+  .mmm-premium .mmmp-baht { font-size: 26px; }
+  .mmm-premium .mmmp-price-number { font-size: 54px; }
+  .mmm-premium .mmmp-duration { font-size: 17px; }
+  .mmm-premium .mmmp-old-price { font-size: 14px; }
+  .mmm-premium .mmmp-payment-copy { font-size: 13px; }
+  .mmm-premium .mmmp-includes { font-size: 14px; }
+}
 @container mmmp (max-width: 359px) {
   .mmm-premium { padding: 24px 12px 140px; }
-  .mmm-premium .mmmp-title { font-size: 34px; }
-  .mmm-premium .mmmp-title > .mmmp-title-gold { font-size: 49px; }
+  .mmm-premium .mmmp-title { font-size: 28px; }
+  .mmm-premium .mmmp-title > .mmmp-title-gold { font-size: 38px; }
   .mmm-premium .mmmp-intro-copy { font-size: 13px; }
   .mmm-premium .mmmp-package { padding: 27px 11px 7px; border-radius: 30px 30px 21px 21px; }
   .mmm-premium .mmmp-sale { right: 6px; font-size: 11px; }
-  .mmm-premium .mmmp-price-number { font-size: 66px; }
+  .mmm-premium .mmmp-price-number { font-size: 48px; }
   .mmm-premium .mmmp-duration { font-size: 18px; }
   .mmm-premium .mmmp-feature > summary { grid-template-columns: 48px minmax(0,1fr) 10px; gap: 9px; }
   .mmm-premium .mmmp-feature-art { width: 48px; height: 48px; }
@@ -190,7 +200,7 @@
 .phone-frame .story-landing .mmm-premium .mmmp-title-gold {
   letter-spacing: -0.05em !important;
   line-height: 1.4 !important;
-  margin-top: -26px;
+  margin-top: -20px;
   padding-top: 0.14em;
   overflow: visible !important;
   text-shadow: none !important;
