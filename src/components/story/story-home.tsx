@@ -419,7 +419,9 @@ export function StoryHome() {
             ก็กล้าเดินต่อ
           </h1>
           <p className="story-hero-sub">
-            ลองดูว่าช่วงนี้ เรื่องไหนควรไปต่อ เรื่องไหนควรรอก่อน
+            ลองดูว่าช่วงนี้ เรื่องไหนควรไปต่อ
+            <br />
+            เรื่องไหนควรรอก่อน
           </p>
           <div
             className="story-hero-gallery"
