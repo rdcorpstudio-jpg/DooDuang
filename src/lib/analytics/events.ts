@@ -4,6 +4,7 @@ export const ANALYTICS_EVENT_NAMES = [
   "screen_view",
   "offer_view",
   "pay_view",
+  "signup_start",
   "signup",
   "login",
   "profile_saved",
@@ -21,6 +22,7 @@ export const CLIENT_ANALYTICS_EVENT_NAMES = [
   "screen_view",
   "offer_view",
   "pay_view",
+  "signup_start",
   "feature_open",
   "thanks_line_cta",
 ] as const satisfies readonly AnalyticsEventName[];
@@ -81,6 +83,7 @@ export const FUNNEL_STEPS: {
   name: AnalyticsEventName;
   label: string;
 }[] = [
+  { name: "signup_start", label: "กดสมัคร / เริ่มล็อกอิน" },
   { name: "signup", label: "สมัครใหม่" },
   { name: "login", label: "เข้าสู่ระบบ" },
   { name: "profile_saved", label: "บันทึกโปรไฟล์" },
@@ -148,6 +151,7 @@ export function featureFromPath(
   const hashPart = hash.startsWith("#") ? hash.slice(1) : hash;
 
   if (path === "/") return "home";
+  if (path === "/2") return "home";
   if (path === "/menu" || path.startsWith("/preview/menu")) return "home";
   if (path === "/predict" || path.startsWith("/preview/predict")) return "home";
   if (path === "/reading") return "reading";
@@ -187,6 +191,7 @@ export function featureFromPath(
 /** Friendly label for raw path (screen_view breakdown) */
 export function screenLabelFromPath(pathname: string): string {
   const path = pathname.replace(/\/$/, "") || "/";
+  if (path === "/2") return "หน้าสตอรี่ /2";
   const feature = featureFromPath(path);
   if (feature) return ANALYTICS_FEATURE_LABELS[feature];
   if (path === "/premium/pay") return "หน้าชำระเงิน";

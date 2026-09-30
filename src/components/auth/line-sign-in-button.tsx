@@ -7,6 +7,7 @@ import {
   rememberCallback,
   safeCallback,
 } from "@/components/auth/google-sign-in-button";
+import { trackSignupStart } from "@/lib/analytics/client";
 import { cn } from "@/lib/utils";
 
 /** LINE brand mark — simple chat bubble glyph */
@@ -43,6 +44,7 @@ export function LineSignInButton({
 
   function startLineLogin() {
     setLoading(true);
+    trackSignupStart({ channel: "line", path: "/login" });
     rememberCallback(callbackUrl);
     const next = encodeURIComponent(safeCallback(callbackUrl));
     window.location.assign(`/api/auth/line/start?callbackUrl=${next}`);

@@ -11,6 +11,7 @@ import {
   type UserCredential,
 } from "firebase/auth";
 import { getFirebaseAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
+import { trackSignupStart } from "@/lib/analytics/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -282,6 +283,8 @@ export function GoogleSignInButton({
       setError("ยังไม่ได้ตั้งค่า Firebase");
       return;
     }
+
+    trackSignupStart({ channel: "google", path: "/login" });
 
     // Must start popup in the same sync turn as the click — any await before
     // this makes Safari/Chrome treat it as blocked on the first try.

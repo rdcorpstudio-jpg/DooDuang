@@ -74,6 +74,7 @@ type AnalyticsPayload = {
   growthFunnel?: {
     visitors: number;
     visitSessions: number;
+    signupStarts?: number;
     signups: number;
     buyers: number;
     payments: number;
@@ -82,6 +83,7 @@ type AnalyticsPayload = {
     visitors: number;
     offerViews?: number;
     payViews: number;
+    signupStarts?: number;
     signups: number;
     buyers: number;
   };
@@ -934,7 +936,7 @@ export function AdminAnalyticsPage() {
               <div className="mb-5 text-center sm:text-left">
                 <p className="text-[15px] font-semibold">Funnel Infographic</p>
                 <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                  คนเข้าชมเว็บ → คนสมัคร → คนซื้อ
+                  คนเข้าชมเว็บ → กดสมัคร → สมัครสำเร็จ → คนซื้อ
                 </p>
               </div>
               <FunnelCone
@@ -949,8 +951,16 @@ export function AdminAnalyticsPage() {
                     text: "#0f7a4a",
                   },
                   {
+                    id: "signup_start",
+                    label: "กดสมัคร",
+                    hint: "signup_start",
+                    value: data.growthFunnel?.signupStarts ?? 0,
+                    fill: "#5b8def",
+                    text: "#ffffff",
+                  },
+                  {
                     id: "signup",
-                    label: "คนสมัคร",
+                    label: "สมัครสำเร็จ",
                     hint: "signup",
                     value: data.growthFunnel?.signups ?? data.summary.signups,
                     fill: "#1a1d21",
@@ -978,7 +988,7 @@ export function AdminAnalyticsPage() {
               <div className="mb-5 text-center sm:text-left">
                 <p className="text-[15px] font-semibold">Funnel ชำระเงิน</p>
                 <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                  เข้าชม → เห็นข้อเสนอ/ราคา → สมัคร → ซื้อ
+                  เข้าชม → เห็นข้อเสนอ/ราคา → กดสมัคร → สมัครสำเร็จ → ซื้อ
                 </p>
               </div>
               <FunnelCone
@@ -1003,8 +1013,16 @@ export function AdminAnalyticsPage() {
                     text: "#ffffff",
                   },
                   {
+                    id: "signup_start",
+                    label: "กดสมัคร",
+                    hint: "signup_start",
+                    value: data.payFunnel?.signupStarts ?? 0,
+                    fill: "#3d5a80",
+                    text: "#ffffff",
+                  },
+                  {
                     id: "signup",
-                    label: "คนสมัคร",
+                    label: "สมัครสำเร็จ",
                     hint: "signup",
                     value: data.payFunnel?.signups ?? data.summary.signups,
                     fill: "#1a1d21",

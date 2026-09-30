@@ -8,6 +8,7 @@ import {
   safeCallback,
   wantsCheckoutAfterLogin,
 } from "@/components/auth/google-sign-in-button";
+import { trackSignupStart } from "@/lib/analytics/client";
 import { normalizeThaiMobile } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 
@@ -60,6 +61,10 @@ export function PhoneLoginForm({
     if (!normalized) {
       setError("กรอกเบอร์มือถือไทย 10 หลัก เช่น 08x-xxx-xxxx");
       return;
+    }
+
+    if (!resend) {
+      trackSignupStart({ channel: "phone", path: "/login" });
     }
 
     setLoading(true);

@@ -49,7 +49,7 @@ const FEATURES = [
   },
 ] as const;
 
-const JOIN_URL = "https://www.maemangmee.com/welcome/preview";
+const JOIN_URL = "/welcome/preview";
 
 const DAILY = [
   {

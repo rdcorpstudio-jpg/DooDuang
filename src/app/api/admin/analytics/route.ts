@@ -224,6 +224,24 @@ export async function GET(request: Request) {
 
     const offerViews = Number(offerViewAgg?.people) || 0;
 
+    const [signupStartAgg] = await db
+      .select({
+        people: sql<number>`count(distinct coalesce(
+          (${analyticsEvents.props})::jsonb->>'visitorId',
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          eq(analyticsEvents.name, "signup_start")
+        )
+      );
+
+    const signupStarts = Number(signupStartAgg?.people) || 0;
+
     const paySourceRows = await db
       .select({
         feature: analyticsEvents.feature,
@@ -638,6 +656,7 @@ export async function GET(request: Request) {
       growthFunnel: {
         visitors,
         visitSessions,
+        signupStarts,
         signups: signupTotal,
         buyers,
         payments: paymentCount,
@@ -646,6 +665,7 @@ export async function GET(request: Request) {
         visitors,
         offerViews,
         payViews,
+        signupStarts,
         signups: signupTotal,
         buyers,
       },

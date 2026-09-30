@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { startMaeNavigation } from "@/components/layout/navigation-loading";
+import { trackSignupStart } from "@/lib/analytics/client";
 import { readIntake } from "@/lib/fortune/intake-storage";
 
 const MAE_GOLD = "#e8d19a";
@@ -455,6 +456,10 @@ export function OnboardingPreview() {
       } catch {
         /* fall through to login */
       }
+      trackSignupStart({
+        channel: "preview_cta",
+        path: "/welcome/preview",
+      });
       router.push(
         `/login?callbackUrl=${encodeURIComponent("/reading")}`,
       );

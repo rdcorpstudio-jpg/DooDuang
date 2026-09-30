@@ -32,6 +32,21 @@ export function trackOfferView(opts?: {
   });
 }
 
+/** Tapped Google / LINE / phone / preview CTA to start signup or login. */
+export function trackSignupStart(opts?: {
+  channel?: string;
+  path?: string | null;
+}): void {
+  trackClientEvent({
+    name: "signup_start",
+    path: opts?.path,
+    props: {
+      visitorId: getOrCreateVisitorId(),
+      channel: opts?.channel || "unknown",
+    },
+  });
+}
+
 export function trackClientEvent(opts: {
   name: ClientAnalyticsEventName;
   feature?: AnalyticsFeature | string | null;
