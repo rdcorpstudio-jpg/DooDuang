@@ -334,7 +334,7 @@ export async function applyOneTimePremiumCheckout(opts: {
       session.customer_details?.email ||
       session.customer_email ||
       null;
-    notifyPremiumPayment({
+    await notifyPremiumPayment({
       userId,
       amount: opts.amount,
       days: opts.days,

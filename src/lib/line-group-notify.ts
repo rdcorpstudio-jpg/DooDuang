@@ -51,7 +51,7 @@ export async function pushLineGroupText(text: string): Promise<boolean> {
   }
 }
 
-/** Fire-and-forget — never throw to callers. */
+/** Fire-and-forget — never throw to callers. Prefer await pushLineGroupText in auth/payment. */
 export function notifyLineGroup(text: string) {
   void pushLineGroupText(text);
 }
@@ -85,13 +85,13 @@ function maskEmail(email?: string | null) {
   return `${maskedLocal}@${domain}`;
 }
 
-export function notifyNewRegistration(opts: {
+export async function notifyNewRegistration(opts: {
   channel: "google" | "phone" | "line";
   userId: string;
   name?: string | null;
   email?: string | null;
   phone?: string | null;
-}) {
+}): Promise<boolean> {
   const channelLabel =
     opts.channel === "google"
       ? "Google"
@@ -108,10 +108,10 @@ export function notifyNewRegistration(opts: {
     phone ? `เบอร์: ${phone}` : null,
     `id: ${opts.userId.slice(0, 8)}…`,
   ].filter(Boolean);
-  notifyLineGroup(lines.join("\n"));
+  return pushLineGroupText(lines.join("\n"));
 }
 
-export function notifyPremiumPayment(opts: {
+export async function notifyPremiumPayment(opts: {
   userId: string;
   amount: number;
   days: number;
@@ -121,8 +121,8 @@ export function notifyPremiumPayment(opts: {
   lineLinked?: boolean;
   nickname?: string | null;
   alreadyFulfilled?: boolean;
-}) {
-  if (opts.alreadyFulfilled) return;
+}): Promise<boolean> {
+  if (opts.alreadyFulfilled) return false;
   const email = maskEmail(opts.email);
   const phone = maskPhone(opts.phone);
   const nickname = opts.nickname?.trim() || null;
@@ -137,5 +137,5 @@ export function notifyPremiumPayment(opts: {
     nickname ? `ชื่อเล่นดวง: ${nickname}` : null,
     `id: ${opts.userId.slice(0, 8)}…`,
   ].filter(Boolean);
-  notifyLineGroup(lines.join("\n"));
+  return pushLineGroupText(lines.join("\n"));
 }

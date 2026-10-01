@@ -74,17 +74,23 @@ type AnalyticsPayload = {
   growthFunnel?: {
     visitors: number;
     visitSessions: number;
+    homeViews?: number;
+    previewViews?: number;
     signupStarts?: number;
     signups: number;
+    profilesCompleted?: number;
     buyers: number;
     payments: number;
   };
   payFunnel?: {
     visitors: number;
+    homeViews?: number;
+    previewViews?: number;
     offerViews?: number;
     payViews: number;
     signupStarts?: number;
     signups: number;
+    profilesCompleted?: number;
     buyers: number;
   };
   payViewsByFeature?: ChannelCount[];
@@ -931,122 +937,83 @@ export function AdminAnalyticsPage() {
             </SoftCard>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
-            <SoftCard>
-              <div className="mb-5 text-center sm:text-left">
-                <p className="text-[15px] font-semibold">Funnel Infographic</p>
-                <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                  คนเข้าชมเว็บ → กดสมัคร → สมัครสำเร็จ → คนซื้อ
-                </p>
-              </div>
-              <FunnelCone
-                steps={[
-                  {
-                    id: "visit",
-                    label: "คนเข้าชมเว็บ",
-                    hint: "unique visitors",
-                    value:
-                      data.growthFunnel?.visitors ?? data.summary.visitors ?? 0,
-                    fill: "#7dffb3",
-                    text: "#0f7a4a",
-                  },
-                  {
-                    id: "signup_start",
-                    label: "กดสมัคร",
-                    hint: "signup_start",
-                    value: data.growthFunnel?.signupStarts ?? 0,
-                    fill: "#5b8def",
-                    text: "#ffffff",
-                  },
-                  {
-                    id: "signup",
-                    label: "สมัครสำเร็จ",
-                    hint: "signup",
-                    value: data.growthFunnel?.signups ?? data.summary.signups,
-                    fill: "#1a1d21",
-                    text: "#ffffff",
-                  },
-                  {
-                    id: "buy",
-                    label: "คนซื้อ",
-                    hint: "unique buyers",
-                    value: data.growthFunnel?.buyers ?? data.summary.buyers ?? 0,
-                    fill: "#b8f5d8",
-                    text: "#0f7a4a",
-                  },
-                ]}
-                emptyNote={
-                  (data.growthFunnel?.visitors ?? data.summary.visitors ?? 0) ===
-                  0
-                    ? "ตัวเลขเข้าชมเริ่มนับหลังเปิด track · รีเฟรชช่วงใหม่หลังมีคนเข้าเว็บ"
-                    : undefined
-                }
-              />
-            </SoftCard>
-
-            <SoftCard>
-              <div className="mb-5 text-center sm:text-left">
-                <p className="text-[15px] font-semibold">Funnel ชำระเงิน</p>
-                <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                  เข้าชม → เห็นข้อเสนอ/ราคา → กดสมัคร → สมัครสำเร็จ → ซื้อ
-                </p>
-              </div>
-              <FunnelCone
-                steps={[
-                  {
-                    id: "visit",
-                    label: "คนเข้าชมเว็บ",
-                    hint: "unique visitors",
-                    value: data.payFunnel?.visitors ?? data.summary.visitors ?? 0,
-                    fill: "#7dffb3",
-                    text: "#0f7a4a",
-                  },
-                  {
-                    id: "pay",
-                    label: "เห็นข้อเสนอ/ราคา",
-                    hint: "offer_view",
-                    value:
-                      data.payFunnel?.offerViews ??
-                      data.payFunnel?.payViews ??
-                      0,
-                    fill: "#5b9fd4",
-                    text: "#ffffff",
-                  },
-                  {
-                    id: "signup_start",
-                    label: "กดสมัคร",
-                    hint: "signup_start",
-                    value: data.payFunnel?.signupStarts ?? 0,
-                    fill: "#3d5a80",
-                    text: "#ffffff",
-                  },
-                  {
-                    id: "signup",
-                    label: "สมัครสำเร็จ",
-                    hint: "signup",
-                    value: data.payFunnel?.signups ?? data.summary.signups,
-                    fill: "#1a1d21",
-                    text: "#ffffff",
-                  },
-                  {
-                    id: "buy",
-                    label: "คนซื้อ",
-                    hint: "unique buyers",
-                    value: data.payFunnel?.buyers ?? data.summary.buyers ?? 0,
-                    fill: "#b8f5d8",
-                    text: "#0f7a4a",
-                  },
-                ]}
-                emptyNote={
-                  (data.payFunnel?.offerViews ??
-                    data.payFunnel?.payViews ??
-                    0) === 0
-                    ? "ตัวเลขเห็นข้อเสนอเริ่มนับหลัง deploy รอบนี้ (รวม pay_view เดิม)"
-                    : undefined
-                }
-              />
-            </SoftCard>
-          </div>
+          <SoftCard>
+            <div className="mb-5 text-center sm:text-left">
+              <p className="text-[15px] font-semibold">Funnel เว็บ</p>
+              <p className="mt-0.5 text-[12px] text-[#8b93a1]">
+                หน้าแรก → พรีวิว → กดสมัคร → กรอกข้อมูล → ชำระเงิน
+              </p>
+            </div>
+            <FunnelCone
+              steps={[
+                {
+                  id: "home",
+                  label: "การเข้าชมหน้าแรก",
+                  hint: "/2",
+                  value:
+                    data.payFunnel?.homeViews ??
+                    data.growthFunnel?.homeViews ??
+                    data.summary.visitors ??
+                    0,
+                  fill: "#7dffb3",
+                  text: "#0f7a4a",
+                },
+                {
+                  id: "preview",
+                  label: "กดไปหน้าพรีวิว",
+                  hint: "/welcome/preview",
+                  value:
+                    data.payFunnel?.previewViews ??
+                    data.growthFunnel?.previewViews ??
+                    0,
+                  fill: "#5b9fd4",
+                  text: "#ffffff",
+                },
+                {
+                  id: "signup_start",
+                  label: "กดสมัคร",
+                  hint: "signup_start",
+                  value:
+                    data.payFunnel?.signupStarts ??
+                    data.growthFunnel?.signupStarts ??
+                    0,
+                  fill: "#3d5a80",
+                  text: "#ffffff",
+                },
+                {
+                  id: "profile",
+                  label: "กรอกข้อมูลจนเสร็จ",
+                  hint: "profile_saved",
+                  value:
+                    data.payFunnel?.profilesCompleted ??
+                    data.growthFunnel?.profilesCompleted ??
+                    0,
+                  fill: "#1a1d21",
+                  text: "#ffffff",
+                },
+                {
+                  id: "buy",
+                  label: "ชำระเงินเลย",
+                  hint: "unique buyers",
+                  value:
+                    data.payFunnel?.buyers ??
+                    data.growthFunnel?.buyers ??
+                    data.summary.buyers ??
+                    0,
+                  fill: "#b8f5d8",
+                  text: "#0f7a4a",
+                },
+              ]}
+              emptyNote={
+                (data.payFunnel?.homeViews ??
+                  data.growthFunnel?.homeViews ??
+                  data.summary.visitors ??
+                  0) === 0
+                  ? "ตัวเลขเข้าชมเริ่มนับหลังเปิด track · รีเฟรชช่วงใหม่หลังมีคนเข้า /2"
+                  : undefined
+              }
+            />
+          </SoftCard>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <SoftCard>

@@ -242,6 +242,61 @@ export async function GET(request: Request) {
 
     const signupStarts = Number(signupStartAgg?.people) || 0;
 
+    const [homeViewAgg] = await db
+      .select({
+        people: sql<number>`count(distinct coalesce(
+          (${analyticsEvents.props})::jsonb->>'visitorId',
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          inArray(analyticsEvents.name, ["page_view", "screen_view"]),
+          inArray(analyticsEvents.path, ["/", "/2"])
+        )
+      );
+
+    const homeViews = Number(homeViewAgg?.people) || 0;
+
+    const [previewViewAgg] = await db
+      .select({
+        people: sql<number>`count(distinct coalesce(
+          (${analyticsEvents.props})::jsonb->>'visitorId',
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          inArray(analyticsEvents.name, ["page_view", "screen_view"]),
+          sql`coalesce(${analyticsEvents.path}, '') like '/welcome/preview%'`
+        )
+      );
+
+    const previewViews = Number(previewViewAgg?.people) || 0;
+
+    const [profileSavedAgg] = await db
+      .select({
+        people: sql<number>`count(distinct coalesce(
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          eq(analyticsEvents.name, "profile_saved")
+        )
+      );
+
+    const profilesCompleted = Number(profileSavedAgg?.people) || 0;
+
     const paySourceRows = await db
       .select({
         feature: analyticsEvents.feature,
@@ -656,17 +711,23 @@ export async function GET(request: Request) {
       growthFunnel: {
         visitors,
         visitSessions,
+        homeViews,
+        previewViews,
         signupStarts,
         signups: signupTotal,
+        profilesCompleted,
         buyers,
         payments: paymentCount,
       },
       payFunnel: {
         visitors,
+        homeViews,
+        previewViews,
         offerViews,
         payViews,
         signupStarts,
         signups: signupTotal,
+        profilesCompleted,
         buyers,
       },
       payViewsByFeature,
