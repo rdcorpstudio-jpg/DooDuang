@@ -255,7 +255,7 @@ export async function GET(request: Request) {
         and(
           inWindow(analyticsEvents.createdAt, since, until),
           inArray(analyticsEvents.name, ["page_view", "screen_view"]),
-          inArray(analyticsEvents.path, ["/", "/2"])
+          inArray(analyticsEvents.path, ["/", "/2", "/mae"])
         )
       );
 

@@ -1,5 +1,8 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { FeatureOpenTracker } from "@/components/analytics/feature-open-tracker";
+import { SiteVisitTracker } from "@/components/analytics/site-visit-tracker";
 import { HomeGate } from "@/components/home/home-gate";
 import {
   APP_NAME,
@@ -16,6 +19,10 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
+      <Suspense fallback={null}>
+        <SiteVisitTracker />
+        <FeatureOpenTracker />
+      </Suspense>
       <section className="sr-only">
         <h1>{APP_NAME}</h1>
         <p>{APP_PURPOSE}</p>

@@ -152,6 +152,7 @@ export function featureFromPath(
 
   if (path === "/") return "home";
   if (path === "/2") return "home";
+  if (path === "/mae") return "home";
   if (path === "/menu" || path.startsWith("/preview/menu")) return "home";
   if (path === "/predict" || path.startsWith("/preview/predict")) return "home";
   if (path === "/reading") return "reading";
@@ -192,6 +193,7 @@ export function featureFromPath(
 export function screenLabelFromPath(pathname: string): string {
   const path = pathname.replace(/\/$/, "") || "/";
   if (path === "/2") return "หน้าสตอรี่ /2";
+  if (path === "/mae") return "หน้าแรก /mae";
   if (path.startsWith("/welcome/preview")) return "หน้าพรีวิว";
   const feature = featureFromPath(path);
   if (feature) return ANALYTICS_FEATURE_LABELS[feature];

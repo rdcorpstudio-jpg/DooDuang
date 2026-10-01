@@ -949,7 +949,7 @@ export function AdminAnalyticsPage() {
                 {
                   id: "home",
                   label: "การเข้าชมหน้าแรก",
-                  hint: "/2",
+                  hint: "/ · /2 · /mae",
                   value:
                     data.payFunnel?.homeViews ??
                     data.growthFunnel?.homeViews ??
@@ -1009,7 +1009,7 @@ export function AdminAnalyticsPage() {
                   data.growthFunnel?.homeViews ??
                   data.summary.visitors ??
                   0) === 0
-                  ? "ตัวเลขเข้าชมเริ่มนับหลังเปิด track · รีเฟรชช่วงใหม่หลังมีคนเข้า /2"
+                  ? "ตัวเลขเข้าชมเริ่มนับหลังเปิด track · รีเฟรชช่วงใหม่หลังมีคนเข้า / · /2 · /mae"
                   : undefined
               }
             />
