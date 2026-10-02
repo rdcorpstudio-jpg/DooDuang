@@ -7079,8 +7079,193 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   --story-gold: #d5b16f;
   --story-gold-light: #e8d19a;
   --story-muted: #b7c0cf;
+  --story-safe-bottom: calc(18px + env(safe-area-inset-bottom));
   background: var(--story-ink);
   color: #f5f7ff;
+}
+.story-landing--login {
+  height: 100%;
+  max-height: 100%;
+}
+.story-landing--login .story-hero {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+.story-landing--login .story-hero::after {
+  background: linear-gradient(
+    180deg,
+    rgba(6, 14, 32, 0.22) 0%,
+    rgba(6, 14, 32, 0.18) 40%,
+    rgba(6, 14, 32, 0.7) 72%,
+    rgba(6, 14, 32, 0.92) 100%
+  );
+}
+.story-landing--login .story-hero-copy {
+  height: 100%;
+  min-height: 0;
+  justify-content: center;
+  padding-top: 10px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  gap: 6px;
+}
+.story-landing--login .story-hero-brand {
+  margin: 0;
+  font-size: 17px !important;
+}
+.story-landing--login .story-hero h1 {
+  margin-bottom: 2px;
+  font-size: clamp(1.4rem, 5.2vw, 1.7rem);
+}
+.story-landing--login .story-hero h1 .mae-gold-text,
+.phone-frame .story-landing--login .story-hero h1 .mae-gold-text {
+  display: block;
+  font-size: inherit;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  background-image: linear-gradient(
+    180deg,
+    #fffdf5 0%,
+    #fff0c4 22%,
+    #f6d78a 48%,
+    #e8c05a 72%,
+    #f8e6b0 100%
+  ) !important;
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 236, 180, 0.35))
+    drop-shadow(0 2px 6px rgba(4, 12, 32, 0.55))
+    drop-shadow(0 0 14px rgba(255, 214, 130, 0.45)) !important;
+}
+.story-landing--login .story-hero-sub {
+  margin-bottom: 0;
+}
+.story-landing--login .story-hero-gallery {
+  position: relative;
+  z-index: 1;
+  display: block;
+  flex: 0 0 auto;
+  height: min(300px, 42svh);
+  max-height: 300px;
+  min-height: 200px;
+  margin: 2px -14px 10px;
+  overflow: visible;
+}
+.story-landing--login .story-hero-stage {
+  width: 100%;
+  height: 100%;
+}
+.story-landing--login .story-hero-benefits {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 20px;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+.story-landing--login .story-hero-benefits li {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 7.2rem;
+}
+.story-landing--login .story-hero .story-hero-benefits strong {
+  overflow: visible;
+  line-height: 1.35;
+  padding-block: 0.04em;
+  font-size: 13px;
+}
+.story-landing--login .story-hero .story-hero-benefits small {
+  overflow: visible;
+  line-height: 1.35;
+  font-size: 12px;
+}
+.story-landing--login .story-hero-fan div {
+  padding: 10px 8px 16px;
+}
+.story-landing--login .story-hero .story-hero-fan small {
+  overflow: visible;
+  line-height: 1.3;
+}
+.story-landing--login .story-hero-foot {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 6px;
+  padding-top: 0;
+  align-items: center;
+}
+.story-landing--login .story-hero-grow {
+  display: none;
+}
+.story-landing--login .story-hero-login {
+  margin-top: 0;
+  padding-top: 0;
+  width: min(100%, 280px);
+}
+.story-login-spacer {
+  height: calc(148px + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+.story-login-hero-label {
+  margin: 0 0 6px;
+  text-align: center;
+  color: #e8d19a !important;
+  font-size: 12px !important;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+.story-login-hero-note {
+  margin: 8px 0 0;
+  text-align: center;
+  color: rgba(186, 204, 230, 0.72) !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+.story-login-hero-stack {
+  width: 100%;
+  max-width: 280px;
+  margin-inline: auto;
+}
+.story-landing--login .story-login-hero-stack .login-google-solid,
+.story-landing--login .story-login-hero-stack a,
+.story-landing--login .story-login-hero-stack button[type="button"] {
+  height: 42px !important;
+  min-height: 42px !important;
+  font-size: 14px !important;
+}
+@media (max-width: 767px) and (max-height: 760px) {
+  .story-landing--login .story-hero {
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+  .story-landing--login .story-hero-copy {
+    height: 100%;
+    min-height: 0;
+    justify-content: center;
+    padding-top: 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    gap: 4px;
+  }
+  .story-landing--login .story-hero-gallery {
+    height: min(240px, 34svh);
+    min-height: 180px;
+    max-height: 240px;
+  }
+}
+.story-cta-bar:has([data-story-login]) {
+  padding-top: 10px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
 }
 .story-landing [data-story-reveal] {
   opacity: 0;
@@ -7540,11 +7725,39 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
   .story-hero .story-hero-fan small {
     font-size: 12px;
   }
+  .story-landing--login .story-hero-fan h2 {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+  .story-landing--login .story-hero .story-hero-fan small {
+    font-size: 11px;
+  }
+  .story-landing--login .story-hero-fan--left {
+    left: 6%;
+    width: 32%;
+    top: 22px;
+  }
+  .story-landing--login .story-hero-fan--middle {
+    left: 34%;
+    width: 34%;
+    top: 8px;
+  }
+  .story-landing--login .story-hero-fan--right {
+    right: 6%;
+    width: 31%;
+    top: 24px;
+  }
 }
 @media (max-width: 767px) and (max-height: 720px) {
   .story-hero {
     height: auto;
     overflow: visible;
+  }
+  .story-landing--login .story-hero {
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
   }
   .story-hero-copy {
     height: auto;
@@ -7552,25 +7765,94 @@ html[data-keyboard-open="true"] .wizard-keyboard-compact .flex.flex-col.gap-4 {
     padding-top: 8px;
     padding-bottom: 6px;
   }
+  .story-landing--login .story-hero-copy {
+    height: 100%;
+    min-height: 0;
+    justify-content: center;
+    padding-top: 6px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+    gap: 4px;
+  }
   .story-hero h1 {
     margin-bottom: 2px;
     font-size: 1.5rem;
+  }
+  .story-landing--login .story-hero h1 {
+    font-size: 1.35rem;
+  }
+  .story-landing--login .story-hero h1 .mae-gold-text,
+  .phone-frame .story-landing--login .story-hero h1 .mae-gold-text {
+    font-size: inherit;
   }
   .story-hero-gallery {
     height: 262px;
     margin-top: 6px;
   }
+  .story-landing--login .story-hero-gallery {
+    height: min(210px, 30svh) !important;
+    min-height: 170px !important;
+    max-height: 210px !important;
+    margin-top: 0;
+    overflow: visible !important;
+  }
+  .story-landing--login .story-hero-fan--left {
+    top: 14px;
+  }
+  .story-landing--login .story-hero-fan--middle {
+    top: 4px;
+  }
+  .story-landing--login .story-hero-fan--right {
+    top: 16px;
+  }
   .story-hero-benefits {
     margin-top: 6px;
+  }
+  .story-landing--login .story-hero-benefits {
+    margin-top: 14px;
+    gap: 8px;
   }
   .story-hero-ico,
   .story-hero-ico img {
     width: 44px;
     height: 44px;
   }
+  .story-landing--login .story-hero-ico,
+  .story-landing--login .story-hero-ico img {
+    width: 36px;
+    height: 36px;
+  }
+  .story-landing--login .story-hero .story-hero-benefits strong {
+    font-size: 12px;
+  }
+  .story-landing--login .story-hero .story-hero-benefits small {
+    font-size: 11px;
+  }
   .story-hero .story-button {
     margin-top: 4px;
     min-height: 46px;
+  }
+  .story-landing--login .story-hero-foot {
+    margin-top: 4px;
+  }
+  .story-landing--login .story-hero-login {
+    width: min(100%, 260px);
+  }
+  .story-landing--login .story-login-hero-stack {
+    max-width: 260px;
+  }
+  .story-landing--login .story-login-hero-label {
+    margin-bottom: 4px;
+    font-size: 11.5px !important;
+  }
+  .story-landing--login .story-login-hero-stack .login-google-solid,
+  .story-landing--login .story-login-hero-stack a,
+  .story-landing--login .story-login-hero-stack button[type="button"] {
+    height: 40px !important;
+    min-height: 40px !important;
+    font-size: 13.5px !important;
+  }
+  .story-landing--login .story-login-hero-stack.space-y-2 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 6px;
   }
 }
 .story-hero-benefits {

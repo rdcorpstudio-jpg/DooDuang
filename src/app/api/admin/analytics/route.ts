@@ -255,11 +255,44 @@ export async function GET(request: Request) {
         and(
           inWindow(analyticsEvents.createdAt, since, until),
           inArray(analyticsEvents.name, ["page_view", "screen_view"]),
-          inArray(analyticsEvents.path, ["/", "/2", "/mae"])
+          inArray(analyticsEvents.path, ["/", "/2", "/3", "/mae"])
         )
       );
 
     const homeViews = Number(homeViewAgg?.people) || 0;
+
+    const HOME_PATHS = ["/", "/2", "/3", "/mae"] as const;
+    const homeViewByPathRows = await db
+      .select({
+        path: analyticsEvents.path,
+        people: sql<number>`count(distinct coalesce(
+          (${analyticsEvents.props})::jsonb->>'visitorId',
+          ${analyticsEvents.userId},
+          ${analyticsEvents.id}
+        ))::int`,
+      })
+      .from(analyticsEvents)
+      .where(
+        and(
+          inWindow(analyticsEvents.createdAt, since, until),
+          inArray(analyticsEvents.name, ["page_view", "screen_view"]),
+          inArray(analyticsEvents.path, [...HOME_PATHS])
+        )
+      )
+      .groupBy(analyticsEvents.path);
+
+    const homeViewsByPath: Record<(typeof HOME_PATHS)[number], number> = {
+      "/": 0,
+      "/2": 0,
+      "/3": 0,
+      "/mae": 0,
+    };
+    for (const row of homeViewByPathRows) {
+      const path = row.path as (typeof HOME_PATHS)[number];
+      if (path in homeViewsByPath) {
+        homeViewsByPath[path] = Number(row.people) || 0;
+      }
+    }
 
     const [previewViewAgg] = await db
       .select({
@@ -712,6 +745,7 @@ export async function GET(request: Request) {
         visitors,
         visitSessions,
         homeViews,
+        homeViewsByPath,
         previewViews,
         signupStarts,
         signups: signupTotal,
@@ -722,6 +756,7 @@ export async function GET(request: Request) {
       payFunnel: {
         visitors,
         homeViews,
+        homeViewsByPath,
         previewViews,
         offerViews,
         payViews,

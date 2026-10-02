@@ -75,6 +75,7 @@ type AnalyticsPayload = {
     visitors: number;
     visitSessions: number;
     homeViews?: number;
+    homeViewsByPath?: Partial<Record<"/" | "/2" | "/3" | "/mae", number>>;
     previewViews?: number;
     signupStarts?: number;
     signups: number;
@@ -85,6 +86,7 @@ type AnalyticsPayload = {
   payFunnel?: {
     visitors: number;
     homeViews?: number;
+    homeViewsByPath?: Partial<Record<"/" | "/2" | "/3" | "/mae", number>>;
     previewViews?: number;
     offerViews?: number;
     payViews: number;
@@ -107,6 +109,23 @@ type AnalyticsPayload = {
 type RangeKey = "7d" | "30d" | "90d";
 type PickMode = "preset" | "custom";
 type Phase = "pick" | "dashboard";
+type HomePathFilter = "all" | "/" | "/2" | "/3" | "/mae";
+
+const HOME_PATH_FILTERS: Array<{ id: HomePathFilter; label: string }> = [
+  { id: "all", label: "รวมทั้งหมด" },
+  { id: "/", label: "/" },
+  { id: "/2", label: "/2" },
+  { id: "/3", label: "/3" },
+  { id: "/mae", label: "/mae" },
+];
+
+const HOME_PATH_HINT: Record<HomePathFilter, string> = {
+  all: "/ · /2 · /3 · /mae",
+  "/": "หน้าแรก /",
+  "/2": "หน้าสตอรี่ /2",
+  "/3": "หน้าล็อกอิน /3",
+  "/mae": "หน้า /mae",
+};
 
 type AnalyticsQuery =
   | { kind: "preset"; range: RangeKey }
@@ -612,6 +631,7 @@ export function AdminAnalyticsPage() {
   const [data, setData] = useState<AnalyticsPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [homePathFilter, setHomePathFilter] = useState<HomePathFilter>("all");
 
   const load = useCallback(async (query: AnalyticsQuery) => {
     setLoading(true);
@@ -938,23 +958,54 @@ export function AdminAnalyticsPage() {
           </div>
 
           <SoftCard>
-            <div className="mb-5 text-center sm:text-left">
+            <div className="mb-4 text-center sm:text-left">
               <p className="text-[15px] font-semibold">Funnel เว็บ</p>
               <p className="mt-0.5 text-[12px] text-[#8b93a1]">
                 หน้าแรก → พรีวิว → กดสมัคร → กรอกข้อมูล → ชำระเงิน
               </p>
+            </div>
+            <div className="mb-5 flex flex-wrap items-center justify-center gap-1.5 sm:justify-start">
+              <span className="mr-1 text-[11px] font-medium text-[#8b93a1]">
+                หน้าแรก:
+              </span>
+              {HOME_PATH_FILTERS.map((opt) => {
+                const active = homePathFilter === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setHomePathFilter(opt.id)}
+                    className={
+                      active
+                        ? "rounded-full bg-[#1a1d21] px-2.5 py-1 text-[11px] font-semibold text-white"
+                        : "rounded-full bg-[#eef1f4] px-2.5 py-1 text-[11px] font-semibold text-[#5c6573] transition hover:bg-[#e2e6eb]"
+                    }
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
             <FunnelCone
               steps={[
                 {
                   id: "home",
                   label: "การเข้าชมหน้าแรก",
-                  hint: "/ · /2 · /mae",
-                  value:
-                    data.payFunnel?.homeViews ??
-                    data.growthFunnel?.homeViews ??
-                    data.summary.visitors ??
-                    0,
+                  hint: HOME_PATH_HINT[homePathFilter],
+                  value: (() => {
+                    const byPath =
+                      data.payFunnel?.homeViewsByPath ??
+                      data.growthFunnel?.homeViewsByPath;
+                    if (homePathFilter !== "all" && byPath) {
+                      return byPath[homePathFilter] ?? 0;
+                    }
+                    return (
+                      data.payFunnel?.homeViews ??
+                      data.growthFunnel?.homeViews ??
+                      data.summary.visitors ??
+                      0
+                    );
+                  })(),
                   fill: "#7dffb3",
                   text: "#0f7a4a",
                 },
@@ -1005,12 +1056,21 @@ export function AdminAnalyticsPage() {
                 },
               ]}
               emptyNote={
-                (data.payFunnel?.homeViews ??
-                  data.growthFunnel?.homeViews ??
-                  data.summary.visitors ??
-                  0) === 0
-                  ? "ตัวเลขเข้าชมเริ่มนับหลังเปิด track · รีเฟรชช่วงใหม่หลังมีคนเข้า / · /2 · /mae"
-                  : undefined
+                (() => {
+                  const byPath =
+                    data.payFunnel?.homeViewsByPath ??
+                    data.growthFunnel?.homeViewsByPath;
+                  const homeValue =
+                    homePathFilter !== "all" && byPath
+                      ? (byPath[homePathFilter] ?? 0)
+                      : (data.payFunnel?.homeViews ??
+                        data.growthFunnel?.homeViews ??
+                        data.summary.visitors ??
+                        0);
+                  return homeValue === 0
+                    ? `ตัวเลขเข้าชมเริ่มนับหลังเปิด track · รีเฟรชช่วงใหม่หลังมีคนเข้า ${HOME_PATH_HINT[homePathFilter]}`
+                    : undefined;
+                })()
               }
             />
           </SoftCard>
