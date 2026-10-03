@@ -157,8 +157,10 @@ export async function POST(request: Request) {
     }
 
     if (isNewUser) {
-      const { notifyNewRegistration } = await import("@/lib/line-group-notify");
-      notifyNewRegistration({
+      const { scheduleNewRegistrationNotify } = await import(
+        "@/lib/line-group-notify"
+      );
+      scheduleNewRegistrationNotify({
         channel: "google",
         userId,
         name: profile.name,
