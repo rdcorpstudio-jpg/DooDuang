@@ -419,6 +419,7 @@ export function StoryHome({ mode = "preview" }: { mode?: StoryHomeMode }) {
     const syncHeroHeight = () => {
       const h = Math.round(landing.clientHeight);
       if (h <= 0) return;
+      // Lock first screen exactly — next section starts right after scroll.
       hero.style.height = `${h}px`;
       hero.style.minHeight = `${h}px`;
       hero.style.maxHeight = `${h}px`;
@@ -449,6 +450,7 @@ export function StoryHome({ mode = "preview" }: { mode?: StoryHomeMode }) {
         const el = landingRef.current;
         if (!el) return;
         setPastHero(el.scrollTop > el.clientHeight * 0.72);
+        if (mode === "login") return;
         const photo = el.querySelector<HTMLElement>(".story-hero-photo");
         if (!photo) return;
         const shift = Math.min(el.scrollTop * 0.22, 96);
@@ -532,17 +534,14 @@ export function StoryHome({ mode = "preview" }: { mode?: StoryHomeMode }) {
             ))}
           </ul>
           {mode === "login" ? (
-            <>
-              <div className="story-hero-foot">
-                <StoryLoginCta
-                  callbackUrl={LOGIN_CALLBACK}
-                  anchor
-                  variant="hero"
-                  className="story-hero-login"
-                />
-              </div>
-              <div className="story-hero-grow" aria-hidden />
-            </>
+            <div className="story-hero-foot">
+              <StoryLoginCta
+                callbackUrl={LOGIN_CALLBACK}
+                anchor
+                variant="hero"
+                className="story-hero-login"
+              />
+            </div>
           ) : (
             <Link className="story-button" href={JOIN_URL}>
               ลองดูดวงของฉันฟรี <span aria-hidden>→</span>
@@ -550,8 +549,6 @@ export function StoryHome({ mode = "preview" }: { mode?: StoryHomeMode }) {
           )}
         </div>
       </section>
-
-      {mode === "login" ? <div className="story-login-spacer" aria-hidden /> : null}
 
       <StorySectionTwo />
 
