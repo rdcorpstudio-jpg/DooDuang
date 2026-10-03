@@ -44,7 +44,7 @@ export function LineSignInButton({
 
   function startLineLogin() {
     setLoading(true);
-    trackSignupStart({ channel: "line", path: "/login" });
+    trackSignupStart({ channel: "line" });
     rememberCallback(callbackUrl);
     const next = encodeURIComponent(safeCallback(callbackUrl));
     window.location.assign(`/api/auth/line/start?callbackUrl=${next}`);

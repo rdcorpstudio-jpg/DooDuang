@@ -310,7 +310,9 @@ export async function applyOneTimePremiumCheckout(opts: {
   });
 
   try {
-    const { notifyPremiumPayment } = await import("@/lib/line-group-notify");
+    const { schedulePremiumPaymentNotify } = await import(
+      "@/lib/line-group-notify"
+    );
     const db = requireDb();
     const [u] = await db
       .select({
@@ -334,7 +336,7 @@ export async function applyOneTimePremiumCheckout(opts: {
       session.customer_details?.email ||
       session.customer_email ||
       null;
-    await notifyPremiumPayment({
+    schedulePremiumPaymentNotify({
       userId,
       amount: opts.amount,
       days: opts.days,

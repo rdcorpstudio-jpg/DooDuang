@@ -110,8 +110,10 @@ export async function GET(request: Request) {
 
     const { userId, isNewUser } = await upsertUserByLineId(profile);
     if (isNewUser) {
-      const { notifyNewRegistration } = await import("@/lib/line-group-notify");
-      await notifyNewRegistration({
+      const { scheduleNewRegistrationNotify } = await import(
+        "@/lib/line-group-notify"
+      );
+      scheduleNewRegistrationNotify({
         channel: "line",
         userId,
         name: profile.name,

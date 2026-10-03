@@ -262,6 +262,8 @@ export async function GET(request: Request) {
     const homeViews = Number(homeViewAgg?.people) || 0;
 
     const HOME_PATHS = ["/", "/2", "/3", "/mae"] as const;
+    type HomePath = (typeof HOME_PATHS)[number];
+
     const homeViewByPathRows = await db
       .select({
         path: analyticsEvents.path,
@@ -281,18 +283,124 @@ export async function GET(request: Request) {
       )
       .groupBy(analyticsEvents.path);
 
-    const homeViewsByPath: Record<(typeof HOME_PATHS)[number], number> = {
+    const homeViewsByPath: Record<HomePath, number> = {
       "/": 0,
       "/2": 0,
       "/3": 0,
       "/mae": 0,
     };
     for (const row of homeViewByPathRows) {
-      const path = row.path as (typeof HOME_PATHS)[number];
+      const path = row.path as HomePath;
       if (path in homeViewsByPath) {
         homeViewsByPath[path] = Number(row.people) || 0;
       }
     }
+
+    /** Visitors who hit a given home path — used to attribute later funnel steps. */
+    function homeVisitorIdsSql(homePath: HomePath) {
+      return sql`(
+        select distinct (props)::jsonb->>'visitorId'
+        from analytics_events
+        where created_at >= ${since}
+          and created_at < ${until}
+          and name in ('page_view', 'screen_view')
+          and path = ${homePath}
+          and (props)::jsonb->>'visitorId' is not null
+      )`;
+    }
+
+    /** Users linked to those visitors (same visitorId on any event in-window). */
+    function homeLinkedUserIdsSql(homePath: HomePath) {
+      return sql`(
+        select distinct user_id
+        from analytics_events
+        where created_at >= ${since}
+          and created_at < ${until}
+          and user_id is not null
+          and (props)::jsonb->>'visitorId' in ${homeVisitorIdsSql(homePath)}
+      )`;
+    }
+
+    async function funnelSliceForHomePath(homePath: HomePath) {
+      const homeVids = homeVisitorIdsSql(homePath);
+      const linkedUids = homeLinkedUserIdsSql(homePath);
+
+      const [previewAgg] = await db
+        .select({
+          people: sql<number>`count(distinct coalesce(
+            (${analyticsEvents.props})::jsonb->>'visitorId',
+            ${analyticsEvents.userId},
+            ${analyticsEvents.id}
+          ))::int`,
+        })
+        .from(analyticsEvents)
+        .where(
+          and(
+            inWindow(analyticsEvents.createdAt, since, until),
+            inArray(analyticsEvents.name, ["page_view", "screen_view"]),
+            sql`coalesce(${analyticsEvents.path}, '') like '/welcome/preview%'`,
+            sql`(${analyticsEvents.props})::jsonb->>'visitorId' in ${homeVids}`
+          )
+        );
+
+      const [signupAgg] = await db
+        .select({
+          people: sql<number>`count(distinct coalesce(
+            (${analyticsEvents.props})::jsonb->>'visitorId',
+            ${analyticsEvents.userId},
+            ${analyticsEvents.id}
+          ))::int`,
+        })
+        .from(analyticsEvents)
+        .where(
+          and(
+            inWindow(analyticsEvents.createdAt, since, until),
+            eq(analyticsEvents.name, "signup_start"),
+            sql`(${analyticsEvents.props})::jsonb->>'visitorId' in ${homeVids}`
+          )
+        );
+
+      const [profileAgg] = await db
+        .select({
+          people: sql<number>`count(distinct ${analyticsEvents.userId})::int`,
+        })
+        .from(analyticsEvents)
+        .where(
+          and(
+            inWindow(analyticsEvents.createdAt, since, until),
+            eq(analyticsEvents.name, "profile_saved"),
+            sql`${analyticsEvents.userId} in ${linkedUids}`
+          )
+        );
+
+      const [buyerSliceAgg] = await db
+        .select({
+          people: sql<number>`count(distinct ${payments.userId})::int`,
+        })
+        .from(payments)
+        .where(
+          and(
+            inWindow(payments.createdAt, since, until),
+            eq(payments.status, "completed"),
+            sql`${payments.userId} in ${linkedUids}`
+          )
+        );
+
+      return {
+        homeViews: homeViewsByPath[homePath],
+        previewViews: Number(previewAgg?.people) || 0,
+        signupStarts: Number(signupAgg?.people) || 0,
+        profilesCompleted: Number(profileAgg?.people) || 0,
+        buyers: Number(buyerSliceAgg?.people) || 0,
+      };
+    }
+
+    const funnelByHomePath = {
+      "/": await funnelSliceForHomePath("/"),
+      "/2": await funnelSliceForHomePath("/2"),
+      "/3": await funnelSliceForHomePath("/3"),
+      "/mae": await funnelSliceForHomePath("/mae"),
+    };
 
     const [previewViewAgg] = await db
       .select({
@@ -746,6 +854,7 @@ export async function GET(request: Request) {
         visitSessions,
         homeViews,
         homeViewsByPath,
+        funnelByHomePath,
         previewViews,
         signupStarts,
         signups: signupTotal,
@@ -757,6 +866,7 @@ export async function GET(request: Request) {
         visitors,
         homeViews,
         homeViewsByPath,
+        funnelByHomePath,
         previewViews,
         offerViews,
         payViews,

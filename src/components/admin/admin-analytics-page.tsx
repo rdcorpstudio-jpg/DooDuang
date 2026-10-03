@@ -55,6 +55,16 @@ type PurchaseRow = {
   channelLabel: string;
 };
 
+type HomePathKey = "/" | "/2" | "/3" | "/mae";
+
+type HomeFunnelSlice = {
+  homeViews: number;
+  previewViews: number;
+  signupStarts: number;
+  profilesCompleted: number;
+  buyers: number;
+};
+
 type AnalyticsPayload = {
   ok: true;
   rangeDays: number;
@@ -75,7 +85,8 @@ type AnalyticsPayload = {
     visitors: number;
     visitSessions: number;
     homeViews?: number;
-    homeViewsByPath?: Partial<Record<"/" | "/2" | "/3" | "/mae", number>>;
+    homeViewsByPath?: Partial<Record<HomePathKey, number>>;
+    funnelByHomePath?: Partial<Record<HomePathKey, HomeFunnelSlice>>;
     previewViews?: number;
     signupStarts?: number;
     signups: number;
@@ -86,7 +97,8 @@ type AnalyticsPayload = {
   payFunnel?: {
     visitors: number;
     homeViews?: number;
-    homeViewsByPath?: Partial<Record<"/" | "/2" | "/3" | "/mae", number>>;
+    homeViewsByPath?: Partial<Record<HomePathKey, number>>;
+    funnelByHomePath?: Partial<Record<HomePathKey, HomeFunnelSlice>>;
     previewViews?: number;
     offerViews?: number;
     payViews: number;
@@ -109,7 +121,7 @@ type AnalyticsPayload = {
 type RangeKey = "7d" | "30d" | "90d";
 type PickMode = "preset" | "custom";
 type Phase = "pick" | "dashboard";
-type HomePathFilter = "all" | "/" | "/2" | "/3" | "/mae";
+type HomePathFilter = "all" | HomePathKey;
 
 const HOME_PATH_FILTERS: Array<{ id: HomePathFilter; label: string }> = [
   { id: "all", label: "รวมทั้งหมด" },
@@ -126,6 +138,48 @@ const HOME_PATH_HINT: Record<HomePathFilter, string> = {
   "/3": "หน้าล็อกอิน /3",
   "/mae": "หน้า /mae",
 };
+
+function resolveWebFunnel(
+  data: AnalyticsPayload,
+  filter: HomePathFilter
+): HomeFunnelSlice {
+  if (filter !== "all") {
+    const slice =
+      data.payFunnel?.funnelByHomePath?.[filter] ??
+      data.growthFunnel?.funnelByHomePath?.[filter];
+    if (slice) return slice;
+    return {
+      homeViews:
+        data.payFunnel?.homeViewsByPath?.[filter] ??
+        data.growthFunnel?.homeViewsByPath?.[filter] ??
+        0,
+      previewViews: 0,
+      signupStarts: 0,
+      profilesCompleted: 0,
+      buyers: 0,
+    };
+  }
+  return {
+    homeViews:
+      data.payFunnel?.homeViews ??
+      data.growthFunnel?.homeViews ??
+      data.summary.visitors ??
+      0,
+    previewViews:
+      data.payFunnel?.previewViews ?? data.growthFunnel?.previewViews ?? 0,
+    signupStarts:
+      data.payFunnel?.signupStarts ?? data.growthFunnel?.signupStarts ?? 0,
+    profilesCompleted:
+      data.payFunnel?.profilesCompleted ??
+      data.growthFunnel?.profilesCompleted ??
+      0,
+    buyers:
+      data.payFunnel?.buyers ??
+      data.growthFunnel?.buyers ??
+      data.summary.buyers ??
+      0,
+  };
+}
 
 type AnalyticsQuery =
   | { kind: "preset"; range: RangeKey }
@@ -966,7 +1020,7 @@ export function AdminAnalyticsPage() {
             </div>
             <div className="mb-5 flex flex-wrap items-center justify-center gap-1.5 sm:justify-start">
               <span className="mr-1 text-[11px] font-medium text-[#8b93a1]">
-                หน้าแรก:
+                Funnel จากหน้า:
               </span>
               {HOME_PATH_FILTERS.map((opt) => {
                 const active = homePathFilter === opt.id;
@@ -986,93 +1040,72 @@ export function AdminAnalyticsPage() {
                 );
               })}
             </div>
+            {(() => {
+              const funnel = resolveWebFunnel(data, homePathFilter);
+              return (
             <FunnelCone
               steps={[
                 {
                   id: "home",
                   label: "การเข้าชมหน้าแรก",
                   hint: HOME_PATH_HINT[homePathFilter],
-                  value: (() => {
-                    const byPath =
-                      data.payFunnel?.homeViewsByPath ??
-                      data.growthFunnel?.homeViewsByPath;
-                    if (homePathFilter !== "all" && byPath) {
-                      return byPath[homePathFilter] ?? 0;
-                    }
-                    return (
-                      data.payFunnel?.homeViews ??
-                      data.growthFunnel?.homeViews ??
-                      data.summary.visitors ??
-                      0
-                    );
-                  })(),
+                  value: funnel.homeViews,
                   fill: "#7dffb3",
                   text: "#0f7a4a",
                 },
                 {
                   id: "preview",
                   label: "กดไปหน้าพรีวิว",
-                  hint: "/welcome/preview",
-                  value:
-                    data.payFunnel?.previewViews ??
-                    data.growthFunnel?.previewViews ??
-                    0,
+                  hint:
+                    homePathFilter === "all"
+                      ? "/welcome/preview"
+                      : `พรีวิว จาก ${homePathFilter}`,
+                  value: funnel.previewViews,
                   fill: "#5b9fd4",
                   text: "#ffffff",
                 },
                 {
                   id: "signup_start",
                   label: "กดสมัคร",
-                  hint: "signup_start",
-                  value:
-                    data.payFunnel?.signupStarts ??
-                    data.growthFunnel?.signupStarts ??
-                    0,
+                  hint:
+                    homePathFilter === "all"
+                      ? "signup_start"
+                      : `กดสมัคร จาก ${homePathFilter}`,
+                  value: funnel.signupStarts,
                   fill: "#3d5a80",
                   text: "#ffffff",
                 },
                 {
                   id: "profile",
                   label: "กรอกข้อมูลจนเสร็จ",
-                  hint: "profile_saved",
-                  value:
-                    data.payFunnel?.profilesCompleted ??
-                    data.growthFunnel?.profilesCompleted ??
-                    0,
+                  hint:
+                    homePathFilter === "all"
+                      ? "profile_saved"
+                      : `โปรไฟล์ จาก ${homePathFilter}`,
+                  value: funnel.profilesCompleted,
                   fill: "#1a1d21",
                   text: "#ffffff",
                 },
                 {
                   id: "buy",
                   label: "ชำระเงินเลย",
-                  hint: "unique buyers",
-                  value:
-                    data.payFunnel?.buyers ??
-                    data.growthFunnel?.buyers ??
-                    data.summary.buyers ??
-                    0,
+                  hint:
+                    homePathFilter === "all"
+                      ? "unique buyers"
+                      : `ชำระ จาก ${homePathFilter}`,
+                  value: funnel.buyers,
                   fill: "#b8f5d8",
                   text: "#0f7a4a",
                 },
               ]}
               emptyNote={
-                (() => {
-                  const byPath =
-                    data.payFunnel?.homeViewsByPath ??
-                    data.growthFunnel?.homeViewsByPath;
-                  const homeValue =
-                    homePathFilter !== "all" && byPath
-                      ? (byPath[homePathFilter] ?? 0)
-                      : (data.payFunnel?.homeViews ??
-                        data.growthFunnel?.homeViews ??
-                        data.summary.visitors ??
-                        0);
-                  return homeValue === 0
-                    ? `ตัวเลขเข้าชมเริ่มนับหลังเปิด track · รีเฟรชช่วงใหม่หลังมีคนเข้า ${HOME_PATH_HINT[homePathFilter]}`
-                    : undefined;
-                })()
+                funnel.homeViews === 0
+                  ? `ตัวเลขเข้าชมเริ่มนับหลังเปิด track · รีเฟรชช่วงใหม่หลังมีคนเข้า ${HOME_PATH_HINT[homePathFilter]}`
+                  : undefined
               }
             />
+              );
+            })()}
           </SoftCard>
 
           <div className="grid gap-4 lg:grid-cols-2">

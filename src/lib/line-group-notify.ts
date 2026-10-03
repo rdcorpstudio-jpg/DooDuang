@@ -3,6 +3,8 @@
  * Requires the bot to already be a member of the group.
  */
 
+import { after } from "next/server";
+
 function messagingToken() {
   return (
     process.env.LINE_MESSAGING_ACCESS_TOKEN ||
@@ -19,10 +21,15 @@ export function isLineGroupNotifyConfigured() {
   return Boolean(messagingToken() && notifyGroupId());
 }
 
-export async function pushLineGroupText(text: string): Promise<boolean> {
+async function pushLineGroupTextOnce(text: string): Promise<boolean> {
   const token = messagingToken();
   const groupId = notifyGroupId();
-  if (!token || !groupId) return false;
+  if (!token || !groupId) {
+    console.error(
+      "[line-notify] missing env — set LINE_MESSAGING_ACCESS_TOKEN and LINE_NOTIFY_GROUP_ID"
+    );
+    return false;
+  }
 
   const body = text.trim().slice(0, 4500);
   if (!body) return false;
@@ -51,9 +58,30 @@ export async function pushLineGroupText(text: string): Promise<boolean> {
   }
 }
 
-/** Fire-and-forget — never throw to callers. Prefer await pushLineGroupText in auth/payment. */
+export async function pushLineGroupText(text: string): Promise<boolean> {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const ok = await pushLineGroupTextOnce(text);
+    if (ok) return true;
+    if (attempt < 3) {
+      await new Promise((r) => setTimeout(r, 250 * attempt));
+    }
+  }
+  return false;
+}
+
+/** Fire-and-forget — never throw to callers. Prefer scheduleLineGroupNotify / await. */
 export function notifyLineGroup(text: string) {
   void pushLineGroupText(text);
+}
+
+/**
+ * Keep the serverless invocation alive until LINE push finishes
+ * (void/fire-and-forget gets killed when the response ends).
+ */
+export function scheduleLineGroupNotify(text: string) {
+  after(() => {
+    void pushLineGroupText(text);
+  });
 }
 
 function maskPhone(phone?: string | null) {
@@ -85,13 +113,13 @@ function maskEmail(email?: string | null) {
   return `${maskedLocal}@${domain}`;
 }
 
-export async function notifyNewRegistration(opts: {
+function formatNewRegistrationText(opts: {
   channel: "google" | "phone" | "line";
   userId: string;
   name?: string | null;
   email?: string | null;
   phone?: string | null;
-}): Promise<boolean> {
+}) {
   const channelLabel =
     opts.channel === "google"
       ? "Google"
@@ -100,15 +128,37 @@ export async function notifyNewRegistration(opts: {
         : "LINE Login";
   const email = maskEmail(opts.email);
   const phone = maskPhone(opts.phone);
-  const lines = [
+  return [
     "🆕 สมัครใหม่",
     `ช่องทาง: ${channelLabel}`,
     opts.name ? `ชื่อ: ${opts.name}` : null,
     email ? `อีเมล: ${email}` : null,
     phone ? `เบอร์: ${phone}` : null,
     `id: ${opts.userId.slice(0, 8)}…`,
-  ].filter(Boolean);
-  return pushLineGroupText(lines.join("\n"));
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+export async function notifyNewRegistration(opts: {
+  channel: "google" | "phone" | "line";
+  userId: string;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+}): Promise<boolean> {
+  return pushLineGroupText(formatNewRegistrationText(opts));
+}
+
+/** Prefer this in auth routes — survives response end on serverless. */
+export function scheduleNewRegistrationNotify(opts: {
+  channel: "google" | "phone" | "line";
+  userId: string;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+}) {
+  scheduleLineGroupNotify(formatNewRegistrationText(opts));
 }
 
 export async function notifyPremiumPayment(opts: {
@@ -138,4 +188,13 @@ export async function notifyPremiumPayment(opts: {
     `id: ${opts.userId.slice(0, 8)}…`,
   ].filter(Boolean);
   return pushLineGroupText(lines.join("\n"));
+}
+
+export function schedulePremiumPaymentNotify(
+  opts: Parameters<typeof notifyPremiumPayment>[0]
+) {
+  if (opts.alreadyFulfilled) return;
+  after(() => {
+    void notifyPremiumPayment(opts);
+  });
 }

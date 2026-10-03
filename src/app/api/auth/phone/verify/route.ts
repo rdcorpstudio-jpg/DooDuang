@@ -43,8 +43,10 @@ export async function POST(request: Request) {
     const { userId, isNewUser } = await upsertUserByPhone(phone);
 
     if (isNewUser) {
-      const { notifyNewRegistration } = await import("@/lib/line-group-notify");
-      await notifyNewRegistration({
+      const { scheduleNewRegistrationNotify } = await import(
+        "@/lib/line-group-notify"
+      );
+      scheduleNewRegistrationNotify({
         channel: "phone",
         userId,
         phone,

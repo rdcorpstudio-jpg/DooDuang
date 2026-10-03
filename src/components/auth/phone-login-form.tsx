@@ -64,7 +64,7 @@ export function PhoneLoginForm({
     }
 
     if (!resend) {
-      trackSignupStart({ channel: "phone", path: "/login" });
+      trackSignupStart({ channel: "phone" });
     }
 
     setLoading(true);

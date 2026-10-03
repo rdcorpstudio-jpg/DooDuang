@@ -284,7 +284,7 @@ export function GoogleSignInButton({
       return;
     }
 
-    trackSignupStart({ channel: "google", path: "/login" });
+    trackSignupStart({ channel: "google" });
 
     // Must start popup in the same sync turn as the click — any await before
     // this makes Safari/Chrome treat it as blocked on the first try.
