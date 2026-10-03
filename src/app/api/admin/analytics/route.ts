@@ -297,34 +297,60 @@ export async function GET(request: Request) {
     }
 
     /** Visitors who hit a given home path — used to attribute later funnel steps. */
-    function homeVisitorIdsSql(homePath: HomePath) {
-      return sql`(
-        select distinct (props)::jsonb->>'visitorId'
-        from analytics_events
-        where created_at >= ${since}
-          and created_at < ${until}
-          and name in ('page_view', 'screen_view')
-          and path = ${homePath}
-          and (props)::jsonb->>'visitorId' is not null
+    function visitedHomeSql(homePath: HomePath) {
+      return sql`exists (
+        select 1
+        from analytics_events h
+        where h.created_at >= ${since}
+          and h.created_at < ${until}
+          and h.name in ('page_view', 'screen_view')
+          and h.path = ${homePath}
+          and nullif(h.props, '') is not null
+          and (h.props)::jsonb->>'visitorId' is not null
+          and (h.props)::jsonb->>'visitorId' =
+            nullif((${analyticsEvents.props})::jsonb->>'visitorId', '')
       )`;
     }
 
-    /** Users linked to those visitors (same visitorId on any event in-window). */
-    function homeLinkedUserIdsSql(homePath: HomePath) {
-      return sql`(
-        select distinct user_id
-        from analytics_events
-        where created_at >= ${since}
-          and created_at < ${until}
-          and user_id is not null
-          and (props)::jsonb->>'visitorId' in ${homeVisitorIdsSql(homePath)}
+    function linkedToHomeVisitorSql(homePath: HomePath) {
+      return sql`exists (
+        select 1
+        from analytics_events h
+        join analytics_events linked
+          on nullif(linked.props, '') is not null
+         and (linked.props)::jsonb->>'visitorId' is not null
+         and (linked.props)::jsonb->>'visitorId' = (h.props)::jsonb->>'visitorId'
+        where h.created_at >= ${since}
+          and h.created_at < ${until}
+          and h.name in ('page_view', 'screen_view')
+          and h.path = ${homePath}
+          and nullif(h.props, '') is not null
+          and (h.props)::jsonb->>'visitorId' is not null
+          and linked.user_id is not null
+          and linked.user_id = ${analyticsEvents.userId}
+      )`;
+    }
+
+    function paymentLinkedToHomeVisitorSql(homePath: HomePath) {
+      return sql`exists (
+        select 1
+        from analytics_events h
+        join analytics_events linked
+          on nullif(linked.props, '') is not null
+         and (linked.props)::jsonb->>'visitorId' is not null
+         and (linked.props)::jsonb->>'visitorId' = (h.props)::jsonb->>'visitorId'
+        where h.created_at >= ${since}
+          and h.created_at < ${until}
+          and h.name in ('page_view', 'screen_view')
+          and h.path = ${homePath}
+          and nullif(h.props, '') is not null
+          and (h.props)::jsonb->>'visitorId' is not null
+          and linked.user_id is not null
+          and linked.user_id = ${payments.userId}
       )`;
     }
 
     async function funnelSliceForHomePath(homePath: HomePath) {
-      const homeVids = homeVisitorIdsSql(homePath);
-      const linkedUids = homeLinkedUserIdsSql(homePath);
-
       const [previewAgg] = await db
         .select({
           people: sql<number>`count(distinct coalesce(
@@ -339,7 +365,7 @@ export async function GET(request: Request) {
             inWindow(analyticsEvents.createdAt, since, until),
             inArray(analyticsEvents.name, ["page_view", "screen_view"]),
             sql`coalesce(${analyticsEvents.path}, '') like '/welcome/preview%'`,
-            sql`(${analyticsEvents.props})::jsonb->>'visitorId' in ${homeVids}`
+            visitedHomeSql(homePath)
           )
         );
 
@@ -356,7 +382,7 @@ export async function GET(request: Request) {
           and(
             inWindow(analyticsEvents.createdAt, since, until),
             eq(analyticsEvents.name, "signup_start"),
-            sql`(${analyticsEvents.props})::jsonb->>'visitorId' in ${homeVids}`
+            visitedHomeSql(homePath)
           )
         );
 
@@ -369,7 +395,7 @@ export async function GET(request: Request) {
           and(
             inWindow(analyticsEvents.createdAt, since, until),
             eq(analyticsEvents.name, "profile_saved"),
-            sql`${analyticsEvents.userId} in ${linkedUids}`
+            linkedToHomeVisitorSql(homePath)
           )
         );
 
@@ -382,7 +408,7 @@ export async function GET(request: Request) {
           and(
             inWindow(payments.createdAt, since, until),
             eq(payments.status, "completed"),
-            sql`${payments.userId} in ${linkedUids}`
+            paymentLinkedToHomeVisitorSql(homePath)
           )
         );
 
@@ -395,12 +421,46 @@ export async function GET(request: Request) {
       };
     }
 
-    const funnelByHomePath = {
-      "/": await funnelSliceForHomePath("/"),
-      "/2": await funnelSliceForHomePath("/2"),
-      "/3": await funnelSliceForHomePath("/3"),
-      "/mae": await funnelSliceForHomePath("/mae"),
+    const emptyHomeFunnel = {
+      homeViews: 0,
+      previewViews: 0,
+      signupStarts: 0,
+      profilesCompleted: 0,
+      buyers: 0,
     };
+
+    let funnelByHomePath: Record<
+      HomePath,
+      {
+        homeViews: number;
+        previewViews: number;
+        signupStarts: number;
+        profilesCompleted: number;
+        buyers: number;
+      }
+    > = {
+      "/": { ...emptyHomeFunnel, homeViews: homeViewsByPath["/"] },
+      "/2": { ...emptyHomeFunnel, homeViews: homeViewsByPath["/2"] },
+      "/3": { ...emptyHomeFunnel, homeViews: homeViewsByPath["/3"] },
+      "/mae": { ...emptyHomeFunnel, homeViews: homeViewsByPath["/mae"] },
+    };
+
+    try {
+      const [root, two, three, mae] = await Promise.all([
+        funnelSliceForHomePath("/"),
+        funnelSliceForHomePath("/2"),
+        funnelSliceForHomePath("/3"),
+        funnelSliceForHomePath("/mae"),
+      ]);
+      funnelByHomePath = {
+        "/": root,
+        "/2": two,
+        "/3": three,
+        "/mae": mae,
+      };
+    } catch (err) {
+      console.error("funnelByHomePath failed:", err);
+    }
 
     const [previewViewAgg] = await db
       .select({
