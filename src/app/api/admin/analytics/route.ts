@@ -255,13 +255,13 @@ export async function GET(request: Request) {
         and(
           inWindow(analyticsEvents.createdAt, since, until),
           inArray(analyticsEvents.name, ["page_view", "screen_view"]),
-          inArray(analyticsEvents.path, ["/", "/2", "/3", "/mae"])
+          inArray(analyticsEvents.path, ["/", "/2", "/3", "/4", "/mae"])
         )
       );
 
     const homeViews = Number(homeViewAgg?.people) || 0;
 
-    const HOME_PATHS = ["/", "/2", "/3", "/mae"] as const;
+    const HOME_PATHS = ["/", "/2", "/3", "/4", "/mae"] as const;
     type HomePath = (typeof HOME_PATHS)[number];
 
     const homeViewByPathRows = await db
@@ -287,6 +287,7 @@ export async function GET(request: Request) {
       "/": 0,
       "/2": 0,
       "/3": 0,
+      "/4": 0,
       "/mae": 0,
     };
     for (const row of homeViewByPathRows) {
@@ -442,20 +443,23 @@ export async function GET(request: Request) {
       "/": { ...emptyHomeFunnel, homeViews: homeViewsByPath["/"] },
       "/2": { ...emptyHomeFunnel, homeViews: homeViewsByPath["/2"] },
       "/3": { ...emptyHomeFunnel, homeViews: homeViewsByPath["/3"] },
+      "/4": { ...emptyHomeFunnel, homeViews: homeViewsByPath["/4"] },
       "/mae": { ...emptyHomeFunnel, homeViews: homeViewsByPath["/mae"] },
     };
 
     try {
-      const [root, two, three, mae] = await Promise.all([
+      const [root, two, three, four, mae] = await Promise.all([
         funnelSliceForHomePath("/"),
         funnelSliceForHomePath("/2"),
         funnelSliceForHomePath("/3"),
+        funnelSliceForHomePath("/4"),
         funnelSliceForHomePath("/mae"),
       ]);
       funnelByHomePath = {
         "/": root,
         "/2": two,
         "/3": three,
+        "/4": four,
         "/mae": mae,
       };
     } catch (err) {

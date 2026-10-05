@@ -31,7 +31,8 @@ export function isMaeShellPath(pathname: string) {
     pathname.startsWith("/daily") ||
     pathname.startsWith("/logout") ||
     pathname === "/2" ||
-    pathname === "/3"
+    pathname === "/3" ||
+    pathname === "/4"
   );
 }
 

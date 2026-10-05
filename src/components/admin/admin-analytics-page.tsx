@@ -55,7 +55,7 @@ type PurchaseRow = {
   channelLabel: string;
 };
 
-type HomePathKey = "/" | "/2" | "/3" | "/mae";
+type HomePathKey = "/" | "/2" | "/3" | "/4" | "/mae";
 
 type HomeFunnelSlice = {
   homeViews: number;
@@ -128,14 +128,16 @@ const HOME_PATH_FILTERS: Array<{ id: HomePathFilter; label: string }> = [
   { id: "/", label: "/" },
   { id: "/2", label: "/2" },
   { id: "/3", label: "/3" },
+  { id: "/4", label: "/4" },
   { id: "/mae", label: "/mae" },
 ];
 
 const HOME_PATH_HINT: Record<HomePathFilter, string> = {
-  all: "/ · /2 · /3 · /mae",
+  all: "/ · /2 · /3 · /4 · /mae",
   "/": "หน้าแรก /",
   "/2": "หน้าสตอรี่ /2",
   "/3": "หน้าล็อกอิน /3",
+  "/4": "หน้าเปิดไพ่เกต /4",
   "/mae": "หน้า /mae",
 };
 
