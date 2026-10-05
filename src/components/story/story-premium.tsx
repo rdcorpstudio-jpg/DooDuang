@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { trackOfferView } from "@/lib/analytics/client";
 import "./premium-vertical.css";
 import { FORTUNE_PACKAGE_LABEL, FORTUNE_UNLOCK_LIST_PRICE, FORTUNE_UNLOCK_PRICE } from "@/lib/site";
 
@@ -116,19 +115,10 @@ function Chevron() {
   );
 }
 
-export function StoryPremium({
-  offerPath = "/2#premium",
-  ctaHref = "/welcome/preview",
-  ctaLabel = "อ่านดวงแบบเต็ม",
-}: {
-  offerPath?: string;
-  ctaHref?: string;
-  ctaLabel?: string;
-}) {
+export function StoryPremium() {
   const price = FORTUNE_UNLOCK_PRICE.toLocaleString("th-TH");
   const original = FORTUNE_UNLOCK_LIST_PRICE.toLocaleString("th-TH");
   const featureScrollRef = useRef<HTMLDivElement>(null);
-  const packageRef = useRef<HTMLDivElement>(null);
   const [featureMore, setFeatureMore] = useState(true);
 
   useEffect(() => {
@@ -149,26 +139,11 @@ export function StoryPremium({
     };
   }, []);
 
-  useEffect(() => {
-    const el = packageRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        trackOfferView({ path: offerPath });
-        io.disconnect();
-      },
-      { threshold: 0.35 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [offerPath]);
-
   return (
     <div className="mmm-premium-slot">
       <section className="mmm-premium" id="premium" aria-labelledby="mmm-premium-heading">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="mmmp-scenery" src="/images/story/premium/scenery.webp?v=orig" width={900} height={1599} alt="" aria-hidden />
+        <img className="mmmp-scenery" src="/images/story/premium/scenery.webp" width={900} height={1599} alt="" aria-hidden />
         <svg className="mmmp-celestial" viewBox="0 0 300 300" fill="none" aria-hidden>
           <g stroke="currentColor" strokeWidth="0.65">
             <circle cx="150" cy="150" r="146" />
@@ -205,7 +180,7 @@ export function StoryPremium({
           <p className="mmmp-intro-copy">เห็นช่วงที่ควรเดินหน้า และช่วงที่ควรตั้งหลัก</p>
         </div>
 
-        <div className="mmmp-package" data-story-reveal ref={packageRef}>
+        <div className="mmmp-package" data-story-reveal>
           <div className="mmmp-sale" aria-label="ราคาพิเศษ">
             <b lang="en">SALE</b>
             <span>
@@ -270,7 +245,7 @@ export function StoryPremium({
         </div>
 
         <div className="mmmp-action" data-story-reveal>
-          <Link className="mmmp-cta" href={ctaHref}>
+          <Link className="mmmp-cta" href="https://www.maemangmee.com/welcome/preview">
             <svg className="mmmp-cta-lock" viewBox="0 0 28 36" aria-hidden>
               <path d="M6 15V9a8 8 0 0 1 16 0v6" fill="none" strokeWidth="3" />
               <rect x="2" y="14" width="24" height="21" rx="3" stroke="none" />
@@ -278,7 +253,7 @@ export function StoryPremium({
               <path d="M14 25v4" fill="none" stroke="#efd390" strokeWidth="2.5" />
             </svg>
             <span className="mmmp-cta-text">
-              <strong>{ctaLabel}</strong>
+              <strong>อ่านดวงแบบเต็ม</strong>
             </span>
             <Chevron />
           </Link>

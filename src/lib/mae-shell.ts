@@ -8,7 +8,8 @@ export function isAdminPath(pathname: string) {
 
 export function isMaeShellPath(pathname: string) {
   if (isAdminPath(pathname)) return false;
-  if (pathname === "/" || pathname === "") return true;
+  if (pathname === "/mae" || pathname.startsWith("/mae/")) return false;
+  if (pathname === "/" || pathname === "" || pathname === "/2") return true;
   return (
     pathname.startsWith("/mae") ||
     pathname.startsWith("/home") ||
@@ -30,7 +31,6 @@ export function isMaeShellPath(pathname: string) {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/daily") ||
     pathname.startsWith("/logout") ||
-    pathname === "/2" ||
     pathname === "/3" ||
     pathname === "/4"
   );
