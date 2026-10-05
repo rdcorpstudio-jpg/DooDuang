@@ -195,8 +195,8 @@ export function featureFromPath(
 export function screenLabelFromPath(pathname: string): string {
   const path = pathname.replace(/\/$/, "") || "/";
   if (path === "/2") return "หน้าสตอรี่ /2";
-  if (path === "/3") return "หน้าไพ่ประจำวัน /3";
-  if (path === "/4") return "หน้าเปิดไพ่เกต /4";
+  if (path === "/3") return "หน้าสตอรี่ล็อกอิน /3";
+  if (path === "/4") return "หน้าไพ่ประจำวัน /4";
   if (path === "/mae") return "หน้าแรก /mae";
   if (path.startsWith("/welcome/preview")) return "หน้าพรีวิว";
   const feature = featureFromPath(path);

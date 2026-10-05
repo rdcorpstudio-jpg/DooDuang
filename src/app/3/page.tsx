@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Landing3DailyTarot } from "@/components/story/landing3-daily-tarot";
+import { StoryHome } from "@/components/story/story-home";
 import { APP_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `ไพ่ประจำวัน · ${APP_NAME}`,
+  title: `สมัครแล้วเริ่มดูดวง · ${APP_NAME}`,
   description:
-    "เปิดไพ่ประจำวันกับแม่มั่งมี อ่านคำทำนายสั้น ๆ แล้วสมัครเพื่ออ่านต่อแบบเต็ม",
+    "บางเรื่องในชีวิตแค่รู้จังหวะก็กล้าเดินต่อ สมัครด้วย Google LINE หรือเบอร์ แล้วเริ่มดูดวงกับแม่มั่งมี",
 };
 
-export default function Landing3Page() {
-  return <Landing3DailyTarot />;
+export default function StoryLoginHomePage() {
+  return <StoryHome mode="login" />;
 }

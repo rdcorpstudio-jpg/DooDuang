@@ -2,21 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Noto_Serif_Thai } from "next/font/google";
 import { MAE_REVIEWS } from "@/lib/reviews";
+import { StoryLoginCta } from "@/components/story/story-login-cta";
 import { StoryPremium } from "@/components/story/story-premium";
 import { StorySectionTwo } from "@/components/story/story-section-two";
-import "./story-landing.css";
-
-const storySerif = Noto_Serif_Thai({
-  subsets: ["thai", "latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-noto-serif",
-  display: "swap",
-});
 
 const STORY_IMAGES = {
-  hero: "/images/bg/story-moon.webp",
+  hero: "/images/bg/story-moon.webp?v=orig",
   year: "/images/home/predict/year-banner.webp",
   bazi: "/images/home/predict/bazi-banner.webp",
   couple: "/images/home/predict/couple-banner.webp",
@@ -58,7 +50,34 @@ const FEATURES = [
   },
 ] as const;
 
-const JOIN_URL = "https://www.maemangmee.com/welcome/preview";
+const JOIN_URL = "/welcome/preview";
+const LOGIN_ANCHOR = "#story-login";
+const LOGIN_CALLBACK = "/reading";
+
+type StoryHomeMode = "preview" | "login";
+
+function JoinTarget({
+  mode,
+  className,
+  children,
+}: {
+  mode: StoryHomeMode;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  if (mode === "login") {
+    return (
+      <a href={LOGIN_ANCHOR} className={className}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={JOIN_URL} className={className}>
+      {children}
+    </Link>
+  );
+}
 
 const DAILY = [
   {
@@ -116,7 +135,7 @@ const MORE = [
 
 const HERO_SETS = [
   [
-    { title: "งานช่วงนี้", sub: "เรื่องที่กำลังรอคำตอบ", image: "/images/story/cards/work.webp" },
+    { title: "งานช่วงนี้", sub: "เรื่องที่รอคำตอบ", image: "/images/story/cards/work.webp" },
     { title: "จังหวะชีวิต", sub: "เดือนก่อน — วันนี้", image: "/images/story/cards/timing.webp" },
     { title: "การเงิน", sub: "ภาพรวมของคุณ", image: "/images/story/cards/money.webp" },
   ],
@@ -202,7 +221,7 @@ function HeroLineIcon({ src }: { src: string }) {
 
 const HERO_SLOTS = ["left", "middle", "right"] as const;
 
-export function StoryHome() {
+export function StoryHome({ mode = "preview" }: { mode?: StoryHomeMode }) {
   const [featureIndex, setFeatureIndex] = useState(0);
   const [heroIndex, setHeroIndex] = useState(0);
   const [heroDir, setHeroDir] = useState<1 | -1>(1);
@@ -391,14 +410,47 @@ export function StoryHome() {
     animateFeatureScroll(el, index * step);
   }
 
+  useEffect(() => {
+    if (mode !== "login") return;
+    const landing = landingRef.current;
+    const hero = landing?.querySelector<HTMLElement>(".story-hero");
+    if (!landing || !hero) return;
+
+    const syncHeroHeight = () => {
+      const h = Math.round(landing.clientHeight);
+      if (h <= 0) return;
+      // Lock first screen exactly — next section starts right after scroll.
+      hero.style.height = `${h}px`;
+      hero.style.minHeight = `${h}px`;
+      hero.style.maxHeight = `${h}px`;
+    };
+
+    syncHeroHeight();
+    const ro = new ResizeObserver(syncHeroHeight);
+    ro.observe(landing);
+    window.addEventListener("resize", syncHeroHeight);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", syncHeroHeight);
+      hero.style.height = "";
+      hero.style.minHeight = "";
+      hero.style.maxHeight = "";
+    };
+  }, [mode]);
+
   return (
     <div
       ref={landingRef}
-      className={`story-landing relative h-full overflow-y-auto overscroll-contain ${storySerif.variable}`}
+      className={
+        mode === "login"
+          ? "story-landing story-landing--login relative h-full overflow-y-auto overscroll-contain"
+          : "story-landing relative h-full overflow-y-auto overscroll-contain"
+      }
       onScroll={() => {
         const el = landingRef.current;
         if (!el) return;
         setPastHero(el.scrollTop > el.clientHeight * 0.72);
+        if (mode === "login") return;
         const photo = el.querySelector<HTMLElement>(".story-hero-photo");
         if (!photo) return;
         const shift = Math.min(el.scrollTop * 0.22, 96);
@@ -481,9 +533,20 @@ export function StoryHome() {
               </li>
             ))}
           </ul>
-          <Link className="story-button" href={JOIN_URL}>
-            ลองดูดวงของฉันฟรี <span aria-hidden>→</span>
-          </Link>
+          {mode === "login" ? (
+            <div className="story-hero-foot">
+              <StoryLoginCta
+                callbackUrl={LOGIN_CALLBACK}
+                anchor
+                variant="hero"
+                className="story-hero-login"
+              />
+            </div>
+          ) : (
+            <Link className="story-button" href={JOIN_URL}>
+              ลองดูดวงของฉันฟรี <span aria-hidden>→</span>
+            </Link>
+          )}
         </div>
       </section>
 
@@ -523,10 +586,9 @@ export function StoryHome() {
             {FEATURES.map((item) => {
               const image = STORY_IMAGES[item.key];
               return (
-                <Link
+                <JoinTarget
                   key={item.href}
-                  href={JOIN_URL}
-                  draggable={false}
+                  mode={mode}
                   className={`story-feature story-feature--${item.tone}`}
                 >
                   {image ? (
@@ -541,7 +603,7 @@ export function StoryHome() {
                   <span className="story-feature-arrow" aria-hidden>
                     →
                   </span>
-                </Link>
+                </JoinTarget>
               );
             })}
           </div>
@@ -569,16 +631,16 @@ export function StoryHome() {
           </p>
           <div className="story-more" data-story-stagger aria-label="ฟีเจอร์อื่น">
             {MORE.map((item) => (
-              <Link key={item.label} href={JOIN_URL}>
+              <JoinTarget key={item.label} mode={mode}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.image} alt="" />
                 <span>{item.label}</span>
-              </Link>
+              </JoinTarget>
             ))}
           </div>
           <div className="story-daily-list" data-story-stagger>
             {DAILY.map((item) => (
-              <Link key={item.title} href={JOIN_URL} className="story-daily-card">
+              <JoinTarget key={item.title} mode={mode} className="story-daily-card">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img className="story-mini-photo" src={item.image} alt="" />
                 <span>
@@ -588,7 +650,7 @@ export function StoryHome() {
                 <span className="story-feature-arrow" aria-hidden>
                   →
                 </span>
-              </Link>
+              </JoinTarget>
             ))}
           </div>
         </div>
@@ -648,18 +710,26 @@ export function StoryHome() {
               </article>
             ))}
           </div>
-          <Link className="story-review-more" href={JOIN_URL}>
+          <JoinTarget mode={mode} className="story-review-more">
             ดูทั้งหมด {MAE_REVIEWS.length} รีวิว →
-          </Link>
+          </JoinTarget>
         </div>
       </section>
 
-      <StoryPremium />
+      <StoryPremium
+        offerPath={mode === "login" ? "/3#premium" : "/2#premium"}
+        ctaHref={mode === "login" ? LOGIN_ANCHOR : JOIN_URL}
+        ctaLabel={mode === "login" ? "สมัครแล้วอ่านดวงแบบเต็ม" : undefined}
+      />
 
       <div className={pastHero ? "story-cta-bar" : "story-cta-bar story-cta-bar--off"}>
-        <Link className="story-button" href={JOIN_URL}>
-          ลองดูดวงของฉันฟรี <span aria-hidden>→</span>
-        </Link>
+        {mode === "login" ? (
+          <StoryLoginCta callbackUrl={LOGIN_CALLBACK} compact className="mx-auto max-w-[420px]" />
+        ) : (
+          <Link className="story-button" href={JOIN_URL}>
+            ลองดูดวงของฉันฟรี <span aria-hidden>→</span>
+          </Link>
+        )}
       </div>
     </div>
   );
