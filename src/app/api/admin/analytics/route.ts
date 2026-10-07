@@ -400,6 +400,39 @@ export async function GET(request: Request) {
           )
         );
 
+      const [cardOpenAgg] = await db
+        .select({
+          people: sql<number>`count(distinct coalesce(
+            (${analyticsEvents.props})::jsonb->>'visitorId',
+            ${analyticsEvents.userId},
+            ${analyticsEvents.id}
+          ))::int`,
+        })
+        .from(analyticsEvents)
+        .where(
+          and(
+            inWindow(analyticsEvents.createdAt, since, until),
+            eq(analyticsEvents.name, "card_open"),
+            visitedHomeSql(homePath)
+          )
+        );
+
+      /** Logged-in visitors who then opened a real in-app feature (not a landing page). */
+      const [appPlayAgg] = await db
+        .select({
+          people: sql<number>`count(distinct ${analyticsEvents.userId})::int`,
+        })
+        .from(analyticsEvents)
+        .where(
+          and(
+            inWindow(analyticsEvents.createdAt, since, until),
+            eq(analyticsEvents.name, "feature_open"),
+            sql`${analyticsEvents.userId} is not null`,
+            sql`coalesce(${analyticsEvents.feature}, '') not in ('', 'home', 'menu')`,
+            visitedHomeSql(homePath)
+          )
+        );
+
       const [buyerSliceAgg] = await db
         .select({
           people: sql<number>`count(distinct ${payments.userId})::int`,
@@ -418,6 +451,8 @@ export async function GET(request: Request) {
         previewViews: Number(previewAgg?.people) || 0,
         signupStarts: Number(signupAgg?.people) || 0,
         profilesCompleted: Number(profileAgg?.people) || 0,
+        cardOpens: Number(cardOpenAgg?.people) || 0,
+        appPlays: Number(appPlayAgg?.people) || 0,
         buyers: Number(buyerSliceAgg?.people) || 0,
       };
     }
@@ -427,6 +462,8 @@ export async function GET(request: Request) {
       previewViews: 0,
       signupStarts: 0,
       profilesCompleted: 0,
+      cardOpens: 0,
+      appPlays: 0,
       buyers: 0,
     };
 
@@ -437,6 +474,8 @@ export async function GET(request: Request) {
         previewViews: number;
         signupStarts: number;
         profilesCompleted: number;
+        cardOpens: number;
+        appPlays: number;
         buyers: number;
       }
     > = {

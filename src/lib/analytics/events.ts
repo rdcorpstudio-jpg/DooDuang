@@ -13,6 +13,7 @@ export const ANALYTICS_EVENT_NAMES = [
   "thanks_line_cta",
   "feature_open",
   "feature_complete",
+  "card_open",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];
@@ -25,6 +26,7 @@ export const CLIENT_ANALYTICS_EVENT_NAMES = [
   "signup_start",
   "feature_open",
   "thanks_line_cta",
+  "card_open",
 ] as const satisfies readonly AnalyticsEventName[];
 
 export type ClientAnalyticsEventName =

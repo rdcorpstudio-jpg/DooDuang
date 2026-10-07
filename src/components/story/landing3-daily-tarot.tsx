@@ -11,17 +11,21 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
 import Image from "next/image";
-import { Sparkles, Shuffle } from "lucide-react";
+import { ChevronRight, LockOpen, Shuffle, Sparkles } from "lucide-react";
 import { StoryLoginCta } from "@/components/story/story-login-cta";
+import { MAE_REVIEWS } from "@/lib/reviews";
+import { trackClientEvent } from "@/lib/analytics/client";
+import { getOrCreateVisitorId } from "@/lib/analytics/visitor-id";
 import {
+  TAROT_DECK,
   drawTarotCard,
+  getTarotSide,
   tarotCardImageSrc,
 } from "@/lib/fortune/tarot-deck";
-import { bangkokTodayKey } from "@/lib/fortune/tarot-day-storage";
-import { MaeBrandLink } from "@/components/layout/mae-brand-link";
 import { MaePageBackground } from "@/components/layout/mae-page-background";
 import { AnimatedPage } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils";
@@ -33,8 +37,7 @@ const FAN_CARD_SIZES = "220px";
 const FAN_CARD_W = 142;
 const FAN_CARD_H = 244;
 const FAN_CARD_W_COMPACT = 118;
-const FAN_CARD_H_COMPACT = 200;
-const GOLD_SOFT = "#e8d19a";
+const FAN_CARD_H_COMPACT = 200;const GOLD_SOFT = "#e8d19a";
 const LOGIN_CALLBACK = "/reading";
 const GOLD_RING_OUTER =
   "linear-gradient(145deg, #fff6d4 0%, #f0d78a 18%, #c9a24a 42%, #8a6a2e 68%, #5c451c 88%, #3d2e12 100%)";
@@ -54,12 +57,14 @@ function useCompactViewport() {
   return compact;
 }
 
-function landing3Seed(dayKey = bangkokTodayKey()) {
-  return `landing3-tarot-${dayKey}`;
-}
+const UPRIGHT_CHANCE = 0.75;
 
-function landing3StorageKey(dayKey = bangkokTodayKey()) {
-  return `dooduang-landing3-tarot-${dayKey}`;
+/** Fresh random card on every draw — upright 75% of the time. */
+function shuffleDraw() {
+  const card = TAROT_DECK[Math.floor(Math.random() * TAROT_DECK.length)]!;
+  const upright = Math.random() < UPRIGHT_CHANCE;
+  const side = getTarotSide(card, upright);
+  return { card, upright, side, brief: side.summary };
 }
 
 function SoftGoldPill({
@@ -136,7 +141,7 @@ function ResultHeader({
 
       <h1
         className={cn(
-          "mae-gold-text relative font-bold tracking-tight",
+          "mae-gold-text l3-shimmer-text relative font-bold tracking-tight",
           compact ? "text-[1.65rem]" : "text-[2rem]"
         )}
         style={{
@@ -150,7 +155,10 @@ function ResultHeader({
       </h1>
 
       {status ? (
-        <SoftGoldPill compact={compact} className={compact ? "mt-3" : "mt-3.5"}>
+        <SoftGoldPill
+          compact={compact}
+          className={cn("l3-rise l3-d1", compact ? "mt-3" : "mt-3.5")}
+        >
           {status}
         </SoftGoldPill>
       ) : null}
@@ -158,7 +166,7 @@ function ResultHeader({
       {pillLabel ? (
         <p
           className={cn(
-            "relative max-w-[18rem] font-medium",
+            "l3-rise relative max-w-[18rem] font-medium",
             compact
               ? "mt-3 text-[13.5px] leading-[1.45]"
               : "mt-4 text-[15px] leading-[1.5]"
@@ -172,7 +180,7 @@ function ResultHeader({
       {enLabel ? (
         <p
           className={cn(
-            "relative font-medium uppercase",
+            "l3-rise l3-d1 relative font-medium uppercase",
             compact
               ? "mt-1.5 text-[10px] tracking-[0.16em]"
               : "mt-2 text-[11px] tracking-[0.18em]"
@@ -287,20 +295,41 @@ function GoldFrame({
 function TarotCardFan({
   selected,
   onSelect,
+  onOpen,
   disabled,
   compact = false,
 }: {
   selected: number;
   onSelect: (index: number) => void;
+  onOpen: (index: number) => void;
   disabled?: boolean;
   compact?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ x: number; start: number } | null>(null);
+  const dragRef = useRef<{
+    x: number;
+    start: number;
+    moved: boolean;
+    tapIndex: number | null;
+  } | null>(null);
   const cardW = compact ? FAN_CARD_W_COMPACT : FAN_CARD_W;
   const cardH = compact ? FAN_CARD_H_COMPACT : FAN_CARD_H;
   const stepX = compact ? 16 : 20;
   const trackH = compact ? 230 : 300;
+  const [deal, setDeal] = useState<"stacked" | "dealing" | "settled">("stacked");
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDeal("settled");
+      return;
+    }
+    const start = window.setTimeout(() => setDeal("dealing"), 380);
+    const done = window.setTimeout(() => setDeal("settled"), 380 + 1300);
+    return () => {
+      window.clearTimeout(start);
+      window.clearTimeout(done);
+    };
+  }, []);
 
   return (
     <div className="relative w-full select-none">
@@ -310,7 +339,15 @@ function TarotCardFan({
         style={{ height: trackH }}
         onPointerDown={(e) => {
           if (disabled || e.button !== 0) return;
-          dragRef.current = { x: e.clientX, start: selected };
+          const cardEl = (e.target as HTMLElement).closest<HTMLElement>(
+            "[data-fan-index]"
+          );
+          dragRef.current = {
+            x: e.clientX,
+            start: selected,
+            moved: false,
+            tapIndex: cardEl ? Number(cardEl.dataset.fanIndex) : null,
+          };
           try {
             e.currentTarget.setPointerCapture(e.pointerId);
           } catch {
@@ -320,6 +357,8 @@ function TarotCardFan({
         onPointerMove={(e) => {
           if (!dragRef.current) return;
           const dx = e.clientX - dragRef.current.x;
+          if (Math.abs(dx) > 8) dragRef.current.moved = true;
+          if (!dragRef.current.moved) return;
           const step = Math.round(-dx / (compact ? 24 : 28));
           const next = Math.min(
             FAN_COUNT - 1,
@@ -328,7 +367,11 @@ function TarotCardFan({
           if (next !== selected) onSelect(next);
         }}
         onPointerUp={() => {
+          const drag = dragRef.current;
           dragRef.current = null;
+          if (drag && !drag.moved && drag.tapIndex != null) {
+            onOpen(drag.tapIndex);
+          }
         }}
         onPointerCancel={() => {
           dragRef.current = null;
@@ -337,19 +380,35 @@ function TarotCardFan({
         {Array.from({ length: FAN_COUNT }, (_, i) => {
           const offset = i - selected;
           const abs = Math.abs(offset);
-          const rotate = offset * (compact ? 3 : 3.4);
-          const x = offset * stepX;
-          const y = abs * abs * (compact ? 0.75 : 0.95);
-          const scale = i === selected ? (compact ? 1.06 : 1.1) : Math.max(0.82, 1 - abs * 0.03);
+          const stacked = deal === "stacked";
+          const isSelected = i === selected;
+          const rotate = stacked ? 0 : offset * (compact ? 3 : 3.4);
+          const x = stacked ? 0 : offset * stepX;
+          const y = stacked ? 18 : abs * abs * (compact ? 0.75 : 0.95);
+          const scale = stacked
+            ? 0.9
+            : isSelected
+              ? compact
+                ? 1.06
+                : 1.1
+              : Math.max(0.82, 1 - abs * 0.03);
+          const opacity = stacked
+            ? 0
+            : isSelected
+              ? 1
+              : Math.max(0.42, 1 - abs * 0.1);
           const z = 40 - abs;
           return (
             <button
               key={i}
               type="button"
               disabled={disabled}
-              aria-label={`ไพ่ใบที่ ${i + 1}`}
+              data-fan-index={i}
+              aria-label={`เปิดไพ่ใบที่ ${i + 1}`}
               aria-pressed={i === selected}
-              onClick={() => onSelect(i)}
+              onClick={(e) => {
+                if (e.detail === 0) onOpen(i);
+              }}
               className="absolute left-1/2 top-0 origin-bottom outline-none transition-[transform,opacity] duration-300 ease-out will-change-transform"
               style={{
                 width: cardW,
@@ -357,10 +416,24 @@ function TarotCardFan({
                 marginLeft: -cardW / 2,
                 transform: `translate3d(${x}px, ${y}px, 0) rotate(${rotate}deg) scale(${scale})`,
                 zIndex: z,
-                opacity: i === selected ? 1 : Math.max(0.42, 1 - abs * 0.1),
+                opacity,
+                ...(deal === "settled"
+                  ? null
+                  : {
+                      transitionDuration: "900ms",
+                      transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+                      transitionDelay: `${abs * 55}ms`,
+                    }),
               }}
             >
-              <GoldFrame glow={i === selected} thin className="h-full w-full">
+              <GoldFrame
+                glow={isSelected}
+                thin
+                className={cn(
+                  "h-full w-full",
+                  isSelected && deal === "settled" && "l3-card-float"
+                )}
+              >
                 <CardFace
                   src="/images/tarot/card-back.webp?v=4"
                   alt=""
@@ -383,7 +456,7 @@ function TarotCardFan({
                           "0 6px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.35)",
                       }}
                     >
-                      ใบนี้
+                      แตะเพื่อเปิด
                     </span>
                   </span>
                 ) : null}
@@ -399,7 +472,7 @@ function TarotCardFan({
         )}
         style={{ color: "rgba(220,230,245,0.78)" }}
       >
-        ปัดซ้าย–ขวา · ใบกลางคือใบที่จะเปิด
+        ปัดซ้าย–ขวาเพื่อดูไพ่ · แตะใบไหนก็เปิดได้เลย
         <span className="sr-only">
           {" "}
           ตำแหน่ง {selected + 1} จาก {FAN_COUNT}
@@ -484,16 +557,171 @@ function FlipRevealCard({
   );
 }
 
+const FAN_SPARKLES = [
+  { left: "6%", top: "8%", size: 10, delay: "0s" },
+  { left: "90%", top: "4%", size: 8, delay: "1.1s" },
+  { left: "14%", top: "62%", size: 7, delay: "2.2s" },
+  { left: "84%", top: "58%", size: 11, delay: "0.6s" },
+  { left: "50%", top: "-6%", size: 9, delay: "1.7s" },
+  { left: "96%", top: "34%", size: 6, delay: "2.8s" },
+] as const;
+
+function FanStage({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className="pointer-events-none absolute inset-0" aria-hidden>
+      <div
+        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+        style={{
+          top: compact ? 96 : 124,
+          width: compact ? 210 : 260,
+          height: compact ? 210 : 260,
+          background:
+            "radial-gradient(circle, rgba(232,209,154,0.3) 0%, rgba(213,177,111,0.12) 42%, transparent 70%)",
+        }}
+      />
+      <div
+        className="absolute left-1/2 -translate-x-1/2 rounded-[50%] blur-xl"
+        style={{
+          top: compact ? 200 : 262,
+          width: compact ? 280 : 340,
+          height: compact ? 36 : 44,
+          background:
+            "radial-gradient(ellipse at center, rgba(232,209,154,0.24) 0%, rgba(0,0,0,0.4) 55%, transparent 75%)",
+        }}
+      />
+      {FAN_SPARKLES.map((s, i) => (
+        <span
+          key={i}
+          className="tarot-sparkle absolute"
+          style={{
+            left: s.left,
+            top: s.top,
+            width: s.size,
+            height: s.size,
+            animationDelay: s.delay,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+const BURST_SPARKS = Array.from({ length: 14 }, (_, i) => ({
+  angle: `${i * (360 / 14) + (i % 2 ? 9 : -6)}deg`,
+  dist: `${120 + ((i * 37) % 70)}px`,
+  delay: `${(i % 4) * 0.04}s`,
+}));
+
+/** Light burst centered on the flipping card — `back` sits behind it, `front` over it. */
+function RevealBurst({ layer }: { layer: "back" | "front" }) {
+  if (layer === "back") {
+    return (
+      <div className="l3-burst" aria-hidden>
+        <span className="l3-burst__charge" />
+        <span className="l3-burst__rays" />
+      </div>
+    );
+  }
+  return (
+    <div className="l3-burst l3-burst--front" aria-hidden>
+      <span className="l3-burst__flash" />
+      <span className="l3-burst__ring" />
+      {BURST_SPARKS.map((s, i) => (
+        <span
+          key={i}
+          className="l3-burst__spark"
+          style={
+            {
+              "--l3-spark-angle": s.angle,
+              "--l3-spark-dist": s.dist,
+              "--l3-spark-delay": s.delay,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+const RATING_AVATARS = MAE_REVIEWS.slice(0, 4);
+
+function RatingStrip({ compact = false }: { compact?: boolean }) {
+  const avatarSize = compact ? 22 : 26;
+
+  return (
+    <div
+      className={cn(
+        "l3-rise l3-d5 inline-flex max-w-full items-center gap-2.5 rounded-full",
+        compact ? "mt-3 py-1.5 pl-1.5 pr-3.5" : "mt-5 py-2 pl-2 pr-4"
+      )}
+      style={{
+        background:
+          "linear-gradient(165deg, rgba(14,30,56,0.6) 0%, rgba(6,16,34,0.7) 100%)",
+        boxShadow:
+          "inset 0 0 0 1px rgba(232,209,154,0.22), 0 10px 24px rgba(0,0,0,0.22)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+      }}
+    >
+      <div className="flex shrink-0 items-center" aria-hidden>
+          {RATING_AVATARS.map((r, i) => (
+            <span
+              key={r.id}
+              className="flex items-center justify-center rounded-full font-semibold text-white"
+              style={{
+                width: avatarSize,
+                height: avatarSize,
+                marginLeft: i === 0 ? 0 : -avatarSize * 0.32,
+                background: r.tone,
+                fontSize: compact ? 10.5 : 12,
+                boxShadow: "0 0 0 2px rgba(8,18,36,0.95)",
+                zIndex: RATING_AVATARS.length - i,
+              }}
+            >
+              {r.initial}
+            </span>
+          ))}
+      </div>
+
+      <span
+        className={cn(
+          "leading-none tracking-[0.06em]",
+          compact ? "text-[12px]" : "text-[13.5px]"
+        )}
+        style={{ color: GOLD_SOFT }}
+        aria-label="4.9 จาก 5 ดาว"
+      >
+        ★★★★★
+      </span>
+      <span
+        className={cn(
+          "whitespace-nowrap font-medium leading-none",
+          compact ? "text-[12px]" : "text-[13px]"
+        )}
+        style={{ color: "rgba(230,236,248,0.86)" }}
+      >
+        <b className="font-bold" style={{ color: GOLD_SOFT }}>
+          4.9
+        </b>{" "}
+        · 12,458 รีวิว
+      </span>
+    </div>
+  );
+}
+
 function KeywordTags({ keywords }: { keywords: string[] }) {
   const tags = keywords.slice(0, 4);
   if (tags.length === 0) return null;
   return (
     <div className="mt-4 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-2 px-2">
-      {tags.map((tag) => (
+      {tags.map((tag, i) => (
         <span
           key={tag}
-          className="inline-flex max-w-full items-center gap-1.5 text-[13.5px] font-medium leading-snug"
-          style={{ color: "rgba(232,209,154,0.92)" }}
+          className="l3-pop inline-flex max-w-full items-center gap-1.5 text-[13.5px] font-medium leading-snug"
+          style={{
+            color: "rgba(232,209,154,0.92)",
+            animationDelay: `${0.35 + i * 0.1}s`,
+          }}
         >
           <span
             className="h-1 w-1 shrink-0 rounded-full"
@@ -510,36 +738,47 @@ function KeywordTags({ keywords }: { keywords: string[] }) {
 function LockedAdviceBlock({
   label,
   body,
+  className,
+  onUnlock,
 }: {
   label: string;
   body: string;
+  className?: string;
+  onUnlock: () => void;
 }) {
   return (
-    <div
-      className="relative overflow-hidden rounded-[18px] px-3.5 py-3.5 text-left"
+    <button
+      type="button"
+      onClick={onUnlock}
+      aria-label={`${label} — สมัครเพื่ออ่านต่อ`}
+      className={cn(
+        "relative block w-full overflow-hidden rounded-[18px] px-3.5 py-3.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
+        className
+      )}
       style={{
         background:
           "linear-gradient(160deg, rgba(12,28,52,0.72), rgba(5,14,30,0.68))",
         boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.22)",
       }}
     >
-      <p
-        className="text-[12px] font-semibold tracking-[0.14em]"
+      <span
+        className="block text-[12px] font-semibold tracking-[0.14em]"
         style={{ color: GOLD_SOFT }}
       >
         {label}
-      </p>
-      <p
-        className="mt-1.5 text-[15px] font-medium leading-[1.55]"
+      </span>
+      <span
+        className="mt-1.5 block text-[15px] font-medium leading-[1.55]"
         style={{
           color: "rgba(245,247,255,0.55)",
           filter: "blur(4.5px)",
           userSelect: "none",
         }}
+        aria-hidden
       >
         {body}
-      </p>
-      <div
+      </span>
+      <span
         className="pointer-events-none absolute inset-0 flex items-center justify-center"
         style={{
           background:
@@ -547,40 +786,51 @@ function LockedAdviceBlock({
         }}
       >
         <span
-          className="rounded-full px-3 py-1 text-[12px] font-semibold"
+          className="l3-lock-badge rounded-full px-3 py-1 text-[12px] font-semibold"
           style={{
             color: GOLD_SOFT,
             background: "rgba(6,20,42,0.78)",
             boxShadow: "inset 0 0 0 1px rgba(232,209,154,0.35)",
           }}
         >
-          ล็อก · สมัครเพื่ออ่านต่อ
+          แตะเพื่อสมัครอ่านต่อ
         </span>
-      </div>
-    </div>
+      </span>
+    </button>
   );
 }
 
 /** /3 only — fan pick · flip reveal · gated deeper copy · own storage */
 export function Landing3DailyTarot({ className }: { className?: string }) {
   const compact = useCompactViewport();
-  const [dayKey, setDayKey] = useState(bangkokTodayKey);
-  const seed = useMemo(() => landing3Seed(dayKey), [dayKey]);
-  const storageKey = useMemo(() => landing3StorageKey(dayKey), [dayKey]);
-
+  const [draw, setDraw] = useState(() => drawTarotCard("landing3-initial"));
   const [opened, setOpened] = useState(false);
   const [faceUp, setFaceUp] = useState(false);
   const [slot, setSlot] = useState(Math.floor(FAN_COUNT / 2));
   const [readyToDraw, setReadyToDraw] = useState(true);
   const [flipping, setFlipping] = useState(false);
-  const [revisiting, setRevisiting] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const openTimerRef = useRef<number | null>(null);
+  const signupRef = useRef<HTMLDivElement>(null);
+  const [burstKey, setBurstKey] = useState<number | null>(null);
+  const burstTimerRef = useRef<number | null>(null);
 
-  const draw = useMemo(
-    () => drawTarotCard(`${seed}-slot-${slot}`),
-    [seed, slot]
+  useEffect(
+    () => () => {
+      if (burstTimerRef.current != null) {
+        window.clearTimeout(burstTimerRef.current);
+      }
+    },
+    []
   );
+
+  const goToSignup = useCallback(() => {
+    setShowLogin(true);
+    window.requestAnimationFrame(() => {
+      signupRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, []);
+
   const { card, upright, side } = draw;
 
   useEffect(() => {
@@ -591,83 +841,42 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
     };
   }, []);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      if (raw) {
-        const parsed = JSON.parse(raw) as { slot?: number; opened?: boolean };
-        if (typeof parsed.slot === "number") {
-          setSlot(Math.min(FAN_COUNT - 1, Math.max(0, parsed.slot)));
-        }
-        if (parsed.opened) {
-          setOpened(true);
-          setFaceUp(true);
-          setReadyToDraw(true);
-          setFlipping(false);
-          setRevisiting(true);
-          return;
-        }
-      }
-      setOpened(false);
-      setFaceUp(false);
-      setReadyToDraw(true);
-      setFlipping(false);
-      setRevisiting(false);
-      setShowLogin(false);
-    } catch {
-      setReadyToDraw(true);
-    }
-  }, [storageKey]);
-
-  useEffect(() => {
-    const tick = () => {
-      const nextKey = bangkokTodayKey();
-      if (nextKey !== dayKey) {
-        setDayKey(nextKey);
-        setSlot(Math.floor(FAN_COUNT / 2));
-        setRevisiting(false);
-        setShowLogin(false);
-      }
-    };
-    tick();
-    const id = window.setInterval(tick, 15_000);
-    return () => window.clearInterval(id);
-  }, [dayKey]);
-
-  const persistOpen = useCallback(
-    (nextSlot: number) => {
-      try {
-        localStorage.setItem(
-          storageKey,
-          JSON.stringify({ opened: true, slot: nextSlot })
-        );
-      } catch {
-        /* ignore */
-      }
-    },
-    [storageKey]
-  );
-
   const revealAtSlot = useCallback(
     (nextSlot: number) => {
+      const next = shuffleDraw();
+      trackClientEvent({
+        name: "card_open",
+        props: {
+          visitorId: getOrCreateVisitorId(),
+          card: next.card.id,
+          upright: next.upright,
+        },
+      });
+      setDraw(next);
       setSlot(nextSlot);
       setFlipping(true);
       setOpened(true);
       setFaceUp(false);
-      setRevisiting(false);
+      setBurstKey(Date.now());
+      if (burstTimerRef.current != null) {
+        window.clearTimeout(burstTimerRef.current);
+      }
+      burstTimerRef.current = window.setTimeout(() => {
+        setBurstKey(null);
+        burstTimerRef.current = null;
+      }, 2100);
       if (openTimerRef.current != null) {
         window.clearTimeout(openTimerRef.current);
       }
       openTimerRef.current = window.setTimeout(() => {
         setFaceUp(true);
         openTimerRef.current = window.setTimeout(() => {
-          persistOpen(nextSlot);
           setFlipping(false);
           openTimerRef.current = null;
         }, 700);
       }, 520);
     },
-    [persistOpen]
+    []
   );
 
   const openSelected = useCallback(() => {
@@ -692,27 +901,35 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn("relative h-full overflow-y-auto text-white", className)}
+      className={cn(
+        "relative h-full overflow-y-auto overflow-x-hidden text-white",
+        className
+      )}
     >
-      <MaePageBackground blur={14} scrollBlur={false} />
-      {opened && flipping && !revisiting ? (
-        <div className="tarot-open-veil pointer-events-none absolute inset-0 z-20" aria-hidden />
-      ) : null}
+      <MaePageBackground blur={0} scrollBlur={false} />
+      <div
+        className="pointer-events-none sticky top-0 z-0"
+        style={{
+          height: "var(--vv-height, 100dvh)",
+          marginBottom: "calc(-1 * var(--vv-height, 100dvh))",
+          background:
+            "linear-gradient(180deg, rgba(3,10,26,0.62) 0%, rgba(3,10,26,0.2) 30%, rgba(3,10,26,0.15) 55%, rgba(3,10,26,0.7) 100%)",
+        }}
+        aria-hidden
+      />
       <AnimatedPage
         className={cn(
           "relative z-[1] mx-auto flex min-h-full w-full max-w-[440px] flex-col",
           compact ? "px-4 pb-4 pt-2" : "px-4 pb-10 pt-3 sm:px-5"
         )}
       >
-        <header className={cn("flex items-center justify-between gap-3", compact ? "pt-0" : "pt-1")}>
-          <MaeBrandLink />
-        </header>
-
         {!opened ? (
           <div
             className={cn(
               "flex flex-1 flex-col items-center",
-              compact ? "justify-between gap-2 pb-1 pt-1" : "pb-3 pt-2"
+              compact
+                ? "justify-between gap-2 pb-1 pt-1"
+                : "justify-center pb-6 pt-2"
             )}
           >
             <header className="relative flex w-full flex-col items-center text-center">
@@ -724,63 +941,67 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
                     "radial-gradient(circle, rgba(232,209,154,0.16) 0%, transparent 72%)",
                 }}
               />
+              <SoftGoldPill compact={compact} className="l3-rise l3-d1">
+                ✦ ไพ่ทาโรต์ประจำวัน · เปิดฟรี
+              </SoftGoldPill>
+
               <h1
                 className={cn(
-                  "mae-gold-text relative font-bold tracking-tight",
-                  compact ? "text-[1.65rem]" : "text-[2rem]"
+                  "l3-rise l3-d2 relative font-bold tracking-tight text-white",
+                  compact
+                    ? "mt-2.5 text-[1.6rem]"
+                    : "mt-4 text-[2.05rem]"
                 )}
                 style={{
-                  lineHeight: 1.15,
-                  paddingTop: "0.08em",
-                  paddingBottom: "0.06em",
+                  lineHeight: 1.22,
+                  paddingTop: "0.06em",
                   overflow: "visible",
+                  textShadow: "0 4px 20px rgba(0,0,0,0.45)",
                 }}
               >
-                ไพ่ประจำวัน
+                วันนี้จักรวาล
+                <br />
+                <span className="mae-gold-text l3-shimmer-text">
+                  มีอะไรอยากบอกคุณ?
+                </span>
               </h1>
-
-              <SoftGoldPill
-                compact={compact}
-                className={compact ? "mt-3" : "mt-3.5"}
-              >
-                {readyToDraw
-                  ? "เปิดได้วันละ 1 ใบ · เริ่มใหม่ตอน 00:00 น."
-                  : "ตั้งจิตก่อนเปิดไพ่"}
-              </SoftGoldPill>
 
               <p
                 className={cn(
-                  "relative max-w-[18rem] font-medium",
+                  "l3-rise l3-d3 relative max-w-[19rem] font-medium",
                   compact
-                    ? "mt-3 text-[13.5px] leading-[1.45]"
-                    : "mt-4 text-[15px] leading-[1.5]"
+                    ? "mt-2 text-[13.5px] leading-[1.45]"
+                    : "mt-3 text-[15px] leading-[1.5]"
                 )}
-                style={{ color: "rgba(235,240,250,0.9)" }}
+                style={{ color: "rgba(235,240,250,0.86)" }}
               >
-                เลือกใบที่ใจดึงดูด
-                <br />
-                หรือให้จักรวาลเลือกให้
+                {readyToDraw ? (
+                  <>
+                    แตะไพ่ที่ใจดึงดูด 1 ใบ
+                    <br />
+                    รับคำทำนายของวันนี้ได้ทันที
+                  </>
+                ) : (
+                  "ตั้งจิตก่อนเปิดไพ่"
+                )}
               </p>
             </header>
 
             <div
               className={cn(
                 "relative w-full transition-opacity",
-                compact ? "mt-3" : "mt-12",
+                compact ? "mt-3" : "mt-9",
                 !readyToDraw && "pointer-events-none opacity-50",
               )}
             >
-              <div
-                aria-hidden
-                className="pointer-events-none absolute left-1/2 top-[40%] h-[10rem] w-[10rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(232,209,154,0.16) 0%, transparent 70%)",
-                }}
-              />
+              <FanStage compact={compact} />
               <TarotCardFan
                 selected={slot}
                 onSelect={setSlot}
+                onOpen={(i) => {
+                  if (!readyToDraw || opened || flipping) return;
+                  revealAtSlot(i);
+                }}
                 disabled={!readyToDraw || flipping}
                 compact={compact}
               />
@@ -788,7 +1009,7 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
 
             <div
               className={cn(
-                "flex w-full max-w-[340px] flex-col",
+                "l3-rise l3-d4 flex w-full max-w-[340px] flex-col",
                 compact ? "mt-2 gap-2" : "mt-5 gap-2.5"
               )}
             >
@@ -797,7 +1018,7 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
                 disabled={!readyToDraw || flipping}
                 onClick={openSelected}
                 className={cn(
-                  "wallpaper-dl-btn group relative flex w-full items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
+                  "l3-cta wallpaper-dl-btn group relative flex w-full items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45",
                   compact ? "h-[3.1rem]" : "h-[3.55rem]"
                 )}
               >
@@ -853,14 +1074,16 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
                 สุ่มให้จักรวาลเลือก
               </button>
             </div>
+
+            <RatingStrip compact={compact} />
           </div>
         ) : (
           <div className="mt-3 flex flex-1 flex-col items-center pb-4">
             <ResultHeader
               compact={compact}
               status={
-                faceUp || revisiting
-                  ? "เปิดแล้วสำหรับวันนี้ · เริ่มใหม่ตอน 00:00 น."
+                faceUp
+                  ? "ไพ่ที่จักรวาลส่งถึงคุณวันนี้"
                   : "กำลังเปิดไพ่…"
               }
               nameTh={faceUp ? card.nameTh : undefined}
@@ -868,7 +1091,28 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
               upright={upright}
             />
 
-            <div className="relative mx-auto mt-5 w-fit">
+            <div
+              className={cn(
+                "relative mx-auto mt-5 w-fit",
+                faceUp && !flipping && "l3-card-float"
+              )}
+            >
+              {faceUp ? (
+                <div
+                  className="l3-halo pointer-events-none absolute left-1/2 top-1/2 rounded-full blur-3xl"
+                  style={{
+                    width: "150%",
+                    height: "90%",
+                    transform: "translate(-50%, -50%)",
+                    background:
+                      "radial-gradient(circle, rgba(232,209,154,0.34) 0%, rgba(213,177,111,0.12) 45%, transparent 72%)",
+                  }}
+                  aria-hidden
+                />
+              ) : null}
+              {burstKey != null ? (
+                <RevealBurst key={`back-${burstKey}`} layer="back" />
+              ) : null}
               <FlipRevealCard
                 faceSrc={tarotCardImageSrc(card)}
                 faceAlt={`${card.nameEn} — ${card.nameTh}`}
@@ -877,6 +1121,9 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
                 animating={flipping}
                 width={compact ? "min(50vw, 172px)" : "min(52vw, 184px)"}
               />
+              {burstKey != null ? (
+                <RevealBurst key={`front-${burstKey}`} layer="front" />
+              ) : null}
             </div>
 
             <div
@@ -886,7 +1133,10 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
               )}
             >
               <div
-                className="w-full overflow-hidden rounded-[26px] px-4 py-5 text-center sm:px-5"
+                className={cn(
+                  "w-full overflow-hidden rounded-[26px] px-4 py-5 text-center sm:px-5",
+                  faceUp && "l3-rise l3-r1"
+                )}
                 style={{
                   background:
                     "linear-gradient(165deg, rgba(12,28,52,0.82) 0%, rgba(5,14,30,0.78) 100%)",
@@ -906,7 +1156,7 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
                   {side.summary}
                 </p>
 
-                <KeywordTags keywords={side.keywords} />
+                {faceUp ? <KeywordTags keywords={side.keywords} /> : null}
 
                 <div
                   className="my-4 h-px w-full"
@@ -917,13 +1167,34 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
                 />
 
                 <div className="space-y-2.5">
-                  <LockedAdviceBlock label="ควรทำ" body={side.do} />
-                  <LockedAdviceBlock label="ควรระวัง" body={side.watch} />
-                  <LockedAdviceBlock label="ข้อความถึงคุณ" body={side.message} />
+                  <LockedAdviceBlock
+                    label="ควรทำ"
+                    body={side.do}
+                    className={faceUp ? "l3-rise l3-r2" : undefined}
+                    onUnlock={goToSignup}
+                  />
+                  <LockedAdviceBlock
+                    label="ควรระวัง"
+                    body={side.watch}
+                    className={faceUp ? "l3-rise l3-r3" : undefined}
+                    onUnlock={goToSignup}
+                  />
+                  <LockedAdviceBlock
+                    label="ข้อความถึงคุณ"
+                    body={side.message}
+                    className={faceUp ? "l3-rise l3-r4" : undefined}
+                    onUnlock={goToSignup}
+                  />
                 </div>
               </div>
 
-              <div className="mt-6 flex w-full flex-col gap-2.5">
+              <div
+                ref={signupRef}
+                className={cn(
+                  "mt-6 flex w-full flex-col gap-2.5",
+                  faceUp && "l3-rise l3-r5"
+                )}
+              >
                 {showLogin ? (
                   <StoryLoginCta
                     callbackUrl={LOGIN_CALLBACK}
@@ -933,12 +1204,25 @@ export function Landing3DailyTarot({ className }: { className?: string }) {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => setShowLogin(true)}
-                    className="wallpaper-dl-btn group relative flex h-[3.55rem] w-full items-center justify-center overflow-hidden rounded-[18px] px-2.5 outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
+                    onClick={goToSignup}
+                    className="l3-cta wallpaper-dl-btn group relative flex h-[3.55rem] w-full items-center gap-3 overflow-hidden rounded-[18px] px-2.5 text-left outline-none transition active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#d5b16f]/45"
                   >
-                    <span className="dd-btn-label relative z-[1] text-[15.5px] font-bold tracking-wide">
-                      สมัครเพื่ออ่านต่อ
+                    <span className="wallpaper-dl-btn__icon relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]">
+                      <LockOpen className="h-[18px] w-[18px]" strokeWidth={2.2} />
                     </span>
+                    <span className="relative z-[1] min-w-0 flex-1">
+                      <span className="dd-btn-label block text-[15.5px] font-bold leading-tight tracking-wide">
+                        สมัครเพื่ออ่านต่อ
+                      </span>
+                      <span className="mt-0.5 block truncate text-[12.5px] font-medium leading-tight opacity-70">
+                        ปลดล็อกควรทำ · ควรระวัง · ข้อความถึงคุณ
+                      </span>
+                    </span>
+                    <ChevronRight
+                      className="relative z-[1] mr-1 h-5 w-5 shrink-0 opacity-70 transition-transform group-hover:translate-x-0.5"
+                      strokeWidth={2.4}
+                      aria-hidden
+                    />
                     <span
                       className="wallpaper-dl-btn__shine pointer-events-none absolute inset-0"
                       aria-hidden

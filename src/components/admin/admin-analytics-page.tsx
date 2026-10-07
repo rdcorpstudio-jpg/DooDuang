@@ -62,6 +62,8 @@ type HomeFunnelSlice = {
   previewViews: number;
   signupStarts: number;
   profilesCompleted: number;
+  cardOpens?: number;
+  appPlays?: number;
   buyers: number;
 };
 
@@ -1017,7 +1019,9 @@ export function AdminAnalyticsPage() {
             <div className="mb-4 text-center sm:text-left">
               <p className="text-[15px] font-semibold">Funnel เว็บ</p>
               <p className="mt-0.5 text-[12px] text-[#8b93a1]">
-                หน้าแรก → พรีวิว → กดสมัคร → กรอกข้อมูล → ชำระเงิน
+                {homePathFilter === "/4"
+                  ? "หน้าแรก → เปิดการ์ด → กดสมัคร → เล่นในแอป → ชำระเงิน"
+                  : "หน้าแรก → พรีวิว → กดสมัคร → กรอกข้อมูล → ชำระเงิน"}
               </p>
             </div>
             <div className="mb-5 flex flex-wrap items-center justify-center gap-1.5 sm:justify-start">
@@ -1046,7 +1050,48 @@ export function AdminAnalyticsPage() {
               const funnel = resolveWebFunnel(data, homePathFilter);
               return (
             <FunnelCone
-              steps={[
+              steps={homePathFilter === "/4" ? [
+                {
+                  id: "home",
+                  label: "เข้าชมหน้าแรก",
+                  hint: HOME_PATH_HINT["/4"],
+                  value: funnel.homeViews,
+                  fill: "#7dffb3",
+                  text: "#0f7a4a",
+                },
+                {
+                  id: "card_open",
+                  label: "กดเปิดการ์ด",
+                  hint: "card_open จาก /4",
+                  value: funnel.cardOpens ?? 0,
+                  fill: "#5b9fd4",
+                  text: "#ffffff",
+                },
+                {
+                  id: "signup_start",
+                  label: "กดสมัคร",
+                  hint: "signup_start จาก /4",
+                  value: funnel.signupStarts,
+                  fill: "#3d5a80",
+                  text: "#ffffff",
+                },
+                {
+                  id: "app_play",
+                  label: "กดเล่นภายในแอป",
+                  hint: "เปิดฟีเจอร์หลังล็อกอิน จาก /4",
+                  value: funnel.appPlays ?? 0,
+                  fill: "#1a1d21",
+                  text: "#ffffff",
+                },
+                {
+                  id: "buy",
+                  label: "กดชำระ",
+                  hint: "ชำระสำเร็จ จาก /4",
+                  value: funnel.buyers,
+                  fill: "#b8f5d8",
+                  text: "#0f7a4a",
+                },
+              ] : [
                 {
                   id: "home",
                   label: "การเข้าชมหน้าแรก",
