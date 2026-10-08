@@ -297,13 +297,17 @@ export async function GET(request: Request) {
       }
     }
 
+    // postgres-js rejects raw Date params inside drizzle `sql` templates.
+    const sinceTs = sql`${since.toISOString()}::timestamp`;
+    const untilTs = sql`${until.toISOString()}::timestamp`;
+
     /** Visitors who hit a given home path — used to attribute later funnel steps. */
     function visitedHomeSql(homePath: HomePath) {
       return sql`exists (
         select 1
         from analytics_events h
-        where h.created_at >= ${since}
-          and h.created_at < ${until}
+        where h.created_at >= ${sinceTs}
+          and h.created_at < ${untilTs}
           and h.name in ('page_view', 'screen_view')
           and h.path = ${homePath}
           and nullif(h.props, '') is not null
@@ -321,8 +325,8 @@ export async function GET(request: Request) {
           on nullif(linked.props, '') is not null
          and (linked.props)::jsonb->>'visitorId' is not null
          and (linked.props)::jsonb->>'visitorId' = (h.props)::jsonb->>'visitorId'
-        where h.created_at >= ${since}
-          and h.created_at < ${until}
+        where h.created_at >= ${sinceTs}
+          and h.created_at < ${untilTs}
           and h.name in ('page_view', 'screen_view')
           and h.path = ${homePath}
           and nullif(h.props, '') is not null
@@ -340,8 +344,8 @@ export async function GET(request: Request) {
           on nullif(linked.props, '') is not null
          and (linked.props)::jsonb->>'visitorId' is not null
          and (linked.props)::jsonb->>'visitorId' = (h.props)::jsonb->>'visitorId'
-        where h.created_at >= ${since}
-          and h.created_at < ${until}
+        where h.created_at >= ${sinceTs}
+          and h.created_at < ${untilTs}
           and h.name in ('page_view', 'screen_view')
           and h.path = ${homePath}
           and nullif(h.props, '') is not null
